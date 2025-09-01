@@ -1,47 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check, Trash2, ChevronDown, ChevronUp, Plus } from 'lucide-react';
-
-interface Category {
-  main: string;
-  sub: string;
-}
-
-interface AddHabitModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSaveHabit: (habitData: {
-    id?: number;
-    name: string;
-    description: string;
-    color: string;
-    type: string;
-    categories: Category[];
-    frequencyType: string;
-    selectedDays: string[];
-    timesPerPeriod: number;
-    periodUnit: string;
-    repeatDays: number;
-  }) => void;
-  onDeleteHabit?: (habitId: number) => void;
-  habitToEdit?: {
-    id: number;
-    name: string;
-    description: string;
-    color: string;
-    type: string;
-    categories: Category[];
-    frequencyType: string;
-    selectedDays: string[];
-    timesPerPeriod: number;
-    periodUnit: string;
-    repeatDays: number;
-    completed: Record<string, boolean>; // Added for stats calculation
-  } | null;
-  habitMuscleCount: number;
-  lifeGoalsCount: number;
-  habitMuscleCount: number;
-  lifeGoalsCount: number;
-}
+import { Category, AddHabitModalProps } from '../types';
+import { isHabitScheduledOnDay, formatDate } from '../utils';
 
 // Constants for localStorage
 const LOCAL_STORAGE_CATEGORIES_KEY = 'bolt_habit_categories';
@@ -89,7 +49,15 @@ const saveCategoriesToLocalStorage = (categoriesMap: Record<string, string[]>) =
   }
 };
 
-const AddHabitModal: React.FC<AddHabitModalProps> = ({ isOpen, onClose, onSaveHabit, onDeleteHabit, habitToEdit, habitMuscleCount, lifeGoalsCount }) => {
+const AddHabitModal: React.FC<AddHabitModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSaveHabit, 
+  onDeleteHabit, 
+  habitToEdit, 
+  habitMuscleCount, 
+  lifeGoalsCount 
+}) => {
   const [habitName, setHabitName] = useState('');
   const [habitDescription, setHabitDescription] = useState('');
   const [selectedColor, setSelectedColor] = useState('green');
@@ -127,37 +95,10 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({ isOpen, onClose, onSaveHa
     const habitCreationDate = new Date(habit.id);
     habitCreationDate.setHours(0, 0, 0, 0);
     
-    // Helper function to check if habit is scheduled on a day
-    const isHabitScheduledOnDay = (habit: any, date: Date): boolean => {
-      switch (habit.frequencyType) {
-        case 'Everyday':
-          return true;
-        case 'Some days of the week':
-          const dayName = date.toLocaleString('en-US', { weekday: 'short' });
-          return habit.selectedDays.includes(dayName);
-        case 'Numbers of times per period':
-          return true; // Simplified for this example
-        case 'Repeats':
-          if (habit.repeatDays <= 1) return true;
-          const timeDiff = Math.abs(date.getTime() - habitCreationDate.getTime());
-          const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-          return daysDiff % habit.repeatDays === 0;
-        default:
-          return true;
-      }
-    };
-    
-    // Helper function to format date
-    const formatDateString = (date: Date): string => {
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      return `${date.getFullYear()}-${month}-${day}`;
-    };
-    
     // Check each day from creation to today
     let currentDay = new Date(habitCreationDate);
     while (currentDay <= today) {
-      const dateString = formatDateString(currentDay);
+      const dateString = formatDate(currentDay, 'yyyy-MM-dd');
       const isScheduled = isHabitScheduledOnDay(habit, currentDay);
       const isCompleted = habit.completed[dateString];
       
