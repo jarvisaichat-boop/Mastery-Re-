@@ -906,7 +906,7 @@ function App() {
             <div className="max-w-2xl mx-auto">
                 {/* Title */}
                 <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
+                    <h1 className="text-4xl font-bold mb-2 text-blue-400">Mastery Dashboard</h1>
                     <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
                 </div>
 
