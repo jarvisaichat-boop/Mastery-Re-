@@ -521,9 +521,9 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                 <div>
                   <div className="text-xs font-medium text-gray-400 mb-2">Main Categories</div>
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {Object.keys(allCategoriesMap).map((mainCategory) => (
-                      const isSelectedAsMain = selectedCategories.some(c => c.main === mainCategory && !c.sub);
-                      const isSelectedAsSub = selectedCategories.some(c => c.main === mainCategory && c.sub);
+                    {Object.keys(allCategoriesMap).map((mainCategory) => {
+                       const isSelectedAsMain = selectedCategories.some(c => c.main === mainCategory && !c.sub);
+                       const isSelectedAsSub = selectedCategories.some(c => c.main === mainCategory && c.sub);
                       return (
                       <button
                         key={mainCategory}
@@ -540,7 +540,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                         {mainCategory}
                       </button>
                       );
-                    ))}
+                    })}
                   </div>
                   
                   {/* Add Custom Main Category */}
