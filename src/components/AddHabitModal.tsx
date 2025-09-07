@@ -58,13 +58,11 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
   const [repeatDays, setRepeatDays] = useState(1);
   const [showCategorySelection, setShowCategorySelection] = useState(false);
   
-  // FIX 1: Track multiple expanded categories instead of just one
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
-
+  // START OF UI REVERT: State to track which single category is expanded for sub-view
+  const [activeSubCategoryView, setActiveSubCategoryView] = useState<string | null>(null);
+  
   const [customMainCategoryInput, setCustomMainCategoryInput] = useState('');
   const [customSubCategoryInput, setCustomSubCategoryInput] = useState('');
-  const [customSubCategoryParent, setCustomSubCategoryParent] = useState<string | null>(null);
-
   const [allCategoriesMap, setAllCategoriesMap] = useState<Record<string, string[]>>(loadCategoriesFromLocalStorage);
 
   const calculateHabitStats = (habit: any) => {
@@ -103,51 +101,45 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  // FIX 2: Rewritten logic for handling main category clicks
   const handleMainCategoryClick = (main: string) => {
-    // Toggle expansion state
-    setExpandedCategories(prev =>
-      prev.includes(main) ? prev.filter(c => c !== main) : [...prev, main]
-    );
-
-    // Toggle selection state
+    // Toggles the visibility of the sub-category section for this main category
+    setActiveSubCategoryView(prev => prev === main ? null : main);
+    
+    // Toggles the selection of the main category group
     setSelectedCategories(prev => {
-      const mainOnlyExists = prev.some(cat => cat.main === main && !cat.sub);
-      const subsExist = prev.some(cat => cat.main === main && cat.sub);
-
-      if (mainOnlyExists) {
-        // If main is selected, unselect it and all its children
+      const isAnythingSelected = prev.some(cat => cat.main === main);
+      if (isAnythingSelected) {
         return prev.filter(cat => cat.main !== main);
-      } else if (subsExist) {
-        // If subs are selected, clicking main selects main-only and clears subs
-        const otherCategories = prev.filter(cat => cat.main !== main);
-        return [...otherCategories, { main }];
       } else {
-        // Otherwise, just select the main category
         return [...prev, { main }];
       }
     });
   };
-  
-  // FIX 3: Rewritten logic for handling sub-category clicks
+
   const handleSubCategoryClick = (main: string, sub: string) => {
     setSelectedCategories(prev => {
-      const subExists = prev.some(cat => cat.main === main && cat.sub === sub);
-      if (subExists) {
-        // If sub exists, just remove it
+      const isSubSelected = prev.some(cat => cat.main === main && cat.sub === sub);
+      if (isSubSelected) {
         return prev.filter(cat => !(cat.main === main && cat.sub === sub));
       } else {
-        // If sub doesn't exist, add it and remove the main-only version if it exists
-        const withoutMainOnly = prev.filter(cat => !(cat.main === main && !cat.sub));
-        return [...withoutMainOnly, { main, sub }];
+        let newSelection = [...prev];
+        if (!prev.some(c => c.main === main && !c.sub)) {
+            newSelection.push({ main });
+        }
+        newSelection.push({ main, sub });
+        return newSelection;
       }
     });
   };
-
+  
   const handleRemoveHabitCategory = (categoryToRemove: Category) => {
-    setSelectedCategories(prev =>
-      prev.filter(cat => !(cat.main === categoryToRemove.main && cat.sub === categoryToRemove.sub))
-    );
+    if (!categoryToRemove.sub) {
+      setSelectedCategories(prev => prev.filter(cat => cat.main !== categoryToRemove.main));
+    } else {
+      setSelectedCategories(prev =>
+        prev.filter(cat => !(cat.main === categoryToRemove.main && cat.sub === categoryToRemove.sub))
+      );
+    }
   };
 
   const handleAddCustomMainCategory = () => {
@@ -160,9 +152,10 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     }
   };
 
-  const handleAddCustomSubCategory = (main: string) => {
+  const handleAddCustomSubCategory = () => {
     const trimmedInput = customSubCategoryInput.trim();
-    if (trimmedInput && main && !allCategoriesMap[main]?.includes(trimmedInput)) {
+    if (trimmedInput && activeSubCategoryView && !allCategoriesMap[activeSubCategoryView]?.includes(trimmedInput)) {
+      const main = activeSubCategoryView;
       const newCategoriesMap = {
         ...allCategoriesMap,
         [main]: [...(allCategoriesMap[main] || []), trimmedInput]
@@ -170,7 +163,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
       setAllCategoriesMap(newCategoriesMap);
       saveCategoriesToLocalStorage(newCategoriesMap);
       setCustomSubCategoryInput('');
-      setCustomSubCategoryParent(null);
     }
   };
 
@@ -181,20 +173,19 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     }
   };
 
-  const handleCustomSubCategoryKeyDown = (e: React.KeyboardEvent, main: string) => {
+  const handleCustomSubCategoryKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleAddCustomSubCategory(main);
+      handleAddCustomSubCategory();
     }
   };
   
   useEffect(() => {
     if (isOpen) {
       setShowCategorySelection(false);
-      setExpandedCategories([]);
+      setActiveSubCategoryView(null);
       setCustomMainCategoryInput('');
       setCustomSubCategoryInput('');
-      setCustomSubCategoryParent(null);
       if (habitToEdit) {
         setHabitName(habitToEdit.name);
         setHabitDescription(habitToEdit.description);
@@ -350,6 +341,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
             </div>
           </div>
           
+          {/* START OF UI REVERT: Reverted Category Section Layout */}
           <div>
             <button type="button" onClick={() => setShowCategorySelection(!showCategorySelection)} className="flex items-center justify-between w-full text-left mb-3">
               <span className="text-sm font-medium text-gray-300">Categories (Optional)</span>
@@ -373,58 +365,71 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
             
             {showCategorySelection && (
               <div className="space-y-4">
-                {Object.keys(allCategoriesMap).map(mainCategory => {
-                  const isExpanded = expandedCategories.includes(mainCategory);
-                  const isSelectedAsMain = selectedCategories.some(c => c.main === mainCategory && !c.sub);
-                  const selectedSubs = selectedCategories.filter(c => c.main === mainCategory && c.sub).map(c => c.sub);
-
-                  return (
-                    <div key={mainCategory}>
-                      <button type="button" onClick={() => handleMainCategoryClick(mainCategory)}
-                        className={`w-full text-left px-3 py-1.5 text-sm rounded-lg border flex justify-between items-center transition-colors ${
-                          isSelectedAsMain || selectedSubs.length > 0 ? 'bg-blue-600/50 border-blue-500' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'
-                        }`}>
-                        <span>{mainCategory}</span>
-                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      </button>
-
-                      {isExpanded && (
-                        <div className="pl-4 pt-3">
-                          <div className="flex flex-wrap gap-2 mb-3">
-                            {allCategoriesMap[mainCategory]?.map(subCategory => {
-                              const isSelected = selectedSubs.includes(subCategory);
-                              return (
-                                <button key={subCategory} type="button" onClick={() => handleSubCategoryClick(mainCategory, subCategory)}
-                                  className={`px-2.5 py-1.5 text-xs rounded-md border ${isSelected ? 'bg-green-500 border-green-400' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'}`}>
-                                  {subCategory}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          <div className="flex space-x-2">
-                            <input type="text"
-                              value={customSubCategoryParent === mainCategory ? customSubCategoryInput : ''}
-                              onFocus={() => setCustomSubCategoryParent(mainCategory)}
-                              onChange={(e) => setCustomSubCategoryInput(e.target.value)}
-                              onKeyDown={(e) => handleCustomSubCategoryKeyDown(e, mainCategory)}
-                              placeholder={`Add custom ${mainCategory.toLowerCase()} category...`}
-                              className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" />
-                            <button type="button" onClick={() => handleAddCustomSubCategory(mainCategory)} disabled={!customSubCategoryInput.trim() || customSubCategoryParent !== mainCategory} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600">
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-                <div className="flex space-x-2">
-                  <input type="text" value={customMainCategoryInput} onChange={(e) => setCustomMainCategoryInput(e.target.value)} onKeyDown={handleCustomMainCategoryKeyDown} placeholder="Add custom main category..." className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" />
-                  <button type="button" onClick={handleAddCustomMainCategory} disabled={!customMainCategoryInput.trim()} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600"><Plus className="w-4 h-4" /></button>
+                {/* Main Categories Section */}
+                <div>
+                  <label className="text-sm font-medium text-gray-400 mb-2 block">Main Categories</label>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.keys(allCategoriesMap).map(mainCategory => {
+                      const isSelected = selectedCategories.some(c => c.main === mainCategory);
+                      return (
+                        <button
+                          key={mainCategory}
+                          type="button"
+                          onClick={() => handleMainCategoryClick(mainCategory)}
+                          className={`px-3 py-1.5 text-sm rounded-lg border flex items-center justify-between w-full sm:w-auto transition-colors ${
+                            isSelected ? 'bg-blue-600/50 border-blue-500' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'
+                          }`}
+                        >
+                          <span>{mainCategory}</span>
+                          {activeSubCategoryView === mainCategory ? <ChevronUp className="w-4 h-4 ml-2" /> : <ChevronDown className="w-4 h-4 ml-2" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex space-x-2 mt-3">
+                    <input type="text" value={customMainCategoryInput} onChange={(e) => setCustomMainCategoryInput(e.target.value)} onKeyDown={handleCustomMainCategoryKeyDown} placeholder="Add custom main category..." className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" />
+                    <button type="button" onClick={handleAddCustomMainCategory} disabled={!customMainCategoryInput.trim()} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600"><Plus className="w-4 h-4" /></button>
+                  </div>
                 </div>
+
+                {/* Conditional Sub-Categories Section */}
+                {activeSubCategoryView && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-400 mb-2 block">{`${activeSubCategoryView} Sub-Categories`}</label>
+                    <div className="flex flex-wrap gap-2">
+                      {allCategoriesMap[activeSubCategoryView]?.map(subCategory => {
+                        const isSelected = selectedCategories.some(c => c.main === activeSubCategoryView && c.sub === subCategory);
+                        return (
+                          <button
+                            key={subCategory}
+                            type="button"
+                            onClick={() => handleSubCategoryClick(activeSubCategoryView, subCategory)}
+                            className={`px-2.5 py-1.5 text-xs rounded-md border ${isSelected ? 'bg-green-500 border-green-400' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'}`}
+                          >
+                            {subCategory}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="flex space-x-2 mt-3">
+                      <input 
+                        type="text"
+                        value={customSubCategoryInput}
+                        onChange={(e) => setCustomSubCategoryInput(e.target.value)}
+                        onKeyDown={handleCustomSubCategoryKeyDown}
+                        placeholder={`Add custom ${activeSubCategoryView.toLowerCase()} category...`} 
+                        className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" 
+                      />
+                      <button type="button" onClick={handleAddCustomSubCategory} disabled={!customSubCategoryInput.trim()} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600">
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
+          {/* END OF UI REVERT */}
           
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">How Often?</label>
