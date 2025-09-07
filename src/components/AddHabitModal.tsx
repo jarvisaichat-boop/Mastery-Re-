@@ -27,7 +27,6 @@ const loadCategoriesFromLocalStorage = (): Record<string, string[]> => {
     const stored = localStorage.getItem(LOCAL_STORAGE_CATEGORIES_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Ensure we return an object, even if localStorage is corrupted
       if (typeof parsed === 'object' && parsed !== null) {
         return parsed;
       }
@@ -35,7 +34,6 @@ const loadCategoriesFromLocalStorage = (): Record<string, string[]> => {
   } catch (error) {
     console.error('Error loading categories from localStorage:', error);
   }
-  // If nothing is stored, save and return the initial presets
   localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(initialPresetCategories));
   return initialPresetCategories;
 };
@@ -49,14 +47,15 @@ const saveCategoriesToLocalStorage = (categoriesMap: Record<string, string[]>) =
   }
 };
 
-const AddHabitModal: React.FC<AddHabitModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSaveHabit, 
-  onDeleteHabit, 
-  habitToEdit, 
-  habitMuscleCount, 
-  lifeGoalsCount 
+
+const AddHabitModal: React.FC<AddHabitModalProps> = ({
+  isOpen,
+  onClose,
+  onSaveHabit,
+  onDeleteHabit,
+  habitToEdit,
+  habitMuscleCount,
+  lifeGoalsCount
 }) => {
   const [habitName, setHabitName] = useState('');
   const [habitDescription, setHabitDescription] = useState('');
@@ -72,36 +71,27 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
   const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
   const [customMainCategoryInput, setCustomMainCategoryInput] = useState('');
   const [customSubCategoryInput, setCustomSubCategoryInput] = useState('');
-  
-  // FIX 1: Use lazy initializer to load state once on mount
+
   const [allCategoriesMap, setAllCategoriesMap] = useState<Record<string, string[]>>(
     loadCategoriesFromLocalStorage
   );
 
-  // Helper function to calculate habit statistics
   const calculateHabitStats = (habit: any) => {
     if (!habit || !habit.completed) return { totalCompletions: 0, highestStreak: 0 };
-    
-    // Count total completions
+
     const totalCompletions = Object.values(habit.completed).filter(Boolean).length;
-    
-    // Calculate highest streak
     let highestStreak = 0;
     let currentStreak = 0;
-    
-    // Get all dates from habit creation to today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const habitCreationDate = new Date(habit.id);
     habitCreationDate.setHours(0, 0, 0, 0);
-    
-    // Check each day from creation to today
+
     let currentDay = new Date(habitCreationDate);
     while (currentDay <= today) {
       const dateString = formatDate(currentDay, 'yyyy-MM-dd');
       const isScheduled = isHabitScheduledOnDay(habit, currentDay);
       const isCompleted = habit.completed[dateString];
-      
       if (isScheduled) {
         if (isCompleted) {
           currentStreak++;
@@ -110,15 +100,11 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
           currentStreak = 0;
         }
       }
-      
-      // Move to next day
       currentDay.setDate(currentDay.getDate() + 1);
     }
-    
     return { totalCompletions, highestStreak };
   };
 
-  // Color options with rainbow colors
   const colorOptions = [
     { name: 'red', class: 'bg-red-500', hex: '#ef4444' },
     { name: 'orange', class: 'bg-orange-500', hex: '#f97316' },
@@ -131,22 +117,17 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  // CHANGE 1: New function to toggle a main category
   const toggleMainCategory = (main: string) => {
     setSelectedCategories(prev => {
-        // Check if this main category (without any subs) is already selected
         const mainCategoryExists = prev.some(cat => cat.main === main && !cat.sub);
 
         if (mainCategoryExists) {
-            // If it exists, remove it
             return prev.filter(cat => !(cat.main === main && !cat.sub));
         } else {
-            // If it doesn't exist, add it and remove any of its sub-categories to avoid duplicates
             const otherCategories = prev.filter(cat => cat.main !== main);
             return [...otherCategories, { main }];
         }
     });
-    // Toggle the view for sub-categories
     setSelectedMainCategory(prev => prev === main ? null : main);
   };
 
@@ -157,58 +138,41 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
       if (exists) {
         return prev.filter(cat => !(cat.main === main && cat.sub === sub));
       } else {
-        // Also remove the main-only category if adding a sub-category
         const withoutMain = prev.filter(cat => !(cat.main === main && !cat.sub));
         return [...withoutMain, category];
       }
     });
   };
 
-  // Handle removing a habit category
   const handleRemoveHabitCategory = (categoryToRemove: Category) => {
-    setSelectedCategories(prev => 
+    setSelectedCategories(prev =>
       prev.filter(cat => !(cat.main === categoryToRemove.main && cat.sub === categoryToRemove.sub))
     );
   };
 
-  // FIX 2: Make saving explicit
   const handleAddCustomMainCategory = () => {
     const trimmedInput = customMainCategoryInput.trim();
-    console.log('Adding main category:', trimmedInput);
-    console.log('Current categories map:', allCategoriesMap);
     if (trimmedInput && !allCategoriesMap[trimmedInput]) {
-      const newCategoriesMap = {
-        ...allCategoriesMap,
-        [trimmedInput]: []
-      };
-      console.log('New categories map:', newCategoriesMap);
+      const newCategoriesMap = { ...allCategoriesMap, [trimmedInput]: [] };
       setAllCategoriesMap(newCategoriesMap);
-      saveCategoriesToLocalStorage(newCategoriesMap); // Save immediately
+      saveCategoriesToLocalStorage(newCategoriesMap);
       setCustomMainCategoryInput('');
-    } else {
-      console.log('Category not added - either empty or already exists');
     }
   };
 
-  // FIX 2: Make saving explicit
   const handleAddCustomSubCategory = () => {
     const trimmedInput = customSubCategoryInput.trim();
-    console.log('Adding sub category:', trimmedInput, 'to main:', selectedMainCategory);
     if (trimmedInput && selectedMainCategory && !allCategoriesMap[selectedMainCategory]?.includes(trimmedInput)) {
       const newCategoriesMap = {
         ...allCategoriesMap,
         [selectedMainCategory]: [...(allCategoriesMap[selectedMainCategory] || []), trimmedInput]
       };
-      console.log('New categories map with sub:', newCategoriesMap);
       setAllCategoriesMap(newCategoriesMap);
-      saveCategoriesToLocalStorage(newCategoriesMap); // Save immediately
+      saveCategoriesToLocalStorage(newCategoriesMap);
       setCustomSubCategoryInput('');
-    } else {
-      console.log('Sub category not added - check conditions');
     }
   };
 
-  // FIX 3: Use onKeyDown for better reliability
   const handleCustomMainCategoryKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -216,7 +180,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     }
   };
 
-  // FIX 3: Use onKeyDown for better reliability
   const handleCustomSubCategoryKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -224,7 +187,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     }
   };
 
-  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setShowCategorySelection(false);
@@ -232,7 +194,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
       setCustomMainCategoryInput('');
       setCustomSubCategoryInput('');
       if (habitToEdit) {
-        // Populate form with existing habit data
         setHabitName(habitToEdit.name);
         setHabitDescription(habitToEdit.description);
         setSelectedColor(habitToEdit.color);
@@ -244,11 +205,10 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
         setPeriodUnit(habitToEdit.periodUnit);
         setRepeatDays(habitToEdit.repeatDays);
       } else {
-        // Reset form for new habit
         setHabitName('');
         setHabitDescription('');
         setSelectedColor('green');
-        setHabitType('Habit'); // Default to regular Habit
+        setHabitType('Habit');
         setSelectedCategories([]);
         setFrequencyType('Everyday');
         setSelectedDays([]);
@@ -259,21 +219,17 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     }
   }, [isOpen, habitToEdit]);
 
-  // Handle day selection for "Some days of the week"
   const toggleDay = (day: string) => {
-    setSelectedDays(prev => 
-      prev.includes(day) 
-        ? prev.filter(d => d !== day)
-        : [...prev, day]
+    setSelectedDays(prev =>
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
     );
   };
 
-  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (habitName.trim()) {
       const habitData = {
-        ...(habitToEdit && { id: habitToEdit.id }), // Include ID if editing
+        ...(habitToEdit && { id: habitToEdit.id }),
         name: habitName.trim(),
         description: habitDescription.trim(),
         color: selectedColor,
@@ -290,7 +246,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     }
   };
 
-  // Handle delete
   const handleDelete = () => {
     if (habitToEdit && onDeleteHabit) {
       onDeleteHabit(habitToEdit.id);
@@ -298,14 +253,10 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     }
   };
 
-  // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
+      if (e.key === 'Escape' && isOpen) onClose();
     };
-
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
@@ -314,28 +265,12 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 bg-[#2C2C2E] rounded-2xl shadow-xl transform transition-all">
-        {/* Header */}
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 bg-[#2C2C2E] rounded-2xl shadow-xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">
-            {habitToEdit ? 'Edit Habit' : 'Create New Habit'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-gray-700"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <h2 className="text-xl font-bold text-white">{habitToEdit ? 'Edit Habit' : 'Create New Habit'}</h2>
+          <button onClick={onClose} className="p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700"><X className="w-5 h-5" /></button>
         </div>
-
-        {/* Stats Section (only show when editing) */}
         {habitToEdit && (
           <div className="mb-6">
             <div className="grid grid-cols-2 gap-4">
@@ -344,24 +279,10 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                 return (
                   <>
                     <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-white mb-1">
-                          {stats.totalCompletions}
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          Total Completions
-                        </div>
-                      </div>
+                      <div className="text-center"><div className="text-2xl font-bold text-white mb-1">{stats.totalCompletions}</div><div className="text-sm text-gray-400">Total Completions</div></div>
                     </div>
                     <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-white mb-1">
-                          {stats.highestStreak}
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          Highest Streak
-                        </div>
-                      </div>
+                      <div className="text-center"><div className="text-2xl font-bold text-white mb-1">{stats.highestStreak}</div><div className="text-sm text-gray-400">Highest Streak</div></div>
                     </div>
                   </>
                 );
@@ -369,83 +290,33 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
             </div>
           </div>
         )}
-
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Habit Name */}
           <div>
-            <label htmlFor="habitName" className="block text-sm font-medium text-gray-300 mb-2">
-              Habit Name *
-            </label>
-            <input
-              id="habitName"
-              type="text"
-              value={habitName}
-              onChange={(e) => setHabitName(e.target.value)}
-              placeholder="e.g., Read for 30 minutes"
-              className="w-full px-4 py-3 bg-[#1C1C1E] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-              autoFocus
-            />
+            <label htmlFor="habitName" className="block text-sm font-medium text-gray-300 mb-2">Habit Name *</label>
+            <input id="habitName" type="text" value={habitName} onChange={(e) => setHabitName(e.target.value)} placeholder="e.g., Read for 30 minutes" className="w-full px-4 py-3 bg-[#1C1C1E] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500" autoFocus />
           </div>
-
-          {/* Habit Description */}
           <div>
-            <label htmlFor="habitDescription" className="block text-sm font-medium text-gray-300 mb-2">
-              Description (Optional)
-            </label>
-            <textarea
-              id="habitDescription"
-              value={habitDescription}
-              onChange={(e) => setHabitDescription(e.target.value)}
-              placeholder="Add more details about your habit..."
-              rows={3}
-              className="w-full px-4 py-3 bg-[#1C1C1E] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
-            />
+            <label htmlFor="habitDescription" className="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
+            <textarea id="habitDescription" value={habitDescription} onChange={(e) => setHabitDescription(e.target.value)} placeholder="Add more details about your habit..." rows={3} className="w-full px-4 py-3 bg-[#1C1C1E] border border-gray-600 rounded-lg text-white resize-none" />
           </div>
-
-          {/* Habit Color */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">
-              Habit Color
-            </label>
-            <div className="flex space-x-3">
-              {colorOptions.map((color) => (
-                <button
-                  key={color.name}
-                  type="button"
-                  onClick={() => setSelectedColor(color.name)}
-                  className={`w-8 h-8 rounded-full ${color.class} border-2 transition-all hover:scale-110 ${
-                    selectedColor === color.name ? 'border-white' : 'border-gray-600'
-                  } flex items-center justify-center`}
-                >
-                  {selectedColor === color.name && (
-                    <Check className="w-4 h-4 text-white" />
-                  )}
-                </button>
-              ))}
-            </div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Habit Color</label>
+            <div className="flex space-x-3">{colorOptions.map((color) => (<button key={color.name} type="button" onClick={() => setSelectedColor(color.name)} className={`w-8 h-8 rounded-full ${color.class} border-2 ${selectedColor === color.name ? 'border-white' : 'border-gray-600'} flex items-center justify-center`}>{selectedColor === color.name && (<Check className="w-4 h-4 text-white" />)}</button>))}</div>
           </div>
-
-          {/* Habit Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">
-              Habit Type
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Habit Type</label>
             <div className="space-y-3">
               {[
                 { value: 'Habit', label: 'Habit', description: 'Regular habit for personal growth' },
                 { value: 'Anchor Habit', label: 'Habit Muscle 💪', description: 'Simple habit to build your habit muscle (only 1 allowed)' },
                 { value: 'Life Goal Habit', label: 'Life Goals ⭐', description: 'Top priority habit for major life improvement (only 3 allowed)' }
-              ].map((type, index) => {
+              ].map((type) => {
                 const isCurrentSelection = habitType === type.value;
-                
-                // Determine if this type should be shrunk based on limits
                 let shouldShrink = false;
                 let backgroundClasses = '';
                 let paddingClass = 'p-3';
-                
+
                 if (type.value === 'Habit') {
-                  // Regular habit always shows full styling
                   backgroundClasses = 'bg-green-500/10 border border-green-500/20 hover:bg-green-500/20';
                 } else if (type.value === 'Anchor Habit') {
                   const isLimitReached = habitMuscleCount >= 1;
@@ -458,66 +329,40 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                   backgroundClasses = 'bg-red-500/10 border border-red-500/20 hover:bg-red-500/20';
                   paddingClass = shouldShrink ? 'py-2' : 'p-3';
                 }
-                
+
                 return (
-                <label key={type.value} className={`flex items-center space-x-3 cursor-pointer ${paddingClass} rounded-lg transition-colors ${backgroundClasses}`}>
-                  <input
-                    type="radio"
-                    name="habitType"
-                    value={type.value}
-                    checked={habitType === type.value}
-                    onChange={(e) => setHabitType(e.target.value)}
-                    className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500 flex-shrink-0"
-                  />
-                  <div>
-                    <div className="text-white font-medium">{type.label}</div>
-                    <div className={`text-sm text-gray-400 ${shouldShrink ? 'hidden' : ''}`}>{type.description}</div>
-                  </div>
-                </label>
+                  <label key={type.value} className={`flex items-center space-x-3 cursor-pointer ${paddingClass} rounded-lg transition-colors ${backgroundClasses}`}>
+                    <input type="radio" name="habitType" value={type.value} checked={habitType === type.value} onChange={(e) => setHabitType(e.target.value)} className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500 flex-shrink-0" />
+                    <div>
+                      <div className="text-white font-medium">{type.label}</div>
+                      <div className={`text-sm text-gray-400 ${shouldShrink ? 'hidden' : ''}`}>{type.description}</div>
+                    </div>
+                  </label>
                 );
               })}
             </div>
           </div>
-
-          {/* Categories */}
           <div>
-            {/* Categories Header */}
-            <button
-              type="button"
-              onClick={() => setShowCategorySelection(!showCategorySelection)}
-              className="flex items-center justify-between w-full text-left mb-3 hover:text-gray-200 transition-colors"
-            >
+            <button type="button" onClick={() => setShowCategorySelection(!showCategorySelection)} className="flex items-center justify-between w-full text-left mb-3">
               <span className="text-sm font-medium text-gray-300">Categories (Optional)</span>
-              {showCategorySelection ? (
-                <ChevronUp className="w-4 h-4 text-gray-400" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              )}
+              {showCategorySelection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
-
-            {/* Selected Categories Display */}
             {selectedCategories.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
-                {/* CHANGE 2: Updated logic for displaying selected categories */}
-                {selectedCategories.map((category, index) => (
-                    <span key={`${category.main}-${category.sub || ''}-${index}`} className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${
-                        category.sub 
-                            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                            : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                    }`}>
-                        {category.sub || category.main}
-                        <button type="button" onClick={() => handleRemoveHabitCategory(category)} className="ml-1.5 text-gray-400 hover:text-white transition-colors">
-                          <X className="w-3 h-3" />
-                        </button>
-                    </span>
-                ))}
+                  {selectedCategories.map((category, index) => (
+                      <span key={`${category.main}-${category.sub || ''}-${index}`} className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${
+                          category.sub
+                              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      }`}>
+                          {category.sub || category.main}
+                          <button type="button" onClick={() => handleRemoveHabitCategory(category)} className="ml-1.5 text-gray-400 hover:text-white"><X className="w-3 h-3" /></button>
+                      </span>
+                  ))}
               </div>
             )}
-
-            {/* Collapsible Category Selection */}
             {showCategorySelection && (
               <div className="space-y-4">
-                {/* Main Categories */}
                 <div>
                   <div className="text-xs font-medium text-gray-400 mb-2">Main Categories</div>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -525,105 +370,47 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                        const isSelectedAsMain = selectedCategories.some(c => c.main === mainCategory && !c.sub);
                        const isSelectedAsSub = selectedCategories.some(c => c.main === mainCategory && c.sub);
                       return (
-                      <button
-                        key={mainCategory}
-                        type="button"
-                        onClick={() => toggleMainCategory(mainCategory)}
-                        className={`px-3 py-1.5 text-sm rounded-lg border transition-colors text-white ${
-                          isSelectedAsMain 
-                            ? 'bg-blue-600 border-blue-500' 
-                            : isSelectedAsSub 
-                            ? 'bg-gray-700 border-gray-500' 
-                            : 'bg-[#1C1C1E] border-gray-600 hover:border-gray-500 hover:bg-gray-700'
-                        }`}
-                      >
+                      <button key={mainCategory} type="button" onClick={() => toggleMainCategory(mainCategory)}
+                        className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+                          isSelectedAsMain ? 'bg-blue-600 border-blue-500' : isSelectedAsSub ? 'bg-gray-700 border-gray-500' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'
+                        }`}>
                         {mainCategory}
                       </button>
-                      );
-                    })}
+                    )})}
                   </div>
-                  
-                  {/* Add Custom Main Category */}
                   <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      value={customMainCategoryInput}
-                      onChange={(e) => setCustomMainCategoryInput(e.target.value)}
-                      onKeyDown={handleCustomMainCategoryKeyDown}
-                      placeholder="Add custom main category..."
-                      className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddCustomMainCategory}
-                      disabled={!customMainCategoryInput.trim()}
-                      className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors flex items-center"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
+                    <input type="text" value={customMainCategoryInput} onChange={(e) => setCustomMainCategoryInput(e.target.value)} onKeyDown={handleCustomMainCategoryKeyDown} placeholder="Add custom main category..." className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" />
+                    <button type="button" onClick={handleAddCustomMainCategory} disabled={!customMainCategoryInput.trim()} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600"><Plus className="w-4 h-4" /></button>
                   </div>
                 </div>
-
-                {/* Sub Categories (only show when main category is selected) */}
                 {selectedMainCategory && (
                   <div>
-                    <div className="text-xs font-medium text-gray-400 mb-2">
-                      {selectedMainCategory} Sub-Categories
-                    </div>
+                    <div className="text-xs font-medium text-gray-400 mb-2">{selectedMainCategory} Sub-Categories</div>
                     <div className="flex flex-wrap gap-2 mb-3">
                       {allCategoriesMap[selectedMainCategory]?.map((subCategory) => {
-                        const isSelected = selectedCategories.some(
-                          cat => cat.main === selectedMainCategory && cat.sub === subCategory
-                        );
+                        const isSelected = selectedCategories.some(cat => cat.main === selectedMainCategory && cat.sub === subCategory);
                         return (
-                          <button
-                            key={subCategory}
-                            type="button"
-                            onClick={() => toggleHabitCategory(selectedMainCategory, subCategory)}
-                            className={`px-2.5 py-1.5 text-xs rounded-md border transition-colors ${
-                              isSelected
-                                ? 'bg-green-500 border-green-400 text-white'
-                                : 'bg-[#1C1C1E] border-gray-600 text-gray-300 hover:border-gray-500 hover:bg-gray-700'
-                            }`}
-                          >
+                          <button key={subCategory} type="button" onClick={() => toggleHabitCategory(selectedMainCategory, subCategory)}
+                            className={`px-2.5 py-1.5 text-xs rounded-md border ${isSelected ? 'bg-green-500 border-green-400' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'}`}>
                             {subCategory}
                           </button>
                         );
                       })}
                     </div>
-                    
-                    {/* Add Custom Sub Category */}
                     <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={customSubCategoryInput}
-                        onChange={(e) => setCustomSubCategoryInput(e.target.value)}
-                        onKeyDown={handleCustomSubCategoryKeyDown}
-                        placeholder={`Add custom ${selectedMainCategory.toLowerCase()} category...`}
-                        className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddCustomSubCategory}
-                        disabled={!customSubCategoryInput.trim()}
-                        className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors flex items-center"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
+                      <input type="text" value={customSubCategoryInput} onChange={(e) => setCustomSubCategoryInput(e.target.value)} onKeyDown={handleCustomSubCategoryKeyDown} placeholder={`Add custom ${selectedMainCategory.toLowerCase()} category...`} className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" />
+                      <button type="button" onClick={handleAddCustomSubCategory} disabled={!customSubCategoryInput.trim()} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600"><Plus className="w-4 h-4" /></button>
                     </div>
                   </div>
                 )}
               </div>
             )}
           </div>
-
-          {/* Frequency */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">
               How Often?
             </label>
             <div className="space-y-3">
-              {/* Anytime */}
               <label className="flex items-center space-x-3 cursor-pointer">
                 <input
                   type="radio"
@@ -636,7 +423,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                 <span className="text-white">Anytime</span>
               </label>
 
-              {/* Everyday */}
               <label className="flex items-center space-x-3 cursor-pointer">
                 <input
                   type="radio"
@@ -649,7 +435,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                 <span className="text-white">Everyday</span>
               </label>
 
-              {/* Some days of the week */}
               <div>
                 <label className="flex items-center space-x-3 cursor-pointer mb-2">
                   <input
@@ -682,7 +467,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                 )}
               </div>
 
-              {/* Numbers of times per period */}
               <div>
                 <label className="flex items-center space-x-3 cursor-pointer mb-2">
                   <input
@@ -718,7 +502,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                 )}
               </div>
 
-              {/* Repeats */}
               <div>
                 <label className="flex items-center space-x-3 cursor-pointer mb-2">
                   <input
@@ -747,37 +530,15 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
               </div>
             </div>
           </div>
-
-          {/* Buttons */}
           <div className="space-y-3 pt-4">
-            {/* Delete button (only show when editing) */}
             {habitToEdit && onDeleteHabit && (
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-red-400 bg-red-900/30 border border-red-800/50 rounded-lg hover:bg-red-900/50 transition-colors font-medium"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Delete Habit</span>
+              <button type="button" onClick={handleDelete} className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-red-400 bg-red-900/30 border border-red-800/50 rounded-lg hover:bg-red-900/50">
+                <Trash2 className="w-4 h-4" /><span>Delete Habit</span>
               </button>
             )}
-            
-            {/* Save/Cancel buttons */}
             <div className="flex space-x-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-3 text-gray-300 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!habitName.trim()}
-                className="flex-1 px-4 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors font-medium"
-              >
-                {habitToEdit ? 'Save' : 'Create Habit'}
-              </button>
+              <button type="button" onClick={onClose} className="flex-1 px-4 py-3 text-gray-300 bg-gray-700 rounded-lg hover:bg-gray-600">Cancel</button>
+              <button type="submit" disabled={!habitName.trim()} className="flex-1 px-4 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-600">{habitToEdit ? 'Save' : 'Create Habit'}</button>
             </div>
           </div>
         </form>
