@@ -117,36 +117,35 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  // START OF LOGIC FIX
+  // START: Corrected Logic
   const toggleMainCategory = (main: string) => {
-    setSelectedMainCategory(prev => (prev === main ? null : main));
+    const isSelected = selectedCategories.some(c => c.main === main);
     
-    setSelectedCategories(prev => {
-        const isSelected = prev.some(cat => cat.main === main);
-        if (isSelected) {
-            // If the main category is being deselected, remove it and all its sub-categories
-            return prev.filter(cat => cat.main !== main);
-        } else {
-            // Otherwise, add just the main category (sub-categories can be added separately)
-            return [...prev, { main }];
-        }
-    });
+    // This logic handles both selection and the sub-category view correctly
+    if (isSelected) {
+      // If it's already selected, deselect it and all its children, and hide the sub-category view
+      setSelectedCategories(prev => prev.filter(cat => cat.main !== main));
+      setSelectedMainCategory(null);
+    } else {
+      // If it's not selected, select it and make it the active view
+      setSelectedCategories(prev => [...prev, { main }]);
+      setSelectedMainCategory(main);
+    }
   };
-  
+
   const toggleHabitCategory = (main: string, sub: string) => {
     setSelectedCategories(prev => {
         const isSubSelected = prev.some(cat => cat.main === main && cat.sub === sub);
-        
         if (isSubSelected) {
-            // If the sub-category is already selected, remove it.
+            // If sub is selected, just remove it. The main tag remains.
             return prev.filter(cat => !(cat.main === main && cat.sub === sub));
         } else {
-            // If the sub-category is not selected, add it.
-            // This does NOT remove the main category.
+            // If sub is not selected, add it. The main tag is already there.
             return [...prev, { main, sub }];
         }
     });
   };
+  
 
   const handleRemoveHabitCategory = (categoryToRemove: Category) => {
     if (!categoryToRemove.sub) {
@@ -159,7 +158,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
         );
     }
   };
-  // END OF LOGIC FIX
+  // END: Corrected Logic
 
   const handleAddCustomMainCategory = () => {
     const trimmedInput = customMainCategoryInput.trim();
