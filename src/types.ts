@@ -2,7 +2,7 @@
 
 export interface Category {
   main: string;
-  sub: string;
+  sub?: string; // CHANGE: Made 'sub' optional
 }
 
 export interface Habit {
@@ -11,7 +11,7 @@ export interface Habit {
   description: string;
   color: string;
   type: string;
-  categories: Array<{ main: string; sub: string; }>;
+  categories: Array<{ main: string; sub?: string; }>; // CHANGE: Made 'sub' optional here too
   frequencyType: string;
   selectedDays: string[];
   timesPerPeriod: number;

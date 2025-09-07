@@ -131,7 +131,25 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  // Handle habit category selection
+  // CHANGE 1: New function to toggle a main category
+  const toggleMainCategory = (main: string) => {
+    setSelectedCategories(prev => {
+        // Check if this main category (without any subs) is already selected
+        const mainCategoryExists = prev.some(cat => cat.main === main && !cat.sub);
+
+        if (mainCategoryExists) {
+            // If it exists, remove it
+            return prev.filter(cat => !(cat.main === main && !cat.sub));
+        } else {
+            // If it doesn't exist, add it and remove any of its sub-categories to avoid duplicates
+            const otherCategories = prev.filter(cat => cat.main !== main);
+            return [...otherCategories, { main }];
+        }
+    });
+    // Toggle the view for sub-categories
+    setSelectedMainCategory(prev => prev === main ? null : main);
+  };
+
   const toggleHabitCategory = (main: string, sub: string) => {
     const category: Category = { main, sub };
     setSelectedCategories(prev => {
@@ -139,7 +157,9 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
       if (exists) {
         return prev.filter(cat => !(cat.main === main && cat.sub === sub));
       } else {
-        return [...prev, category];
+        // Also remove the main-only category if adding a sub-category
+        const withoutMain = prev.filter(cat => !(cat.main === main && !cat.sub));
+        return [...withoutMain, category];
       }
     });
   };
@@ -478,38 +498,19 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
             {/* Selected Categories Display */}
             {selectedCategories.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
-                {(() => {
-                  // Group categories by main category
-                  const groupedCategories = selectedCategories.reduce((acc, category) => {
-                    if (!acc[category.main]) {
-                      acc[category.main] = [];
-                    }
-                    acc[category.main].push(category);
-                    return acc;
-                  }, {} as Record<string, Category[]>);
-
-                  return Object.entries(groupedCategories).map(([mainCategory, categories]) => (
-                    <div key={mainCategory} className="flex flex-wrap items-center gap-2">
-                      {/* Main category bubble (blue) - shown once per main category */}
-                      <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full">
-                        {mainCategory}
-                      </span>
-                      {/* Sub category bubbles (green) - all subs for this main category */}
-                      {categories.map((category, index) => (
-                        <span key={`${category.main}-${category.sub}-${index}`} className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30 rounded-full">
-                          {category.sub}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveHabitCategory(category)}
-                            className="ml-1.5 text-green-400 hover:text-green-300 transition-colors"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  ));
-                })()}
+                {/* CHANGE 2: Updated logic for displaying selected categories */}
+                {selectedCategories.map((category, index) => (
+                    <span key={`${category.main}-${category.sub || ''}-${index}`} className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${
+                        category.sub 
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                            : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                    }`}>
+                        {category.sub || category.main}
+                        <button type="button" onClick={() => handleRemoveHabitCategory(category)} className="ml-1.5 text-gray-400 hover:text-white transition-colors">
+                          <X className="w-3 h-3" />
+                        </button>
+                    </span>
+                ))}
               </div>
             )}
 
@@ -521,20 +522,27 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                   <div className="text-xs font-medium text-gray-400 mb-2">Main Categories</div>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {Object.keys(allCategoriesMap).map((mainCategory) => (
+                      {/* CHANGE 3: Update button behavior and style */}
+                      (() => {
+                        const isSelectedAsMain = selectedCategories.some(c => c.main === mainCategory && !c.sub);
+                        const isSelectedAsSub = selectedCategories.some(c => c.main === mainCategory && c.sub);
+                        return (
                       <button
                         key={mainCategory}
                         type="button"
-                        onClick={() => setSelectedMainCategory(
-                          selectedMainCategory === mainCategory ? null : mainCategory
-                        )}
-                        className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                          selectedMainCategory === mainCategory
-                            ? 'bg-blue-600 border-blue-500 text-white'
-                            : 'bg-[#1C1C1E] border-gray-600 text-gray-300 hover:border-gray-500 hover:bg-gray-700'
+                        onClick={() => toggleMainCategory(mainCategory)}
+                        className={`px-3 py-1.5 text-sm rounded-lg border transition-colors text-white ${
+                          isSelectedAsMain 
+                            ? 'bg-blue-600 border-blue-500' 
+                            : isSelectedAsSub 
+                            ? 'bg-gray-700 border-gray-500' 
+                            : 'bg-[#1C1C1E] border-gray-600 hover:border-gray-500 hover:bg-gray-700'
                         }`}
                       >
                         {mainCategory}
                       </button>
+                        );
+                      })()
                     ))}
                   </div>
                   
