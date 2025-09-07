@@ -21,15 +21,12 @@ const initialPresetCategories = {
   'Life': ['Life Planning', 'Goal Setting', 'Life Review', 'Major Decisions', 'Life Balance']
 };
 
-// Load categories from localStorage
 const loadCategoriesFromLocalStorage = (): Record<string, string[]> => {
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_CATEGORIES_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (typeof parsed === 'object' && parsed !== null) {
-        return parsed;
-      }
+      if (typeof parsed === 'object' && parsed !== null) return parsed;
     }
   } catch (error) {
     console.error('Error loading categories from localStorage:', error);
@@ -38,7 +35,6 @@ const loadCategoriesFromLocalStorage = (): Record<string, string[]> => {
   return initialPresetCategories;
 };
 
-// Save categories to localStorage
 const saveCategoriesToLocalStorage = (categoriesMap: Record<string, string[]>) => {
   try {
     localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(categoriesMap));
@@ -47,15 +43,8 @@ const saveCategoriesToLocalStorage = (categoriesMap: Record<string, string[]>) =
   }
 };
 
-
 const AddHabitModal: React.FC<AddHabitModalProps> = ({
-  isOpen,
-  onClose,
-  onSaveHabit,
-  onDeleteHabit,
-  habitToEdit,
-  habitMuscleCount,
-  lifeGoalsCount
+  isOpen, onClose, onSaveHabit, onDeleteHabit, habitToEdit, habitMuscleCount, lifeGoalsCount
 }) => {
   const [habitName, setHabitName] = useState('');
   const [habitDescription, setHabitDescription] = useState('');
@@ -68,17 +57,14 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
   const [periodUnit, setPeriodUnit] = useState('Week');
   const [repeatDays, setRepeatDays] = useState(1);
   const [showCategorySelection, setShowCategorySelection] = useState(false);
-  const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [customMainCategoryInput, setCustomMainCategoryInput] = useState('');
   const [customSubCategoryInput, setCustomSubCategoryInput] = useState('');
-
-  const [allCategoriesMap, setAllCategoriesMap] = useState<Record<string, string[]>>(
-    loadCategoriesFromLocalStorage
-  );
+  const [customSubCategoryParent, setCustomSubCategoryParent] = useState<string | null>(null);
+  const [allCategoriesMap, setAllCategoriesMap] = useState<Record<string, string[]>>(loadCategoriesFromLocalStorage);
 
   const calculateHabitStats = (habit: any) => {
     if (!habit || !habit.completed) return { totalCompletions: 0, highestStreak: 0 };
-
     const totalCompletions = Object.values(habit.completed).filter(Boolean).length;
     let highestStreak = 0;
     let currentStreak = 0;
@@ -86,7 +72,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     today.setHours(0, 0, 0, 0);
     const habitCreationDate = new Date(habit.id);
     habitCreationDate.setHours(0, 0, 0, 0);
-
     let currentDay = new Date(habitCreationDate);
     while (currentDay <= today) {
       const dateString = formatDate(currentDay, 'yyyy-MM-dd');
@@ -106,49 +91,70 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
   };
 
   const colorOptions = [
-    { name: 'red', class: 'bg-red-500', hex: '#ef4444' },
-    { name: 'orange', class: 'bg-orange-500', hex: '#f97316' },
-    { name: 'yellow', class: 'bg-yellow-500', hex: '#eab308' },
-    { name: 'green', class: 'bg-green-500', hex: '#22c55e' },
-    { name: 'blue', class: 'bg-blue-500', hex: '#3b82f6' },
-    { name: 'indigo', class: 'bg-indigo-500', hex: '#6366f1' },
-    { name: 'purple', class: 'bg-purple-500', hex: '#a855f7' },
+    { name: 'red', class: 'bg-red-500' }, { name: 'orange', class: 'bg-orange-500' },
+    { name: 'yellow', class: 'bg-yellow-500' }, { name: 'green', class: 'bg-green-500' },
+    { name: 'blue', class: 'bg-blue-500' }, { name: 'indigo', class: 'bg-indigo-500' },
+    { name: 'purple', class: 'bg-purple-500' },
   ];
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  const toggleMainCategory = (main: string) => {
-    setSelectedCategories(prev => {
-        const mainCategoryExists = prev.some(cat => cat.main === main && !cat.sub);
+  // START OF FIX: Updated category selection logic
+  const handleMainCategoryClick = (main: string) => {
+    // This button acts as a master toggle for its entire group.
+    // It also toggles the visibility of its sub-categories.
+    setExpandedCategories(prev =>
+        prev.includes(main) ? prev.filter(c => c !== main) : [...prev, main]
+    );
 
-        if (mainCategoryExists) {
-            return prev.filter(cat => !(cat.main === main && !cat.sub));
+    setSelectedCategories(prev => {
+        const isAnythingSelected = prev.some(cat => cat.main === main);
+        if (isAnythingSelected) {
+            // If any part of this category is selected (main or sub),
+            // clicking the main button deselects all of them.
+            return prev.filter(cat => cat.main !== main);
         } else {
-            const otherCategories = prev.filter(cat => cat.main !== main);
-            return [...otherCategories, { main }];
+            // If nothing is selected, it selects just the main category.
+            return [...prev, { main }];
         }
     });
-    setSelectedMainCategory(prev => prev === main ? null : main);
   };
 
-  const toggleHabitCategory = (main: string, sub: string) => {
-    const category: Category = { main, sub };
+  const handleSubCategoryClick = (main: string, sub: string) => {
     setSelectedCategories(prev => {
-      const exists = prev.some(cat => cat.main === main && cat.sub === sub);
-      if (exists) {
-        return prev.filter(cat => !(cat.main === main && cat.sub === sub));
-      } else {
-        const withoutMain = prev.filter(cat => !(cat.main === main && !cat.sub));
-        return [...withoutMain, category];
-      }
+        const isSubSelected = prev.some(cat => cat.main === main && cat.sub === sub);
+
+        if (isSubSelected) {
+            // If the sub-category is selected, deselect it.
+            // The main category tag will remain if it was selected.
+            return prev.filter(cat => !(cat.main === main && cat.sub === sub));
+        } else {
+            // If the sub-category is not selected, select it.
+            let newSelection = [...prev];
+            // Ensure the main category tag is also present.
+            if (!prev.some(c => c.main === main && !c.sub)) {
+                newSelection.push({ main });
+            }
+            // Add the sub-category itself.
+            newSelection.push({ main, sub });
+            return newSelection;
+        }
     });
   };
 
   const handleRemoveHabitCategory = (categoryToRemove: Category) => {
-    setSelectedCategories(prev =>
-      prev.filter(cat => !(cat.main === categoryToRemove.main && cat.sub === categoryToRemove.sub))
-    );
+    // This handles clicking the 'x' on the selected category tags.
+    if (!categoryToRemove.sub) {
+        // If removing a main category tag, remove it and all its sub-categories.
+        setSelectedCategories(prev => prev.filter(cat => cat.main !== categoryToRemove.main));
+    } else {
+        // If removing a sub-category tag, just remove that one.
+        setSelectedCategories(prev =>
+          prev.filter(cat => !(cat.main === categoryToRemove.main && cat.sub === categoryToRemove.sub))
+        );
+    }
   };
+  // END OF FIX
 
   const handleAddCustomMainCategory = () => {
     const trimmedInput = customMainCategoryInput.trim();
@@ -160,16 +166,17 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     }
   };
 
-  const handleAddCustomSubCategory = () => {
+  const handleAddCustomSubCategory = (main: string) => {
     const trimmedInput = customSubCategoryInput.trim();
-    if (trimmedInput && selectedMainCategory && !allCategoriesMap[selectedMainCategory]?.includes(trimmedInput)) {
+    if (trimmedInput && main && !allCategoriesMap[main]?.includes(trimmedInput)) {
       const newCategoriesMap = {
         ...allCategoriesMap,
-        [selectedMainCategory]: [...(allCategoriesMap[selectedMainCategory] || []), trimmedInput]
+        [main]: [...(allCategoriesMap[main] || []), trimmedInput]
       };
       setAllCategoriesMap(newCategoriesMap);
       saveCategoriesToLocalStorage(newCategoriesMap);
       setCustomSubCategoryInput('');
+      setCustomSubCategoryParent(null);
     }
   };
 
@@ -180,19 +187,20 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     }
   };
 
-  const handleCustomSubCategoryKeyDown = (e: React.KeyboardEvent) => {
+  const handleCustomSubCategoryKeyDown = (e: React.KeyboardEvent, main: string) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleAddCustomSubCategory();
+      handleAddCustomSubCategory(main);
     }
   };
-
+  
   useEffect(() => {
     if (isOpen) {
       setShowCategorySelection(false);
-      setSelectedMainCategory(null);
+      setExpandedCategories([]);
       setCustomMainCategoryInput('');
       setCustomSubCategoryInput('');
+      setCustomSubCategoryParent(null);
       if (habitToEdit) {
         setHabitName(habitToEdit.name);
         setHabitDescription(habitToEdit.description);
@@ -260,7 +268,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
-
+  
   if (!isOpen) return null;
 
   return (
@@ -271,6 +279,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
           <h2 className="text-xl font-bold text-white">{habitToEdit ? 'Edit Habit' : 'Create New Habit'}</h2>
           <button onClick={onClose} className="p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700"><X className="w-5 h-5" /></button>
         </div>
+        
         {habitToEdit && (
           <div className="mb-6">
             <div className="grid grid-cols-2 gap-4">
@@ -290,19 +299,23 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
             </div>
           </div>
         )}
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="habitName" className="block text-sm font-medium text-gray-300 mb-2">Habit Name *</label>
             <input id="habitName" type="text" value={habitName} onChange={(e) => setHabitName(e.target.value)} placeholder="e.g., Read for 30 minutes" className="w-full px-4 py-3 bg-[#1C1C1E] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500" autoFocus />
           </div>
+          
           <div>
             <label htmlFor="habitDescription" className="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
             <textarea id="habitDescription" value={habitDescription} onChange={(e) => setHabitDescription(e.target.value)} placeholder="Add more details about your habit..." rows={3} className="w-full px-4 py-3 bg-[#1C1C1E] border border-gray-600 rounded-lg text-white resize-none" />
           </div>
+          
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">Habit Color</label>
             <div className="flex space-x-3">{colorOptions.map((color) => (<button key={color.name} type="button" onClick={() => setSelectedColor(color.name)} className={`w-8 h-8 rounded-full ${color.class} border-2 ${selectedColor === color.name ? 'border-white' : 'border-gray-600'} flex items-center justify-center`}>{selectedColor === color.name && (<Check className="w-4 h-4 text-white" />)}</button>))}</div>
           </div>
+          
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">Habit Type</label>
             <div className="space-y-3">
@@ -342,124 +355,105 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
               })}
             </div>
           </div>
+          
           <div>
             <button type="button" onClick={() => setShowCategorySelection(!showCategorySelection)} className="flex items-center justify-between w-full text-left mb-3">
               <span className="text-sm font-medium text-gray-300">Categories (Optional)</span>
               {showCategorySelection ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
+
             {selectedCategories.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
-                  {selectedCategories.map((category, index) => (
-                      <span key={`${category.main}-${category.sub || ''}-${index}`} className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${
-                          category.sub
-                              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                      }`}>
-                          {category.sub || category.main}
-                          <button type="button" onClick={() => handleRemoveHabitCategory(category)} className="ml-1.5 text-gray-400 hover:text-white"><X className="w-3 h-3" /></button>
-                      </span>
-                  ))}
+                {selectedCategories.map((category, index) => (
+                  <span key={`${category.main}-${category.sub || ''}-${index}`} className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${
+                      category.sub
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                          : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  }`}>
+                      {category.sub || category.main}
+                      <button type="button" onClick={() => handleRemoveHabitCategory(category)} className="ml-1.5 text-gray-400 hover:text-white"><X className="w-3 h-3" /></button>
+                  </span>
+                ))}
               </div>
             )}
+            
             {showCategorySelection && (
               <div className="space-y-4">
-                <div>
-                  <div className="text-xs font-medium text-gray-400 mb-2">Main Categories</div>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {Object.keys(allCategoriesMap).map((mainCategory) => {
-                       const isSelectedAsMain = selectedCategories.some(c => c.main === mainCategory && !c.sub);
-                       const isSelectedAsSub = selectedCategories.some(c => c.main === mainCategory && c.sub);
-                      return (
-                      <button key={mainCategory} type="button" onClick={() => toggleMainCategory(mainCategory)}
-                        className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                          isSelectedAsMain ? 'bg-blue-600 border-blue-500' : isSelectedAsSub ? 'bg-gray-700 border-gray-500' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'
+                {Object.keys(allCategoriesMap).map(mainCategory => {
+                  const isExpanded = expandedCategories.includes(mainCategory);
+                  const isMainSelected = selectedCategories.some(c => c.main === mainCategory && !c.sub);
+                  const selectedSubs = selectedCategories.filter(c => c.main === mainCategory && c.sub).map(c => c.sub);
+
+                  return (
+                    <div key={mainCategory}>
+                      <button type="button" onClick={() => handleMainCategoryClick(mainCategory)}
+                        className={`w-full text-left px-3 py-1.5 text-sm rounded-lg border flex justify-between items-center transition-colors ${
+                          isMainSelected || selectedSubs.length > 0 ? 'bg-blue-600/50 border-blue-500' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'
                         }`}>
-                        {mainCategory}
+                        <span>{mainCategory}</span>
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
-                    )})}
-                  </div>
-                  <div className="flex space-x-2">
-                    <input type="text" value={customMainCategoryInput} onChange={(e) => setCustomMainCategoryInput(e.target.value)} onKeyDown={handleCustomMainCategoryKeyDown} placeholder="Add custom main category..." className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" />
-                    <button type="button" onClick={handleAddCustomMainCategory} disabled={!customMainCategoryInput.trim()} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600"><Plus className="w-4 h-4" /></button>
-                  </div>
+
+                      {isExpanded && (
+                        <div className="pl-4 pt-3">
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {allCategoriesMap[mainCategory]?.map(subCategory => {
+                              const isSelected = selectedSubs.includes(subCategory);
+                              return (
+                                <button key={subCategory} type="button" onClick={() => handleSubCategoryClick(mainCategory, subCategory)}
+                                  className={`px-2.5 py-1.5 text-xs rounded-md border ${isSelected ? 'bg-green-500 border-green-400' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'}`}>
+                                  {subCategory}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <div className="flex space-x-2">
+                            <input type="text"
+                              value={customSubCategoryParent === mainCategory ? customSubCategoryInput : ''}
+                              onFocus={() => setCustomSubCategoryParent(mainCategory)}
+                              onChange={(e) => setCustomSubCategoryInput(e.target.value)}
+                              onKeyDown={(e) => handleCustomSubCategoryKeyDown(e, mainCategory)}
+                              placeholder={`Add custom ${mainCategory.toLowerCase()} category...`}
+                              className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" />
+                            <button type="button" onClick={() => handleAddCustomSubCategory(mainCategory)} disabled={!customSubCategoryInput.trim() || customSubCategoryParent !== mainCategory} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600">
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+                <div className="flex space-x-2">
+                  <input type="text" value={customMainCategoryInput} onChange={(e) => setCustomMainCategoryInput(e.target.value)} onKeyDown={handleCustomMainCategoryKeyDown} placeholder="Add custom main category..." className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" />
+                  <button type="button" onClick={handleAddCustomMainCategory} disabled={!customMainCategoryInput.trim()} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600"><Plus className="w-4 h-4" /></button>
                 </div>
-                {selectedMainCategory && (
-                  <div>
-                    <div className="text-xs font-medium text-gray-400 mb-2">{selectedMainCategory} Sub-Categories</div>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {allCategoriesMap[selectedMainCategory]?.map((subCategory) => {
-                        const isSelected = selectedCategories.some(cat => cat.main === selectedMainCategory && cat.sub === subCategory);
-                        return (
-                          <button key={subCategory} type="button" onClick={() => toggleHabitCategory(selectedMainCategory, subCategory)}
-                            className={`px-2.5 py-1.5 text-xs rounded-md border ${isSelected ? 'bg-green-500 border-green-400' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'}`}>
-                            {subCategory}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div className="flex space-x-2">
-                      <input type="text" value={customSubCategoryInput} onChange={(e) => setCustomSubCategoryInput(e.target.value)} onKeyDown={handleCustomSubCategoryKeyDown} placeholder={`Add custom ${selectedMainCategory.toLowerCase()} category...`} className="flex-1 px-3 py-2 bg-[#1C1C1E] border border-gray-600 rounded-lg text-sm" />
-                      <button type="button" onClick={handleAddCustomSubCategory} disabled={!customSubCategoryInput.trim()} className="px-3 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-600"><Plus className="w-4 h-4" /></button>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>
+          
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">
-              How Often?
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-3">How Often?</label>
             <div className="space-y-3">
               <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="frequencyType"
-                  value="Anytime"
-                  checked={frequencyType === 'Anytime'}
-                  onChange={(e) => setFrequencyType(e.target.value)}
-                  className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500"
-                />
+                <input type="radio" name="frequencyType" value="Anytime" checked={frequencyType === 'Anytime'} onChange={(e) => setFrequencyType(e.target.value)} className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500" />
                 <span className="text-white">Anytime</span>
               </label>
 
               <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="frequencyType"
-                  value="Everyday"
-                  checked={frequencyType === 'Everyday'}
-                  onChange={(e) => setFrequencyType(e.target.value)}
-                  className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500"
-                />
+                <input type="radio" name="frequencyType" value="Everyday" checked={frequencyType === 'Everyday'} onChange={(e) => setFrequencyType(e.target.value)} className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500" />
                 <span className="text-white">Everyday</span>
               </label>
 
               <div>
                 <label className="flex items-center space-x-3 cursor-pointer mb-2">
-                  <input
-                    type="radio"
-                    name="frequencyType"
-                    value="Some days of the week"
-                    checked={frequencyType === 'Some days of the week'}
-                    onChange={(e) => setFrequencyType(e.target.value)}
-                    className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500"
-                  />
+                  <input type="radio" name="frequencyType" value="Some days of the week" checked={frequencyType === 'Some days of the week'} onChange={(e) => setFrequencyType(e.target.value)} className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500" />
                   <span className="text-white">Some days of the week</span>
                 </label>
                 {frequencyType === 'Some days of the week' && (
                   <div className="ml-7 flex flex-wrap gap-2">
                     {daysOfWeek.map((day) => (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() => toggleDay(day)}
-                        className={`px-3 py-1 text-sm rounded-full border transition-colors ${
-                          selectedDays.includes(day)
-                            ? 'bg-green-500 border-green-400 text-white'
-                            : 'bg-[#1C1C1E] border-gray-600 text-gray-300 hover:border-gray-500'
-                        }`}
-                      >
+                      <button key={day} type="button" onClick={() => toggleDay(day)} className={`px-3 py-1 text-sm rounded-full border transition-colors ${selectedDays.includes(day) ? 'bg-green-500 border-green-400 text-white' : 'bg-[#1C1C1E] border-gray-600 text-gray-300 hover:border-gray-500'}`}>
                         {day}
                       </button>
                     ))}
@@ -469,31 +463,14 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
 
               <div>
                 <label className="flex items-center space-x-3 cursor-pointer mb-2">
-                  <input
-                    type="radio"
-                    name="frequencyType"
-                    value="Numbers of times per period"
-                    checked={frequencyType === 'Numbers of times per period'}
-                    onChange={(e) => setFrequencyType(e.target.value)}
-                    className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500"
-                  />
+                  <input type="radio" name="frequencyType" value="Numbers of times per period" checked={frequencyType === 'Numbers of times per period'} onChange={(e) => setFrequencyType(e.target.value)} className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500" />
                   <span className="text-white">Numbers of times per period</span>
                 </label>
                 {frequencyType === 'Numbers of times per period' && (
                   <div className="ml-7 flex items-center space-x-2">
-                    <input
-                      type="number"
-                      min="1"
-                      value={timesPerPeriod}
-                      onChange={(e) => setTimesPerPeriod(parseInt(e.target.value) || 1)}
-                      className="w-16 px-2 py-1 bg-[#1C1C1E] border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
-                    />
+                    <input type="number" min="1" value={timesPerPeriod} onChange={(e) => setTimesPerPeriod(parseInt(e.target.value) || 1)} className="w-16 px-2 py-1 bg-[#1C1C1E] border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-green-500" />
                     <span className="text-gray-300">times per</span>
-                    <select
-                      value={periodUnit}
-                      onChange={(e) => setPeriodUnit(e.target.value)}
-                      className="px-2 py-1 bg-[#1C1C1E] border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
-                    >
+                    <select value={periodUnit} onChange={(e) => setPeriodUnit(e.target.value)} className="px-2 py-1 bg-[#1C1C1E] border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-green-500">
                       <option value="Week">Week</option>
                       <option value="Month">Month</option>
                       <option value="Year">Year</option>
@@ -504,32 +481,20 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
 
               <div>
                 <label className="flex items-center space-x-3 cursor-pointer mb-2">
-                  <input
-                    type="radio"
-                    name="frequencyType"
-                    value="Repeats"
-                    checked={frequencyType === 'Repeats'}
-                    onChange={(e) => setFrequencyType(e.target.value)}
-                    className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500"
-                  />
+                  <input type="radio" name="frequencyType" value="Repeats" checked={frequencyType === 'Repeats'} onChange={(e) => setFrequencyType(e.target.value)} className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500" />
                   <span className="text-white">Repeats</span>
                 </label>
                 {frequencyType === 'Repeats' && (
                   <div className="ml-7 flex items-center space-x-2">
                     <span className="text-gray-300">Every</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={repeatDays}
-                      onChange={(e) => setRepeatDays(parseInt(e.target.value) || 1)}
-                      className="w-16 px-2 py-1 bg-[#1C1C1E] border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
-                    />
+                    <input type="number" min="1" value={repeatDays} onChange={(e) => setRepeatDays(parseInt(e.target.value) || 1)} className="w-16 px-2 py-1 bg-[#1C1C1E] border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-green-500" />
                     <span className="text-gray-300">days</span>
                   </div>
                 )}
               </div>
             </div>
           </div>
+          
           <div className="space-y-3 pt-4">
             {habitToEdit && onDeleteHabit && (
               <button type="button" onClick={handleDelete} className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-red-400 bg-red-900/30 border border-red-800/50 rounded-lg hover:bg-red-900/50">
