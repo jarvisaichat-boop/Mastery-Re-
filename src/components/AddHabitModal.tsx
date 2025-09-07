@@ -117,38 +117,49 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+  // START OF LOGIC FIX
   const toggleMainCategory = (main: string) => {
+    setSelectedMainCategory(prev => (prev === main ? null : main));
+    
     setSelectedCategories(prev => {
-        const mainCategoryExists = prev.some(cat => cat.main === main && !cat.sub);
-
-        if (mainCategoryExists) {
-            return prev.filter(cat => !(cat.main === main && !cat.sub));
+        const isSelected = prev.some(cat => cat.main === main);
+        if (isSelected) {
+            // If the main category is being deselected, remove it and all its sub-categories
+            return prev.filter(cat => cat.main !== main);
         } else {
-            const otherCategories = prev.filter(cat => cat.main !== main);
-            return [...otherCategories, { main }];
+            // Otherwise, add just the main category (sub-categories can be added separately)
+            return [...prev, { main }];
         }
     });
-    setSelectedMainCategory(prev => prev === main ? null : main);
   };
-
+  
   const toggleHabitCategory = (main: string, sub: string) => {
-    const category: Category = { main, sub };
     setSelectedCategories(prev => {
-      const exists = prev.some(cat => cat.main === main && cat.sub === sub);
-      if (exists) {
-        return prev.filter(cat => !(cat.main === main && cat.sub === sub));
-      } else {
-        const withoutMain = prev.filter(cat => !(cat.main === main && !cat.sub));
-        return [...withoutMain, category];
-      }
+        const isSubSelected = prev.some(cat => cat.main === main && cat.sub === sub);
+        
+        if (isSubSelected) {
+            // If the sub-category is already selected, remove it.
+            return prev.filter(cat => !(cat.main === main && cat.sub === sub));
+        } else {
+            // If the sub-category is not selected, add it.
+            // This does NOT remove the main category.
+            return [...prev, { main, sub }];
+        }
     });
   };
 
   const handleRemoveHabitCategory = (categoryToRemove: Category) => {
-    setSelectedCategories(prev =>
-      prev.filter(cat => !(cat.main === categoryToRemove.main && cat.sub === categoryToRemove.sub))
-    );
+    if (!categoryToRemove.sub) {
+        // If removing the main tag, also remove all its sub-category children
+        setSelectedCategories(prev => prev.filter(cat => cat.main !== categoryToRemove.main));
+    } else {
+        // If removing a sub-category tag, just remove that one
+        setSelectedCategories(prev =>
+            prev.filter(cat => !(cat.main === categoryToRemove.main && cat.sub === categoryToRemove.sub))
+        );
+    }
   };
+  // END OF LOGIC FIX
 
   const handleAddCustomMainCategory = () => {
     const trimmedInput = customMainCategoryInput.trim();
@@ -367,12 +378,11 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                   <div className="text-xs font-medium text-gray-400 mb-2">Main Categories</div>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {Object.keys(allCategoriesMap).map((mainCategory) => {
-                       const isSelectedAsMain = selectedCategories.some(c => c.main === mainCategory && !c.sub);
-                       const isSelectedAsSub = selectedCategories.some(c => c.main === mainCategory && c.sub);
+                       const isSelected = selectedCategories.some(c => c.main === mainCategory);
                       return (
                       <button key={mainCategory} type="button" onClick={() => toggleMainCategory(mainCategory)}
                         className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                          isSelectedAsMain ? 'bg-blue-600 border-blue-500' : isSelectedAsSub ? 'bg-gray-700 border-gray-500' : 'bg-[#1C1C1E] border-gray-600 hover:bg-gray-700'
+                          isSelected ? 'bg-blue-600 border-blue-500 text-white' : 'bg-[#1C1C1E] border-gray-600 text-gray-300 hover:border-gray-500'
                         }`}>
                         {mainCategory}
                       </button>
