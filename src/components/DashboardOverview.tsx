@@ -29,13 +29,13 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
   const longestStreak = streaks.mode === 'easy' ? streaks.easyLongest : streaks.hardLongest;
 
   // SIMPLIFIED TOOLTIP EXPLANATIONS
-  const rateInfo = `BASIC Mode (Motivational): Measures the percentage of tasks you completed out of the tasks you paid attention to (completed or marked missed). Tasks you ignore are not counted against you.
-HARD Mode (Discipline): Measures the percentage of tasks completed out of every task you had scheduled from Monday through today. Future tasks are not counted.`;
+  const rateInfo = `Basic Mode (Motivational): Completed / Acknowledged (True or False). Skips unacknowledged future days.
+Hard Mode (Strict): Completed / Scheduled. Calculated only for days elapsed this week (Mon-Today).`;
   
-  const streakInfo = `BASIC Mode: The longest number of consecutive days where you completed at least one habit.
-HARD Mode: The longest number of consecutive days where you achieved a Perfect Day (100% of scheduled tasks completed).`;
+  const streakInfo = `BASIC Mode: Consecutive days with at least one completed habit.
+HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
 
-  const focusInfo = `Metric: This chart shows where your successful energy is focused. It calculates the percentage of all your total checkmarks that fall under each category (Life Goal, Habit Muscle, or Regular Habit).`;
+  const focusInfo = `Metric: Distribution of Completed Actions. Shows where your successfully completed checkmarks are concentrated across your habit types (Life Goals, Muscle, Regular).`;
 
   // FIX: Function to handle opening/closing a tooltip on click
   const handleInfoClick = useCallback((e, setOpen, currentOpen) => {
@@ -67,33 +67,28 @@ HARD Mode: The longest number of consecutive days where you achieved a Perfect D
     };
   }, [rateTooltipOpen, streakTooltipOpen, focusTooltipOpen]);
 
-  // Helper functions (omitted for brevity)
+  // NEW HEATMAP COLOR LOGIC (Gradual Red Scale & Mixed Day Color)
   const getHeatmapColor = (data: { completionCount: number, missedCount: number }): string => {
-    if (data.missedCount > 0) return 'bg-red-900/30'; 
+    // 1. Check for Mixed Day (Completed > 0 AND Missed > 0)
+    // Suggestion: Use Orange/Amber as a neutral warning signal (bg-orange-500 is available)
+    if (data.completionCount > 0 && data.missedCount > 0) {
+        return 'bg-orange-500/50'; 
+    }
+
+    // 2. Pure Misses (Gradual Red Scale)
+    if (data.missedCount > 0) {
+        // Use defined colors. bg-red-500 is used elsewhere (safe)
+        if (data.missedCount <= 2) return 'bg-red-500/10'; // Lightest Red (Least Missed)
+        return 'bg-red-900/30'; // Darkest Red (Most Missed)
+    }
+
+    // 3. Pure Successes (Green Scale - Existing logic)
     if (data.completionCount === 0) return 'bg-gray-700/50';
     if (data.completionCount <= 1) return 'bg-green-600/30';
     if (data.completionCount <= 3) return 'bg-green-600/60';
     return 'bg-green-600';
   };
   
-  const getDonutGradient = () => {
-    const goal = categoryBreakdown['Life Goal'];
-    const anchor = categoryBreakdown['Habit Muscle 💪'];
-    const regular = categoryBreakdown['Habit'];
-    const segments = [
-      { name: 'Life Goal', value: goal, color: '#ef4444' }, { name: 'Habit Muscle 💪', value: anchor, color: '#3b82f6' }, { name: 'Habit', value: regular, color: '#a855f7' } 
-    ];
-    let gradientString = 'conic-gradient(';
-    let currentAngle = 0;
-    segments.forEach((segment, index) => {
-      const angle = (segment.value / 100) * 360;
-      gradientString += `${segment.color} ${currentAngle}deg ${currentAngle + angle}deg`;
-      if (index < segments.length - 1) { gradientString += ', '; }
-      currentAngle += angle;
-    });
-    gradientString += ')';
-    return gradientString;
-  };
 
 
   return (
@@ -169,7 +164,7 @@ HARD Mode: The longest number of consecutive days where you achieved a Perfect D
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           
-          {/* Widget 3: Habit Type Focus */}
+          {/* Widget 3: Habit Type Focus (BAR CHART IMPLEMENTATION) */}
           <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600 relative"> 
             {/* Title Row with Info Icon */}
             <div className="flex justify-between items-center mb-4 relative">
@@ -183,30 +178,39 @@ HARD Mode: The longest number of consecutive days where you achieved a Perfect D
                     <Info className="w-4 h-4 text-gray-500 hover:text-gray-400" />
                 </div>
             </div>
+            
+            {/* NEW: Bar Chart View */}
             <div className="flex flex-col items-center">
-              {/* Donut Chart Placeholder */}
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center relative"
-                style={{ background: getDonutGradient() }}
-              >
-                {/* Center Cutout */}
-                <div className="absolute w-14 h-14 bg-[#1C1C1E] rounded-full" />
-                <div className="text-lg font-bold z-10 text-white">100%</div>
-              </div>
-              
-              {/* Legend */}
-              <div className="mt-4 space-y-1 text-xs w-full">
+              <div className="mt-2 space-y-3 w-full">
                 {Object.entries(categoryBreakdown).map(([name, value], index) => {
-                  const colorMap: Record<string, string> = {
-                    'Life Goal': 'text-red-400',
-                    'Habit Muscle 💪': 'text-blue-400', 
-                    'Habit': 'text-purple-400',
-                  };
+                    const colorMap: Record<string, string> = {
+                        'Life Goal': 'bg-red-500', 
+                        'Habit Muscle 💪': 'bg-blue-500', 
+                        'Habit': 'bg-purple-500',
+                    };
+                    const textColorMap: Record<string, string> = {
+                        'Life Goal': 'text-red-400', 
+                        'Habit Muscle 💪': 'text-blue-400', 
+                        'Habit': 'text-purple-400',
+                    };
+                    const barColor = colorMap[name];
+                    const textColor = textColorMap[name];
+
                   return (
-                    <div key={index} className="flex justify-between text-gray-400">
-                      <span className={colorMap[name] || 'text-white'}>{name}</span>
-                      <span className="font-medium text-white">{value}%</span>
-                    </div>
+                        <div key={index} className="space-y-1">
+                            <div className="flex justify-between items-baseline">
+                                <span className={`text-xs font-medium ${textColor}`}>{name}</span>
+                                <span className="text-sm font-bold text-white">{value}%</span>
+                            </div>
+                            {/* Bar Container */}
+                            <div className="w-full h-3 bg-gray-700 rounded-sm overflow-hidden">
+                                {/* Bar Fill */}
+                                <div 
+                                    className={`h-full ${barColor} transition-all duration-500`} 
+                                    style={{ width: `${value}%` }}
+                                />
+                            </div>
+                        </div>
                   );
                 })}
               </div>
@@ -226,10 +230,6 @@ HARD Mode: The longest number of consecutive days where you achieved a Perfect D
                   title={`Completed: ${data.completionCount}, Missed: ${data.missedCount} on ${data.date}`}
                 />
               ))}
-            </div>
-            <div className="flex justify-between mt-2 text-xs text-gray-500">
-              <span>Less</span>
-              <span>More</span>
             </div>
           </div>
         </div>
