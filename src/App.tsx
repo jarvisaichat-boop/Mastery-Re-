@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, MoreHorizontal, Calendar, LayoutDashboard } from 'lucide-react';
+import { Plus, MoreHorizontal, List, Calendar, LayoutDashboard } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import DashboardOverview from './components/DashboardOverview';
 import { Habit } from './types';
@@ -24,6 +24,9 @@ function App() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
     
+    // REINTRODUCED: The state for toggling the detailed/simple list view
+    const [showDailyTrackingView, setShowDailyTrackingView] = useState(true);
+
     // NEW STATE: Screen switching
     const [currentScreen, setCurrentScreen] = useState<'habits' | 'dashboard'>('habits');
 
@@ -94,11 +97,22 @@ function App() {
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
                 <div className="flex items-center space-x-2">
-                    {/* NEW NAVIGATION BUTTON */}
+                    {/* BUTTON 1: Dashboard/Habits Screen Switch */}
                     <button onClick={() => setCurrentScreen(p => p === 'habits' ? 'dashboard' : 'habits')} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">
                         {currentScreen === 'habits' ? <LayoutDashboard className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
                     </button>
+
+                    {/* BUTTON 2: Detailed/Simple List View Toggle (ONLY visible on habits screen) */}
+                    {currentScreen === 'habits' && (
+                        <button onClick={() => setShowDailyTrackingView(p => !p)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">
+                            {showDailyTrackingView ? <List className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
+                        </button>
+                    )}
+                    
+                    {/* BUTTON 3: Add New Habit */}
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
+                    
+                    {/* BUTTON 4: More Options (Remains placeholder) */}
                     <button className="p-2 rounded-full hover:bg-gray-700"><MoreHorizontal className="w-6 h-6" /></button>
                 </div>
             </div>
@@ -111,15 +125,32 @@ function App() {
                 {/* CONDITIONAL RENDERING OF VIEWS */}
                 {currentScreen === 'habits' ? (
                     <>
-                        <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick}/>
-                        {viewMode === 'week' && <WeekHeader weekDates={weekDates} />}
-                        {viewMode === 'month' && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
-                        {viewMode === 'year' && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
-                        {viewMode === 'week' && (
-                            <div className="space-y-2">
-                                {sortedHabits.map(habit => <HabitRow key={habit.id} habit={habit} weekDates={weekDates} onToggle={handleToggleHabit} onEditHabit={handleEditHabit} showCircles={viewMode === 'week'} onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} isDragging={draggedHabitId === habit.id}/>)}
-                            </div>
-                        )}
+                        {/* Calendar Header and Week Header are ONLY shown if showDailyTrackingView is true */}
+                        {showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick}/>}
+                        {viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
+                        
+                        {/* Month and Year Views are only shown if showDailyTrackingView is false and viewMode is month/year */}
+                        {viewMode === 'month' && !showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
+                        {viewMode === 'year' && !showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
+
+                        {/* Habit rows are always visible on the 'habits' screen */}
+                        <div className="space-y-2">
+                            {sortedHabits.map(habit => (
+                                <HabitRow 
+                                    key={habit.id} 
+                                    habit={habit} 
+                                    weekDates={weekDates} 
+                                    onToggle={handleToggleHabit} 
+                                    onEditHabit={handleEditHabit} 
+                                    // showCircles is based on the new toggle state AND if we are in the week view
+                                    showCircles={viewMode === 'week' && showDailyTrackingView} 
+                                    onDragStart={handleDragStart} 
+                                    onDragOver={handleDragOver} 
+                                    onDrop={handleDrop} 
+                                    isDragging={draggedHabitId === habit.id}
+                                />
+                            ))}
+                        </div>
                     </>
                 ) : (
                     // Dashboard View
