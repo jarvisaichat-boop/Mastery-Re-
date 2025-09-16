@@ -168,15 +168,17 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     'Habit': regularPercentage 
   };
   
-  // 2. WEEKLY COMPLETION RATE (Dual Logic & Guardrail Fix)
+  // 2. WEEKLY COMPLETION RATE (Start on Monday fix)
   const WEEK_LENGTH = 7;
+  // Get the start of the current Monday-to-Sunday week
+  const startOfThisWeek = getStartOfWeek(today); 
   let totalScheduledHardMode = 0;
-  let totalAcknowledgedBasicMode = 0; // Tracks only instances with true/false (i.e. 'not null')
+  let totalAcknowledgedBasicMode = 0; 
   let totalCompleted = 0;
 
-  // Iterate over the last 7 *full* days (start from yesterday, i=1)
-  for (let i = 1; i <= WEEK_LENGTH; i++) {
-      const dateToProcess = addDays(today, -i);
+  // Iterate over the current 7 days (Monday to Sunday)
+  for (let i = 0; i < WEEK_LENGTH; i++) {
+      const dateToProcess = addDays(startOfThisWeek, i); // Iterate forward from Monday
       const dateString = formatDate(dateToProcess, 'yyyy-MM-dd');
 
       habits.forEach(h => {
@@ -275,27 +277,33 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
   }
 
 
-  // --- 4. CONSISTENCY HEATMAP DATA (35 days) ---
+  // --- 4. CONSISTENCY HEATMAP DATA (35 days, tracking completed and missed) ---
   const heatmapData = [];
-  let day = addDays(today, -35);
+  // Start date is 34 days before today (to ensure 35 total days, ending today)
+  let startDate = addDays(today, -34); 
 
   for (let i = 0; i < 35; i++) {
-    const dateToProcess = day;
+    const dateToProcess = addDays(startDate, i); // Iterate forward from the start date
     const dateString = formatDate(dateToProcess, 'yyyy-MM-dd');
     
     let completedCount = 0;
+    let missedCount = 0;
+    
     habits.forEach(h => {
-      if (isHabitScheduledOnDay(h, dateToProcess) && h.completed[dateString] === true) {
-          completedCount++;
+      if (isHabitScheduledOnDay(h, dateToProcess)) {
+          if (h.completed[dateString] === true) {
+              completedCount++;
+          } else if (h.completed[dateString] === false) {
+              missedCount++; // TRACK MISSED COUNT
+          }
       }
     });
 
     heatmapData.push({
       date: dateString,
       completionCount: completedCount,
+      missedCount: missedCount, // NEW: Include missed count
     });
-    
-    day = addDays(day, 1);
   }
 
   return {

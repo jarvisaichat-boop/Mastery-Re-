@@ -16,19 +16,24 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
   // Determine the current streak value and mode text
   const currentStreak = streaks.mode === 'easy' ? streaks.easyCurrent : streaks.hardCurrent;
   const longestStreak = streaks.mode === 'easy' ? streaks.easyLongest : streaks.hardLongest;
-  const streakModeText = streaks.mode === 'easy' ? 'EASY' : 'HARD';
+  // MODIFIED: 'easy' mode is now labeled 'BASIC'
+  const streakModeText = streaks.mode === 'easy' ? 'BASIC' : 'HARD';
 
-  // Helper function for the heatmap color
-  const getHeatmapColor = (count: number): string => {
-    if (count === 0) return 'bg-gray-700/50';
-    if (count <= 1) return 'bg-green-600/30';
-    if (count <= 3) return 'bg-green-600/60';
+  // Helper function for the heatmap color (Now uses data to check for missed habits)
+  const getHeatmapColor = (data: { completionCount: number, missedCount: number }): string => {
+    // NEW: If there is at least one explicitly missed habit (X-ed out)
+    if (data.missedCount > 0) return 'bg-red-900/30'; 
+    
+    // Otherwise, use the green completion scale
+    if (data.completionCount === 0) return 'bg-gray-700/50';
+    if (data.completionCount <= 1) return 'bg-green-600/30';
+    if (data.completionCount <= 3) return 'bg-green-600/60';
     return 'bg-green-600';
   };
   
   // Helper function to generate the conic gradient for the donut chart placeholder
   const getDonutGradient = () => {
-    // FIXED: Use correct, final keys for color mapping
+    // FIXED: Uses data based on completed actions (implemented in utils.ts)
     const goal = categoryBreakdown['Life Goal'];
     const anchor = categoryBreakdown['Habit Muscle 💪'];
     const regular = categoryBreakdown['Habit'];
@@ -86,7 +91,8 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
           >
             <div className="flex justify-between items-center mb-2">
                 <div className="text-sm font-semibold text-gray-300">Consistency Streak</div>
-                <div className="text-xs text-gray-400 font-medium">{streakModeText} MODE</div>
+                {/* MODIFIED: Label uses the new streakModeText variable */}
+                <div className="text-xs text-gray-400 font-medium">{streakModeText} MODE</div> 
             </div>
             <div className="text-center">
               <div className="text-5xl font-bold text-white leading-none">{currentStreak}</div>
@@ -98,7 +104,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           
-          {/* Widget 3: Habit Type Focus (Donut Chart) */}
+          {/* Widget 3: Habit Type Focus (Donut Chart) - Now uses the completed actions metric */}
           <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
             <div className="text-sm font-semibold text-gray-300 mb-4">Habit Type Focus</div>
             <div className="flex flex-col items-center">
@@ -131,15 +137,17 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
             </div>
           </div>
 
-          {/* Widget 4: Consistency Heatmap */}
+          {/* Widget 4: Consistency Heatmap - Now uses Missed Count for red/gray coloring */}
           <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
             <div className="text-sm font-semibold text-gray-300 mb-2">Consistency Heatmap</div>
             <div className="grid grid-cols-7 grid-rows-5 gap-1 pt-2">
               {heatmapData.map((data, index) => (
                 <div
                   key={index}
-                  className={`w-full aspect-square rounded-sm ${getHeatmapColor(data.completionCount)} transition-colors`}
-                  title={`Completed ${data.completionCount} habits on ${data.date}`}
+                  // MODIFIED: Pass 'data' object to getHeatmapColor
+                  className={`w-full aspect-square rounded-sm ${getHeatmapColor(data)} transition-colors`} 
+                  // MODIFIED: Show both completed and missed counts in tooltip
+                  title={`Completed: ${data.completionCount}, Missed: ${data.missedCount} on ${data.date}`}
                 />
               ))}
             </div>

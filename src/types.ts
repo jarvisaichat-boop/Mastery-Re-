@@ -58,7 +58,7 @@ export interface DashboardData {
     mode: 'easy' | 'hard';
   };
   categoryBreakdown: Record<string, number>;
-  heatmapData: { date: string; completionCount: number; }[];
+  heatmapData: { date: string; completionCount: number; missedCount: number; }[];
 }
 
 export interface DashboardOverviewProps {
