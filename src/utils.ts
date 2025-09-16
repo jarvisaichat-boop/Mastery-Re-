@@ -55,17 +55,18 @@ export const calculateDashboardData = (habits: Habit[], mode: 'basic' | 'hard'):
       const dateToProcess = addDays(today, -(i + 1));
       const dateString = formatDate(dateToProcess, 'yyyy-MM-dd');
 
+      habits.forEach(h => {
           if (isHabitScheduledOnDay(h, dateToProcess)) {
               // HARD MODE: Considers all scheduled instances as the total possible
-          if (isHabitScheduledOnDay(h, dateToProcess) && h.completed[dateString] === true) {
-              completedCount++;
-          }
-              } else if (h.completed[dateString] === false) {
-                  // BASIC MODE: Only counts confirmed misses/completions in its denominator
-                  totalScheduledBasicMode++; 
+              totalScheduledHardMode++;
+              if (h.completed[dateString] === true) {
+                  totalCompleted++;
               }
-              // If null/undefined, Hard Mode counts it as a miss; Basic Mode ignores it.
+          } else if (h.completed[dateString] === false) {
+              // BASIC MODE: Only counts confirmed misses/completions in its denominator
+              totalScheduledBasicMode++; 
           }
+          // If null/undefined, Hard Mode counts it as a miss; Basic Mode ignores it.
       });
   }
   
