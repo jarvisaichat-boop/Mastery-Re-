@@ -59,17 +59,18 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData }) 
           <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
             <div className="text-sm font-semibold text-gray-300 mb-2">Consistency Streak</div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">Current Streak: {currentStreak} days</div>
-              <div className="text-sm text-gray-400 mt-2">Longest Streak: {longestStreak} days</div>
+              <div className="text-5xl font-bold text-white leading-none">{currentStreak}</div>
+              <div className="text-lg font-bold text-gray-300 mb-2">days</div>
+              <div className="text-sm text-gray-400 mt-1">Longest Streak: {longestStreak} days</div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           
-          {/* Widget 3: Category Focus (Donut Chart) */}
+          {/* Widget 3: Habit Type Focus (Donut Chart) */}
           <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
-            <div className="text-sm font-semibold text-gray-300 mb-4">Category Focus</div>
+            <div className="text-sm font-semibold text-gray-300 mb-4">Habit Type Focus</div>
             <div className="flex flex-col items-center">
               {/* Donut Chart Placeholder */}
               <div
@@ -108,7 +109,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData }) 
                 <div
                   key={index}
                   className={`w-full aspect-square rounded-sm ${getHeatmapColor(data.completionCount)} transition-colors`}
-                  title={`Completion Count: ${data.completionCount}`}
+                  title={`Completed ${data.completionCount} habits on ${data.date}`}
                 />
               ))}
             </div>

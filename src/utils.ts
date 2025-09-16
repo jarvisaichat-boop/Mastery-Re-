@@ -4,38 +4,79 @@ import { Habit, DashboardData } from './types';
 
 // NEW DASHBOARD CALCULATION STUB (Performance Critical Function)
 export const calculateDashboardData = (habits: Habit[]): DashboardData => {
-  // NOTE: This is a placeholder implementation for memoization. 
-  // Actual complex calculation logic will be built in a later step.
-
+  // 1. HABIT TYPE BREAKDOWN
   const totalAnchor = habits.filter(h => h.type === 'Anchor Habit').length;
   const totalGoal = habits.filter(h => h.type === 'Life Goal Habit').length;
   const totalRegular = habits.filter(h => h.type === 'Habit').length;
   const totalHabits = totalAnchor + totalGoal + totalRegular;
   
-  // Calculate placeholder percentages based on existing habit counts
-  // Fallback to initial design placeholders if no habits exist.
-  let goalPercentage = totalHabits > 0 ? Math.round((totalGoal / totalHabits) * 100) : 50;
-  let anchorPercentage = totalHabits > 0 ? Math.round((totalAnchor / totalHabits) * 100) : 30;
+  let goalPercentage = 0;
+  let anchorPercentage = 0;
+  let regularPercentage = 0;
 
-  // Ensure 100% total after rounding
-  goalPercentage = Math.min(goalPercentage, 100);
-  anchorPercentage = Math.min(anchorPercentage, 100 - goalPercentage);
-  const regularPercentage = 100 - goalPercentage - anchorPercentage;
+  if (totalHabits > 0) {
+    goalPercentage = Math.round((totalGoal / totalHabits) * 100);
+    anchorPercentage = Math.round((totalAnchor / totalHabits) * 100);
+    regularPercentage = Math.round((totalRegular / totalHabits) * 100);
 
+    // Adjust for rounding errors (ensuring sum is exactly 100)
+    const currentTotal = goalPercentage + anchorPercentage + regularPercentage;
+    const diff = 100 - currentTotal;
+    if (diff !== 0) {
+      // Add the difference to the largest group
+      if (goalPercentage >= anchorPercentage && goalPercentage >= regularPercentage) {
+        goalPercentage += diff;
+      } else if (anchorPercentage >= regularPercentage) {
+        anchorPercentage += diff;
+      } else {
+        regularPercentage += diff;
+      }
+    }
+  }
+
+  const categoryBreakdown = { 
+    'Goal Habit': goalPercentage, 
+    'Anchor Habit': anchorPercentage, 
+    'Regular': regularPercentage 
+  };
+
+  // 2. CONSISTENCY HEATMAP DATA (35 days)
+  const heatmapData = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Start 35 days ago to calculate a full 5x7 grid
+  let day = addDays(today, -35);
+
+  for (let i = 0; i < 35; i++) {
+    const dateToProcess = day;
+    const dateString = formatDate(dateToProcess, 'yyyy-MM-dd');
+    
+    // Find scheduled habits and count completed ones for the date
+    let completedCount = 0;
+    habits.forEach(h => {
+      if (isHabitScheduledOnDay(h, dateToProcess)) {
+        if (h.completed[dateString] === true) {
+          completedCount++;
+        }
+      }
+    });
+
+    heatmapData.push({
+      date: dateString,
+      completionCount: completedCount,
+    });
+    
+    day = addDays(day, 1); // Move to the next day
+  }
+
+  // 3. STREAK AND COMPLETION RATE (Still using mock data as per plan)
   return {
     weeklyCompletionRate: 82, 
     currentStreak: 14, 
     longestStreak: 32, 
-    categoryBreakdown: { 
-        'Goal Habit': goalPercentage, 
-        'Anchor Habit': anchorPercentage, 
-        'Regular': regularPercentage
-    },
-    // Placeholder heatmap data (7 days * 5 rows = 35 squares)
-    heatmapData: Array.from({ length: 35 }, (_, i) => ({ 
-        date: `2025-09-${i + 1}`, // Placeholder date
-        completionCount: (i % 7 === 0) ? 0 : (i % 5 === 0) ? 3 : 1 // Varying shades
-    })),
+    categoryBreakdown: categoryBreakdown,
+    heatmapData: heatmapData,
   };
 };
 
