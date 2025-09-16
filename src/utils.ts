@@ -214,8 +214,8 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
   let tempHardStreak = 0;
   let tempEasyStreak = 0;
   
-  // Iterate backwards from yesterday (i=1)
-  for (let i = 1; i < MAX_LOOKBACK; i++) {
+  // Iterate backwards starting from today (i=0)
+  for (let i = 0; i < MAX_LOOKBACK; i++) {
       const checkDay = addDays(today, -i);
       const dateString = formatDate(checkDay, 'yyyy-MM-dd');
       
@@ -238,15 +238,12 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       if (isDayPerfect) {
           tempHardStreak++;
           hardLongestStreak = Math.max(hardLongestStreak, tempHardStreak);
-
-          if (hardCurrentStreak === i - 1) hardCurrentStreak = i; 
-          else if (i === 1) hardCurrentStreak = 1;
-
+          // hardCurrentStreak is updated only if the streak is not broken
+          if (i === hardCurrentStreak) hardCurrentStreak++;
       } else {
           tempHardStreak = 0;
-          if (hardCurrentStreak === i - 1) hardCurrentStreak = 0;
-      }
-      
+          // If the break occurred today (i=0), the streak is 0. Otherwise it's already set.
+          if (i === 0) hardCurrentStreak = 0;
       // EASY STREAK
       if (isDayCompletedAtLeastOne) {
           tempEasyStreak++;
@@ -265,9 +262,8 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
   }
 
   // Final sanity check on current streaks if no action was taken today
-  const yesterday = addDays(today, -1);
-  let scheduledYesterday = 0;
-  let completedYesterday = 0;
+          // easyCurrentStreak is updated only if the streak is not broken
+          if (i === easyCurrentStreak) easyCurrentStreak++;
   habits.forEach(h => {
       if (isHabitScheduledOnDay(h, yesterday)) {
           scheduledYesterday++;
@@ -293,17 +289,8 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     let completedCount = 0;
     habits.forEach(h => {
       if (isHabitScheduledOnDay(h, dateToProcess) && h.completed[dateString] === true) {
-          completedCount++;
-      }
-    });
-
-    heatmapData.push({
-      date: dateString,
-      completionCount: completedCount,
-    });
-    
-    day = addDays(day, 1);
-  }
+  // Remove the redundant and confusing end-of-function sanity checks and local variables.
+  // The 'current' streaks are now correctly set to the length of the streak starting today.
 
   return {
     weeklyCompletionRate: weeklyCompletionRate, 
