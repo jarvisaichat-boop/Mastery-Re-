@@ -89,7 +89,7 @@ HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
                 
                 {/* Info Icon */}
                 <div 
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2 mr-2 cursor-default" 
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2 mr-2 cursor-help" 
                     title={rateInfo}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -152,7 +152,7 @@ HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
               
               {/* Info Icon for Focus Metric */}
               <div 
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2 mr-2 cursor-default" 
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2 mr-2 cursor-help" 
                     title={focusInfo}
                     onClick={(e) => e.stopPropagation()}
                 >
