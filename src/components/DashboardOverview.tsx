@@ -71,33 +71,48 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
           {/* Widget 1: Weekly Completion Rate (CLICKABLE FOR TOGGLE) */}
           <div 
             className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600 cursor-pointer transition-colors hover:bg-gray-700"
-            onClick={onToggleRateMode} // TOGGLE CLICK HANDLER
+            onClick={onToggleRateMode}
           >
-            <div className="flex justify-between items-center mb-2">
+            {/* A.2: Title Centered */}
+            <div className="flex justify-center items-center mb-2">
                 <div className="text-sm font-semibold text-gray-300">Weekly Completion Rate</div>
-                <div className="text-xs text-gray-400 font-medium">{weeklyCompletionRate.mode === 'basic' ? 'BASIC' : 'HARD'} MODE</div>
+                {/* A.1: Removed mode indicator from top */}
             </div>
             
             <div className="text-center">
               <div className="text-4xl font-bold text-green-400">{currentRate}%</div>
-              <div className="text-sm text-gray-400 mt-1">{rateModeText}</div>
+              
+              {/* A.1: Move short Mode Indicator below Percentage */}
+              {/* A.3: Remove long description text (Hard Mode (Strict)) */}
+              <div className="text-xs text-gray-400 font-medium mt-1">
+                  {weeklyCompletionRate.mode === 'basic' ? 'BASIC' : 'HARD'} MODE
+              </div>
             </div>
           </div>
 
           {/* Widget 2: Consistency Streak (CLICKABLE FOR TOGGLE) */}
           <div 
             className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600 cursor-pointer transition-colors hover:bg-gray-700"
-            onClick={onToggleStreakMode} // NEW TOGGLE CLICK HANDLER
+            onClick={onToggleStreakMode}
           >
-            <div className="flex justify-between items-center mb-2">
-                <div className="text-sm font-semibold text-gray-300">Consistency Streak</div>
-                {/* MODIFIED: Label uses the new streakModeText variable */}
-                <div className="text-xs text-gray-400 font-medium">{streakModeText} MODE</div> 
+            {/* B.1, B.2: Title 'Streak' centered */}
+            <div className="flex justify-center items-center mb-2">
+                <div className="text-sm font-semibold text-gray-300">Streak</div> {/* B.1: Change title */}
+                {/* B.4: Remove mode indicator from top */}
             </div>
             <div className="text-center">
-              <div className="text-5xl font-bold text-white leading-none">{currentStreak}</div>
-              <div className="text-lg font-bold text-gray-300 mb-2">days</div>
+              {/* B.3: Move 'days' next to the number */}
+              <div className="flex justify-center items-end leading-none">
+                <div className="text-5xl font-bold text-white">{currentStreak}</div>
+                <div className="text-lg font-bold text-gray-300 mb-1 ml-1">days</div>
+              </div>
+
               <div className="text-sm text-gray-400 mt-1">Longest Streak: {longestStreak} days</div>
+              
+              {/* B.4: Move Mode Indicator below Longest Streak */}
+              <div className="text-xs text-gray-400 font-medium mt-1">
+                {streakModeText} MODE
+              </div>
             </div>
           </div>
         </div>
