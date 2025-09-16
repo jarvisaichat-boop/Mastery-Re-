@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Plus, MoreHorizontal, List, Calendar } from 'lucide-react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { Plus, MoreHorizontal, Calendar, LayoutDashboard } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
+import DashboardOverview from './components/DashboardOverview';
 import { Habit } from './types';
-import { getStartOfWeek, addDays } from './utils';
+import { getStartOfWeek, addDays, calculateDashboardData } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
 
 const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
@@ -22,7 +23,10 @@ function loadHabitsFromStorage(): Habit[] {
 function App() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
-    const [showDailyTrackingView, setShowDailyTrackingView] = useState(true);
+    
+    // NEW STATE: Screen switching
+    const [currentScreen, setCurrentScreen] = useState<'habits' | 'dashboard'>('habits');
+
     const [habits, setHabits] = useState<Habit[]>(loadHabitsFromStorage);
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
     const [selectedHabitToEdit, setSelectedHabitToEdit] = useState<Habit | null>(null);
@@ -79,13 +83,21 @@ function App() {
     const sortedHabits = [...habits].sort((a, b) => a.order - b.order);
     const habitMuscleCount = habits.filter(h => h.type === 'Anchor Habit').length;
     const lifeGoalsCount = habits.filter(h => h.type === 'Life Goal Habit').length;
+    
+    // CRITICAL PERFORMANCE FIX: Memoized Dashboard Data Calculation
+    const dashboardData = useMemo(() => {
+        return calculateDashboardData(habits);
+    }, [habits]);
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
                 <div className="flex items-center space-x-2">
-                    <button onClick={() => setShowDailyTrackingView(p => !p)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">{showDailyTrackingView ? <List className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}</button>
+                    {/* NEW NAVIGATION BUTTON */}
+                    <button onClick={() => setCurrentScreen(p => p === 'habits' ? 'dashboard' : 'habits')} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">
+                        {currentScreen === 'habits' ? <LayoutDashboard className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
+                    </button>
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
                     <button className="p-2 rounded-full hover:bg-gray-700"><MoreHorizontal className="w-6 h-6" /></button>
                 </div>
@@ -95,15 +107,25 @@ function App() {
                     <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
                     <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
                 </div>
-                {showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick}/>}
-                {viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
-                {viewMode === 'month' && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
-                {viewMode === 'year' && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
-                {viewMode === 'week' && (
-                    <div className="space-y-2">
-                        {sortedHabits.map(habit => <HabitRow key={habit.id} habit={habit} weekDates={weekDates} onToggle={handleToggleHabit} onEditHabit={handleEditHabit} showCircles={showDailyTrackingView} onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} isDragging={draggedHabitId === habit.id}/>)}
-                    </div>
+
+                {/* CONDITIONAL RENDERING OF VIEWS */}
+                {currentScreen === 'habits' ? (
+                    <>
+                        <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick}/>
+                        {viewMode === 'week' && <WeekHeader weekDates={weekDates} />}
+                        {viewMode === 'month' && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
+                        {viewMode === 'year' && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
+                        {viewMode === 'week' && (
+                            <div className="space-y-2">
+                                {sortedHabits.map(habit => <HabitRow key={habit.id} habit={habit} weekDates={weekDates} onToggle={handleToggleHabit} onEditHabit={handleEditHabit} showCircles={viewMode === 'week'} onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} isDragging={draggedHabitId === habit.id}/>)}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    // Dashboard View
+                    <DashboardOverview dashboardData={dashboardData} />
                 )}
+
             </div>
             <AddHabitModal isOpen={showAddHabitModal} onClose={() => { setShowAddHabitModal(false); setSelectedHabitToEdit(null); }} onSaveHabit={handleSaveHabit} onDeleteHabit={handleDeleteHabit} habitToEdit={selectedHabitToEdit} habitMuscleCount={habitMuscleCount} lifeGoalsCount={lifeGoalsCount}/>
         </div>

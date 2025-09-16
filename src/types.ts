@@ -42,3 +42,16 @@ export interface AddHabitModalProps {
   habitMuscleCount: number;
   lifeGoalsCount: number;
 }
+
+// NEW DASHBOARD TYPES
+export interface DashboardData {
+  weeklyCompletionRate: number;
+  currentStreak: number;
+  longestStreak: number;
+  categoryBreakdown: Record<string, number>;
+  heatmapData: { date: string; completionCount: number; }[];
+}
+
+export interface DashboardOverviewProps {
+    dashboardData: DashboardData;
+}

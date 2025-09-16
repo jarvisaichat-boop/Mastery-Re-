@@ -1,6 +1,43 @@
 // src/utils.ts
 
-import { Habit } from './types';
+import { Habit, DashboardData } from './types';
+
+// NEW DASHBOARD CALCULATION STUB (Performance Critical Function)
+export const calculateDashboardData = (habits: Habit[]): DashboardData => {
+  // NOTE: This is a placeholder implementation for memoization. 
+  // Actual complex calculation logic will be built in a later step.
+
+  const totalAnchor = habits.filter(h => h.type === 'Anchor Habit').length;
+  const totalGoal = habits.filter(h => h.type === 'Life Goal Habit').length;
+  const totalRegular = habits.filter(h => h.type === 'Habit').length;
+  const totalHabits = totalAnchor + totalGoal + totalRegular;
+  
+  // Calculate placeholder percentages based on existing habit counts
+  // Fallback to initial design placeholders if no habits exist.
+  let goalPercentage = totalHabits > 0 ? Math.round((totalGoal / totalHabits) * 100) : 50;
+  let anchorPercentage = totalHabits > 0 ? Math.round((totalAnchor / totalHabits) * 100) : 30;
+
+  // Ensure 100% total after rounding
+  goalPercentage = Math.min(goalPercentage, 100);
+  anchorPercentage = Math.min(anchorPercentage, 100 - goalPercentage);
+  const regularPercentage = 100 - goalPercentage - anchorPercentage;
+
+  return {
+    weeklyCompletionRate: 82, 
+    currentStreak: 14, 
+    longestStreak: 32, 
+    categoryBreakdown: { 
+        'Goal Habit': goalPercentage, 
+        'Anchor Habit': anchorPercentage, 
+        'Regular': regularPercentage
+    },
+    // Placeholder heatmap data (7 days * 5 rows = 35 squares)
+    heatmapData: Array.from({ length: 35 }, (_, i) => ({ 
+        date: `2025-09-${i + 1}`, // Placeholder date
+        completionCount: (i % 7 === 0) ? 0 : (i % 5 === 0) ? 3 : 1 // Varying shades
+    })),
+  };
+};
 
 // --- Helper Functions for Dates ---
 export const getStartOfWeek = (date: Date): Date => {
