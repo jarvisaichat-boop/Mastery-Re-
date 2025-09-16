@@ -29,6 +29,9 @@ function App() {
 
     // NEW STATE: Screen switching
     const [currentScreen, setCurrentScreen] = useState<'habits' | 'dashboard'>('habits');
+    
+    // NEW STATE: To track the completion rate mode for the Dashboard
+    const [weeklyRateMode, setWeeklyRateMode] = useState<'basic' | 'hard'>('basic');
 
     const [habits, setHabits] = useState<Habit[]>(loadHabitsFromStorage);
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
@@ -87,10 +90,16 @@ function App() {
     const habitMuscleCount = habits.filter(h => h.type === 'Anchor Habit').length;
     const lifeGoalsCount = habits.filter(h => h.type === 'Life Goal Habit').length;
     
-    // CRITICAL PERFORMANCE FIX: Memoized Dashboard Data Calculation
+    // CRITICAL PERFORMANCE FIX: Memoized Dashboard Data Calculation (Passes the mode state)
     const dashboardData = useMemo(() => {
-        return calculateDashboardData(habits);
-    }, [habits]);
+        // Pass the mode state to ensure the calculation uses the correct logic
+        return calculateDashboardData(habits, weeklyRateMode); 
+    }, [habits, weeklyRateMode]); // Re-calculate only when habits or mode changes
+
+    // Setter function to pass down to the dashboard component
+    const handleToggleRateMode = useCallback(() => {
+        setWeeklyRateMode(p => p === 'basic' ? 'hard' : 'basic');
+    }, []);
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
@@ -153,8 +162,8 @@ function App() {
                         </div>
                     </>
                 ) : (
-                    // Dashboard View
-                    <DashboardOverview dashboardData={dashboardData} />
+                    // Dashboard View - Pass data AND the toggle function
+                    <DashboardOverview dashboardData={dashboardData} onToggleRateMode={handleToggleRateMode} />
                 )}
 
             </div>

@@ -45,7 +45,11 @@ export interface AddHabitModalProps {
 
 // NEW DASHBOARD TYPES
 export interface DashboardData {
-  weeklyCompletionRate: number;
+  weeklyCompletionRate: {
+    basic: number;
+    hard: number;
+    mode: 'basic' | 'hard';
+  };
   currentStreak: number;
   longestStreak: number;
   categoryBreakdown: Record<string, number>;
@@ -54,4 +58,5 @@ export interface DashboardData {
 
 export interface DashboardOverviewProps {
     dashboardData: DashboardData;
+    onToggleRateMode: () => void;
 }

@@ -1,8 +1,17 @@
 import React from 'react';
 import { DashboardOverviewProps } from '../types';
 
-const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData }) => {
+const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, onToggleRateMode }) => {
   const { weeklyCompletionRate, currentStreak, longestStreak, categoryBreakdown, heatmapData } = dashboardData;
+
+  // Determine the current rate value and mode text
+  const currentRate = weeklyCompletionRate.mode === 'basic' 
+      ? weeklyCompletionRate.basic 
+      : weeklyCompletionRate.hard;
+      
+  const modeText = weeklyCompletionRate.mode === 'basic' 
+      ? 'Basic Mode (High Motivation)' 
+      : 'Hard Mode (Strict)';
 
   // Helper function for the heatmap color
   const getHeatmapColor = (count: number): string => {
@@ -14,14 +23,14 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData }) 
   
   // Helper function to generate the conic gradient for the donut chart placeholder
   const getDonutGradient = () => {
-    const { 'Goal Habit': goal, 'Anchor Habit': anchor } = categoryBreakdown;
-    const regular = 100 - goal - anchor;
+    const goal = categoryBreakdown['Goal Habit'];
+    const anchor = categoryBreakdown['Habit Muscle 💪'];
+    const regular = categoryBreakdown['Regular'];
     
-    // Define colors and segments (using shades consistent with AddHabitModal)
     const segments = [
-      { name: 'Goal Habit', value: goal, color: '#ef4444' }, // Red
-      { name: 'Anchor Habit', value: anchor, color: '#3b82f6' }, // Blue
-      { name: 'Regular', value: regular, color: '#a855f7' }  // Purple
+      { name: 'Goal Habit', value: goal, color: '#ef4444' },
+      { name: 'Habit Muscle 💪', value: anchor, color: '#3b82f6' },
+      { name: 'Regular', value: regular, color: '#a855f7' }
     ];
     
     let gradientString = 'conic-gradient(';
@@ -44,18 +53,27 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData }) 
     <div className="p-4">
       {/* Main Content Card - Slightly Lighter Background */}
       <div className="bg-[#2C2C2E] p-6 rounded-2xl shadow-xl space-y-6">
-        <div className="grid grid-cols-2 gap-4">
+        
+        {/* WIDGET GRID (APPLYING MOBILE FIX) */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           
-          {/* Widget 1: Weekly Completion Rate */}
-          <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
-            <div className="text-sm font-semibold text-gray-300 mb-2">Weekly Completion Rate</div>
+          {/* Widget 1: Weekly Completion Rate (CLICKABLE FOR TOGGLE) */}
+          <div 
+            className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600 cursor-pointer transition-colors hover:bg-gray-700"
+            onClick={onToggleRateMode} // TOGGLE CLICK HANDLER
+          >
+            <div className="flex justify-between items-center mb-2">
+                <div className="text-sm font-semibold text-gray-300">Weekly Completion Rate</div>
+                <div className="text-xs text-gray-400 font-medium">{weeklyCompletionRate.mode === 'basic' ? 'BASIC' : 'HARD'} MODE</div>
+            </div>
+            
             <div className="text-center">
-              <div className="text-4xl font-bold text-green-400">{weeklyCompletionRate}%</div>
-              <div className="text-sm text-gray-400 mt-1">Habits completed this week</div>
+              <div className="text-4xl font-bold text-green-400">{currentRate}%</div>
+              <div className="text-sm text-gray-400 mt-1">{modeText}</div>
             </div>
           </div>
 
-          {/* Widget 2: Streak */}
+          {/* Widget 2: Consistency Streak */}
           <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
             <div className="text-sm font-semibold text-gray-300 mb-2">Consistency Streak</div>
             <div className="text-center">
@@ -66,7 +84,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData }) 
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           
           {/* Widget 3: Habit Type Focus (Donut Chart) */}
           <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
@@ -87,7 +105,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData }) 
                 {Object.entries(categoryBreakdown).map(([name, value], index) => {
                   const colorMap: Record<string, string> = {
                     'Goal Habit': 'text-red-400',
-                    'Anchor Habit': 'text-blue-400',
+                    'Habit Muscle 💪': 'text-blue-400', // FIXED LABEL REFERENCE
                     'Regular': 'text-purple-400',
                   };
                   return (
