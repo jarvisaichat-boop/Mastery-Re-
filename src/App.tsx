@@ -32,9 +32,6 @@ function App() {
     
     // NEW STATE: To track the completion rate mode for the Dashboard
     const [weeklyRateMode, setWeeklyRateMode] = useState<'basic' | 'hard'>('basic');
-    
-    // NEW STATE: Streak mode state
-    const [streakMode, setStreakMode] = useState<'hard' | 'easy'>('hard');
 
     const [habits, setHabits] = useState<Habit[]>(loadHabitsFromStorage);
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
@@ -96,16 +93,12 @@ function App() {
     // CRITICAL PERFORMANCE FIX: Memoized Dashboard Data Calculation (Passes the mode state)
     const dashboardData = useMemo(() => {
         // Pass the mode state to ensure the calculation uses the correct logic
-        return calculateDashboardData(habits, weeklyRateMode, streakMode); 
-    }, [habits, weeklyRateMode, streakMode]); // Re-calculate only when habits or modes change
+        return calculateDashboardData(habits, weeklyRateMode); 
+    }, [habits, weeklyRateMode]); // Re-calculate only when habits or mode changes
 
-    // Setter functions to pass down to the dashboard component
+    // Setter function to pass down to the dashboard component
     const handleToggleRateMode = useCallback(() => {
         setWeeklyRateMode(p => p === 'basic' ? 'hard' : 'basic');
-    }, []);
-    
-    const handleToggleStreakMode = useCallback(() => {
-        setStreakMode(p => p === 'hard' ? 'easy' : 'hard');
     }, []);
 
     return (
@@ -170,11 +163,7 @@ function App() {
                     </>
                 ) : (
                     // Dashboard View - Pass data AND the toggle function
-                    <DashboardOverview 
-                        dashboardData={dashboardData} 
-                        onToggleRateMode={handleToggleRateMode} 
-                        onToggleStreakMode={handleToggleStreakMode}
-                    />
+                    <DashboardOverview dashboardData={dashboardData} onToggleRateMode={handleToggleRateMode} />
                 )}
 
             </div>
