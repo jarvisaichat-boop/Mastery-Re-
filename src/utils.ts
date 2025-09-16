@@ -244,6 +244,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
           tempHardStreak = 0;
           // If the break occurred today (i=0), the streak is 0. Otherwise it's already set.
           if (i === 0) hardCurrentStreak = 0;
+      }
       // EASY STREAK
       if (isDayCompletedAtLeastOne) {
           tempEasyStreak++;
@@ -289,6 +290,10 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     let completedCount = 0;
     habits.forEach(h => {
       if (isHabitScheduledOnDay(h, dateToProcess) && h.completed[dateString] === true) {
+      }
+    }
+    )
+  }
   // Remove the redundant and confusing end-of-function sanity checks and local variables.
   // The 'current' streaks are now correctly set to the length of the streak starting today.
 
