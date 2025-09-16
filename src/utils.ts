@@ -118,7 +118,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
   today.setHours(0, 0, 0, 0);
   const MAX_LOOKBACK = 365 * 3; 
 
-  // 1. HABIT TYPE BREAKDOWN (Based on Completed Actions - The new metric)
+  // 1. HABIT TYPE BREAKDOWN (Based on Completed Actions - The current logic)
   const completedCounts = { 'Life Goal': 0, 'Habit Muscle 💪': 0, 'Habit': 0 }; // Final Display Keys
   let totalCompletedActions = 0;
   
@@ -168,29 +168,36 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     'Habit': regularPercentage 
   };
   
-  // 2. WEEKLY COMPLETION RATE (Start on Monday fix)
+  // 2. WEEKLY COMPLETION RATE (Start on Monday fix & Elapsed Days Denominator Fix for both modes)
   const WEEK_LENGTH = 7;
-  // Get the start of the current Monday-to-Sunday week
   const startOfThisWeek = getStartOfWeek(today); 
-  let totalScheduledHardMode = 0;
-  let totalAcknowledgedBasicMode = 0; 
-  let totalCompleted = 0;
+  const todayTimestamp = today.getTime(); 
+
+  let totalScheduledHardMode = 0; // DENOMINATOR (HARD): Scheduled instances on ELAPSED days
+  let totalAcknowledgedBasicMode = 0; // DENOMINATOR (BASIC): Acknowledged instances (true/false) on ELAPSED days
+  let totalCompleted = 0; // NUMERATOR: Completed instances (true) on ELAPSED days
 
   // Iterate over the current 7 days (Monday to Sunday)
   for (let i = 0; i < WEEK_LENGTH; i++) {
-      const dateToProcess = addDays(startOfThisWeek, i); // Iterate forward from Monday
+      const dateToProcess = addDays(startOfThisWeek, i); 
       const dateString = formatDate(dateToProcess, 'yyyy-MM-dd');
+      
+      // Check 1: Is this day in the future? If so, skip it.
+      if (dateToProcess.getTime() > todayTimestamp) {
+        continue;
+      }
 
       habits.forEach(h => {
           if (isHabitScheduledOnDay(h, dateToProcess)) {
-              // HARD MODE: Considers all scheduled instances as the total possible
+              
+              // HARD MODE DENOMINATOR: Count every scheduled task up to today.
               totalScheduledHardMode++; 
               
+              // NUMERATOR & BASIC MODE DENOMINATOR: Count completed/acknowledged tasks up to today.
               if (h.completed[dateString] === true) {
                   totalCompleted++;
                   totalAcknowledgedBasicMode++; 
               } else if (h.completed[dateString] === false) {
-                  // BASIC MODE: Only counts confirmed misses/completions in its denominator
                   totalAcknowledgedBasicMode++; 
               }
           }
@@ -205,6 +212,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     basicRate = Math.round((totalCompleted / totalAcknowledgedBasicMode) * 100);
   }
 
+  // Hard Rate now uses the total scheduled ONLY up to the current day.
   const hardRate = totalScheduledHardMode > 0 
       ? Math.round((totalCompleted / totalScheduledHardMode) * 100) 
       : 0;
@@ -248,13 +256,10 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       if (isDayPerfect) {
           tempHardStreak++;
           hardLongestStreak = Math.max(hardLongestStreak, tempHardStreak);
-          // hardCurrentStreak is updated only if the streak is not broken
           if (i === hardCurrentStreak) hardCurrentStreak++;
       } else {
           tempHardStreak = 0;
-          // If the break occurred today (i=0), the streak is 0. 
           if (i === 0) hardCurrentStreak = 0;
-          // Optimization: if a day is missed, we stop tracking the current streak.
           hardCurrentStreak = hardCurrentStreak; 
       }
       
@@ -262,17 +267,13 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       if (isDayCompletedAtLeastOne) {
           tempEasyStreak++;
           easyLongestStreak = Math.max(easyLongestStreak, tempEasyStreak);
-          // easyCurrentStreak is updated only if the streak is not broken
           if (i === easyCurrentStreak) easyCurrentStreak++;
       } else {
           tempEasyStreak = 0;
-          // If the break occurred today (i=0), the streak is 0.
           if (i === 0) easyCurrentStreak = 0;
-          // Optimization: if a day is missed, we stop tracking the current streak.
           easyCurrentStreak = easyCurrentStreak;
       }
       
-      // If both streaks are 0 and we've checked more than 30 days, we can break early.
       if (hardCurrentStreak === 0 && easyCurrentStreak === 0 && i > 30) break;
   }
 
@@ -283,7 +284,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
   let startDate = addDays(today, -34); 
 
   for (let i = 0; i < 35; i++) {
-    const dateToProcess = addDays(startDate, i); // Iterate forward from the start date
+    const dateToProcess = addDays(startDate, i); 
     const dateString = formatDate(dateToProcess, 'yyyy-MM-dd');
     
     let completedCount = 0;
@@ -294,7 +295,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
           if (h.completed[dateString] === true) {
               completedCount++;
           } else if (h.completed[dateString] === false) {
-              missedCount++; // TRACK MISSED COUNT
+              missedCount++; 
           }
       }
     });
@@ -302,7 +303,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     heatmapData.push({
       date: dateString,
       completionCount: completedCount,
-      missedCount: missedCount, // NEW: Include missed count
+      missedCount: missedCount, 
     });
   }
 
