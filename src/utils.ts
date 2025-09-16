@@ -118,39 +118,48 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
   today.setHours(0, 0, 0, 0);
   const MAX_LOOKBACK = 365 * 3; 
 
-  // 1. HABIT TYPE BREAKDOWN (Final Label Alignment FIX)
-  const counts = { 'Life Goal': 0, 'Habit Muscle 💪': 0, 'Habit': 0 }; // Final Display Keys
-  habits.forEach(h => {
-    // Map internal h.type strings to final display strings:
-    if (h.type === 'Life Goal Habit') counts['Life Goal']++;
-    else if (h.type === 'Anchor Habit') counts['Habit Muscle 💪']++;
-    else if (h.type === 'Habit') counts['Habit']++;
-  });
+  // 1. HABIT TYPE BREAKDOWN (Based on Completed Actions - The new metric)
+  const completedCounts = { 'Life Goal': 0, 'Habit Muscle 💪': 0, 'Habit': 0 }; // Final Display Keys
+  let totalCompletedActions = 0;
   
-  const totalHabits = counts['Life Goal'] + counts['Habit Muscle 💪'] + counts['Habit'];
+  habits.forEach(h => {
+    let key: 'Life Goal' | 'Habit Muscle 💪' | 'Habit';
+    if (h.type === 'Life Goal Habit') key = 'Life Goal';
+    else if (h.type === 'Anchor Habit') key = 'Habit Muscle 💪';
+    else if (h.type === 'Habit') key = 'Habit';
+    else return; // Skip unknown types
+
+    // Sum completed actions for this habit's lifetime
+    Object.values(h.completed).forEach(isCompleted => {
+        if (isCompleted === true) {
+            completedCounts[key]++;
+            totalCompletedActions++;
+        }
+    });
+  });
   
   let goalPercentage = 0;
   let anchorPercentage = 0;
   let regularPercentage = 0;
 
-  if (totalHabits > 0) {
-    goalPercentage = Math.round((counts['Life Goal'] / totalHabits) * 100);
-    anchorPercentage = Math.round((counts['Habit Muscle 💪'] / totalHabits) * 100);
-    regularPercentage = Math.round((counts['Habit'] / totalHabits) * 100);
+  if (totalCompletedActions > 0) {
+      // Calculate and round percentages
+      goalPercentage = Math.round((completedCounts['Life Goal'] / totalCompletedActions) * 100);
+      anchorPercentage = Math.round((completedCounts['Habit Muscle 💪'] / totalCompletedActions) * 100);
+      regularPercentage = Math.round((completedCounts['Habit'] / totalCompletedActions) * 100);
 
-    // Adjust for rounding errors (ensuring sum is exactly 100)
-    const currentTotal = goalPercentage + anchorPercentage + regularPercentage;
-    const diff = 100 - currentTotal;
-    if (diff !== 0) {
-      // Add the difference to the largest group
-      if (counts['Life Goal'] >= counts['Habit Muscle 💪'] && counts['Life Goal'] >= counts['Habit']) {
-          goalPercentage += diff;
-      } else if (counts['Habit Muscle 💪'] >= counts['Habit']) {
-          anchorPercentage += diff;
-      } else {
-          regularPercentage += diff;
+      // Perform rounding adjustment
+      const currentTotal = goalPercentage + anchorPercentage + regularPercentage;
+      const diff = 100 - currentTotal;
+
+      if (diff !== 0) {
+          // Apply correction to the group with the highest raw count of completed actions
+          const largestKey = Object.keys(completedCounts).reduce((a, b) => completedCounts[a] > completedCounts[b] ? a : b) as 'Life Goal' | 'Habit Muscle 💪' | 'Habit';
+
+          if (largestKey === 'Life Goal') goalPercentage += diff;
+          else if (largestKey === 'Habit Muscle 💪') anchorPercentage += diff;
+          else regularPercentage += diff;
       }
-    }
   }
 
   const categoryBreakdown = { 
@@ -158,8 +167,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     'Habit Muscle 💪': anchorPercentage,
     'Habit': regularPercentage 
   };
-
-
+  
   // 2. WEEKLY COMPLETION RATE (Dual Logic & Guardrail Fix)
   const WEEK_LENGTH = 7;
   let totalScheduledHardMode = 0;
@@ -205,7 +213,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     mode: rateMode
   };
   
-  // --- 3. GLOBAL STREAKS (Fixing the Bugged Logic) ---
+  // --- 3. GLOBAL STREAKS (Fixed to calculate streak including today) ---
   let hardCurrentStreak = 0;
   let hardLongestStreak = 0;
   let easyCurrentStreak = 0;
@@ -213,7 +221,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
 
   let tempHardStreak = 0;
   let tempEasyStreak = 0;
-  
+
   // Iterate backwards starting from today (i=0)
   for (let i = 0; i < MAX_LOOKBACK; i++) {
       const checkDay = addDays(today, -i);
@@ -242,41 +250,29 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
           if (i === hardCurrentStreak) hardCurrentStreak++;
       } else {
           tempHardStreak = 0;
-          // If the break occurred today (i=0), the streak is 0. Otherwise it's already set.
+          // If the break occurred today (i=0), the streak is 0. 
           if (i === 0) hardCurrentStreak = 0;
+          // Optimization: if a day is missed, we stop tracking the current streak.
+          hardCurrentStreak = hardCurrentStreak; 
       }
+      
       // EASY STREAK
       if (isDayCompletedAtLeastOne) {
           tempEasyStreak++;
           easyLongestStreak = Math.max(easyLongestStreak, tempEasyStreak);
-
-          if (easyCurrentStreak === i - 1) easyCurrentStreak = i;
-          else if (i === 1) easyCurrentStreak = 1;
-
-      } else {
-          tempEasyStreak = 0;
-          if (easyCurrentStreak === i - 1) easyCurrentStreak = 0;
-      }
-      
-      // Stop checking current streak when a break is encountered (Optimization)
-      if (hardCurrentStreak === 0 && easyCurrentStreak === 0 && i > 30) break;
-  }
-
-  // Final sanity check on current streaks if no action was taken today
           // easyCurrentStreak is updated only if the streak is not broken
           if (i === easyCurrentStreak) easyCurrentStreak++;
-  habits.forEach(h => {
-      if (isHabitScheduledOnDay(h, yesterday)) {
-          scheduledYesterday++;
-          if (h.completed[formatDate(yesterday, 'yyyy-MM-dd')] === true) completedYesterday++;
+      } else {
+          tempEasyStreak = 0;
+          // If the break occurred today (i=0), the streak is 0.
+          if (i === 0) easyCurrentStreak = 0;
+          // Optimization: if a day is missed, we stop tracking the current streak.
+          easyCurrentStreak = easyCurrentStreak;
       }
-  });
-
-  const isYesterdayPerfect = scheduledYesterday > 0 && completedYesterday === scheduledYesterday;
-  const isYesterdayCompletedAtLeastOne = completedYesterday > 0;
-  
-  if (!isYesterdayPerfect) hardCurrentStreak = hardCurrentStreak > 0 ? hardCurrentStreak : 0;
-  if (!isYesterdayCompletedAtLeastOne) easyCurrentStreak = easyCurrentStreak > 0 ? easyCurrentStreak : 0;
+      
+      // If both streaks are 0 and we've checked more than 30 days, we can break early.
+      if (hardCurrentStreak === 0 && easyCurrentStreak === 0 && i > 30) break;
+  }
 
 
   // --- 4. CONSISTENCY HEATMAP DATA (35 days) ---
@@ -290,12 +286,17 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     let completedCount = 0;
     habits.forEach(h => {
       if (isHabitScheduledOnDay(h, dateToProcess) && h.completed[dateString] === true) {
+          completedCount++;
       }
-    }
-    )
+    });
+
+    heatmapData.push({
+      date: dateString,
+      completionCount: completedCount,
+    });
+    
+    day = addDays(day, 1);
   }
-  // Remove the redundant and confusing end-of-function sanity checks and local variables.
-  // The 'current' streaks are now correctly set to the length of the streak starting today.
 
   return {
     weeklyCompletionRate: weeklyCompletionRate, 
