@@ -18,6 +18,11 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
   const longestStreak = streaks.mode === 'easy' ? streaks.easyLongest : streaks.hardLongest;
   const streakModeText = streaks.mode === 'easy' ? 'EASY' : 'HARD';
 
+  // Determine the current streak value and mode text
+  const currentStreak = streaks.mode === 'easy' ? streaks.easyCurrent : streaks.hardCurrent;
+  const longestStreak = streaks.mode === 'easy' ? streaks.easyLongest : streaks.hardLongest;
+  const streakModeText = streaks.mode === 'easy' ? 'EASY' : 'HARD';
+
   // Helper function for the heatmap color
   const getHeatmapColor = (count: number): string => {
     if (count === 0) return 'bg-gray-700/50';
@@ -81,6 +86,12 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
           {/* Widget 2: Consistency Streak (CLICKABLE FOR TOGGLE) */}
           <div 
             className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600 cursor-pointer transition-colors hover:bg-gray-700"
+            onClick={onToggleStreakMode} // NEW TOGGLE CLICK HANDLER
+          >
+            <div className="flex justify-between items-center mb-2">
+                <div className="text-sm font-semibold text-gray-300">Consistency Streak</div>
+                <div className="text-xs text-gray-400 font-medium">{streakModeText} MODE</div>
+            </div>
             onClick={onToggleStreakMode} // NEW TOGGLE CLICK HANDLER
           >
             <div className="flex justify-between items-center mb-2">

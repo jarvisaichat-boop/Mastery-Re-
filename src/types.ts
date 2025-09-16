@@ -57,6 +57,11 @@ export interface DashboardData {
     hardLongest: number;
     mode: 'easy' | 'hard';
   };
+    easyLongest: number;
+    hardCurrent: number;
+    hardLongest: number;
+    mode: 'easy' | 'hard';
+  };
   categoryBreakdown: Record<string, number>;
   heatmapData: { date: string; completionCount: number; }[];
 }
@@ -64,5 +69,6 @@ export interface DashboardData {
 export interface DashboardOverviewProps {
     dashboardData: DashboardData;
     onToggleRateMode: () => void;
+    onToggleStreakMode: () => void;
     onToggleStreakMode: () => void;
 }

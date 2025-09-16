@@ -36,6 +36,9 @@ function App() {
     // NEW STATE: Streak mode state
     const [streakMode, setStreakMode] = useState<'hard' | 'easy'>('hard');
 
+    // NEW STATE: Streak mode state
+    const [streakMode, setStreakMode] = useState<'hard' | 'easy'>('hard');
+
     const [habits, setHabits] = useState<Habit[]>(loadHabitsFromStorage);
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
     const [selectedHabitToEdit, setSelectedHabitToEdit] = useState<Habit | null>(null);
@@ -107,6 +110,10 @@ function App() {
     const handleToggleStreakMode = useCallback(() => {
         setStreakMode(p => p === 'hard' ? 'easy' : 'hard');
     }, []);
+    
+    const handleToggleStreakMode = useCallback(() => {
+        setStreakMode(p => p === 'hard' ? 'easy' : 'hard');
+    }, []);
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
@@ -173,6 +180,7 @@ function App() {
                     <DashboardOverview 
                         dashboardData={dashboardData} 
                         onToggleRateMode={handleToggleRateMode} 
+                        onToggleStreakMode={handleToggleStreakMode}
                         onToggleStreakMode={handleToggleStreakMode}
                     />
                 )}
