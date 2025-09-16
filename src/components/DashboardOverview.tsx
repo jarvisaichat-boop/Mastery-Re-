@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info } from 'lucide-react'; 
+import { Info } from 'lucide-react';
 import { DashboardOverviewProps } from '../types';
 
 const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, onToggleRateMode, onToggleStreakMode }) => {
@@ -91,6 +91,7 @@ HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
                 <div 
                     className="absolute right-0 top-1/2 transform -translate-y-1/2 mr-2 cursor-default" 
                     title={rateInfo}
+                    onClick={(e) => e.stopPropagation()}
                 >
                     <Info className="w-4 h-4 text-gray-500 hover:text-gray-400" />
                 </div>
@@ -119,6 +120,7 @@ HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
                  <div 
                     className="absolute right-0 top-1/2 transform -translate-y-1/2 mr-2 cursor-default" 
                     title={streakInfo}
+                    onClick={(e) => e.stopPropagation()}
                 >
                     <Info className="w-4 h-4 text-gray-500 hover:text-gray-400" />
                 </div>
@@ -152,6 +154,7 @@ HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
               <div 
                     className="absolute right-0 top-1/2 transform -translate-y-1/2 mr-2 cursor-default" 
                     title={focusInfo}
+                    onClick={(e) => e.stopPropagation()}
                 >
                     <Info className="w-4 h-4 text-gray-500 hover:text-gray-400" />
                 </div>
