@@ -24,14 +24,12 @@ function App() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
     
-    // REINTRODUCED: The state for toggling the detailed/simple list view
     const [showDailyTrackingView, setShowDailyTrackingView] = useState(true);
 
-    // NEW STATE: Screen switching
     const [currentScreen, setCurrentScreen] = useState<'habits' | 'dashboard'>('habits');
     
-    // NEW STATE: To track the completion rate mode for the Dashboard
     const [weeklyRateMode, setWeeklyRateMode] = useState<'basic' | 'hard'>('basic');
+    const [streakMode, setStreakMode] = useState<'hard' | 'easy'>('hard'); 
 
     const [habits, setHabits] = useState<Habit[]>(loadHabitsFromStorage);
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
@@ -90,15 +88,19 @@ function App() {
     const habitMuscleCount = habits.filter(h => h.type === 'Anchor Habit').length;
     const lifeGoalsCount = habits.filter(h => h.type === 'Life Goal Habit').length;
     
-    // CRITICAL PERFORMANCE FIX: Memoized Dashboard Data Calculation (Passes the mode state)
+    // CRITICAL PERFORMANCE FIX: Memoized Dashboard Data Calculation 
     const dashboardData = useMemo(() => {
-        // Pass the mode state to ensure the calculation uses the correct logic
-        return calculateDashboardData(habits, weeklyRateMode); 
-    }, [habits, weeklyRateMode]); // Re-calculate only when habits or mode changes
+        // Pass both mode states for the full calculation
+        return calculateDashboardData(habits, weeklyRateMode, streakMode); 
+    }, [habits, weeklyRateMode, streakMode]); 
 
-    // Setter function to pass down to the dashboard component
+    // Setter function for rate mode
     const handleToggleRateMode = useCallback(() => {
         setWeeklyRateMode(p => p === 'basic' ? 'hard' : 'basic');
+    }, []);
+    // Setter function for streak mode
+    const handleToggleStreakMode = useCallback(() => {
+        setStreakMode(p => p === 'hard' ? 'easy' : 'hard');
     }, []);
 
     return (
@@ -162,8 +164,12 @@ function App() {
                         </div>
                     </>
                 ) : (
-                    // Dashboard View - Pass data AND the toggle function
-                    <DashboardOverview dashboardData={dashboardData} onToggleRateMode={handleToggleRateMode} />
+                    // Dashboard View - Pass data AND the toggle functions
+                    <DashboardOverview 
+                        dashboardData={dashboardData} 
+                        onToggleRateMode={handleToggleRateMode} 
+                        onToggleStreakMode={handleToggleStreakMode}
+                    />
                 )}
 
             </div>

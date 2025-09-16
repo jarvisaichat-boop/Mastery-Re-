@@ -1,17 +1,22 @@
 import React from 'react';
 import { DashboardOverviewProps } from '../types';
 
-const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, onToggleRateMode }) => {
-  const { weeklyCompletionRate, currentStreak, longestStreak, categoryBreakdown, heatmapData } = dashboardData;
+const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, onToggleRateMode, onToggleStreakMode }) => {
+  const { weeklyCompletionRate, streaks, categoryBreakdown, heatmapData } = dashboardData;
 
   // Determine the current rate value and mode text
   const currentRate = weeklyCompletionRate.mode === 'basic' 
       ? weeklyCompletionRate.basic 
       : weeklyCompletionRate.hard;
       
-  const modeText = weeklyCompletionRate.mode === 'basic' 
+  const rateModeText = weeklyCompletionRate.mode === 'basic' 
       ? 'Basic Mode (High Motivation)' 
       : 'Hard Mode (Strict)';
+      
+  // Determine the current streak value and mode text
+  const currentStreak = streaks.mode === 'easy' ? streaks.easyCurrent : streaks.hardCurrent;
+  const longestStreak = streaks.mode === 'easy' ? streaks.easyLongest : streaks.hardLongest;
+  const streakModeText = streaks.mode === 'easy' ? 'EASY' : 'HARD';
 
   // Helper function for the heatmap color
   const getHeatmapColor = (count: number): string => {
@@ -23,14 +28,15 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
   
   // Helper function to generate the conic gradient for the donut chart placeholder
   const getDonutGradient = () => {
-    const goal = categoryBreakdown['Goal Habit'];
+    // FIXED: Use correct, final keys for color mapping
+    const goal = categoryBreakdown['Life Goal'];
     const anchor = categoryBreakdown['Habit Muscle 💪'];
-    const regular = categoryBreakdown['Regular'];
+    const regular = categoryBreakdown['Habit'];
     
     const segments = [
-      { name: 'Goal Habit', value: goal, color: '#ef4444' },
-      { name: 'Habit Muscle 💪', value: anchor, color: '#3b82f6' },
-      { name: 'Regular', value: regular, color: '#a855f7' }
+      { name: 'Life Goal', value: goal, color: '#ef4444' }, // Red
+      { name: 'Habit Muscle 💪', value: anchor, color: '#3b82f6' }, // Blue
+      { name: 'Habit', value: regular, color: '#a855f7' } // Purple
     ];
     
     let gradientString = 'conic-gradient(';
@@ -51,7 +57,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
 
   return (
     <div className="p-4">
-      {/* Main Content Card - Slightly Lighter Background */}
+      {/* Main Content Card */}
       <div className="bg-[#2C2C2E] p-6 rounded-2xl shadow-xl space-y-6">
         
         {/* WIDGET GRID (APPLYING MOBILE FIX) */}
@@ -69,13 +75,19 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
             
             <div className="text-center">
               <div className="text-4xl font-bold text-green-400">{currentRate}%</div>
-              <div className="text-sm text-gray-400 mt-1">{modeText}</div>
+              <div className="text-sm text-gray-400 mt-1">{rateModeText}</div>
             </div>
           </div>
 
-          {/* Widget 2: Consistency Streak */}
-          <div className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600">
-            <div className="text-sm font-semibold text-gray-300 mb-2">Consistency Streak</div>
+          {/* Widget 2: Consistency Streak (CLICKABLE FOR TOGGLE) */}
+          <div 
+            className="bg-[#1C1C1E] p-4 rounded-lg border border-gray-600 cursor-pointer transition-colors hover:bg-gray-700"
+            onClick={onToggleStreakMode} // NEW TOGGLE CLICK HANDLER
+          >
+            <div className="flex justify-between items-center mb-2">
+                <div className="text-sm font-semibold text-gray-300">Consistency Streak</div>
+                <div className="text-xs text-gray-400 font-medium">{streakModeText} MODE</div>
+            </div>
             <div className="text-center">
               <div className="text-5xl font-bold text-white leading-none">{currentStreak}</div>
               <div className="text-lg font-bold text-gray-300 mb-2">days</div>
@@ -100,13 +112,13 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
                 <div className="text-lg font-bold z-10 text-white">100%</div>
               </div>
               
-              {/* Legend */}
+              {/* Legend (FIXED: Final Labels) */}
               <div className="mt-4 space-y-1 text-xs w-full">
                 {Object.entries(categoryBreakdown).map(([name, value], index) => {
                   const colorMap: Record<string, string> = {
-                    'Goal Habit': 'text-red-400',
-                    'Habit Muscle 💪': 'text-blue-400', // FIXED LABEL REFERENCE
-                    'Regular': 'text-purple-400',
+                    'Life Goal': 'text-red-400',
+                    'Habit Muscle 💪': 'text-blue-400', 
+                    'Habit': 'text-purple-400',
                   };
                   return (
                     <div key={index} className="flex justify-between text-gray-400">
