@@ -46,7 +46,8 @@ export const isHabitScheduledOnDay = (habit: Habit, date: Date): boolean => {
         case 'Everyday':
             return true;
         
-        // FIX: 'Anytime' and 'Numbers of times per period' do not enforce a specific daily streak.
+        // 'Anytime' and 'Numbers of times per period' do not enforce a specific daily streak 
+        // for the global dashboard metric.
         case 'Anytime':
         case 'Numbers of times per period':
             return false;
@@ -61,7 +62,6 @@ export const isHabitScheduledOnDay = (habit: Habit, date: Date): boolean => {
             const daysDiff = getDaysDifference(startDate, date);
             return daysDiff % habit.repeatDays === 0;
         
-        // FIX: Ensure no unexpected frequency types default to counting as scheduled.
         default:
             return false;
     }
@@ -271,6 +271,17 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
               } else if (h.completed[dateString] === false) {
                   totalAcknowledgedBasicMode++; 
               }
+          } 
+          // FIX for Completion Rate Mismatch: If the habit is Anytime/TimesPerPeriod (which is not scheduled
+          // via isHabitScheduledOnDay), we must still count it for the BASIC MODE (Acknowledged) metric
+          // because BASIC is supposed to be completed/(completed + missed).
+          else if (h.frequencyType === 'Anytime' || h.frequencyType === 'Numbers of times per period') {
+              if (h.completed[dateString] === true) {
+                  totalCompleted++;
+                  totalAcknowledgedBasicMode++;
+              } else if (h.completed[dateString] === false) {
+                  totalAcknowledgedBasicMode++;
+              }
           }
       });
   }
@@ -389,6 +400,14 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
               completedCount++;
           } else if (h.completed[dateString] === false) {
               missedCount++; 
+          }
+      }
+      // If the habit is Anytime/TimesPerPeriod, we still count its completions/misses for the heatmap
+      else if (h.frequencyType === 'Anytime' || h.frequencyType === 'Numbers of times per period') {
+          if (h.completed[dateString] === true) {
+              completedCount++;
+          } else if (h.completed[dateString] === false) {
+              missedCount++;
           }
       }
     });
