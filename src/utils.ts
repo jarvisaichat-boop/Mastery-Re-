@@ -118,9 +118,9 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
   today.setHours(0, 0, 0, 0);
   const MAX_LOOKBACK = 365 * 3; 
 
-  // 1. HABIT TYPE BREAKDOWN (Based on Completed Actions in ELAPSED WEEK)
-  const completedCounts = { 'Life Goal': 0, 'Habit Muscle 💪': 0, 'Habit': 0 }; // Final Display Keys
-  let totalCompletedActions = 0;
+  // 1. HABIT TYPE BREAKDOWN (Based on Completion Rate in ELAPSED WEEK)
+  const scheduledCounts = { 'Life Goal': 0, 'Habit Muscle 💪': 0, 'Habit': 0 };
+  const completedCountsByType = { 'Life Goal': 0, 'Habit Muscle 💪': 0, 'Habit': 0 };
   
   // Determine elapsed days for this week
   const startOfThisWeekForFocus = getStartOfWeek(today); 
@@ -141,43 +141,30 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     else if (h.type === 'Habit') key = 'Habit';
     else return; // Skip unknown types
 
-    // Sum completed actions, but only check ELAPSED days in the current week
+    // Count scheduled and completed actions for ELAPSED days in the current week
     dateStringsToConsider.forEach(dateString => {
-        if (h.completed[dateString] === true) {
-            completedCounts[key]++;
-            totalCompletedActions++;
+        const date = new Date(dateString);
+        if (isHabitScheduledOnDay(h, date)) {
+            scheduledCounts[key]++;
+            
+            if (h.completed[dateString] === true) {
+                completedCountsByType[key]++;
+            }
         }
     });
   });
   
-  let goalPercentage = 0;
-  let anchorPercentage = 0;
-  let regularPercentage = 0;
-
-  if (totalCompletedActions > 0) {
-      // Calculate and round percentages
-      goalPercentage = Math.round((completedCounts['Life Goal'] / totalCompletedActions) * 100);
-      anchorPercentage = Math.round((completedCounts['Habit Muscle 💪'] / totalCompletedActions) * 100);
-      regularPercentage = Math.round((completedCounts['Habit'] / totalCompletedActions) * 100);
-
-      // Perform rounding adjustment
-      const currentTotal = goalPercentage + anchorPercentage + regularPercentage;
-      const diff = 100 - currentTotal;
-
-      if (diff !== 0) {
-          // Apply correction to the group with the highest raw count of completed actions
-          const largestKey = Object.keys(completedCounts).reduce((a, b) => completedCounts[a] > completedCounts[b] ? a : b) as 'Life Goal' | 'Habit Muscle 💪' | 'Habit';
-
-          if (largestKey === 'Life Goal') goalPercentage += diff;
-          else if (largestKey === 'Habit Muscle 💪') anchorPercentage += diff;
-          else regularPercentage += diff;
-      }
-  }
-
-  const habitTypeBreakdown = { 
-    'Life Goal': goalPercentage, 
-    'Habit Muscle 💪': anchorPercentage,
-    'Habit': regularPercentage 
+  // Calculate completion rate percentages for each habit type
+  const habitTypeBreakdown = {
+    'Life Goal': scheduledCounts['Life Goal'] > 0 
+      ? Math.round((completedCountsByType['Life Goal'] / scheduledCounts['Life Goal']) * 100) 
+      : 0,
+    'Habit Muscle 💪': scheduledCounts['Habit Muscle 💪'] > 0 
+      ? Math.round((completedCountsByType['Habit Muscle 💪'] / scheduledCounts['Habit Muscle 💪']) * 100) 
+      : 0,
+    'Habit': scheduledCounts['Habit'] > 0 
+      ? Math.round((completedCountsByType['Habit'] / scheduledCounts['Habit']) * 100) 
+      : 0
   };
   
   // 2. WEEKLY COMPLETION RATE (Start on Monday fix & Elapsed Days Denominator Fix for both modes)
