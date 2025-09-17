@@ -131,29 +131,19 @@ function App() {
         setStreakMode(p => p === 'hard' ? 'easy' : 'hard');
     }, []);
 
-    const activeIconClass = "text-white bg-gray-700 pointer-events-none";
-    const inactiveIconClass = "text-gray-400 hover:bg-gray-700";
-
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
                 <div className="flex items-center space-x-2">
                     {/* BUTTON 1: Dashboard/Habits Screen Switch */}
-                    <button 
-                        onClick={() => setCurrentScreen(p => p === 'habits' ? 'dashboard' : 'habits')} 
-                        className={`p-2 rounded-lg ${currentScreen === 'habits' ? inactiveIconClass : activeIconClass}`}
-                        disabled={currentScreen === 'dashboard'}
-                    >
+                    <button onClick={() => setCurrentScreen(p => p === 'habits' ? 'dashboard' : 'habits')} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">
                         {currentScreen === 'habits' ? <LayoutDashboard className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
                     </button>
 
                     {/* BUTTON 2: Detailed/Simple List View Toggle (ONLY visible on habits screen) */}
                     {currentScreen === 'habits' && (
-                        <button 
-                            onClick={() => setShowDailyTrackingView(p => !p)} 
-                            className={`p-2 rounded-lg ${inactiveIconClass}`}
-                        >
+                        <button onClick={() => setShowDailyTrackingView(p => !p)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">
                             {showDailyTrackingView ? <List className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
                         </button>
                     )}
