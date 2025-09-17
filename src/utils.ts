@@ -46,8 +46,7 @@ export const isHabitScheduledOnDay = (habit: Habit, date: Date): boolean => {
         case 'Everyday':
             return true;
         
-        // 'Anytime' and 'Numbers of times per period' do not enforce a specific daily streak 
-        // for the global dashboard metric.
+        // FIX: 'Anytime' and 'Numbers of times per period' return false for GLOBAL HARD STREAK checks.
         case 'Anytime':
         case 'Numbers of times per period':
             return false;
@@ -116,24 +115,50 @@ export const getTextColorClass = (color: string) => {
     return colorMap[color] || 'text-white';
 };
 
-// New function to calculate an individual habit's current and longest streaks.
-// This is now used to drive the Dashboard's BASIC MODE (Easy Streak) tile.
+// NEW HELPER: Calculates the weekly rate for a single habit (used for BASIC MODE RATE)
+const getSingleHabitWeeklyRate = (h: Habit, today: Date) => {
+    const startOfThisWeek = getStartOfWeek(today); 
+    const todayTimestamp = today.getTime(); 
+    let weeklyCompleted = 0;
+    let weeklyScheduled = 0;
+
+    for (let i = 0; i < 7; i++) {
+        const dateToProcess = addDays(startOfThisWeek, i); 
+        if (dateToProcess.getTime() > todayTimestamp) continue;
+
+        let isScheduled = isHabitScheduledOnDay(h, dateToProcess);
+        const dateString = formatDate(dateToProcess, 'yyyy-MM-dd');
+        const isCompleted = h.completed[dateString] === true;
+        
+        // For the purposes of a single habit's *rate*, Anytime/TimesPerPeriod count as opportunities.
+        if (h.frequencyType === 'Anytime' || h.frequencyType === 'Numbers of times per period') {
+            isScheduled = true;
+        }
+
+        if (isScheduled) {
+            weeklyScheduled++;
+            if (isCompleted) {
+                weeklyCompleted++;
+            }
+        }
+    }
+    return weeklyScheduled > 0 ? (weeklyCompleted / weeklyScheduled) * 100 : 0;
+};
+
+// The core streak logic (used by the new single habit rate function and the dashboard)
 export const calculateSingleHabitStreaks = (habit: Habit, today: Date) => {
     let currentStreak = 0;
     let longestStreak = 0;
     let tempStreak = 0;
     const MAX_LOOKBACK = 365 * 3;
     
-    // Longest and Temporary Streak Calculation (Iterate backwards to find longest)
+    // Longest Streak Calculation (combined for longest and current)
     for (let i = 0; i < MAX_LOOKBACK; i++) {
         const checkDay = addDays(today, -i);
         const dateString = formatDate(checkDay, 'yyyy-MM-dd');
         
-        // Determine if this day is relevant for *this single habit's* streak.
         let isScheduled = isHabitScheduledOnDay(habit, checkDay);
         
-        // For 'Anytime' and 'Numbers of times per period', we must count them as "available" every day
-        // for their *individual* streak, matching the habit row behavior.
         if (habit.frequencyType === 'Anytime' || habit.frequencyType === 'Numbers of times per period') {
              isScheduled = true;
         }
@@ -145,20 +170,17 @@ export const calculateSingleHabitStreaks = (habit: Habit, today: Date) => {
                 tempStreak++;
                 longestStreak = Math.max(longestStreak, tempStreak);
             } else {
-                // Streak is broken on this scheduled day (missed or unacknowledged)
                 tempStreak = 0;
             }
         } 
-        // If not scheduled, the streak holds its value (tempStreak doesn't reset).
         
-        // Optimization: stop searching for old streaks if the current temp streak is 0 and we've gone back far.
         if (tempStreak === 0 && i > 30) {
             break;
         }
     }
     
     // Current Streak Calculation (Iterate backwards and break on first failure)
-    let currentStreakCheck = 0;
+    currentStreak = 0;
     for (let i = 0; i < MAX_LOOKBACK; i++) {
         const checkDay = addDays(today, -i);
         const dateString = formatDate(checkDay, 'yyyy-MM-dd');
@@ -172,29 +194,26 @@ export const calculateSingleHabitStreaks = (habit: Habit, today: Date) => {
         
         if (isScheduled) {
             if (isCompleted) {
-                currentStreakCheck++;
+                currentStreak++;
             } else {
-                break; // Streak broken on scheduled day
+                break;
             }
         }
-        // If not scheduled, continue to previous day without breaking.
     }
-    currentStreak = currentStreakCheck;
     
     return { current: currentStreak, longest: longestStreak };
 };
 
-// NEW DASHBOARD CALCULATION FUNCTION (Final Logic)
+// UPDATED DASHBOARD CALCULATION FUNCTION
 export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'hard', streakMode: 'easy' | 'hard'): DashboardData => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const MAX_LOOKBACK = 365 * 3; 
 
-  // 1. HABIT TYPE BREAKDOWN (Based on Completion Rate in ELAPSED WEEK)
+  // 1. HABIT TYPE BREAKDOWN (Logic unchanged)
   const scheduledCounts = { 'Life Goal': 0, 'Habit Muscle 💪': 0, 'Habit': 0 };
   const completedCountsByType = { 'Life Goal': 0, 'Habit Muscle 💪': 0, 'Habit': 0 };
   
-  // Determine elapsed days for this week
   const startOfThisWeekForFocus = getStartOfWeek(today); 
   const todayTimestampForFocus = today.getTime(); 
 
@@ -211,12 +230,11 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     if (h.type === 'Life Goal Habit') key = 'Life Goal';
     else if (h.type === 'Anchor Habit') key = 'Habit Muscle 💪';
     else if (h.type === 'Habit') key = 'Habit';
-    else return; // Skip unknown types
+    else return;
 
-    // Count scheduled and completed actions for ELAPSED days in the current week
     dateStringsToConsider.forEach(dateString => {
         const date = new Date(dateString);
-        if (isHabitScheduledOnDay(h, date)) {
+        if (isHabitScheduledOnDay(h, date)) { 
             scheduledCounts[key]++;
             
             if (h.completed[dateString] === true) {
@@ -226,7 +244,6 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     });
   });
   
-  // Calculate completion rate percentages for each habit type
   const habitTypeBreakdown = {
     'Life Goal': scheduledCounts['Life Goal'] > 0 
       ? Math.round((completedCountsByType['Life Goal'] / scheduledCounts['Life Goal']) * 100) 
@@ -239,65 +256,55 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       : 0
   };
   
-  // 2. WEEKLY COMPLETION RATE (Start on Monday fix & Elapsed Days Denominator Fix for both modes)
+  // 2. WEEKLY COMPLETION RATE (FIXED LOGIC)
   const WEEK_LENGTH = 7;
   const startOfThisWeek = getStartOfWeek(today); 
   const todayTimestamp = today.getTime(); 
 
-  let totalScheduledHardMode = 0; // DENOMINATOR (HARD): Scheduled instances on ELAPSED days
-  let totalAcknowledgedBasicMode = 0; // DENOMINATOR (BASIC): Acknowledged instances (true/false) on ELAPSED days
-  let totalCompleted = 0; // NUMERATOR: Completed instances (true) on ELAPSED days
+  let totalScheduledHardOpportunities = 0; // Hard Denom (All scheduled opportunities)
+  let totalCompletedHard = 0;             // Hard Numerator (All completed opportunities)
+  
+  let maxIndividualRate = 0; // Basic Rate (Max single habit rate)
 
-  // Iterate over the current 7 days (Monday to Sunday)
+  // Calculate Hard Mode Rate components and find the Max Individual Rate (Basic Mode)
   for (let i = 0; i < WEEK_LENGTH; i++) {
       const dateToProcess = addDays(startOfThisWeek, i); 
       const dateString = formatDate(dateToProcess, 'yyyy-MM-dd');
       
-      // Check 1: Is this day in the future? If so, skip it.
       if (dateToProcess.getTime() > todayTimestamp) {
         continue;
       }
 
       habits.forEach(h => {
-          if (isHabitScheduledOnDay(h, dateToProcess)) {
-              
-              // HARD MODE DENOMINATOR: Count every scheduled task up to today.
-              totalScheduledHardMode++; 
-              
-              // NUMERATOR & BASIC MODE DENOMINATOR: Count completed/acknowledged tasks up to today.
-              if (h.completed[dateString] === true) {
-                  totalCompleted++;
-                  totalAcknowledgedBasicMode++; 
-              } else if (h.completed[dateString] === false) {
-                  totalAcknowledgedBasicMode++; 
-              }
-          } 
-          // FIX for Completion Rate Mismatch: If the habit is Anytime/TimesPerPeriod (which is not scheduled
-          // via isHabitScheduledOnDay), we must still count it for the BASIC MODE (Acknowledged) metric
-          // because BASIC is supposed to be completed/(completed + missed).
-          else if (h.frequencyType === 'Anytime' || h.frequencyType === 'Numbers of times per period') {
-              if (h.completed[dateString] === true) {
-                  totalCompleted++;
-                  totalAcknowledgedBasicMode++;
-              } else if (h.completed[dateString] === false) {
-                  totalAcknowledgedBasicMode++;
+          let isOpportunity = isHabitScheduledOnDay(h, dateToProcess);
+          const isCompleted = h.completed[dateString] === true;
+          
+          // For the HARD MODE RATE, all habit types are considered opportunities.
+          if (h.frequencyType === 'Anytime' || h.frequencyType === 'Numbers of times per period') {
+              isOpportunity = true;
+          }
+
+          if (isOpportunity) {
+              totalScheduledHardOpportunities++;
+              if (isCompleted) {
+                  totalCompletedHard++;
               }
           }
       });
   }
   
-  // BASIC MODE GUARDRAIL FIX (The motivational 100% fix)
-  let basicRate = 0;
-  if (totalCompleted === 0 && totalAcknowledgedBasicMode === 0) {
-    basicRate = 100;
-  } else if (totalAcknowledgedBasicMode > 0) {
-    basicRate = Math.round((totalCompleted / totalAcknowledgedBasicMode) * 100);
-  }
+  // Calculate BASIC MODE Rate: Max Rate of a single habit this week
+  habits.forEach(h => {
+      const rate = getSingleHabitWeeklyRate(h, today);
+      maxIndividualRate = Math.max(maxIndividualRate, rate);
+  });
+  
 
-  // Hard Rate now uses the total scheduled ONLY up to the current day.
-  const hardRate = totalScheduledHardMode > 0 
-      ? Math.round((totalCompleted / totalScheduledHardMode) * 100) 
+  const hardRate = totalScheduledHardOpportunities > 0 
+      ? Math.round((totalCompletedHard / totalScheduledHardOpportunities) * 100) 
       : 0;
+
+  const basicRate = Math.round(maxIndividualRate);
 
   const weeklyCompletionRate = {
     basic: basicRate,
@@ -305,7 +312,8 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     mode: rateMode
   };
   
-  // --- 3. GLOBAL STREAKS (FIXED to show MAX SINGLE HABIT STREAK for Easy/Basic Mode) ---
+  // 3. GLOBAL STREAKS (Logic unchanged and correct)
+
   let hardCurrentStreak = 0;
   let hardLongestStreak = 0;
   let easyCurrentStreak = 0;
@@ -318,11 +326,11 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       easyLongestStreak = Math.max(easyLongestStreak, longest);
   });
   
-  // Hard Mode (HARD): Perfect Day Streak (Global Metric) - Logic remains complex but correct
+  // Hard Mode (HARD): Perfect Day Streak (Global Metric)
+
   let tempHardStreak = 0;
   let tempHardLongestStreak = 0;
   
-  // Hard Streak (Perfect Day) Calculation - Calculates longest streak
   for (let i = 0; i < MAX_LOOKBACK; i++) {
       const checkDay = addDays(today, -i);
       const dateString = formatDate(checkDay, 'yyyy-MM-dd');
@@ -331,7 +339,6 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       let completedCount = 0;
       
       habits.forEach(h => {
-          // Use the strict global schedule check here (where Anytime/TimesPerPeriod return false)
           if (isHabitScheduledOnDay(h, checkDay)) {
               scheduledCount++;
               if (h.completed[dateString] === true) completedCount++;
@@ -353,7 +360,6 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       if (tempHardStreak === 0 && i > 30) break;
   }
   
-  // Current Hard Streak - Calculates current streak
   hardCurrentStreak = 0;
   for (let i = 0; i < MAX_LOOKBACK; i++) {
     const checkDay = addDays(today, -i);
@@ -382,9 +388,9 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
 
   hardLongestStreak = tempHardLongestStreak;
 
-  // --- 4. CONSISTENCY HEATMAP DATA (35 days, tracking completed and missed) ---
+  // 4. CONSISTENCY HEATMAP DATA (Logic unchanged)
+
   const heatmapData = [];
-  // Start date is 34 days before today (to ensure 35 total days, ending today)
   let startDate = addDays(today, -34); 
 
   for (let i = 0; i < 35; i++) {
@@ -395,19 +401,11 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     let missedCount = 0;
     
     habits.forEach(h => {
-      if (isHabitScheduledOnDay(h, dateToProcess)) {
+      if (isHabitScheduledOnDay(h, dateToProcess) || h.frequencyType === 'Anytime' || h.frequencyType === 'Numbers of times per period') {
           if (h.completed[dateString] === true) {
               completedCount++;
           } else if (h.completed[dateString] === false) {
               missedCount++; 
-          }
-      }
-      // If the habit is Anytime/TimesPerPeriod, we still count its completions/misses for the heatmap
-      else if (h.frequencyType === 'Anytime' || h.frequencyType === 'Numbers of times per period') {
-          if (h.completed[dateString] === true) {
-              completedCount++;
-          } else if (h.completed[dateString] === false) {
-              missedCount++;
           }
       }
     });
