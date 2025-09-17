@@ -6,7 +6,12 @@ import { DashboardOverviewProps } from '../types';
 const CustomTooltip: React.FC<{ content: string }> = ({ content }) => (
     // Positioned absolutely within the relative widget container
     <div className="absolute z-10 p-3 mt-1 text-sm text-white bg-gray-800 rounded-lg shadow-xl w-64 left-1/2 transform -translate-x-1/2" style={{ top: 'calc(100% + 5px)' }}>
-        {content}
+        {content.split('\n').map((line, index) => (
+            <React.Fragment key={index}>
+                {line}
+                {index < content.split('\n').length - 1 && <br />}
+            </React.Fragment>
+        ))}
     </div>
 );
 
