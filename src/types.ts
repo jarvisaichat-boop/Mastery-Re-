@@ -57,7 +57,7 @@ export interface DashboardData {
     hardLongest: number;
     mode: 'easy' | 'hard';
   };
-  categoryBreakdown: Record<string, number>;
+  habitTypeBreakdown: Record<string, number>;
   heatmapData: { date: string; completionCount: number; missedCount: number; }[];
 }
 

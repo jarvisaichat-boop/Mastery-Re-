@@ -118,10 +118,22 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
   today.setHours(0, 0, 0, 0);
   const MAX_LOOKBACK = 365 * 3; 
 
-  // 1. HABIT TYPE BREAKDOWN (Based on Completed Actions - The current logic)
+  // 1. HABIT TYPE BREAKDOWN (Based on Completed Actions in ELAPSED WEEK)
   const completedCounts = { 'Life Goal': 0, 'Habit Muscle 💪': 0, 'Habit': 0 }; // Final Display Keys
   let totalCompletedActions = 0;
   
+  // Determine elapsed days for this week
+  const startOfThisWeekForFocus = getStartOfWeek(today); 
+  const todayTimestampForFocus = today.getTime(); 
+
+  const dateStringsToConsider: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const dateToProcess = addDays(startOfThisWeekForFocus, i); 
+    if (dateToProcess.getTime() <= todayTimestampForFocus) {
+      dateStringsToConsider.push(formatDate(dateToProcess, 'yyyy-MM-dd'));
+    }
+  }
+
   habits.forEach(h => {
     let key: 'Life Goal' | 'Habit Muscle 💪' | 'Habit';
     if (h.type === 'Life Goal Habit') key = 'Life Goal';
@@ -129,9 +141,9 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     else if (h.type === 'Habit') key = 'Habit';
     else return; // Skip unknown types
 
-    // Sum completed actions for this habit's lifetime
-    Object.values(h.completed).forEach(isCompleted => {
-        if (isCompleted === true) {
+    // Sum completed actions, but only check ELAPSED days in the current week
+    dateStringsToConsider.forEach(dateString => {
+        if (h.completed[dateString] === true) {
             completedCounts[key]++;
             totalCompletedActions++;
         }
@@ -162,7 +174,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       }
   }
 
-  const categoryBreakdown = { 
+  const habitTypeBreakdown = { 
     'Life Goal': goalPercentage, 
     'Habit Muscle 💪': anchorPercentage,
     'Habit': regularPercentage 
@@ -316,7 +328,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       hardLongest: hardLongestStreak,
       mode: streakMode
     },
-    categoryBreakdown: categoryBreakdown,
+    habitTypeBreakdown: habitTypeBreakdown,
     heatmapData: heatmapData,
   };
 };
