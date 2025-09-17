@@ -37,6 +37,9 @@ HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
 
   const focusInfo = `Metric: Distribution of Completed Actions. Shows where your successfully completed checkmarks are concentrated across your habit types (Life Goals, Muscle, Regular).`;
 
+  // ORDER DEFINITION (Goal 2A)
+  const DISPLAY_ORDER = ['Habit Muscle 💪', 'Life Goal', 'Habit'];
+
   // FIX: Function to handle opening/closing a tooltip on click
   const handleInfoClick = useCallback((e, setOpen, currentOpen) => {
     e.stopPropagation(); // Prevents click from reaching parent card (the mode toggle)
@@ -182,7 +185,10 @@ HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
             {/* NEW: Bar Chart View */}
             <div className="flex flex-col items-center">
               <div className="mt-2 space-y-3 w-full">
-                {Object.entries(habitTypeBreakdown).map(([name, value], index) => {
+                {/* SORTED ORDER IMPLEMENTATION (Goal 2A) */}
+                {Object.entries(habitTypeBreakdown)
+                    .sort(([keyA], [keyB]) => DISPLAY_ORDER.indexOf(keyA) - DISPLAY_ORDER.indexOf(keyB))
+                    .map(([name, value], index) => {
                     const colorMap: Record<string, string> = {
                         'Life Goal': 'bg-red-500', 
                         'Habit Muscle 💪': 'bg-blue-500', 
