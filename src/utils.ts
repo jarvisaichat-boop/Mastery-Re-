@@ -116,6 +116,74 @@ export const getTextColorClass = (color: string) => {
     return colorMap[color] || 'text-white';
 };
 
+// New function to calculate an individual habit's current and longest streaks.
+// This is now used to drive the Dashboard's BASIC MODE (Easy Streak) tile.
+export const calculateSingleHabitStreaks = (habit: Habit, today: Date) => {
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    const MAX_LOOKBACK = 365 * 3;
+    
+    // Longest and Temporary Streak Calculation (Iterate backwards to find longest)
+    for (let i = 0; i < MAX_LOOKBACK; i++) {
+        const checkDay = addDays(today, -i);
+        const dateString = formatDate(checkDay, 'yyyy-MM-dd');
+        
+        // Determine if this day is relevant for *this single habit's* streak.
+        let isScheduled = isHabitScheduledOnDay(habit, checkDay);
+        
+        // For 'Anytime' and 'Numbers of times per period', we must count them as "available" every day
+        // for their *individual* streak, matching the habit row behavior.
+        if (habit.frequencyType === 'Anytime' || habit.frequencyType === 'Numbers of times per period') {
+             isScheduled = true;
+        }
+
+        const isCompleted = habit.completed[dateString] === true;
+
+        if (isScheduled) {
+            if (isCompleted) {
+                tempStreak++;
+                longestStreak = Math.max(longestStreak, tempStreak);
+            } else {
+                // Streak is broken on this scheduled day (missed or unacknowledged)
+                tempStreak = 0;
+            }
+        } 
+        // If not scheduled, the streak holds its value (tempStreak doesn't reset).
+        
+        // Optimization: stop searching for old streaks if the current temp streak is 0 and we've gone back far.
+        if (tempStreak === 0 && i > 30) {
+            break;
+        }
+    }
+    
+    // Current Streak Calculation (Iterate backwards and break on first failure)
+    let currentStreakCheck = 0;
+    for (let i = 0; i < MAX_LOOKBACK; i++) {
+        const checkDay = addDays(today, -i);
+        const dateString = formatDate(checkDay, 'yyyy-MM-dd');
+        
+        let isScheduled = isHabitScheduledOnDay(habit, checkDay);
+        if (habit.frequencyType === 'Anytime' || habit.frequencyType === 'Numbers of times per period') {
+             isScheduled = true;
+        }
+        
+        const isCompleted = habit.completed[dateString] === true;
+        
+        if (isScheduled) {
+            if (isCompleted) {
+                currentStreakCheck++;
+            } else {
+                break; // Streak broken on scheduled day
+            }
+        }
+        // If not scheduled, continue to previous day without breaking.
+    }
+    currentStreak = currentStreakCheck;
+    
+    return { current: currentStreak, longest: longestStreak };
+};
+
 // NEW DASHBOARD CALCULATION FUNCTION (Final Logic)
 export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'hard', streakMode: 'easy' | 'hard'): DashboardData => {
   const today = new Date();
@@ -226,16 +294,24 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
     mode: rateMode
   };
   
-  // --- 3. GLOBAL STREAKS (Fixed to calculate streak including today) ---
+  // --- 3. GLOBAL STREAKS (FIXED to show MAX SINGLE HABIT STREAK for Easy/Basic Mode) ---
   let hardCurrentStreak = 0;
   let hardLongestStreak = 0;
   let easyCurrentStreak = 0;
   let easyLongestStreak = 0;
 
-  // --- Longest Streak Calculation ---
+  // Easy Mode (BASIC): Maximum of all Individual Habit Streaks
+  habits.forEach(h => {
+      const { current, longest } = calculateSingleHabitStreaks(h, today);
+      easyCurrentStreak = Math.max(easyCurrentStreak, current);
+      easyLongestStreak = Math.max(easyLongestStreak, longest);
+  });
+  
+  // Hard Mode (HARD): Perfect Day Streak (Global Metric) - Logic remains complex but correct
   let tempHardStreak = 0;
-  let tempEasyStreak = 0;
-
+  let tempHardLongestStreak = 0;
+  
+  // Hard Streak (Perfect Day) Calculation - Calculates longest streak
   for (let i = 0; i < MAX_LOOKBACK; i++) {
       const checkDay = addDays(today, -i);
       const dateString = formatDate(checkDay, 'yyyy-MM-dd');
@@ -244,6 +320,7 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       let completedCount = 0;
       
       habits.forEach(h => {
+          // Use the strict global schedule check here (where Anytime/TimesPerPeriod return false)
           if (isHabitScheduledOnDay(h, checkDay)) {
               scheduledCount++;
               if (h.completed[dateString] === true) completedCount++;
@@ -251,37 +328,22 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
       });
 
       const isDayScheduled = scheduledCount > 0;
-      const isDayPerfect = scheduledCount > 0 && completedCount === scheduledCount;
-      const isDayCompletedAtLeastOne = scheduledCount > 0 && completedCount > 0;
+      const isDayPerfect = isDayScheduled && completedCount === scheduledCount;
 
-      // HARD STREAK (Perfect Day)
       if (isDayScheduled) {
           if (isDayPerfect) {
               tempHardStreak++;
-              hardLongestStreak = Math.max(hardLongestStreak, tempHardStreak);
+              tempHardLongestStreak = Math.max(tempHardLongestStreak, tempHardStreak);
           } else {
-              // Streak broken on a scheduled day
               tempHardStreak = 0;
           }
       } 
-      // If NOT scheduled, temp streak holds.
 
-      // EASY STREAK (At Least One)
-      if (isDayScheduled) {
-          if (isDayCompletedAtLeastOne) {
-              tempEasyStreak++;
-              easyLongestStreak = Math.max(easyLongestStreak, tempEasyStreak);
-          } else {
-              // Streak broken on a scheduled day
-              tempEasyStreak = 0;
-          }
-      }
-      // If NOT scheduled, temp streak holds.
+      if (tempHardStreak === 0 && i > 30) break;
   }
   
-  // --- Current Streak Calculation (More robust and strictly consecutive) ---
-  
-  // HARD MODE CURRENT STREAK
+  // Current Hard Streak - Calculates current streak
+  hardCurrentStreak = 0;
   for (let i = 0; i < MAX_LOOKBACK; i++) {
     const checkDay = addDays(today, -i);
     const dateString = formatDate(checkDay, 'yyyy-MM-dd');
@@ -302,41 +364,12 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
         if (isDayPerfect) {
             hardCurrentStreak++;
         } else {
-            // Break: scheduled day was not perfect (missed/incomplete)
             break;
         }
     }
-    // If NOT scheduled, continue to the day before without breaking.
-  }
-  
-  // EASY MODE CURRENT STREAK
-  for (let i = 0; i < MAX_LOOKBACK; i++) {
-    const checkDay = addDays(today, -i);
-    const dateString = formatDate(checkDay, 'yyyy-MM-dd');
-    let scheduledCount = 0;
-    let completedCount = 0;
-    
-    habits.forEach(h => {
-        if (isHabitScheduledOnDay(h, checkDay)) {
-            scheduledCount++;
-            if (h.completed[dateString] === true) completedCount++;
-        }
-    });
-
-    const isDayScheduled = scheduledCount > 0;
-    const isDayCompletedAtLeastOne = scheduledCount > 0 && completedCount > 0;
-    
-    if (isDayScheduled) {
-        if (isDayCompletedAtLeastOne) {
-            easyCurrentStreak++;
-        } else {
-            // Break: scheduled day had zero completions
-            break;
-        }
-    }
-    // If NOT scheduled, continue to the day before without breaking.
   }
 
+  hardLongestStreak = tempHardLongestStreak;
 
   // --- 4. CONSISTENCY HEATMAP DATA (35 days, tracking completed and missed) ---
   const heatmapData = [];
