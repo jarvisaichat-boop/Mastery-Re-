@@ -228,16 +228,17 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
   let easyCurrentStreak = 0;
   let easyLongestStreak = 0;
 
+  // --- Longest Streak Calculation ---
   let tempHardStreak = 0;
   let tempEasyStreak = 0;
 
-  // Iterate backwards starting from today (i=0)
   for (let i = 0; i < MAX_LOOKBACK; i++) {
       const checkDay = addDays(today, -i);
       const dateString = formatDate(checkDay, 'yyyy-MM-dd');
       
       let scheduledCount = 0;
       let completedCount = 0;
+      
       habits.forEach(h => {
           if (isHabitScheduledOnDay(h, checkDay)) {
               scheduledCount++;
@@ -245,35 +246,91 @@ export const calculateDashboardData = (habits: Habit[], rateMode: 'basic' | 'har
           }
       });
 
-      // CRITERIA
       const isDayScheduled = scheduledCount > 0;
-      const isDayPerfect = isDayScheduled && completedCount === scheduledCount;
-      const isDayCompletedAtLeastOne = completedCount > 0;
-      
-      
-      // HARD STREAK
-      if (isDayPerfect) {
-          tempHardStreak++;
-          hardLongestStreak = Math.max(hardLongestStreak, tempHardStreak);
-          if (i === hardCurrentStreak) hardCurrentStreak++;
-      } else {
-          tempHardStreak = 0;
-          if (i === 0) hardCurrentStreak = 0;
-          hardCurrentStreak = hardCurrentStreak; 
+      const isDayPerfect = scheduledCount > 0 && completedCount === scheduledCount;
+      const isDayCompletedAtLeastOne = scheduledCount > 0 && completedCount > 0;
+
+      // HARD STREAK (Perfect Day)
+      if (isDayScheduled) {
+          if (isDayPerfect) {
+              tempHardStreak++;
+              hardLongestStreak = Math.max(hardLongestStreak, tempHardStreak);
+          } else {
+              // Streak broken on a scheduled day
+              tempHardStreak = 0;
+          }
+      } 
+      // If NOT scheduled, temp streak holds.
+
+      // EASY STREAK (At Least One)
+      if (isDayScheduled) {
+          if (isDayCompletedAtLeastOne) {
+              tempEasyStreak++;
+              easyLongestStreak = Math.max(easyLongestStreak, tempEasyStreak);
+          } else {
+              // Streak broken on a scheduled day
+              tempEasyStreak = 0;
+          }
       }
-      
-      // EASY STREAK
-      if (isDayCompletedAtLeastOne) {
-          tempEasyStreak++;
-          easyLongestStreak = Math.max(easyLongestStreak, tempEasyStreak);
-          if (i === easyCurrentStreak) easyCurrentStreak++;
-      } else {
-          tempEasyStreak = 0;
-          if (i === 0) easyCurrentStreak = 0;
-          easyCurrentStreak = easyCurrentStreak;
-      }
-      
-      if (hardCurrentStreak === 0 && easyCurrentStreak === 0 && i > 30) break;
+      // If NOT scheduled, temp streak holds.
+  }
+  
+  // --- Current Streak Calculation (More robust and strictly consecutive) ---
+  
+  // HARD MODE CURRENT STREAK
+  for (let i = 0; i < MAX_LOOKBACK; i++) {
+    const checkDay = addDays(today, -i);
+    const dateString = formatDate(checkDay, 'yyyy-MM-dd');
+    let scheduledCount = 0;
+    let completedCount = 0;
+    
+    habits.forEach(h => {
+        if (isHabitScheduledOnDay(h, checkDay)) {
+            scheduledCount++;
+            if (h.completed[dateString] === true) completedCount++;
+        }
+    });
+
+    const isDayScheduled = scheduledCount > 0;
+    const isDayPerfect = isDayScheduled && completedCount === scheduledCount;
+    
+    if (isDayScheduled) {
+        if (isDayPerfect) {
+            hardCurrentStreak++;
+        } else {
+            // Break: scheduled day was not perfect (missed/incomplete)
+            break;
+        }
+    }
+    // If NOT scheduled, continue to the day before without breaking.
+  }
+  
+  // EASY MODE CURRENT STREAK
+  for (let i = 0; i < MAX_LOOKBACK; i++) {
+    const checkDay = addDays(today, -i);
+    const dateString = formatDate(checkDay, 'yyyy-MM-dd');
+    let scheduledCount = 0;
+    let completedCount = 0;
+    
+    habits.forEach(h => {
+        if (isHabitScheduledOnDay(h, checkDay)) {
+            scheduledCount++;
+            if (h.completed[dateString] === true) completedCount++;
+        }
+    });
+
+    const isDayScheduled = scheduledCount > 0;
+    const isDayCompletedAtLeastOne = scheduledCount > 0 && completedCount > 0;
+    
+    if (isDayScheduled) {
+        if (isDayCompletedAtLeastOne) {
+            easyCurrentStreak++;
+        } else {
+            // Break: scheduled day had zero completions
+            break;
+        }
+    }
+    // If NOT scheduled, continue to the day before without breaking.
   }
 
 
