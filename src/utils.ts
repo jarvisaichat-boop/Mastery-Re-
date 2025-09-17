@@ -44,10 +44,13 @@ const getDaysDifference = (date1: Date, date2: Date): number => {
 export const isHabitScheduledOnDay = (habit: Habit, date: Date): boolean => {
     switch (habit.frequencyType) {
         case 'Everyday':
-        case 'Anytime':
-        case 'Numbers of times per period':
             return true;
         
+        // FIX: 'Anytime' and 'Numbers of times per period' do not enforce a specific daily streak.
+        case 'Anytime':
+        case 'Numbers of times per period':
+            return false;
+            
         case 'Some days of the week':
             const dayName = date.toLocaleString('en-US', { weekday: 'short' });
             return habit.selectedDays.includes(dayName);
@@ -58,8 +61,9 @@ export const isHabitScheduledOnDay = (habit: Habit, date: Date): boolean => {
             const daysDiff = getDaysDifference(startDate, date);
             return daysDiff % habit.repeatDays === 0;
         
+        // FIX: Ensure no unexpected frequency types default to counting as scheduled.
         default:
-            return true;
+            return false;
     }
 };
 
