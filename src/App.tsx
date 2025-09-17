@@ -7,6 +7,28 @@ import { getStartOfWeek, addDays, calculateDashboardData } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
 
 const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
+const LOCAL_STORAGE_RATE_MODE_KEY = 'mastery-dashboard-rate-mode-v1';
+const LOCAL_STORAGE_STREAK_MODE_KEY = 'mastery-dashboard-streak-mode-v1';
+
+function loadRateMode(): 'basic' | 'hard' {
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_RATE_MODE_KEY);
+    // Default to 'basic' if not found
+    return stored === 'hard' ? 'hard' : 'basic'; 
+  } catch (e) {
+    return 'basic';
+  }
+}
+
+function loadStreakMode(): 'easy' | 'hard' {
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_STREAK_MODE_KEY);
+    // Default to 'easy' (Basic Mode) if not found
+    return stored === 'hard' ? 'hard' : 'easy'; 
+  } catch (e) {
+    return 'easy';
+  }
+}
 
 function loadHabitsFromStorage(): Habit[] {
   try {
@@ -28,8 +50,8 @@ function App() {
 
     const [currentScreen, setCurrentScreen] = useState<'habits' | 'dashboard'>('habits');
     
-    const [weeklyRateMode, setWeeklyRateMode] = useState<'basic' | 'hard'>('basic');
-    const [streakMode, setStreakMode] = useState<'hard' | 'easy'>('hard'); 
+    const [weeklyRateMode, setWeeklyRateMode] = useState(loadRateMode);
+    const [streakMode, setStreakMode] = useState(loadStreakMode);
 
     const [habits, setHabits] = useState<Habit[]>(loadHabitsFromStorage);
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
@@ -37,9 +59,15 @@ function App() {
     const [draggedHabitId, setDraggedHabitId] = useState<number | null>(null);
 
     useEffect(() => {
-        try { localStorage.setItem(LOCAL_STORAGE_HABITS_KEY, JSON.stringify(habits)); }
+        try { 
+            localStorage.setItem(LOCAL_STORAGE_HABITS_KEY, JSON.stringify(habits)); 
+            
+            // Save modes
+            localStorage.setItem(LOCAL_STORAGE_RATE_MODE_KEY, weeklyRateMode);
+            localStorage.setItem(LOCAL_STORAGE_STREAK_MODE_KEY, streakMode);
+        }
         catch (e) { console.error("Failed to save habits", e); }
-    }, [habits]);
+    }, [habits, weeklyRateMode, streakMode]);
 
     const startOfWeek = getStartOfWeek(currentDate);
     const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek, i));

@@ -29,13 +29,16 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
   const longestStreak = streaks.mode === 'easy' ? streaks.easyLongest : streaks.hardLongest;
 
   // SIMPLIFIED TOOLTIP EXPLANATIONS
-  const rateInfo = `Basic Mode (Motivational): Completed / Acknowledged (True or False). Skips unacknowledged future days.
-Hard Mode (Strict): Completed / Scheduled. Calculated only for days elapsed this week (Mon-Today).`;
+  const rateInfo = `Basic Mode: Completed / Acknowledged (True or False). Skips unacknowledged future days.
+
+Hard Mode: Completed / Scheduled. Calculated only for days elapsed this week (Mon-Today).`;
   
   const streakInfo = `BASIC Mode: Consecutive days with at least one completed habit.
 HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
 
-  const focusInfo = `Metric: Distribution of Completed Actions. Shows where your successfully completed checkmarks are concentrated across your habit types (Life Goals, Muscle, Regular).`;
+  const focusInfo = `Metric: Completion Rate by Habit Type.
+
+This chart shows the percentage of scheduled tasks completed within the current week (Monday-Today) for each of your Habit Types.`;
 
   // ORDER DEFINITION (Goal 2A)
   const DISPLAY_ORDER = ['Habit Muscle 💪', 'Life Goal', 'Habit'];
