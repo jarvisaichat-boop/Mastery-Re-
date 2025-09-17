@@ -29,12 +29,12 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ dashboardData, on
   const longestStreak = streaks.mode === 'easy' ? streaks.easyLongest : streaks.hardLongest;
 
   // SIMPLIFIED TOOLTIP EXPLANATIONS
-  const rateInfo = `Basic Mode: Completed / Acknowledged (True or False). Skips unacknowledged future days.
+  const rateInfo = `BASIC MODE: Completed / Marked (Completed or Missed). Skips unacknowledged future days.
 
-Hard Mode: Completed / Scheduled. Calculated only for days elapsed this week (Mon-Today).`;
+HARD MODE: Completed / Scheduled. Calculated only for days elapsed this week (Mon-Today).`;
   
-  const streakInfo = `BASIC Mode: Consecutive days with at least one completed habit.
-HARD Mode: Consecutive days with 100% completion (Perfect Day).`;
+  const streakInfo = `BASIC MODE: Consecutive days with at least one completed habit.
+HARD MODE: Consecutive days with 100% completion (Perfect Day).`;
 
   const focusInfo = `Metric: Completion Rate by Habit Type.
 
