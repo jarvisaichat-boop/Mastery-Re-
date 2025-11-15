@@ -321,6 +321,7 @@ function App() {
                 {showWeeklyReview && (
                     <InlineWeeklyReview 
                         habits={habits}
+                        dailyReasons={dailyReasons}
                         onAdjust={handleWeeklyReviewAdjust}
                         onShare={handleWeeklyReviewShare}
                     />

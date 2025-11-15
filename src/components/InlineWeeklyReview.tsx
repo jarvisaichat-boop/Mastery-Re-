@@ -4,6 +4,7 @@ import { formatDate } from '../utils';
 
 interface InlineWeeklyReviewProps {
     habits: Habit[];
+    dailyReasons: Record<string, Record<number, string>>;
     onAdjust: (adjustedHabits: Habit[]) => void;
     onShare: () => void;
 }
@@ -16,15 +17,54 @@ interface HabitAnalysis {
     status: 'keep' | 'problem' | 'neutral';
 }
 
-export default function InlineWeeklyReview({ habits, onAdjust, onShare }: InlineWeeklyReviewProps) {
+export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onShare }: InlineWeeklyReviewProps) {
     const [isAnalyzing, setIsAnalyzing] = useState(true);
     const [analysis, setAnalysis] = useState<HabitAnalysis[]>([]);
-    const [missedReasons, setMissedReasons] = useState<Record<number, string>>({});
+    const [missedReasons, setMissedReasons] = useState<Record<number, string>>(() => {
+        const aggregated: Record<number, string> = {};
+        for (let i = 0; i < 7; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dateString = formatDate(date, 'yyyy-MM-dd');
+            const dayReasons = dailyReasons[dateString] || {};
+            Object.entries(dayReasons).forEach(([habitId, reason]) => {
+                const id = Number(habitId);
+                if (reason && !aggregated[id]) {
+                    aggregated[id] = reason;
+                }
+            });
+        }
+        return aggregated;
+    });
     const [suggestions, setSuggestions] = useState<Record<number, string>>({});
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [adjustedHabits, setAdjustedHabits] = useState<Habit[]>(habits);
     const [showAccountability, setShowAccountability] = useState(false);
     const [copied, setCopied] = useState(false);
+
+    const generateSuggestions = (analysisData: HabitAnalysis[]): Record<number, string> => {
+        const newSuggestions: Record<number, string> = {};
+
+        analysisData.filter(a => a.status === 'problem').forEach(item => {
+            const reason = missedReasons[item.habit.id]?.toLowerCase() || '';
+            
+            if (reason.includes('early') || reason.includes('morning') || reason.includes('snooze')) {
+                newSuggestions[item.habit.id] = "💡 Try moving this to the afternoon or evening instead.";
+            } else if (reason.includes('tired') || reason.includes('exhausted') || reason.includes('energy')) {
+                newSuggestions[item.habit.id] = "💡 Reduce the duration by half, or shift to when you have more energy.";
+            } else if (reason.includes('forgot') || reason.includes('remember')) {
+                newSuggestions[item.habit.id] = "💡 Link this to another habit you already do consistently.";
+            } else if (reason.includes('time') || reason.includes('busy') || reason.includes('work')) {
+                newSuggestions[item.habit.id] = "💡 Try doing this every other day instead of daily.";
+            } else if (reason.includes('hard') || reason.includes('difficult') || reason.includes('too much')) {
+                newSuggestions[item.habit.id] = "💡 Lower the difficulty - aim for something you can do even on bad days.";
+            } else {
+                newSuggestions[item.habit.id] = "💡 Consider adjusting the frequency or making it easier.";
+            }
+        });
+
+        return newSuggestions;
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -65,27 +105,21 @@ export default function InlineWeeklyReview({ habits, onAdjust, onShare }: Inline
         return () => clearTimeout(timer);
     }, [habits]);
 
+    useEffect(() => {
+        if (analysis.length === 0 || isAnalyzing) return;
+        
+        const problemHabits = analysis.filter(a => a.status === 'problem');
+        const hasAllReasons = problemHabits.every(p => missedReasons[p.habit.id]);
+        
+        if (hasAllReasons && problemHabits.length > 0) {
+            const autoSuggestions = generateSuggestions(analysis);
+            setSuggestions(autoSuggestions);
+            setShowSuggestions(true);
+        }
+    }, [analysis, missedReasons, isAnalyzing]);
+
     const handleAnalyzeReasons = () => {
-        const newSuggestions: Record<number, string> = {};
-
-        analysis.filter(a => a.status === 'problem').forEach(item => {
-            const reason = missedReasons[item.habit.id]?.toLowerCase() || '';
-            
-            if (reason.includes('early') || reason.includes('morning') || reason.includes('snooze')) {
-                newSuggestions[item.habit.id] = "💡 Try moving this to the afternoon or evening instead.";
-            } else if (reason.includes('tired') || reason.includes('exhausted') || reason.includes('energy')) {
-                newSuggestions[item.habit.id] = "💡 Reduce the duration by half, or shift to when you have more energy.";
-            } else if (reason.includes('forgot') || reason.includes('remember')) {
-                newSuggestions[item.habit.id] = "💡 Link this to another habit you already do consistently.";
-            } else if (reason.includes('time') || reason.includes('busy') || reason.includes('work')) {
-                newSuggestions[item.habit.id] = "💡 Try doing this every other day instead of daily.";
-            } else if (reason.includes('hard') || reason.includes('difficult') || reason.includes('too much')) {
-                newSuggestions[item.habit.id] = "💡 Lower the difficulty - aim for something you can do even on bad days.";
-            } else {
-                newSuggestions[item.habit.id] = "💡 Consider adjusting the frequency or making it easier.";
-            }
-        });
-
+        const newSuggestions = generateSuggestions(analysis);
         setSuggestions(newSuggestions);
         setShowSuggestions(true);
     };
@@ -225,16 +259,19 @@ export default function InlineWeeklyReview({ habits, onAdjust, onShare }: Inline
                     {problems.map((item, idx) => (
                         <div key={idx} className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg space-y-3">
                             <p className="text-white text-sm">
-                                You missed <span className="font-bold">{item.habit.name}</span> ({item.completedDays}/{item.totalDays}). No judgment—what happened?
+                                You missed <span className="font-bold">{item.habit.name}</span> ({item.completedDays}/{item.totalDays}). {missedReasons[item.habit.id] ? 'You mentioned:' : 'No judgment—what happened?'}
                             </p>
                             <input
                                 type="text"
                                 placeholder="e.g., Too early, kept snoozing my alarm"
                                 value={missedReasons[item.habit.id] || ''}
-                                onChange={(e) => setMissedReasons(prev => ({
-                                    ...prev,
-                                    [item.habit.id]: e.target.value
-                                }))}
+                                onChange={(e) => {
+                                    setMissedReasons(prev => ({
+                                        ...prev,
+                                        [item.habit.id]: e.target.value
+                                    }));
+                                    setShowSuggestions(false);
+                                }}
                                 className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                             />
                             {showSuggestions && suggestions[item.habit.id] && (
