@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, MoreHorizontal, List, Calendar, LayoutDashboard } from 'lucide-react';
+import { Plus, MoreHorizontal, List, Calendar, LayoutDashboard, TrendingUp } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import DashboardOverview from './components/DashboardOverview';
 import Onboarding from './components/Onboarding';
+import WeeklyReview from './components/WeeklyReview';
 import { Habit } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
@@ -78,7 +79,7 @@ function App() {
     
     const [showDailyTrackingView, setShowDailyTrackingView] = useState(true);
 
-    const [currentScreen, setCurrentScreen] = useState<'habits' | 'dashboard'>('habits');
+    const [currentScreen, setCurrentScreen] = useState<'habits' | 'dashboard' | 'review'>('habits');
     
     const [weeklyRateMode, setWeeklyRateMode] = useState(loadRateMode);
     const [streakMode, setStreakMode] = useState(loadStreakMode);
@@ -175,8 +176,17 @@ function App() {
         setStreakMode(p => p === 'hard' ? 'easy' : 'hard');
     }, []);
 
+    const handleWeeklyReviewComplete = (adjustedHabits: Habit[]) => {
+        setHabits(adjustedHabits);
+        setCurrentScreen('habits');
+    };
+
     if (!onboardingComplete) {
         return <Onboarding onComplete={handleOnboardingComplete} />;
+    }
+
+    if (currentScreen === 'review') {
+        return <WeeklyReview habits={habits} onComplete={handleWeeklyReviewComplete} onClose={() => setCurrentScreen('habits')} />;
     }
 
     return (
@@ -199,8 +209,10 @@ function App() {
                     {/* BUTTON 3: Add New Habit */}
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
                     
-                    {/* BUTTON 4: More Options (Remains placeholder) */}
-                    <button className="p-2 rounded-full hover:bg-gray-700"><MoreHorizontal className="w-6 h-6" /></button>
+                    {/* BUTTON 4: Weekly Review */}
+                    <button onClick={() => setCurrentScreen('review')} className="p-2 rounded-full hover:bg-gray-700" title="Weekly Review">
+                        <TrendingUp className="w-6 h-6" />
+                    </button>
                 </div>
             </div>
             <div className="max-w-2xl mx-auto">

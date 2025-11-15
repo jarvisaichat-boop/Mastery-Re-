@@ -1,0 +1,128 @@
+import { useState } from 'react';
+import { Habit } from '../../types';
+
+interface AccountabilityCheckInProps {
+    habits: Habit[];
+    onComplete: () => void;
+    onSkip: () => void;
+}
+
+export default function AccountabilityCheckIn({ habits, onComplete, onSkip }: AccountabilityCheckInProps) {
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [shareUrl, setShareUrl] = useState<string | null>(null);
+
+    const generateCommitmentMessage = (): string => {
+        const activeHabits = habits.slice(0, 3);
+        const habitList = activeHabits.map(h => h.name).join(' and ');
+        
+        return `I'm committing to ${habitList} this week. I will update you on Sunday. Hold me to it.`;
+    };
+
+    const handleShareCommitment = () => {
+        setIsGenerating(true);
+        
+        setTimeout(() => {
+            const message = generateCommitmentMessage();
+            const encodedMessage = encodeURIComponent(message);
+            
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                const smsUrl = `sms:?&body=${encodedMessage}`;
+                setShareUrl(smsUrl);
+            } else {
+                const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+                setShareUrl(whatsappUrl);
+            }
+            
+            setIsGenerating(false);
+        }, 1000);
+    };
+
+    const handleOpenShare = () => {
+        if (shareUrl) {
+            window.open(shareUrl, '_blank');
+            setTimeout(() => {
+                onComplete();
+            }, 1000);
+        }
+    };
+
+    const handleCopyToClipboard = () => {
+        const message = generateCommitmentMessage();
+        navigator.clipboard.writeText(message);
+        alert('Commitment copied to clipboard! Share it with someone who will hold you accountable.');
+        onComplete();
+    };
+
+    return (
+        <div className="space-y-8 animate-fadeIn">
+            <div className="text-center space-y-4">
+                <div className="text-5xl mb-4">🤝</div>
+                <h2 className="text-3xl font-bold">Accountability Check-In</h2>
+                <p className="text-xl text-gray-400">Make it real. Share your commitment.</p>
+            </div>
+
+            <div className="p-6 bg-gray-800/50 rounded-lg border border-gray-700">
+                <p className="text-lg text-gray-300 mb-4">
+                    Your plan for next week is locked. Now, make it real.
+                </p>
+                <p className="text-gray-400">
+                    Share your commitment with a friend, family member, or accountability group. 
+                    Social pressure is the best motivation.
+                </p>
+            </div>
+
+            <div className="p-6 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <p className="text-sm text-gray-400 mb-3">Preview:</p>
+                <p className="text-white italic">"{generateCommitmentMessage()}"</p>
+            </div>
+
+            {!shareUrl ? (
+                <div className="space-y-4">
+                    <button
+                        onClick={handleShareCommitment}
+                        disabled={isGenerating}
+                        className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white font-bold text-lg rounded-lg transition-all transform hover:scale-105"
+                    >
+                        {isGenerating ? 'Generating...' : 'Share Commitment'}
+                    </button>
+                    
+                    <button
+                        onClick={onSkip}
+                        className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-all"
+                    >
+                        Skip (Not Recommended)
+                    </button>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    <button
+                        onClick={handleOpenShare}
+                        className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold text-lg rounded-lg transition-all transform hover:scale-105"
+                    >
+                        📱 Open Messaging App
+                    </button>
+                    
+                    <button
+                        onClick={handleCopyToClipboard}
+                        className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-all"
+                    >
+                        📋 Copy to Clipboard
+                    </button>
+                    
+                    <button
+                        onClick={onComplete}
+                        className="w-full py-3 text-gray-400 hover:text-white transition-all"
+                    >
+                        I've shared it →
+                    </button>
+                </div>
+            )}
+
+            <div className="text-center text-sm text-gray-500">
+                <p>Pro tip: Share with someone who won't let you off easy.</p>
+            </div>
+        </div>
+    );
+}
