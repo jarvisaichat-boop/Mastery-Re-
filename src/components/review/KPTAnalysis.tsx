@@ -19,6 +19,8 @@ interface HabitAnalysis {
 export default function KPTAnalysis({ habits, onNext, onSkip }: KPTAnalysisProps) {
     const [isAnalyzing, setIsAnalyzing] = useState(true);
     const [analysis, setAnalysis] = useState<HabitAnalysis[]>([]);
+    const [adjustedHabits, setAdjustedHabits] = useState<Habit[]>(habits);
+    const [habitsToRemove, setHabitsToRemove] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -71,11 +73,29 @@ export default function KPTAnalysis({ habits, onNext, onSkip }: KPTAnalysisProps
         return `You're making progress on "${item.habit.name}" (${item.completedDays}/${item.totalDays}). Keep going.`;
     };
 
-    const getSuggestion = (item: HabitAnalysis): string => {
-        if (item.status === 'problem') {
-            return `Let's adjust. Should we make this habit easier, change the time, or try a different approach?`;
-        }
-        return '';
+    const handleRemoveHabit = (habitId: number) => {
+        setHabitsToRemove(prev => new Set(prev).add(habitId));
+        setAdjustedHabits(prev => prev.filter(h => h.id !== habitId));
+    };
+
+    const handleKeepHabit = (habitId: number) => {
+        setHabitsToRemove(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(habitId);
+            return newSet;
+        });
+        setAdjustedHabits(prev => {
+            const existing = prev.find(h => h.id === habitId);
+            if (!existing) {
+                const original = habits.find(h => h.id === habitId);
+                if (original) return [...prev, original];
+            }
+            return prev;
+        });
+    };
+
+    const handleContinue = () => {
+        onNext(adjustedHabits);
     };
 
     if (isAnalyzing) {
@@ -134,12 +154,45 @@ export default function KPTAnalysis({ habits, onNext, onSkip }: KPTAnalysisProps
                         <h3 className="text-lg font-bold text-yellow-400 flex items-center gap-2">
                             <span>⚠️</span> PROBLEM - What Needs Attention
                         </h3>
-                        {problems.map((item, idx) => (
-                            <div key={idx} className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg space-y-3">
-                                <p className="text-white">{getKPTMessage(item)}</p>
-                                <p className="text-gray-400 text-sm italic">{getSuggestion(item)}</p>
-                            </div>
-                        ))}
+                        {problems.map((item, idx) => {
+                            const isRemoved = habitsToRemove.has(item.habit.id);
+                            return (
+                                <div key={idx} className={`p-4 border rounded-lg space-y-3 transition-all ${
+                                    isRemoved 
+                                        ? 'bg-red-500/10 border-red-500/30 opacity-50' 
+                                        : 'bg-yellow-500/10 border-yellow-500/30'
+                                }`}>
+                                    <p className="text-white">{getKPTMessage(item)}</p>
+                                    <p className="text-gray-400 text-sm italic">
+                                        Let's adjust. You can remove this habit or keep trying.
+                                    </p>
+                                    <div className="flex gap-3 mt-3">
+                                        {!isRemoved ? (
+                                            <>
+                                                <button
+                                                    onClick={() => handleRemoveHabit(item.habit.id)}
+                                                    className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-bold rounded transition-all"
+                                                >
+                                                    Remove Habit
+                                                </button>
+                                                <button
+                                                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded transition-all"
+                                                >
+                                                    Keep Trying
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleKeepHabit(item.habit.id)}
+                                                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-white text-sm font-bold rounded transition-all"
+                                            >
+                                                ↩ Undo Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
 
@@ -158,9 +211,22 @@ export default function KPTAnalysis({ habits, onNext, onSkip }: KPTAnalysisProps
                 )}
             </div>
 
+            {habitsToRemove.size > 0 && (
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                    <p className="text-white text-sm">
+                        ⚠️ You're removing {habitsToRemove.size} habit{habitsToRemove.size > 1 ? 's' : ''}. 
+                        Your plan will be lighter next week.
+                    </p>
+                </div>
+            )}
+
             <div className="p-6 bg-gray-800/50 rounded-lg border border-gray-700">
                 <p className="text-center text-gray-300">
-                    <span className="font-semibold text-white">Your plan is locked for next week.</span>
+                    <span className="font-semibold text-white">
+                        {adjustedHabits.length === habits.length 
+                            ? 'Your plan is locked for next week.' 
+                            : 'Your adjusted plan is ready.'}
+                    </span>
                     <br />
                     Now let's make it real with accountability.
                 </p>
@@ -174,7 +240,7 @@ export default function KPTAnalysis({ habits, onNext, onSkip }: KPTAnalysisProps
                     Skip Review
                 </button>
                 <button
-                    onClick={() => onNext(habits)}
+                    onClick={handleContinue}
                     className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-all"
                 >
                     Continue to Accountability

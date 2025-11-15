@@ -8,51 +8,35 @@ interface AccountabilityCheckInProps {
 }
 
 export default function AccountabilityCheckIn({ habits, onComplete, onSkip }: AccountabilityCheckInProps) {
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [shareUrl, setShareUrl] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
 
     const generateCommitmentMessage = (): string => {
         const activeHabits = habits.slice(0, 3);
-        const habitList = activeHabits.map(h => h.name).join(' and ');
+        const habitList = activeHabits.map(h => h.name).join(', ');
         
         return `I'm committing to ${habitList} this week. I will update you on Sunday. Hold me to it.`;
     };
 
-    const handleShareCommitment = () => {
-        setIsGenerating(true);
-        
-        setTimeout(() => {
-            const message = generateCommitmentMessage();
-            const encodedMessage = encodeURIComponent(message);
-            
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            
-            if (isMobile) {
-                const smsUrl = `sms:?&body=${encodedMessage}`;
-                setShareUrl(smsUrl);
-            } else {
-                const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-                setShareUrl(whatsappUrl);
-            }
-            
-            setIsGenerating(false);
-        }, 1000);
+    const handleWhatsApp = () => {
+        const message = generateCommitmentMessage();
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+        window.open(whatsappUrl, '_blank');
     };
 
-    const handleOpenShare = () => {
-        if (shareUrl) {
-            window.open(shareUrl, '_blank');
-            setTimeout(() => {
-                onComplete();
-            }, 1000);
-        }
+    const handleSMS = () => {
+        const message = generateCommitmentMessage();
+        const encodedMessage = encodeURIComponent(message);
+        const smsUrl = `sms:?&body=${encodedMessage}`;
+        window.location.href = smsUrl;
     };
 
     const handleCopyToClipboard = () => {
         const message = generateCommitmentMessage();
-        navigator.clipboard.writeText(message);
-        alert('Commitment copied to clipboard! Share it with someone who will hold you accountable.');
-        onComplete();
+        navigator.clipboard.writeText(message).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
     };
 
     return (
@@ -74,51 +58,53 @@ export default function AccountabilityCheckIn({ habits, onComplete, onSkip }: Ac
             </div>
 
             <div className="p-6 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                <p className="text-sm text-gray-400 mb-3">Preview:</p>
+                <p className="text-sm text-gray-400 mb-3">Your commitment message:</p>
                 <p className="text-white italic">"{generateCommitmentMessage()}"</p>
             </div>
 
-            {!shareUrl ? (
-                <div className="space-y-4">
-                    <button
-                        onClick={handleShareCommitment}
-                        disabled={isGenerating}
-                        className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white font-bold text-lg rounded-lg transition-all transform hover:scale-105"
-                    >
-                        {isGenerating ? 'Generating...' : 'Share Commitment'}
-                    </button>
-                    
-                    <button
-                        onClick={onSkip}
-                        className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-all"
-                    >
-                        Skip (Not Recommended)
-                    </button>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    <button
-                        onClick={handleOpenShare}
-                        className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold text-lg rounded-lg transition-all transform hover:scale-105"
-                    >
-                        📱 Open Messaging App
-                    </button>
-                    
-                    <button
-                        onClick={handleCopyToClipboard}
-                        className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-all"
-                    >
-                        📋 Copy to Clipboard
-                    </button>
-                    
-                    <button
-                        onClick={onComplete}
-                        className="w-full py-3 text-gray-400 hover:text-white transition-all"
-                    >
-                        I've shared it →
-                    </button>
-                </div>
-            )}
+            <div className="space-y-3">
+                <p className="text-center text-sm text-gray-400 font-semibold">Choose how to share:</p>
+                
+                <button
+                    onClick={handleWhatsApp}
+                    className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold text-lg rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-3"
+                >
+                    <span className="text-2xl">💬</span>
+                    Share via WhatsApp
+                </button>
+                
+                <button
+                    onClick={handleSMS}
+                    className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-3"
+                >
+                    <span className="text-2xl">📱</span>
+                    Share via SMS/iMessage
+                </button>
+                
+                <button
+                    onClick={handleCopyToClipboard}
+                    className={`w-full py-4 ${copied ? 'bg-green-600' : 'bg-gray-700'} hover:bg-gray-600 text-white font-bold text-lg rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-3`}
+                >
+                    <span className="text-2xl">{copied ? '✅' : '📋'}</span>
+                    {copied ? 'Copied!' : 'Copy to Clipboard'}
+                </button>
+            </div>
+
+            <div className="flex flex-col gap-3 mt-6">
+                <button
+                    onClick={onComplete}
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-all"
+                >
+                    I've Shared It →
+                </button>
+                
+                <button
+                    onClick={onSkip}
+                    className="w-full py-2 text-gray-400 hover:text-white transition-all text-sm"
+                >
+                    Skip (Not Recommended)
+                </button>
+            </div>
 
             <div className="text-center text-sm text-gray-500">
                 <p>Pro tip: Share with someone who won't let you off easy.</p>
