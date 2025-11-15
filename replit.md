@@ -41,6 +41,15 @@ This project is configured to run in the Replit environment:
 The workflow is automatically configured. The app starts via `npm run dev` and is accessible through the Replit webview.
 
 ## Recent Changes
+- **2025-11-15**: Added complete onboarding flow (Phases 1-3 from PRD)
+  - **Phase 1 - The Intake**: Welcome screen, AI Interview (distractions + aspirations), AI Reflection
+  - **Phase 2 - Goal Contract**: User inputs ONE goal, AI validates alignment with aspirations, digital commitment
+  - **Phase 3 - Weekly Plan**: AI generates 2-3 context-aware habits based on goal, user accepts
+  - **Validation Logic**: Word-boundary keyword matching across 4 domains (business, fitness, learning, creative)
+  - **Smart Transitions**: First-time users see onboarding, returning users go straight to dashboard
+  - **Data Flow**: Onboarding creates initial habits and saves to localStorage
+  - **Simulated AI**: Keyword-based validation and habit generation (real AI integration ready for future)
+
 - **2025-11-15**: Fixed calendar navigation flow
   - **Fixed View Cycling**: Restored correct behavior when clicking month/year header
   - **Correct Flow**: Week → Month → Year → Week (click date to return)
