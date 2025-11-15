@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Plus, MoreHorizontal, List, Calendar, LayoutDashboard } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import DashboardOverview from './components/DashboardOverview';
+import Onboarding from './components/Onboarding';
 import { Habit } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
@@ -9,6 +10,7 @@ import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './com
 const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
 const LOCAL_STORAGE_RATE_MODE_KEY = 'mastery-dashboard-rate-mode-v1';
 const LOCAL_STORAGE_STREAK_MODE_KEY = 'mastery-dashboard-streak-mode-v1';
+const LOCAL_STORAGE_ONBOARDING_KEY = 'mastery-dashboard-onboarding-complete';
 
 function loadRateMode(): 'basic' | 'hard' {
   try {
@@ -58,15 +60,19 @@ function loadHabitsFromStorage(): Habit[] {
     }
   } catch (e) { console.error("Failed to load habits", e); }
   
-  const jan25 = new Date('2025-01-25').getTime();
-  return [
-    { id: 1, name: 'Non-Negotiable: Open App', description: 'Simple habit to build consistency', color: 'blue', type: 'Anchor Habit', categories: [{ main: 'Mental', sub: 'Personal Development' }], frequencyType: 'Everyday', selectedDays: [], timesPerPeriod: 1, periodUnit: 'Week', repeatDays: 1, order: 0, completed: { "2025-01-25": true, "2025-01-26": true, "2025-01-27": true, "2025-01-28": true }, createdAt: jan25 },
-    { id: 2, name: 'Life-Improving: Jog in the morning', description: 'Morning exercise for better health', color: 'green', type: 'Life Goal Habit', categories: [{ main: 'Physical', sub: 'Exercise' }], frequencyType: 'Everyday', selectedDays: [], timesPerPeriod: 1, periodUnit: 'Week', repeatDays: 1, order: 1, completed: { "2025-01-25": true, "2025-01-26": false }, createdAt: jan25 },
-    { id: 3, name: 'Skill-Building: Code for 30 minutes', description: 'Daily coding practice for skill development', color: 'purple', type: 'Habit', categories: [{ main: 'Work', sub: 'Skill Development' }], frequencyType: 'Everyday', selectedDays: [], timesPerPeriod: 1, periodUnit: 'Week', repeatDays: 1, order: 2, completed: {}, createdAt: Date.now() },
-  ];
+  return [];
+}
+
+function isOnboardingComplete(): boolean {
+  try {
+    return localStorage.getItem(LOCAL_STORAGE_ONBOARDING_KEY) === 'true';
+  } catch (e) {
+    return false;
+  }
 }
 
 function App() {
+    const [onboardingComplete, setOnboardingComplete] = useState(isOnboardingComplete);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
     
@@ -81,6 +87,20 @@ function App() {
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
     const [selectedHabitToEdit, setSelectedHabitToEdit] = useState<Habit | null>(null);
     const [draggedHabitId, setDraggedHabitId] = useState<number | null>(null);
+
+    const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[]) => {
+        const now = Date.now();
+        const habitsWithIds = newHabits.map((h, index) => ({
+            ...h,
+            id: now + index,
+            createdAt: now,
+            order: index,
+        }));
+        
+        setHabits(habitsWithIds);
+        setOnboardingComplete(true);
+        localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
+    };
 
     useEffect(() => {
         try { 
@@ -154,6 +174,10 @@ function App() {
     const handleToggleStreakMode = useCallback(() => {
         setStreakMode(p => p === 'hard' ? 'easy' : 'hard');
     }, []);
+
+    if (!onboardingComplete) {
+        return <Onboarding onComplete={handleOnboardingComplete} />;
+    }
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
