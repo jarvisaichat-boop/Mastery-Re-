@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, TrendingUp } from 'lucide-react';
+import { Plus, List, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import Onboarding from './components/Onboarding';
 import AICoachWidget from './components/AICoachWidget';
 import StreakCelebration from './components/StreakCelebration';
-import DailySummary from './components/DailySummary';
+import ChatDailyCheckIn from './components/ChatDailyCheckIn';
 import InlineWeeklyReview from './components/InlineWeeklyReview';
+import StatsOverview from './components/StatsOverview';
 import { Habit } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
@@ -17,6 +18,9 @@ const LOCAL_STORAGE_ONBOARDING_KEY = 'mastery-dashboard-onboarding-complete';
 const LOCAL_STORAGE_CELEBRATED_STREAKS_KEY = 'mastery-dashboard-celebrated-streaks';
 const LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY = 'mastery-dashboard-last-daily-summary';
 const LOCAL_STORAGE_DAILY_REASONS_KEY = 'mastery-dashboard-daily-reasons';
+const LOCAL_STORAGE_GOAL_KEY = 'mastery-dashboard-goal';
+const LOCAL_STORAGE_ASPIRATIONS_KEY = 'mastery-dashboard-aspirations';
+const LOCAL_STORAGE_CHAT_ENTRIES_KEY = 'mastery-dashboard-chat-entries';
 
 function loadRateMode(): 'basic' | 'hard' {
   try {
@@ -83,11 +87,14 @@ function App() {
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
     
     const [showDailyTrackingView, setShowDailyTrackingView] = useState(true);
+    const [showStatsView, setShowStatsView] = useState(false);
     
     const [weeklyRateMode, setWeeklyRateMode] = useState(loadRateMode);
     const [streakMode, setStreakMode] = useState(loadStreakMode);
 
     const [habits, setHabits] = useState<Habit[]>(loadHabitsFromStorage);
+    const [goal, setGoal] = useState(() => localStorage.getItem(LOCAL_STORAGE_GOAL_KEY) || 'Set your #1 priority');
+    const [aspirations, setAspirations] = useState(() => localStorage.getItem(LOCAL_STORAGE_ASPIRATIONS_KEY) || '');
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
     const [selectedHabitToEdit, setSelectedHabitToEdit] = useState<Habit | null>(null);
     const [draggedHabitId, setDraggedHabitId] = useState<number | null>(null);
@@ -96,7 +103,7 @@ function App() {
     const [aiCoachMessage, setAiCoachMessage] = useState('');
     const [showAiCoach, setShowAiCoach] = useState(false);
     const [streakCelebration, setStreakCelebration] = useState<{ habitName: string; days: number } | null>(null);
-    const [showDailySummary, setShowDailySummary] = useState(false);
+    const [showChatCheckIn, setShowChatCheckIn] = useState(false);
     const [celebratedStreaks, setCelebratedStreaks] = useState<Set<string>>(() => {
         try {
             const stored = localStorage.getItem(LOCAL_STORAGE_CELEBRATED_STREAKS_KEY);
@@ -109,8 +116,14 @@ function App() {
             return stored ? JSON.parse(stored) : {};
         } catch { return {}; }
     });
+    const [chatEntries, setChatEntries] = useState<Record<string, any>>(() => {
+        try {
+            const stored = localStorage.getItem(LOCAL_STORAGE_CHAT_ENTRIES_KEY);
+            return stored ? JSON.parse(stored) : {};
+        } catch { return {}; }
+    });
 
-    const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[]) => {
+    const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string) => {
         const now = Date.now();
         const habitsWithIds = newHabits.map((h, index) => ({
             ...h,
@@ -120,8 +133,12 @@ function App() {
         }));
         
         setHabits(habitsWithIds);
+        setGoal(userGoal);
+        setAspirations(userAspirations);
         setOnboardingComplete(true);
         localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
+        localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, userGoal);
+        localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, userAspirations);
     };
 
     useEffect(() => {
@@ -129,34 +146,34 @@ function App() {
             localStorage.setItem(LOCAL_STORAGE_HABITS_KEY, JSON.stringify(habits)); 
             localStorage.setItem(LOCAL_STORAGE_RATE_MODE_KEY, weeklyRateMode);
             localStorage.setItem(LOCAL_STORAGE_STREAK_MODE_KEY, streakMode);
+            localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, goal);
+            localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, aspirations);
         }
         catch (e) { console.error("Failed to save habits", e); }
-    }, [habits, weeklyRateMode, streakMode]);
+    }, [habits, weeklyRateMode, streakMode, goal, aspirations]);
 
     useEffect(() => {
         try {
             localStorage.setItem(LOCAL_STORAGE_CELEBRATED_STREAKS_KEY, JSON.stringify(Array.from(celebratedStreaks)));
             localStorage.setItem(LOCAL_STORAGE_DAILY_REASONS_KEY, JSON.stringify(dailyReasons));
+            localStorage.setItem(LOCAL_STORAGE_CHAT_ENTRIES_KEY, JSON.stringify(chatEntries));
         } catch (e) { console.error("Failed to save motivation data", e); }
-    }, [celebratedStreaks, dailyReasons]);
+    }, [celebratedStreaks, dailyReasons, chatEntries]);
 
     useEffect(() => {
-        const checkDailySummary = () => {
+        const checkChatCheckIn = () => {
             const today = formatDate(new Date(), 'yyyy-MM-dd');
-            const lastSummary = localStorage.getItem(LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY);
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayString = formatDate(yesterday, 'yyyy-MM-dd');
+            const lastCheckIn = localStorage.getItem(LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY);
             
-            if (lastSummary !== today && habits.length > 0) {
+            if (lastCheckIn !== today && habits.length > 0) {
                 const now = new Date().getHours();
-                if (now >= 21 || lastSummary === yesterdayString) {
-                    setShowDailySummary(true);
+                if (now >= 6) {
+                    setShowChatCheckIn(true);
                 }
             }
         };
         
-        const timer = setTimeout(checkDailySummary, 2000);
+        const timer = setTimeout(checkChatCheckIn, 2000);
         return () => clearTimeout(timer);
     }, [habits]);
 
@@ -234,11 +251,11 @@ function App() {
         });
     }, [celebratedStreaks]);
 
-    const handleDailySummarySubmit = (reasons: Record<number, string>) => {
+    const handleChatCheckInSubmit = (entry: { wins: string; challenges: string; messages: any[] }) => {
         const today = formatDate(new Date(), 'yyyy-MM-dd');
-        setDailyReasons(prev => ({ ...prev, [today]: reasons }));
+        setChatEntries(prev => ({ ...prev, [today]: entry }));
         localStorage.setItem(LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY, today);
-        setShowDailySummary(false);
+        setShowChatCheckIn(false);
     };
 
     const handleDragStart = (e: React.DragEvent, habitId: number) => { setDraggedHabitId(habitId); e.dataTransfer.effectAllowed = 'move'; };
@@ -293,22 +310,40 @@ function App() {
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
                 <div className="flex items-center space-x-2">
-                    {/* BUTTON 1: Detailed/Simple List View Toggle */}
-                    <button onClick={() => setShowDailyTrackingView(p => !p)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">
-                        {showDailyTrackingView ? <List className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
+                    {/* BUTTON 1: Stats View Toggle */}
+                    <button 
+                        onClick={() => {
+                            setShowStatsView(p => !p);
+                            if (!showStatsView) {
+                                setShowWeeklyReview(false);
+                            }
+                        }} 
+                        className={`p-2 rounded-lg hover:bg-gray-700 ${showStatsView ? 'text-blue-400' : 'text-gray-400'}`}
+                        title="Stats Dashboard"
+                    >
+                        <BarChart3 className="w-5 h-5" />
                     </button>
                     
-                    {/* BUTTON 2: Add New Habit */}
+                    {/* BUTTON 2: Detailed/Simple List View Toggle */}
+                    {!showStatsView && (
+                        <button onClick={() => setShowDailyTrackingView(p => !p)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">
+                            {showDailyTrackingView ? <List className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
+                        </button>
+                    )}
+                    
+                    {/* BUTTON 3: Add New Habit */}
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
                     
-                    {/* BUTTON 3: Toggle Weekly Review */}
-                    <button 
-                        onClick={() => setShowWeeklyReview(p => !p)} 
-                        className={`p-2 rounded-full hover:bg-gray-700 ${showWeeklyReview ? 'text-blue-400' : 'text-gray-400'}`}
-                        title="Weekly Review"
-                    >
-                        <TrendingUp className="w-6 h-6" />
-                    </button>
+                    {/* BUTTON 4: Toggle Weekly Review */}
+                    {!showStatsView && (
+                        <button 
+                            onClick={() => setShowWeeklyReview(p => !p)} 
+                            className={`p-2 rounded-full hover:bg-gray-700 ${showWeeklyReview ? 'text-blue-400' : 'text-gray-400'}`}
+                            title="Weekly Review"
+                        >
+                            <TrendingUp className="w-6 h-6" />
+                        </button>
+                    )}
                 </div>
             </div>
             <div className="max-w-2xl mx-auto">
@@ -317,8 +352,20 @@ function App() {
                     <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
                 </div>
 
+                {/* STATS OVERVIEW */}
+                {showStatsView && (
+                    <StatsOverview 
+                        dashboardData={dashboardData}
+                        onToggleRateMode={handleToggleRateMode}
+                        onToggleStreakMode={handleToggleStreakMode}
+                        goal={goal}
+                        onGoalUpdate={setGoal}
+                        habits={habits}
+                    />
+                )}
+
                 {/* INLINE WEEKLY REVIEW */}
-                {showWeeklyReview && (
+                {!showStatsView && showWeeklyReview && (
                     <InlineWeeklyReview 
                         habits={habits}
                         dailyReasons={dailyReasons}
@@ -328,15 +375,15 @@ function App() {
                 )}
 
                 {/* Calendar Header shown for all calendar views (week/month/year) when showDailyTrackingView is true */}
-                {showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick}/>}
-                {viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
+                {!showStatsView && showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick}/>}
+                {!showStatsView && viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
                 
                 {/* Month and Year Views are shown when showDailyTrackingView is true (calendar mode) */}
-                {viewMode === 'month' && showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
-                {viewMode === 'year' && showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
+                {!showStatsView && viewMode === 'month' && showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
+                {!showStatsView && viewMode === 'year' && showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
 
                 {/* Habit rows only show in week view (calendar mode) or simple list mode */}
-                {(viewMode === 'week' || !showDailyTrackingView) && (
+                {!showStatsView && (viewMode === 'week' || !showDailyTrackingView) && (
                     <div className="space-y-2">
                         {sortedHabits.map(habit => (
                             <HabitRow 
@@ -372,13 +419,12 @@ function App() {
                 />
             )}
             
-            {showDailySummary && (
-                <DailySummary 
-                    habits={habits}
+            {showChatCheckIn && (
+                <ChatDailyCheckIn 
                     date={new Date()}
-                    onSubmit={handleDailySummarySubmit}
+                    onSubmit={handleChatCheckInSubmit}
                     onDismiss={() => {
-                        setShowDailySummary(false);
+                        setShowChatCheckIn(false);
                         localStorage.setItem(LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY, formatDate(new Date(), 'yyyy-MM-dd'));
                     }}
                 />

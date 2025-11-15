@@ -14,7 +14,7 @@ interface HabitAnalysis {
     completionRate: number;
     completedDays: number;
     totalDays: number;
-    status: 'keep' | 'problem' | 'neutral';
+    status: 'keep' | 'challenged' | 'progress';
 }
 
 export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onShare }: InlineWeeklyReviewProps) {
@@ -45,7 +45,7 @@ export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onS
     const generateSuggestions = (analysisData: HabitAnalysis[]): Record<number, string> => {
         const newSuggestions: Record<number, string> = {};
 
-        analysisData.filter(a => a.status === 'problem').forEach(item => {
+        analysisData.filter(a => a.status === 'challenged').forEach(item => {
             const reason = missedReasons[item.habit.id]?.toLowerCase() || '';
             
             if (reason.includes('early') || reason.includes('morning') || reason.includes('snooze')) {
@@ -85,9 +85,9 @@ export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onS
 
                 const completionRate = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
 
-                let status: 'keep' | 'problem' | 'neutral' = 'neutral';
+                let status: 'keep' | 'challenged' | 'progress' = 'progress';
                 if (completionRate >= 80) status = 'keep';
-                else if (completionRate < 50) status = 'problem';
+                else if (completionRate < 50) status = 'challenged';
 
                 return {
                     habit,
@@ -108,10 +108,10 @@ export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onS
     useEffect(() => {
         if (analysis.length === 0 || isAnalyzing) return;
         
-        const problemHabits = analysis.filter(a => a.status === 'problem');
-        const hasAllReasons = problemHabits.every(p => missedReasons[p.habit.id]);
+        const challengedHabits = analysis.filter(a => a.status === 'challenged');
+        const hasAllReasons = challengedHabits.every(p => missedReasons[p.habit.id]);
         
-        if (hasAllReasons && problemHabits.length > 0) {
+        if (hasAllReasons && challengedHabits.length > 0) {
             const autoSuggestions = generateSuggestions(analysis);
             setSuggestions(autoSuggestions);
             setShowSuggestions(true);
@@ -175,8 +175,8 @@ export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onS
     }
 
     const keeps = analysis.filter(a => a.status === 'keep');
-    const problems = analysis.filter(a => a.status === 'problem');
-    const neutrals = analysis.filter(a => a.status === 'neutral');
+    const challenged = analysis.filter(a => a.status === 'challenged');
+    const progressing = analysis.filter(a => a.status === 'progress');
 
     if (showAccountability) {
         return (
@@ -230,8 +230,8 @@ export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onS
         <div className="bg-gray-800/50 rounded-lg border border-gray-700 p-6 mb-6 space-y-6">
             <div className="text-center">
                 <div className="text-4xl mb-3">📊</div>
-                <h3 className="text-2xl font-bold mb-2">Weekly Review</h3>
-                <p className="text-gray-400">Keep, Problem, Try</p>
+                <h3 className="text-2xl font-bold mb-2">Weekly Progress</h3>
+                <p className="text-gray-400">Wins, Challenges, Growth</p>
             </div>
 
             {/* KEEP */}
@@ -250,13 +250,13 @@ export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onS
                 </div>
             )}
 
-            {/* PROBLEM */}
-            {problems.length > 0 && (
+            {/* CHALLENGED */}
+            {challenged.length > 0 && (
                 <div className="space-y-3">
                     <h4 className="text-yellow-400 font-bold flex items-center gap-2">
-                        <span>⚠️</span> PROBLEM - What Needs Attention
+                        <span>💪</span> CHALLENGED - What Needs Attention
                     </h4>
-                    {problems.map((item, idx) => (
+                    {challenged.map((item, idx) => (
                         <div key={idx} className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg space-y-3">
                             <p className="text-white text-sm">
                                 You missed <span className="font-bold">{item.habit.name}</span> ({item.completedDays}/{item.totalDays}). {missedReasons[item.habit.id] ? 'You mentioned:' : 'No judgment—what happened?'}
@@ -284,13 +284,13 @@ export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onS
                 </div>
             )}
 
-            {/* NEUTRAL */}
-            {neutrals.length > 0 && (
+            {/* PROGRESS */}
+            {progressing.length > 0 && (
                 <div className="space-y-3">
                     <h4 className="text-blue-400 font-bold flex items-center gap-2">
                         <span>📈</span> PROGRESS - Keep Building
                     </h4>
-                    {neutrals.map((item, idx) => (
+                    {progressing.map((item, idx) => (
                         <div key={idx} className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                             <p className="text-white text-sm">
                                 You're making progress on <span className="font-bold">{item.habit.name}</span> ({item.completedDays}/{item.totalDays})
@@ -300,10 +300,10 @@ export default function InlineWeeklyReview({ habits, dailyReasons, onAdjust, onS
                 </div>
             )}
 
-            {!showSuggestions && problems.length > 0 && (
+            {!showSuggestions && challenged.length > 0 && (
                 <button
                     onClick={handleAnalyzeReasons}
-                    disabled={problems.some(p => !missedReasons[p.habit.id])}
+                    disabled={challenged.some(p => !missedReasons[p.habit.id])}
                     className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all"
                 >
                     Get AI Suggestions

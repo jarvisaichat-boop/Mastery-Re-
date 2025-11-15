@@ -19,7 +19,7 @@ interface OnboardingData {
 }
 
 interface OnboardingProps {
-    onComplete: (habits: Omit<Habit, 'id' | 'createdAt'>[]) => void;
+    onComplete: (habits: Omit<Habit, 'id' | 'createdAt'>[], goal: string, aspirations: string) => void;
 }
 
 export default function Onboarding({ onComplete }: OnboardingProps) {
@@ -65,7 +65,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
             order: 0,
         }));
         
-        onComplete(habits);
+        onComplete(habits, data.goal, data.aspirations);
     };
 
     const renderStep = () => {
