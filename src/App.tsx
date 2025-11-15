@@ -196,24 +196,26 @@ function App() {
                         {viewMode === 'month' && showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
                         {viewMode === 'year' && showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
 
-                        {/* Habit rows are always visible on the 'habits' screen */}
-                        <div className="space-y-2">
-                            {sortedHabits.map(habit => (
-                                <HabitRow 
-                                    key={habit.id} 
-                                    habit={habit} 
-                                    weekDates={weekDates} 
-                                    onToggle={handleToggleHabit} 
-                                    onEditHabit={handleEditHabit} 
-                                    // showCircles is based on the new toggle state AND if we are in the week view
-                                    showCircles={viewMode === 'week' && showDailyTrackingView} 
-                                    onDragStart={handleDragStart} 
-                                    onDragOver={handleDragOver} 
-                                    onDrop={handleDrop} 
-                                    isDragging={draggedHabitId === habit.id}
-                                />
-                            ))}
-                        </div>
+                        {/* Habit rows only show in week view (calendar mode) or simple list mode */}
+                        {(viewMode === 'week' || !showDailyTrackingView) && (
+                            <div className="space-y-2">
+                                {sortedHabits.map(habit => (
+                                    <HabitRow 
+                                        key={habit.id} 
+                                        habit={habit} 
+                                        weekDates={weekDates} 
+                                        onToggle={handleToggleHabit} 
+                                        onEditHabit={handleEditHabit} 
+                                        // showCircles is based on the new toggle state AND if we are in the week view
+                                        showCircles={viewMode === 'week' && showDailyTrackingView} 
+                                        onDragStart={handleDragStart} 
+                                        onDragOver={handleDragOver} 
+                                        onDrop={handleDrop} 
+                                        isDragging={draggedHabitId === habit.id}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </>
                 ) : (
                     // Dashboard View - Pass data AND the toggle functions
