@@ -41,6 +41,12 @@ This project is configured to run in the Replit environment:
 The workflow is automatically configured. The app starts via `npm run dev` and is accessible through the Replit webview.
 
 ## Recent Changes
+- **2025-11-15**: Fixed calendar navigation flow
+  - **Fixed View Cycling**: Restored correct behavior when clicking month/year header
+  - **Correct Flow**: Week → Month → Year → Week (click date to return)
+  - **Separated Modes**: Calendar views (with dates) vs Simple list (habit names + streaks)
+  - **List Toggle**: List icon properly toggles between detailed and simple views
+
 - **2025-11-15**: Critical performance bug fixes and architecture improvements
   - **Fixed Major Bug**: Resolved 20,000+ iteration performance issue caused by using `habit.id` as creation timestamp
   - **Added `createdAt` field**: Habits now have explicit creation timestamps separate from their IDs

@@ -173,7 +173,7 @@ export const HabitRow: React.FC<{
         let streak = 0;
         let currentDay = new Date();
         currentDay.setHours(0, 0, 0, 0);
-        const habitCreationDate = new Date(habit.id);
+        const habitCreationDate = new Date(habit.createdAt);
         habitCreationDate.setHours(0, 0, 0, 0);
 
         for (let i = 0; i < 365 && currentDay >= habitCreationDate; i++) {

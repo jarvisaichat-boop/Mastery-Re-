@@ -188,13 +188,13 @@ function App() {
                 {/* CONDITIONAL RENDERING OF VIEWS */}
                 {currentScreen === 'habits' ? (
                     <>
-                        {/* Calendar Header and Week Header are ONLY shown if showDailyTrackingView is true */}
+                        {/* Calendar Header shown for all calendar views (week/month/year) when showDailyTrackingView is true */}
                         {showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick}/>}
                         {viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
                         
-                        {/* Month and Year Views are only shown if showDailyTrackingView is false and viewMode is month/year */}
-                        {viewMode === 'month' && !showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
-                        {viewMode === 'year' && !showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
+                        {/* Month and Year Views are shown when showDailyTrackingView is true (calendar mode) */}
+                        {viewMode === 'month' && showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
+                        {viewMode === 'year' && showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
 
                         {/* Habit rows are always visible on the 'habits' screen */}
                         <div className="space-y-2">
