@@ -17,10 +17,12 @@
     - `AddHabitModal.tsx` - Modal for adding/editing habits
     - `DashboardComponents.tsx` - Calendar, habit rows, and view components
     - `Onboarding.tsx` - Main onboarding orchestrator
-    - `InlineWeeklyReview.tsx` - Embedded weekly review with KPT analysis and AI suggestions
+    - `InlineWeeklyReview.tsx` - Embedded weekly progress review with positive language (Keep/Challenged/Progress)
     - `AICoachWidget.tsx` - Floating toast for real-time habit completion reactions
     - `StreakCelebration.tsx` - Full-screen celebration modal for streak milestones
-    - `DailySummary.tsx` - End-of-day check-in for collecting missed habit reasons
+    - `ChatDailyCheckIn.tsx` - Conversational AI daily check-in with free-form text chat interface
+    - `StatsOverview.tsx` - Comprehensive stats dashboard with completion rates, trends, and editable goal
+    - `DailySummary.tsx` - Legacy component (replaced by ChatDailyCheckIn)
   - `App.tsx` - Main application component
   - `types.ts` - TypeScript type definitions
   - `utils.ts` - Utility functions
@@ -33,24 +35,28 @@
 1. **Phase 1 - The Intake**: Welcome screen, AI interview (distractions + aspirations), Stoic Coach reflection
 2. **Phase 2 - Goal Contract**: User inputs ONE goal, AI validates alignment (130+ keywords across 4 domains), digital commitment
 3. **Phase 3 - Weekly Plan**: AI generates 2-3 context-aware habits based on validated goal
-4. **Phase 4 - The "Do" Week**: Main dashboard with habit tracking, streak monitoring, visual heatmaps
-5. **Phase 5 - Weekly Review**: KPT analysis (Keep, Problem, Try) based on 7-day performance data
+4. **Phase 4 - The "Do" Week**: Main dashboard with habit tracking, daily chat check-ins, stats overview, streak monitoring
+5. **Phase 5 - Weekly Progress**: Positive language review (Keep, Challenged, Progress) based on 7-day performance
 6. **Phase 6 - Accountability**: Share commitment feature (WhatsApp/iMessage/SMS) with social pressure
 7. **Phase 7 - The Loop**: Cycle back to Phase 4 with optimized plan for next week
 
 ### Motivation & Tracking Features
 - **Habit Tracking**: Track daily, weekly, and custom frequency habits
 - **Multiple View Modes**: Week, month, and year calendar views
+- **Stats Dashboard**: Comprehensive weekly analysis with completion rates, best/worst days, streak breakdowns, and heatmaps
+- **Editable Goal**: User can update their life goal as priorities change
 - **Drag & Drop**: Reorder habits by priority
 - **Habit Categories**: Anchor Habits, Life Goal Habits, and regular Habits
 - **Streak Tracking**: Easy and hard mode streak calculations
 - **AI Coach Reactions**: Real-time encouraging messages when habits are checked off
 - **Streak Celebrations**: Full-screen confetti modals for 3/7/14/30-day milestones
-- **Daily Summary**: End-of-day check-in that collects reasons for missed habits
-- **Inline Weekly Review**: KPT analysis with AI-generated suggestions based on user-provided reasons
-- **Auto-Suggestions**: AI automatically analyzes missed habit reasons and suggests adjustments
+- **Conversational Daily Check-In**: Chat-style interface where users freely type about wins and challenges
+- **Interactive AI Chat**: Ask follow-up questions and receive super positive Stoic coach responses
+- **Inline Weekly Progress**: Positive language review (Keep/Challenged/Progress) with AI suggestions
+- **Auto-Suggestions**: AI analyzes reasons and suggests timing, frequency, or difficulty adjustments
 - **Accountability Sharing**: One-click sharing to WhatsApp, SMS, or copy to clipboard
-- **Data Persistence**: All data saved to localStorage including reasons, celebrated streaks, and daily summaries
+- **Push Notification Templates**: Designed intriguing messages for future 2-3 day notification cadence
+- **Data Persistence**: All data saved to localStorage including chat entries, goal, celebrated streaks, and reasons
 
 ## Development Setup
 This project is configured to run in the Replit environment:
@@ -62,6 +68,19 @@ This project is configured to run in the Replit environment:
 The workflow is automatically configured. The app starts via `npm run dev` and is accessible through the Replit webview.
 
 ## Recent Changes
+- **2025-11-15**: Conversational AI and stats dashboard enhancement
+  - **StatsOverview Component**: Comprehensive stats dashboard showing weekly completion rates, best/worst performance days, streak breakdowns by category, visual heatmaps, and habit category analysis
+  - **Editable Goal**: Prominent goal display with edit functionality - users can adjust their goal as life priorities change
+  - **ChatDailyCheckIn**: Conversational AI check-in replacing form-based DailySummary - users chat freely about wins/challenges
+  - **Interactive Chat Flow**: Sequential wins-then-challenges data collection with follow-up question capability ("what can I do better?")
+  - **Super Positive AI Responses**: Stoic coach tone with celebration for wins, supportive encouragement for challenges
+  - **Positive Language Updates**: Replaced all "PROBLEM" terminology with "CHALLENGED" and "PROGRESS" throughout app
+  - **Weekly Progress Reframe**: "Weekly Review" → "Weekly Progress" with "Wins, Challenges, Growth" framing
+  - **Navigation Enhancement**: BarChart3 icon toggles stats dashboard view, TrendingUp icon toggles weekly progress
+  - **Push Notification Design**: Created comprehensive templates for future 2-3 day notification system (see NOTIFICATION_TEMPLATES.md)
+  - **localStorage Schema**: Added chatEntries storage, goal/aspirations persistence, and notification preferences structure
+  - **Motivational Philosophy**: Emphasis on celebrating every win, making it addictive, softer approach to challenges
+
 - **2025-11-15**: Major refactor - Active AI Coach motivation system
   - **Removed Redundant Screens**: Eliminated standalone WeeklyReview page and DashboardOverview screen for cleaner UX
   - **Inline Weekly Review**: Embedded KPT analysis directly in main dashboard, toggleable via TrendingUp icon
