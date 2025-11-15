@@ -13,9 +13,14 @@
 ## Project Structure
 - `src/` - Main source code directory
   - `components/` - React components
+    - `onboarding/` - Onboarding flow sub-components (Welcome, AI Interview, Reflection, Goal Contract, Weekly Plan)
     - `AddHabitModal.tsx` - Modal for adding/editing habits
-    - `DashboardComponents.tsx` - UI components for the dashboard
-    - `DashboardOverview.tsx` - Main dashboard view
+    - `DashboardComponents.tsx` - Calendar, habit rows, and view components
+    - `Onboarding.tsx` - Main onboarding orchestrator
+    - `InlineWeeklyReview.tsx` - Embedded weekly review with KPT analysis and AI suggestions
+    - `AICoachWidget.tsx` - Floating toast for real-time habit completion reactions
+    - `StreakCelebration.tsx` - Full-screen celebration modal for streak milestones
+    - `DailySummary.tsx` - End-of-day check-in for collecting missed habit reasons
   - `App.tsx` - Main application component
   - `types.ts` - TypeScript type definitions
   - `utils.ts` - Utility functions
@@ -33,14 +38,19 @@
 6. **Phase 6 - Accountability**: Share commitment feature (WhatsApp/iMessage/SMS) with social pressure
 7. **Phase 7 - The Loop**: Cycle back to Phase 4 with optimized plan for next week
 
-### Dashboard Features
+### Motivation & Tracking Features
 - **Habit Tracking**: Track daily, weekly, and custom frequency habits
-- **Dashboard View**: Visual overview with completion rates and streaks
-- **Multiple View Modes**: Week, month, and year views
+- **Multiple View Modes**: Week, month, and year calendar views
 - **Drag & Drop**: Reorder habits by priority
 - **Habit Categories**: Anchor Habits, Life Goal Habits, and regular Habits
 - **Streak Tracking**: Easy and hard mode streak calculations
-- **Data Persistence**: All data saved to localStorage
+- **AI Coach Reactions**: Real-time encouraging messages when habits are checked off
+- **Streak Celebrations**: Full-screen confetti modals for 3/7/14/30-day milestones
+- **Daily Summary**: End-of-day check-in that collects reasons for missed habits
+- **Inline Weekly Review**: KPT analysis with AI-generated suggestions based on user-provided reasons
+- **Auto-Suggestions**: AI automatically analyzes missed habit reasons and suggests adjustments
+- **Accountability Sharing**: One-click sharing to WhatsApp, SMS, or copy to clipboard
+- **Data Persistence**: All data saved to localStorage including reasons, celebrated streaks, and daily summaries
 
 ## Development Setup
 This project is configured to run in the Replit environment:
@@ -52,7 +62,21 @@ This project is configured to run in the Replit environment:
 The workflow is automatically configured. The app starts via `npm run dev` and is accessible through the Replit webview.
 
 ## Recent Changes
-- **2025-11-15**: Completed full 7-phase coaching cycle implementation
+- **2025-11-15**: Major refactor - Active AI Coach motivation system
+  - **Removed Redundant Screens**: Eliminated standalone WeeklyReview page and DashboardOverview screen for cleaner UX
+  - **Inline Weekly Review**: Embedded KPT analysis directly in main dashboard, toggleable via TrendingUp icon
+  - **AI Coach Widget**: Floating toast with real-time reactions when habits are checked/unchecked ("Hell yeah! 🔥", "Keep crushing it! 💪")
+  - **Streak Celebrations**: Full-screen confetti modals for 3/7/14/30-day milestones (only shown once per milestone)
+  - **Daily Summary**: End-of-day modal that collects reasons for missed habits (appears after 9pm or next day)
+  - **Integrated Data Flow**: Daily reasons automatically pre-populate in weekly review, eliminating duplicate entry
+  - **Auto-Suggestions**: AI analyzes reasons and generates suggestions automatically when all problem habits have explanations
+  - **Smart Reason Analysis**: Detects patterns (timing issues, energy levels, forgetting, busyness, difficulty) and suggests specific adjustments
+  - **Inline Accountability**: Share commitment directly within review flow (WhatsApp/SMS/Copy)
+  - **Complete Loop**: Daily tracking → AI reactions → Daily summary → Weekly review → AI suggestions → Accountability → Loop back
+  - **State Management**: Added localStorage persistence for celebrated streaks, daily reasons, and last daily summary date
+  - **Navigation Improvement**: TrendingUp icon now toggles inline review (shows blue when active) instead of navigating away
+  
+- **2025-11-15**: Completed full 7-phase coaching cycle implementation (initial version)
   - **Phase 5 - Weekly Review**: KPT analysis (Keep/Problem/Try) with AI-generated feedback based on 7-day habit completion rates
   - **Phase 6 - Accountability**: Share commitment feature generates shareable messages for WhatsApp/iMessage/SMS
   - **Phase 7 - The Loop**: Automatic cycle back to dashboard after review completion
