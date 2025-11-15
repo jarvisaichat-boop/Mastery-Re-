@@ -27,7 +27,7 @@ export default function AccountabilityCheckIn({ habits, onComplete, onSkip }: Ac
     const handleSMS = () => {
         const message = generateCommitmentMessage();
         const encodedMessage = encodeURIComponent(message);
-        const smsUrl = `sms:?&body=${encodedMessage}`;
+        const smsUrl = `sms://?&body=${encodedMessage}`;
         window.location.href = smsUrl;
     };
 
