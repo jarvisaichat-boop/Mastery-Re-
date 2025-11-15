@@ -9,15 +9,75 @@ interface GoalContractProps {
 
 export default function GoalContract({ data, onNext }: GoalContractProps) {
     const [goal, setGoal] = useState('');
-    const [validation, setValidation] = useState<'idle' | 'checking' | 'validated'>('idle');
+    const [validation, setValidation] = useState<'idle' | 'checking' | 'validated' | 'failed'>('idle');
+    const [validationMessage, setValidationMessage] = useState('');
     const [signed, setSigned] = useState(false);
+
+    const checkGoalAlignment = (userGoal: string, aspirations: string): boolean => {
+        const goalLower = userGoal.toLowerCase();
+        const aspirationsLower = aspirations.toLowerCase();
+        
+        const hasKeyword = (text: string, keywords: string[]): boolean => {
+            return keywords.some(kw => {
+                const regex = new RegExp(`\\b${kw}`, 'i');
+                return regex.test(text);
+            });
+        };
+        
+        const businessKeywords = ['business', 'startup', 'launch', 'entrepreneur', 'company', 'revenue', 'financial', 'independent', 'founder', 'entrepreneurship', 'profit', 'income', 'sell', 'selling', 'customer', 'product', 'scale', 'scaling', 'client', 'sales', 'marketing', 'advertis', 'campaign', 'grow', 'growth', 'agency', 'freelance', 'service', 'brand', 'market', 'commerce', 'venture', 'monetize', 'earn', 'earning', 'acquisition', 'conversion', 'funnel', 'lead'];
+        const fitnessKeywords = ['weight', 'lose', 'fit', 'fitness', 'exercise', 'gym', 'health', 'healthy', 'body', 'wellness', 'run', 'running', 'jog', 'jogging', 'workout', 'train', 'training', 'muscle', 'cardio', 'strength', 'athletic', 'pounds', 'lean', 'tone', 'physical', 'active', 'sport', 'yoga', 'diet', 'nutrition', 'eat', 'eating', 'food', 'meal', 'vegetable', 'fruit', 'hydrat', 'sleep', 'rest', 'recover', 'energy', 'stamina', 'endurance', 'strong', 'shape'];
+        const learningKeywords = ['learn', 'learning', 'study', 'studying', 'code', 'coding', 'skill', 'master', 'mastering', 'course', 'degree', 'language', 'programming', 'develop', 'developing', 'practice', 'practicing', 'improve', 'improving', 'knowledge', 'education', 'certifi', 'training', 'teach', 'teaching', 'tutorial', 'reading', 'research', 'expertise'];
+        const creativeKeywords = ['write', 'writing', 'art', 'artistic', 'create', 'creating', 'design', 'designing', 'music', 'musical', 'build', 'building', 'paint', 'painting', 'draw', 'drawing', 'craft', 'crafting', 'compose', 'composing', 'produce', 'producing', 'content', 'video', 'photo', 'photography', 'story', 'novel', 'blog', 'blogging', 'channel', 'portfolio', 'creative'];
+        
+        const hasBusinessGoal = hasKeyword(goalLower, businessKeywords);
+        const hasBusinessAspiration = hasKeyword(aspirationsLower, businessKeywords);
+        
+        const hasFitnessGoal = hasKeyword(goalLower, fitnessKeywords);
+        const hasFitnessAspiration = hasKeyword(aspirationsLower, fitnessKeywords);
+        
+        const hasLearningGoal = hasKeyword(goalLower, learningKeywords);
+        const hasLearningAspiration = hasKeyword(aspirationsLower, learningKeywords);
+        
+        const hasCreativeGoal = hasKeyword(goalLower, creativeKeywords);
+        const hasCreativeAspiration = hasKeyword(aspirationsLower, creativeKeywords);
+        
+        const goalHasAnyDomain = hasBusinessGoal || hasFitnessGoal || hasLearningGoal || hasCreativeGoal;
+        const aspirationHasAnyDomain = hasBusinessAspiration || hasFitnessAspiration || hasLearningAspiration || hasCreativeAspiration;
+        
+        if (!goalHasAnyDomain && aspirationHasAnyDomain) {
+            return false;
+        }
+        
+        if (goalHasAnyDomain && !aspirationHasAnyDomain) {
+            return true;
+        }
+        
+        if (!goalHasAnyDomain && !aspirationHasAnyDomain) {
+            return true;
+        }
+        
+        return (
+            (hasBusinessGoal && hasBusinessAspiration) ||
+            (hasFitnessGoal && hasFitnessAspiration) ||
+            (hasLearningGoal && hasLearningAspiration) ||
+            (hasCreativeGoal && hasCreativeAspiration)
+        );
+    };
 
     const handleValidate = () => {
         if (!goal.trim()) return;
         
         setValidation('checking');
         setTimeout(() => {
-            setValidation('validated');
+            const isAligned = checkGoalAlignment(goal, data.aspirations);
+            
+            if (isAligned) {
+                setValidation('validated');
+                setValidationMessage(`"${goal}" aligns with your aspiration to ${data.aspirations.toLowerCase().split('.')[0]}.`);
+            } else {
+                setValidation('failed');
+                setValidationMessage(`I don't see how "${goal}" connects to your aspiration. Your goal should directly support what you want to become. Try rephrasing it to align with your deeper aspirations.`);
+            }
         }, 1500);
     };
 
@@ -74,13 +134,29 @@ export default function GoalContract({ data, onNext }: GoalContractProps) {
                     </div>
                 )}
 
+                {validation === 'failed' && (
+                    <div className="space-y-4">
+                        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                            <p className="text-red-400 font-semibold">✗ Goal doesn't align</p>
+                            <p className="text-gray-400 mt-2">{validationMessage}</p>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setValidation('idle');
+                                setGoal('');
+                            }}
+                            className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-all"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                )}
+
                 {validation === 'validated' && !signed && (
                     <div className="space-y-6">
                         <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
                             <p className="text-green-400 font-semibold">✓ Goal validated</p>
-                            <p className="text-gray-400 mt-2">
-                                "{goal}" aligns with your aspiration to {data.aspirations.toLowerCase().split('.')[0]}.
-                            </p>
+                            <p className="text-gray-400 mt-2">{validationMessage}</p>
                         </div>
 
                         <div className="p-6 bg-gray-800/50 rounded-lg border border-gray-700">
