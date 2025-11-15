@@ -33,12 +33,36 @@ function loadStreakMode(): 'easy' | 'hard' {
 function loadHabitsFromStorage(): Habit[] {
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_HABITS_KEY);
-    if (stored) return JSON.parse(stored);
+    if (stored) {
+      const habits = JSON.parse(stored);
+      return habits.map((h: any) => {
+        if (h.createdAt) {
+          return { ...h, createdAt: typeof h.createdAt === 'number' ? h.createdAt : Date.now() };
+        }
+        
+        if (typeof h.id === 'number' && h.id > 1000000000000) {
+          return { ...h, createdAt: h.id };
+        }
+        
+        const completionDates = Object.keys(h.completed || {})
+          .filter(dateStr => h.completed[dateStr] === true)
+          .map(dateStr => new Date(dateStr).getTime())
+          .filter(ts => !isNaN(ts));
+        
+        if (completionDates.length > 0) {
+          return { ...h, createdAt: Math.min(...completionDates) };
+        }
+        
+        return { ...h, createdAt: Date.now() };
+      });
+    }
   } catch (e) { console.error("Failed to load habits", e); }
+  
+  const jan25 = new Date('2025-01-25').getTime();
   return [
-    { id: 1, name: 'Non-Negotiable: Open App', description: 'Simple habit to build consistency', color: 'blue', type: 'Anchor Habit', categories: [{ main: 'Mental', sub: 'Personal Development' }], frequencyType: 'Everyday', selectedDays: [], timesPerPeriod: 1, periodUnit: 'Week', repeatDays: 1, order: 0, completed: { "2025-01-25": true, "2025-01-26": true, "2025-01-27": true, "2025-01-28": true } },
-    { id: 2, name: 'Life-Improving: Jog in the morning', description: 'Morning exercise for better health', color: 'green', type: 'Life Goal Habit', categories: [{ main: 'Physical', sub: 'Exercise' }], frequencyType: 'Everyday', selectedDays: [], timesPerPeriod: 1, periodUnit: 'Week', repeatDays: 1, order: 1, completed: { "2025-01-25": true, "2025-01-26": false } },
-    { id: 3, name: 'Skill-Building: Code for 30 minutes', description: 'Daily coding practice for skill development', color: 'purple', type: 'Habit', categories: [{ main: 'Work', sub: 'Skill Development' }], frequencyType: 'Everyday', selectedDays: [], timesPerPeriod: 1, periodUnit: 'Week', repeatDays: 1, order: 2, completed: {} },
+    { id: 1, name: 'Non-Negotiable: Open App', description: 'Simple habit to build consistency', color: 'blue', type: 'Anchor Habit', categories: [{ main: 'Mental', sub: 'Personal Development' }], frequencyType: 'Everyday', selectedDays: [], timesPerPeriod: 1, periodUnit: 'Week', repeatDays: 1, order: 0, completed: { "2025-01-25": true, "2025-01-26": true, "2025-01-27": true, "2025-01-28": true }, createdAt: jan25 },
+    { id: 2, name: 'Life-Improving: Jog in the morning', description: 'Morning exercise for better health', color: 'green', type: 'Life Goal Habit', categories: [{ main: 'Physical', sub: 'Exercise' }], frequencyType: 'Everyday', selectedDays: [], timesPerPeriod: 1, periodUnit: 'Week', repeatDays: 1, order: 1, completed: { "2025-01-25": true, "2025-01-26": false }, createdAt: jan25 },
+    { id: 3, name: 'Skill-Building: Code for 30 minutes', description: 'Daily coding practice for skill development', color: 'purple', type: 'Habit', categories: [{ main: 'Work', sub: 'Skill Development' }], frequencyType: 'Everyday', selectedDays: [], timesPerPeriod: 1, periodUnit: 'Week', repeatDays: 1, order: 2, completed: {}, createdAt: Date.now() },
   ];
 }
 
@@ -87,7 +111,7 @@ function App() {
     const handleSaveHabit = (habitData: any) => {
         setHabits(prev => habitData.id
             ? prev.map(h => h.id === habitData.id ? { ...h, ...habitData } : h)
-            : [...prev, { ...habitData, id: Date.now(), order: Math.max(...prev.map(h => h.order), -1) + 1, completed: {} }]
+            : [...prev, { ...habitData, id: Date.now(), order: Math.max(...prev.map(h => h.order), -1) + 1, completed: {}, createdAt: Date.now() }]
         );
     };
 

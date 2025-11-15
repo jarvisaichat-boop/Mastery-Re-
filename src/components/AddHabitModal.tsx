@@ -80,28 +80,37 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     if (!habit || !habit.completed) return { totalCompletions: 0, highestStreak: 0 };
 
     const totalCompletions = Object.values(habit.completed).filter(Boolean).length;
-    let highestStreak = 0;
-    let currentStreak = 0;
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const habitCreationDate = new Date(habit.id);
+    const habitCreationDate = new Date(habit.createdAt || Date.now());
     habitCreationDate.setHours(0, 0, 0, 0);
-
-    let currentDay = new Date(habitCreationDate);
-    while (currentDay <= today) {
-      const dateString = formatDate(currentDay, 'yyyy-MM-dd');
-      const isScheduled = isHabitScheduledOnDay(habit, currentDay);
+    
+    const MAX_LOOKBACK = 365 * 3;
+    let highestStreak = 0;
+    let currentStreak = 0;
+    
+    for (let i = 0; i < MAX_LOOKBACK; i++) {
+      const checkDay = new Date(today);
+      checkDay.setDate(today.getDate() - i);
+      
+      if (checkDay < habitCreationDate) break;
+      
+      const dateString = formatDate(checkDay, 'yyyy-MM-dd');
+      const isScheduled = isHabitScheduledOnDay(habit, checkDay);
       const isCompleted = habit.completed[dateString];
+      
       if (isScheduled) {
         if (isCompleted) {
           currentStreak++;
           highestStreak = Math.max(highestStreak, currentStreak);
         } else {
           currentStreak = 0;
+          if (i > 30 && highestStreak > 0) break;
         }
       }
-      currentDay.setDate(currentDay.getDate() + 1);
     }
+    
     return { totalCompletions, highestStreak };
   };
 
@@ -239,7 +248,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
     e.preventDefault();
     if (habitName.trim()) {
       const habitData = {
-        ...(habitToEdit && { id: habitToEdit.id }),
+        ...(habitToEdit && { id: habitToEdit.id, createdAt: habitToEdit.createdAt }),
         name: habitName.trim(),
         description: habitDescription.trim(),
         color: selectedColor,

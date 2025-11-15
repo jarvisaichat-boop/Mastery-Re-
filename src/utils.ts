@@ -57,7 +57,7 @@ export const isHabitScheduledOnDay = (habit: Habit, date: Date): boolean => {
         
         case 'Repeats':
             if (habit.repeatDays <= 1) return true;
-            const startDate = new Date(habit.id);
+            const startDate = new Date(habit.createdAt);
             const daysDiff = getDaysDifference(startDate, date);
             return daysDiff % habit.repeatDays === 0;
         

@@ -19,6 +19,7 @@ export interface Habit {
   repeatDays: number;
   completed: Record<string, boolean | null>;
   order: number;
+  createdAt: number;
 }
 
 export interface AddHabitModalProps {
