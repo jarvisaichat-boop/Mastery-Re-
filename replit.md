@@ -53,8 +53,7 @@
 - **Streak Celebrations**: Full-screen confetti modals for 3/7/14/30-day milestones
 - **Conversational Daily Check-In**: Chat-style interface where users freely type about wins and challenges
 - **Interactive AI Chat**: Ask follow-up questions and receive super positive Stoic coach responses
-- **Reflection Journal**: Daily module-based interface tracking mental state, motivation, and goal alignment with quantitative percentage ranges (100-80%, 80-50%, 50-30%, 30-0%) + qualitative "why" reasoning
-- **Sequential Question Rotation**: 10 encompassing questions rotate daily without repetition, covering drive, clarity, energy, resilience, purpose alignment
+- **Reflection Journal**: Daily module-based interface asking "How much progress did you feel towards your goal?" with quantitative percentage ranges (100-80%, 80-50%, 50-30%, 30-0%) + qualitative "why" reasoning for consistent tracking over time
 - **Inline Weekly Progress**: Positive language review (Keep/Challenged/Progress) with AI suggestions
 - **Auto-Suggestions**: AI analyzes reasons and suggests timing, frequency, or difficulty adjustments
 - **Accountability Sharing**: One-click sharing to WhatsApp, SMS, or copy to clipboard
@@ -73,10 +72,10 @@ The workflow is automatically configured. The app starts via `npm run dev` and i
 ## Recent Changes
 - **2025-11-16**: Reflection Journal feature
   - **ReflectionJournal Component**: Module-based daily reflection system separate from habit tracking
+  - **Consistent Daily Question**: "How much progress did you feel towards your goal?" asked every day for trend tracking
   - **Quantitative Metrics**: 4 percentage-range options (Very Great 100-80%, Great 80-50%, Okay 50-30%, Not Great 30-0%) with emojis
   - **Qualitative Depth**: Two-step flow - select percentage → explain "why" in free text field
-  - **Sequential Rotation**: 10 encompassing questions rotate daily (stored index prevents repetition)
-  - **Question Focus**: Mental state, motivation, goal alignment, drive, clarity, energy, resilience, purpose connection - NOT habit completion
+  - **Question Focus**: Progress towards goal - aligns with core app purpose, separate from habit completion tracking
   - **Visual Design**: Hero gradient header with grid pattern, card-based modules matching reference UI
   - **Confirmation Flow**: Motivational "Greaaat job!" screen with reminder to log habits
   - **Navigation**: Sparkles icon (purple) in header toggles journal view

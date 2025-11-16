@@ -26,21 +26,9 @@ const REFLECTION_ANSWERS: ReflectionAnswer[] = [
     { value: 'not-great', percentage: '30% ~ 0%', emoji: '😔' }
 ];
 
-const REFLECTION_QUESTIONS = [
-    "How much contribution did you feel you made towards your goal?",
-    "How aligned did you feel with your purpose today?",
-    "How strong was your internal drive and motivation?",
-    "How clear and focused was your mind throughout the day?",
-    "How much energy and vitality did you experience?",
-    "How resilient did you feel when facing challenges?",
-    "How present and intentional were you with your actions?",
-    "How satisfied are you with your progress towards mastery?",
-    "How connected did you feel to your deeper 'why'?",
-    "How well did you honor your commitments to yourself?"
-];
+const DAILY_REFLECTION_QUESTION = "How much progress did you feel towards your goal?";
 
 const LOCAL_STORAGE_REFLECTIONS_KEY = 'mastery-dashboard-reflections';
-const LOCAL_STORAGE_QUESTION_INDEX_KEY = 'mastery-dashboard-question-index';
 
 function loadReflections(): ReflectionEntry[] {
     try {
@@ -60,31 +48,6 @@ function saveReflections(reflections: ReflectionEntry[]) {
     }
 }
 
-function getNextQuestionIndex(): number {
-    try {
-        const stored = localStorage.getItem(LOCAL_STORAGE_QUESTION_INDEX_KEY);
-        return stored ? parseInt(stored, 10) : 0;
-    } catch (e) {
-        return 0;
-    }
-}
-
-function incrementQuestionIndex(currentIndex: number) {
-    const nextIndex = (currentIndex + 1) % REFLECTION_QUESTIONS.length;
-    localStorage.setItem(LOCAL_STORAGE_QUESTION_INDEX_KEY, nextIndex.toString());
-}
-
-function getQuestionForToday(reflections: ReflectionEntry[], today: string): { question: string; index: number } {
-    const todayReflection = reflections.find(r => r.date === today);
-    if (todayReflection) {
-        const index = REFLECTION_QUESTIONS.indexOf(todayReflection.question);
-        return { question: todayReflection.question, index: index >= 0 ? index : 0 };
-    }
-    
-    const index = getNextQuestionIndex();
-    return { question: REFLECTION_QUESTIONS[index], index };
-}
-
 function getAnswerLabel(value: string): string {
     const labels: Record<string, string> = {
         'very-great': 'Very Great',
@@ -98,7 +61,6 @@ function getAnswerLabel(value: string): string {
 export default function ReflectionJournal({ onClose }: ReflectionJournalProps) {
     const today = formatDate(new Date(), 'yyyy-MM-dd');
     const [reflections, setReflections] = useState<ReflectionEntry[]>(loadReflections());
-    const { question: todayQuestion, index: questionIndex } = getQuestionForToday(reflections, today);
     
     const [selectedAnswer, setSelectedAnswer] = useState<ReflectionAnswer | null>(null);
     const [reasoning, setReasoning] = useState('');
@@ -116,7 +78,7 @@ export default function ReflectionJournal({ onClose }: ReflectionJournalProps) {
 
         const newEntry: ReflectionEntry = {
             date: today,
-            question: todayQuestion,
+            question: DAILY_REFLECTION_QUESTION,
             answer: selectedAnswer,
             reasoning: reasoning.trim(),
             timestamp: Date.now()
@@ -127,7 +89,6 @@ export default function ReflectionJournal({ onClose }: ReflectionJournalProps) {
         
         setReflections(updatedReflections);
         saveReflections(updatedReflections);
-        incrementQuestionIndex(questionIndex);
         setShowConfirmation(true);
     };
 
@@ -233,7 +194,7 @@ export default function ReflectionJournal({ onClose }: ReflectionJournalProps) {
                             <div className="flex items-start gap-3 mb-6">
                                 <div className="text-2xl">📝</div>
                                 <h2 className="text-xl font-bold text-white flex-1">
-                                    {todayQuestion}
+                                    {DAILY_REFLECTION_QUESTION}
                                 </h2>
                             </div>
 
