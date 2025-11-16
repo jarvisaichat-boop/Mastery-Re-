@@ -65,16 +65,35 @@ export default function ReflectionJournal({ onClose }: ReflectionJournalProps) {
     const [selectedAnswer, setSelectedAnswer] = useState<ReflectionAnswer | null>(null);
     const [reasoning, setReasoning] = useState('');
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [hasTypedReasoning, setHasTypedReasoning] = useState(false);
     
     const todayReflection = reflections.find(r => r.date === today);
-    const hasCompletedToday = !!todayReflection;
+    const hasCompletedToday = !!todayReflection && !isEditing;
 
     const handleSelectAnswer = (answer: ReflectionAnswer) => {
         setSelectedAnswer(answer);
+        setHasTypedReasoning(false);
+    };
+
+    const handleEdit = () => {
+        if (todayReflection) {
+            setSelectedAnswer(todayReflection.answer);
+            setReasoning(todayReflection.reasoning);
+            setHasTypedReasoning(true);
+            setIsEditing(true);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setSelectedAnswer(null);
+        setReasoning('');
+        setHasTypedReasoning(false);
+        setIsEditing(false);
     };
 
     const handleSave = () => {
-        if (!selectedAnswer || !reasoning.trim()) return;
+        if (!selectedAnswer) return;
 
         const newEntry: ReflectionEntry = {
             date: today,
@@ -89,7 +108,15 @@ export default function ReflectionJournal({ onClose }: ReflectionJournalProps) {
         
         setReflections(updatedReflections);
         saveReflections(updatedReflections);
+        setIsEditing(false);
         setShowConfirmation(true);
+    };
+
+    const handleReasoningChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setReasoning(e.target.value);
+        if (e.target.value.trim() && !hasTypedReasoning) {
+            setHasTypedReasoning(true);
+        }
     };
 
     const handleDone = () => {
@@ -155,6 +182,13 @@ export default function ReflectionJournal({ onClose }: ReflectionJournalProps) {
                                 </div>
                                 <p className="text-sm text-gray-300 italic">"{todayReflection.reasoning}"</p>
                             </div>
+
+                            <button
+                                onClick={handleEdit}
+                                className="mt-6 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-xl transition-all"
+                            >
+                                ✏️ Edit Reflection
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -221,46 +255,64 @@ export default function ReflectionJournal({ onClose }: ReflectionJournalProps) {
                                 </div>
                             )}
 
-                            {/* Expanded Reasoning Section */}
+                            {/* Step 1 Celebration: Answer Selected */}
                             {selectedAnswer && (
                                 <div className="space-y-4 animate-fadeIn">
-                                    <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center gap-3">
-                                        <span className="text-3xl">{selectedAnswer.emoji}</span>
-                                        <div>
-                                            <p className="text-white font-bold">{getAnswerLabel(selectedAnswer.value)}</p>
-                                            <p className="text-sm text-gray-400">{selectedAnswer.percentage} Productivity</p>
+                                    {/* Celebration after selecting answer */}
+                                    <div className="p-5 bg-gradient-to-r from-green-500/20 to-blue-500/20 border-2 border-green-500/50 rounded-xl">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <span className="text-4xl">✅</span>
+                                            <div>
+                                                <p className="text-lg font-bold text-white">Nice! You answered the question!</p>
+                                                <p className="text-sm text-gray-300">That was easy, right?</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
+                                            <span className="text-2xl">{selectedAnswer.emoji}</span>
+                                            <div>
+                                                <p className="text-white font-bold">{getAnswerLabel(selectedAnswer.value)}</p>
+                                                <p className="text-xs text-gray-400">{selectedAnswer.percentage} Productivity</p>
+                                            </div>
                                         </div>
                                     </div>
 
+                                    {/* Optional deeper reflection */}
                                     <div className="space-y-3">
-                                        <label className="block text-white font-medium">
+                                        <label className="block text-white font-medium flex items-center gap-2">
+                                            <span className="text-sm text-gray-400">(Optional)</span>
                                             Why did you select "{getAnswerLabel(selectedAnswer.value)}"?
                                         </label>
                                         <textarea
                                             value={reasoning}
-                                            onChange={(e) => setReasoning(e.target.value)}
+                                            onChange={handleReasoningChange}
                                             placeholder="Share what's on your mind... your feelings, thoughts, what happened today..."
                                             className="w-full h-32 px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"
                                             autoFocus
                                         />
+                                        
+                                        {/* Step 2 Celebration: Started typing reasoning */}
+                                        {hasTypedReasoning && reasoning.trim().length > 0 && (
+                                            <div className="p-3 bg-purple-500/20 border border-purple-500/40 rounded-lg flex items-center gap-2 animate-fadeIn">
+                                                <span className="text-2xl">✨</span>
+                                                <p className="text-sm text-white font-medium">
+                                                    Amazing! You're going deeper. This builds real self-awareness.
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex gap-3">
                                         <button
-                                            onClick={() => {
-                                                setSelectedAnswer(null);
-                                                setReasoning('');
-                                            }}
+                                            onClick={handleCancelEdit}
                                             className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-all"
                                         >
-                                            Back
+                                            {isEditing ? 'Cancel' : 'Back'}
                                         </button>
                                         <button
                                             onClick={handleSave}
-                                            disabled={!reasoning.trim()}
-                                            className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all"
+                                            className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all"
                                         >
-                                            Save Reflection
+                                            {isEditing ? 'Update Reflection' : 'Save Reflection'}
                                         </button>
                                     </div>
                                 </div>
