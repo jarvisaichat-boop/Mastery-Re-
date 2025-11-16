@@ -53,7 +53,9 @@
 - **Streak Celebrations**: Full-screen confetti modals for 3/7/14/30-day milestones
 - **Conversational Daily Check-In**: Chat-style interface where users freely type about wins and challenges
 - **Interactive AI Chat**: Ask follow-up questions and receive super positive Stoic coach responses
-- **Reflection Journal**: Daily module-based interface asking "How much progress did you feel towards your goal?" with quantitative percentage ranges (100-80%, 80-50%, 50-30%, 30-0%) + qualitative "why" reasoning for consistent tracking over time
+- **Reflection Journal**: Daily module-based interface asking "How much progress did you feel towards your goal?" with quantitative percentage ranges (100-80%, 80-50%, 50-30%, 30-0%) + optional qualitative "why" reasoning for consistent tracking over time
+- **Multi-Stage Celebration Flow**: Step 1 - checkmark celebration after selecting answer, Step 2 - sparkle reward when typing reasoning (optional)
+- **Editable Reflections**: Users can edit past reflections via "Edit Reflection" button on completed entries
 - **Inline Weekly Progress**: Positive language review (Keep/Challenged/Progress) with AI suggestions
 - **Auto-Suggestions**: AI analyzes reasons and suggests timing, frequency, or difficulty adjustments
 - **Accountability Sharing**: One-click sharing to WhatsApp, SMS, or copy to clipboard
@@ -70,17 +72,21 @@ This project is configured to run in the Replit environment:
 The workflow is automatically configured. The app starts via `npm run dev` and is accessible through the Replit webview.
 
 ## Recent Changes
-- **2025-11-16**: Reflection Journal feature
+- **2025-11-16**: Reflection Journal feature with gamified micro-celebrations
   - **ReflectionJournal Component**: Module-based daily reflection system separate from habit tracking
   - **Consistent Daily Question**: "How much progress did you feel towards your goal?" asked every day for trend tracking
   - **Quantitative Metrics**: 4 percentage-range options (Very Great 100-80%, Great 80-50%, Okay 50-30%, Not Great 30-0%) with emojis
-  - **Qualitative Depth**: Two-step flow - select percentage → explain "why" in free text field
+  - **Gamified Multi-Stage Flow**: 
+    - Stage 1: Select answer → ✅ "Nice! You answered the question!" celebration
+    - Stage 2 (Optional): Type reasoning → ✨ "Amazing! You're going deeper" sparkle reward
+    - Stage 3: Final "Greaaat Job!" confirmation screen
+  - **Optional Reasoning**: Users can save after just selecting answer (2-click flow) OR add deeper reflection for bonus achievement
+  - **Editable Entries**: "Edit Reflection" button on completed entries allows modifying answer and reasoning
   - **Question Focus**: Progress towards goal - aligns with core app purpose, separate from habit completion tracking
-  - **Visual Design**: Hero gradient header with grid pattern, card-based modules matching reference UI
-  - **Confirmation Flow**: Motivational "Greaaat job!" screen with reminder to log habits
+  - **Visual Design**: Hero gradient header with grid pattern, card-based modules, green/purple celebration cards
   - **Navigation**: Sparkles icon (purple) in header toggles journal view
-  - **localStorage Schema**: Reflections stored with date, question, answer object (value/percentage/emoji), reasoning text, timestamp
-  - **Daily Limit**: One reflection per day, shows "Already Reflected Today" state with previous entry
+  - **localStorage Schema**: Reflections stored with date, question, answer object (value/percentage/emoji), reasoning text (can be empty), timestamp
+  - **Daily Limit**: One reflection per day, shows "Already Reflected Today" state with previous entry and edit option
 
 - **2025-11-15**: Conversational AI and stats dashboard enhancement
   - **StatsOverview Component**: Comprehensive stats dashboard showing weekly completion rates, best/worst performance days, streak breakdowns by category, visual heatmaps, and habit category analysis
