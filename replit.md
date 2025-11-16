@@ -22,6 +22,7 @@
     - `StreakCelebration.tsx` - Full-screen celebration modal for streak milestones
     - `ChatDailyCheckIn.tsx` - Conversational AI daily check-in with free-form text chat interface
     - `StatsOverview.tsx` - Comprehensive stats dashboard with completion rates, trends, and editable goal
+    - `ReflectionJournal.tsx` - Daily reflection module with quantitative + qualitative tracking
     - `DailySummary.tsx` - Legacy component (replaced by ChatDailyCheckIn)
   - `App.tsx` - Main application component
   - `types.ts` - TypeScript type definitions
@@ -52,11 +53,13 @@
 - **Streak Celebrations**: Full-screen confetti modals for 3/7/14/30-day milestones
 - **Conversational Daily Check-In**: Chat-style interface where users freely type about wins and challenges
 - **Interactive AI Chat**: Ask follow-up questions and receive super positive Stoic coach responses
+- **Reflection Journal**: Daily module-based interface tracking mental state, motivation, and goal alignment with quantitative percentage ranges (100-80%, 80-50%, 50-30%, 30-0%) + qualitative "why" reasoning
+- **Sequential Question Rotation**: 10 encompassing questions rotate daily without repetition, covering drive, clarity, energy, resilience, purpose alignment
 - **Inline Weekly Progress**: Positive language review (Keep/Challenged/Progress) with AI suggestions
 - **Auto-Suggestions**: AI analyzes reasons and suggests timing, frequency, or difficulty adjustments
 - **Accountability Sharing**: One-click sharing to WhatsApp, SMS, or copy to clipboard
 - **Push Notification Templates**: Designed intriguing messages for future 2-3 day notification cadence
-- **Data Persistence**: All data saved to localStorage including chat entries, goal, celebrated streaks, and reasons
+- **Data Persistence**: All data saved to localStorage including chat entries, goal, celebrated streaks, reasons, and daily reflections
 
 ## Development Setup
 This project is configured to run in the Replit environment:
@@ -68,6 +71,18 @@ This project is configured to run in the Replit environment:
 The workflow is automatically configured. The app starts via `npm run dev` and is accessible through the Replit webview.
 
 ## Recent Changes
+- **2025-11-16**: Reflection Journal feature
+  - **ReflectionJournal Component**: Module-based daily reflection system separate from habit tracking
+  - **Quantitative Metrics**: 4 percentage-range options (Very Great 100-80%, Great 80-50%, Okay 50-30%, Not Great 30-0%) with emojis
+  - **Qualitative Depth**: Two-step flow - select percentage → explain "why" in free text field
+  - **Sequential Rotation**: 10 encompassing questions rotate daily (stored index prevents repetition)
+  - **Question Focus**: Mental state, motivation, goal alignment, drive, clarity, energy, resilience, purpose connection - NOT habit completion
+  - **Visual Design**: Hero gradient header with grid pattern, card-based modules matching reference UI
+  - **Confirmation Flow**: Motivational "Greaaat job!" screen with reminder to log habits
+  - **Navigation**: Sparkles icon (purple) in header toggles journal view
+  - **localStorage Schema**: Reflections stored with date, question, answer object (value/percentage/emoji), reasoning text, timestamp
+  - **Daily Limit**: One reflection per day, shows "Already Reflected Today" state with previous entry
+
 - **2025-11-15**: Conversational AI and stats dashboard enhancement
   - **StatsOverview Component**: Comprehensive stats dashboard showing weekly completion rates, best/worst performance days, streak breakdowns by category, visual heatmaps, and habit category analysis
   - **Editable Goal**: Prominent goal display with edit functionality - users can adjust their goal as life priorities change
