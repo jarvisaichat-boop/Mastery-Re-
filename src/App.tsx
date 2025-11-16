@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
+import { Plus, List, Calendar, TrendingUp, BarChart3, Sparkles } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import Onboarding from './components/Onboarding';
 import AICoachWidget from './components/AICoachWidget';
@@ -7,6 +7,7 @@ import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
 import InlineWeeklyReview from './components/InlineWeeklyReview';
 import StatsOverview from './components/StatsOverview';
+import ReflectionJournal from './components/ReflectionJournal';
 import { Habit } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
@@ -88,6 +89,7 @@ function App() {
     
     const [showDailyTrackingView, setShowDailyTrackingView] = useState(true);
     const [showStatsView, setShowStatsView] = useState(false);
+    const [showReflectionJournal, setShowReflectionJournal] = useState(false);
     
     const [weeklyRateMode, setWeeklyRateMode] = useState(loadRateMode);
     const [streakMode, setStreakMode] = useState(loadStreakMode);
@@ -310,7 +312,16 @@ function App() {
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
                 <div className="flex items-center space-x-2">
-                    {/* BUTTON 1: Stats View Toggle */}
+                    {/* BUTTON 1: Reflection Journal */}
+                    <button 
+                        onClick={() => setShowReflectionJournal(true)} 
+                        className="p-2 rounded-lg text-purple-400 hover:bg-gray-700 hover:text-purple-300"
+                        title="Reflection Journal"
+                    >
+                        <Sparkles className="w-5 h-5" />
+                    </button>
+                    
+                    {/* BUTTON 2: Stats View Toggle */}
                     <button 
                         onClick={() => {
                             setShowStatsView(p => !p);
@@ -324,17 +335,17 @@ function App() {
                         <BarChart3 className="w-5 h-5" />
                     </button>
                     
-                    {/* BUTTON 2: Detailed/Simple List View Toggle */}
+                    {/* BUTTON 3: Detailed/Simple List View Toggle */}
                     {!showStatsView && (
                         <button onClick={() => setShowDailyTrackingView(p => !p)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">
                             {showDailyTrackingView ? <List className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
                         </button>
                     )}
                     
-                    {/* BUTTON 3: Add New Habit */}
+                    {/* BUTTON 4: Add New Habit */}
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
                     
-                    {/* BUTTON 4: Toggle Weekly Review */}
+                    {/* BUTTON 5: Toggle Weekly Review */}
                     {!showStatsView && (
                         <button 
                             onClick={() => setShowWeeklyReview(p => !p)} 
@@ -428,6 +439,10 @@ function App() {
                         localStorage.setItem(LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY, formatDate(new Date(), 'yyyy-MM-dd'));
                     }}
                 />
+            )}
+            
+            {showReflectionJournal && (
+                <ReflectionJournal onClose={() => setShowReflectionJournal(false)} />
             )}
             
             <AddHabitModal isOpen={showAddHabitModal} onClose={() => { setShowAddHabitModal(false); setSelectedHabitToEdit(null); }} onSaveHabit={handleSaveHabit} onDeleteHabit={handleDeleteHabit} habitToEdit={selectedHabitToEdit} habitMuscleCount={habitMuscleCount} lifeGoalsCount={lifeGoalsCount}/>
