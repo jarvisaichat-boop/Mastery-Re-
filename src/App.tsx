@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Plus, List, Calendar, BarChart3, Sparkles } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
-import Onboarding from './components/Onboarding';
+import MasteryOnboarding from './components/MasteryOnboarding';
 import AICoachWidget from './components/AICoachWidget';
 import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
@@ -121,7 +121,7 @@ function App() {
         } catch { return {}; }
     });
 
-    const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string) => {
+    const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string, profile?: any) => {
         const now = Date.now();
         const habitsWithIds = newHabits.map((h, index) => ({
             ...h,
@@ -278,7 +278,7 @@ function App() {
 
 
     if (!onboardingComplete) {
-        return <Onboarding onComplete={handleOnboardingComplete} />;
+        return <MasteryOnboarding onComplete={handleOnboardingComplete} />;
     }
 
     return (
