@@ -39,6 +39,13 @@ The core of the system is a 7-phase coaching cycle:
 -   **Deployment**: Replit environment (configured for port 5000 and `0.0.0.0` host)
 
 ## Recent Changes
+- **2025-11-17**: Onboarding Preview Mode (Dev Feature)
+  - **Preview Button**: Top-left ⟲ icon on dashboard allows previewing onboarding without data loss
+  - **Exit to Dashboard**: Blue "Exit to Dashboard" button appears in top-right during preview
+  - **Data Safety**: Preview mode does not clear localStorage - all habits and data preserved
+  - **Testing Tool**: Developers can test onboarding flow repeatedly without resetting progress
+  - **Auto-Save Still Works**: Profile and phase data continue to save automatically during preview
+
 - **2025-11-17**: Save/Resume Onboarding Functionality
   - **Phase Persistence**: Current onboarding phase now saved to localStorage
   - **Auto-Resume**: Users return to exact phase they were on when reloading page
