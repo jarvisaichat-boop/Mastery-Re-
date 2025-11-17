@@ -18,11 +18,16 @@ interface MasteryOnboardingProps {
   onComplete: (habits: Omit<Habit, 'id' | 'createdAt'>[], goal: string, aspirations: string, profile: MasteryProfile) => void;
   isPreview?: boolean;
   onExitPreview?: () => void;
+  initialPhase?: number | null;
 }
 
-export default function MasteryOnboarding({ onComplete, isPreview = false, onExitPreview }: MasteryOnboardingProps) {
+export default function MasteryOnboarding({ onComplete, isPreview = false, onExitPreview, initialPhase }: MasteryOnboardingProps) {
   const [currentPhase, setCurrentPhase] = useState<OnboardingPhase>(() => {
-    // Load saved phase on mount
+    // If initialPhase is provided (from quick access buttons), use it
+    if (initialPhase !== null && initialPhase !== undefined) {
+      return initialPhase as OnboardingPhase;
+    }
+    // Otherwise load saved phase on mount
     try {
       const saved = localStorage.getItem(PHASE_STORAGE_KEY);
       return saved ? parseInt(saved, 10) as OnboardingPhase : 0;

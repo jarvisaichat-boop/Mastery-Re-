@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, RotateCcw } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AICoachWidget from './components/AICoachWidget';
@@ -83,6 +83,7 @@ function isOnboardingComplete(): boolean {
 function App() {
     const [onboardingComplete, setOnboardingComplete] = useState(isOnboardingComplete);
     const [previewOnboarding, setPreviewOnboarding] = useState(false);
+    const [jumpToPhase, setJumpToPhase] = useState<number | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
     
@@ -282,20 +283,39 @@ function App() {
         return <MasteryOnboarding 
             onComplete={handleOnboardingComplete} 
             isPreview={previewOnboarding}
-            onExitPreview={() => setPreviewOnboarding(false)}
+            onExitPreview={() => {
+                setPreviewOnboarding(false);
+                setJumpToPhase(null);
+            }}
+            initialPhase={jumpToPhase}
         />;
     }
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
-            {/* Dev Testing: Preview Onboarding */}
-            <button
-                onClick={() => setPreviewOnboarding(true)}
-                className="fixed top-4 left-4 z-50 p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                title="Preview Onboarding Flow"
-            >
-                <RotateCcw className="w-5 h-5 text-gray-400" />
-            </button>
+            {/* Quick Access to Onboarding Phases */}
+            <div className="fixed top-4 left-4 z-50 flex gap-2">
+                <button
+                    onClick={() => {
+                        setJumpToPhase(0);
+                        setPreviewOnboarding(true);
+                    }}
+                    className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg border border-gray-700 transition-colors"
+                    title="Jump to Phase 0 (Start of Onboarding)"
+                >
+                    <Home className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => {
+                        setJumpToPhase(4);
+                        setPreviewOnboarding(true);
+                    }}
+                    className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg border border-gray-700 transition-colors"
+                    title="Jump to Phase 4 (Logic Tree)"
+                >
+                    <Target className="w-4 h-4" />
+                </button>
+            </div>
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
                 <div className="flex items-center space-x-2">
