@@ -212,7 +212,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-green-500 to-blue-500 transition-all duration-300"
-              style={{ width: `${((currentScreen - 1) / 4) * 100}%` }}
+              style={{ width: `${((currentScreen - 1) / 3) * 100}%` }}
             />
           </div>
         </div>

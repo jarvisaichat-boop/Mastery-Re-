@@ -182,7 +182,7 @@ export default function Phase3Logistics({ profile, onComplete }: Phase3Logistics
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-cyan-500 transition-all duration-300"
-              style={{ width: `${((currentScreen - 1) / 3) * 100}%` }}
+              style={{ width: `${((currentScreen - 1) / 2) * 100}%` }}
             />
           </div>
         </div>

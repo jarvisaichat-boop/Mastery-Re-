@@ -26,7 +26,7 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
   };
 
   const nextScreen = () => {
-    if (currentScreen < 6) {
+    if (currentScreen < 5) {
       setCurrentScreen(prev => prev + 1);
     } else {
       onComplete(data);
@@ -46,6 +46,7 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
       case 3: return data.fuel !== '';
       case 4: return data.saboteur !== '';
       case 5: return data.stakes !== '';
+      case 6: return false; // Safety guard - should never reach
       default: return false;
     }
   };
