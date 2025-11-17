@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, RotateCcw } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AICoachWidget from './components/AICoachWidget';
@@ -281,8 +281,23 @@ function App() {
         return <MasteryOnboarding onComplete={handleOnboardingComplete} />;
     }
 
+    const resetToOnboarding = () => {
+        if (confirm('Reset to onboarding? This will clear all current habits and data.')) {
+            localStorage.clear();
+            window.location.reload();
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
+            {/* Dev Testing: Reset to Onboarding */}
+            <button
+                onClick={resetToOnboarding}
+                className="fixed top-4 left-4 z-50 p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                title="Reset to Onboarding (Dev Testing)"
+            >
+                <RotateCcw className="w-5 h-5 text-gray-400" />
+            </button>
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
                 <div className="flex items-center space-x-2">
