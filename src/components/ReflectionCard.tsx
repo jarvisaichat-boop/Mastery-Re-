@@ -28,12 +28,14 @@ export function getAnswerLabel(value: string): string {
 
 interface ReflectionCardProps {
     onComplete: (answer: ReflectionAnswer, reasoning: string) => void;
+    initialAnswer?: ReflectionAnswer | null;
+    initialReasoning?: string;
 }
 
-export default function ReflectionCard({ onComplete }: ReflectionCardProps) {
-    const [selectedAnswer, setSelectedAnswer] = useState<ReflectionAnswer | null>(null);
-    const [reasoning, setReasoning] = useState('');
-    const [hasTypedReasoning, setHasTypedReasoning] = useState(false);
+export default function ReflectionCard({ onComplete, initialAnswer = null, initialReasoning = '' }: ReflectionCardProps) {
+    const [selectedAnswer, setSelectedAnswer] = useState<ReflectionAnswer | null>(initialAnswer);
+    const [reasoning, setReasoning] = useState(initialReasoning);
+    const [hasTypedReasoning, setHasTypedReasoning] = useState(initialReasoning.length > 0);
 
     const handleSelectAnswer = (answer: ReflectionAnswer) => {
         setSelectedAnswer(answer);

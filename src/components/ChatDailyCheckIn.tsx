@@ -134,10 +134,7 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
     };
 
     const handleEditReflection = () => {
-        // Delete today's reflection and show card again
-        const updatedReflections = reflections.filter(r => r.date !== today);
-        setReflections(updatedReflections);
-        saveReflections(updatedReflections);
+        // Show card again with existing data - don't delete until user saves
         setShowReflectionCard(true);
         setMessages([]);
     };
@@ -221,7 +218,11 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {/* Reflection Card or Summary */}
                 {showReflectionCard ? (
-                    <ReflectionCard onComplete={handleReflectionComplete} />
+                    <ReflectionCard 
+                        onComplete={handleReflectionComplete}
+                        initialAnswer={todayReflection?.answer || null}
+                        initialReasoning={todayReflection?.reasoning || ''}
+                    />
                 ) : todayReflection ? (
                     <ReflectionSummaryCard 
                         answer={todayReflection.answer}
