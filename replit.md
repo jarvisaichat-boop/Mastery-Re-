@@ -53,4 +53,7 @@ The core of the system is a 7-phase coaching cycle:
   - Embedded ReflectionCard component with gradient design
   - AI motivational responses tailored to reflection answers
   - User-controlled access via Sparkles icon (no automatic popups)
-  - **Bug Fix**: Edit Reflection now pre-populates form with existing answer and reasoning instead of starting fresh
+  - **Bug Fix #1**: Edit Reflection now pre-populates form with existing answer and reasoning instead of starting fresh
+  - **Bug Fix #2**: Added "Change" button in celebration box to allow changing answer selection while preserving reasoning text
+  - **Bug Fix #3**: Chat messages now persist when editing reflections (no longer cleared on edit/save)
+  - **Bug Fix #4**: AI only generates motivational message for new reflections, not when editing existing ones
