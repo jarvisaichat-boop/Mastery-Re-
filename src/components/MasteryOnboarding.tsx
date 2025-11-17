@@ -10,13 +10,22 @@ import Phase5Negotiation from './mastery-onboarding/Phase5Negotiation';
 import Phase6Contract from './mastery-onboarding/Phase6Contract';
 
 const STORAGE_KEY = 'mastery-onboarding-profile';
+const PHASE_STORAGE_KEY = 'mastery-onboarding-phase';
 
 interface MasteryOnboardingProps {
   onComplete: (habits: Omit<Habit, 'id' | 'createdAt'>[], goal: string, aspirations: string, profile: MasteryProfile) => void;
 }
 
 export default function MasteryOnboarding({ onComplete }: MasteryOnboardingProps) {
-  const [currentPhase, setCurrentPhase] = useState<OnboardingPhase>(0);
+  const [currentPhase, setCurrentPhase] = useState<OnboardingPhase>(() => {
+    // Load saved phase on mount
+    try {
+      const saved = localStorage.getItem(PHASE_STORAGE_KEY);
+      return saved ? parseInt(saved, 10) as OnboardingPhase : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [profile, setProfile] = useState<Partial<MasteryProfile>>(() => {
     // Load saved profile on mount
     try {
@@ -35,6 +44,15 @@ export default function MasteryOnboarding({ onComplete }: MasteryOnboardingProps
       console.error('Failed to save onboarding progress', e);
     }
   }, [profile]);
+
+  // Auto-save current phase to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(PHASE_STORAGE_KEY, currentPhase.toString());
+    } catch (e) {
+      console.error('Failed to save onboarding phase', e);
+    }
+  }, [currentPhase]);
 
   const updateProfile = (updates: Partial<MasteryProfile>) => {
     setProfile(prev => ({ ...prev, ...updates }));
@@ -119,6 +137,7 @@ export default function MasteryOnboarding({ onComplete }: MasteryOnboardingProps
 
     // Clear onboarding data from storage
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(PHASE_STORAGE_KEY);
 
     // Pass data to parent
     onComplete(
