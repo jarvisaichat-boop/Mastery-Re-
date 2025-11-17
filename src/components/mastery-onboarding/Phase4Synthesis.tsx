@@ -12,10 +12,9 @@ export default function Phase4Synthesis({ profile, onComplete }: Phase4Synthesis
     const archetype = profile.archetype || 'Explorer';
     const fuel = profile.fuel || 'Glory';
     const saboteur = profile.saboteur || 'Distraction';
-    const weekendStructure = profile.weekendStructure || 'Total Rest';
     const goldenHour = profile.goldenHour || 'Morning';
 
-    return `${name}, you are a **${archetype}** driven by **${fuel}**. However, **${saboteur}** is your risk factor. Your weekends are **${weekendStructure}**, so we need to protect that time. Use **${goldenHour}** to build your core habit.`;
+    return `${name}, you are a ${archetype} driven by ${fuel}. Your ${saboteur} is the risk. We will stack habits during ${goldenHour}.`;
   };
 
   const determinePersona = (): string => {

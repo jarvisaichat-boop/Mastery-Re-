@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
-import { Brain, Sparkles, Target, TrendingUp, ListChecks } from 'lucide-react';
+import { Brain, Target, ListChecks } from 'lucide-react';
+import BridgeScreen from './BridgeScreen';
 
 interface Phase1ContextBaselineProps {
   profile: Partial<MasteryProfile>;
@@ -27,7 +28,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
   };
 
   const nextScreen = () => {
-    if (currentScreen < 6) {
+    if (currentScreen < 9) {
       setCurrentScreen(prev => prev + 1);
     } else {
       onComplete(data);
@@ -42,12 +43,14 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
 
   const canProceed = () => {
     switch (currentScreen) {
-      case 1: return data.context && data.context.length > 0;
-      case 2: return data.mentalState !== '';
-      case 3: return data.name && data.name.length > 0;
-      case 4: return data.northStar && data.northStar.length > 0;
-      case 5: return data.deepDive && data.deepDive.length > 0;
-      case 6: return true; // Existing habits are optional
+      case 1: return true; // Bridge
+      case 2: return data.context && data.context.length > 0;
+      case 3: return data.mentalState !== '' && data.name !== '';
+      case 4: return true; // Bridge
+      case 5: return data.northStar && data.northStar.length > 0;
+      case 6: return data.deepDive && data.deepDive.length > 0;
+      case 7: return true; // Bridge
+      case 8: return true; // Existing habits are optional
       default: return false;
     }
   };
@@ -56,10 +59,19 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     switch (currentScreen) {
       case 1:
         return (
+          <BridgeScreen 
+            quote="To guide you, I need to know the terrain. Your past struggles are data, not failures."
+            onContinue={nextScreen}
+          />
+        );
+
+      case 2:
+        return (
           <ScreenContainer
             icon={<Brain className="w-12 h-12 text-blue-400" />}
-            header="Don't Start From Zero"
-            subtext="Paste your journals, goals, or AI chats. Let me study you."
+            goldenHeader="Don't start from zero."
+            header="Context Injection (Brain Dump)"
+            subtext="Paste your journals, goals, or AI chats."
           >
             <textarea
               value={data.context}
@@ -76,93 +88,95 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           </ScreenContainer>
         );
 
-      case 2:
-        return (
-          <ScreenContainer
-            icon={<Sparkles className="w-12 h-12 text-purple-400" />}
-            header="What's Your Spark?"
-            subtext="How do you feel today?"
-          >
-            <div className="space-y-3">
-              {[
-                { value: 'SPARK' as const, emoji: '⚡', label: 'I feel STUCK', sub: 'I need to break a bad habit' },
-                { value: 'STUCK' as const, emoji: '🧱', label: 'I have a GOAL', sub: 'I need to break a bad habit' },
-                { value: 'CURIOUS' as const, emoji: '🧐', label: 'I\'m just CURIOUS', sub: 'Show me what this is about' },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => updateData({ mentalState: option.value })}
-                  className={`w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
-                    data.mentalState === option.value
-                      ? 'bg-purple-500/20 border-purple-500'
-                      : 'bg-gray-900 border-gray-700 hover:border-gray-600'
-                  }`}
-                >
-                  <span className="text-3xl">{option.emoji}</span>
-                  <div className="flex-1">
-                    <p className="font-bold text-white">{option.label}</p>
-                    <p className="text-sm text-gray-400">{option.sub}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </ScreenContainer>
-        );
-
       case 3:
         return (
           <ScreenContainer
             icon={<span className="text-5xl">👤</span>}
-            header="The Profile (Identity)"
-            subtext="Who are you?"
+            goldenHeader="What brought you here?"
+            header="The Spark & Profile"
+            subtext="Cards: Stuck, Specific Goal, etc."
           >
-            <div className="space-y-4">
-              <input
-                type="text"
-                value={data.name}
-                onChange={(e) => updateData({ name: e.target.value })}
-                placeholder="Name"
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-                autoFocus
-              />
-              <input
-                type="text"
-                value={data.location}
-                onChange={(e) => updateData({ location: e.target.value })}
-                placeholder="Location (Optional - used for 'Trend-Aware' AI goals)"
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
-              <input
-                type="text"
-                value={data.occupation}
-                onChange={(e) => updateData({ occupation: e.target.value })}
-                placeholder="Occupation"
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
-              <input
-                type="text"
-                value={data.interests}
-                onChange={(e) => updateData({ interests: e.target.value })}
-                placeholder="Interests (Chips: Business, Fitness, Philosophy, Creative)"
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
+            <div className="space-y-6">
+              <div className="space-y-3">
+                {[
+                  { value: 'STUCK' as const, emoji: '🧱', label: 'STUCK', sub: 'I need to break through' },
+                  { value: 'GOAL' as const, emoji: '🎯', label: 'Specific GOAL', sub: 'I know what I want' },
+                  { value: 'CURIOUS' as const, emoji: '🧐', label: 'Just CURIOUS', sub: 'Show me what this is' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => updateData({ mentalState: option.value })}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
+                      data.mentalState === option.value
+                        ? 'bg-purple-500/20 border-purple-500'
+                        : 'bg-gray-900 border-gray-700 hover:border-gray-600'
+                    }`}
+                  >
+                    <span className="text-3xl">{option.emoji}</span>
+                    <div className="flex-1">
+                      <p className="font-bold text-white">{option.label}</p>
+                      <p className="text-sm text-gray-400">{option.sub}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              
+              <div className="pt-4 border-t border-gray-800 space-y-3">
+                <input
+                  type="text"
+                  value={data.name}
+                  onChange={(e) => updateData({ name: e.target.value })}
+                  placeholder="Name"
+                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={data.location}
+                  onChange={(e) => updateData({ location: e.target.value })}
+                  placeholder="Location (Optional)"
+                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={data.occupation}
+                  onChange={(e) => updateData({ occupation: e.target.value })}
+                  placeholder="Occupation"
+                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={data.interests}
+                  onChange={(e) => updateData({ interests: e.target.value })}
+                  placeholder="Interests (Business, Fitness, Creative, etc.)"
+                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                />
+              </div>
             </div>
           </ScreenContainer>
         );
 
       case 4:
         return (
+          <BridgeScreen 
+            quote="Amateurs focus on the prize. Masters focus on the person."
+            onContinue={nextScreen}
+          />
+        );
+
+      case 5:
+        return (
           <ScreenContainer
             icon={<Target className="w-12 h-12 text-green-400" />}
-            header="The North Star (The Goal)"
-            subtext="What is the ONE main priority?"
+            goldenHeader="Who is the version of you that wins?"
+            header="The North Star (Goal)"
+            subtext="What is your ONE main goal?"
           >
             <div className="space-y-4">
               <input
                 type="text"
                 value={data.northStar}
                 onChange={(e) => updateData({ northStar: e.target.value })}
-                placeholder="e.g., Launch Business, Get Fit, Learn Piano"
+                placeholder="e.g., Launch my business, Get fit, Learn piano"
                 className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none text-lg"
                 autoFocus
               />
@@ -188,44 +202,54 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           </ScreenContainer>
         );
 
-      case 5:
+      case 6:
         return (
           <ScreenContainer
-            icon={<TrendingUp className="w-12 h-12 text-orange-400" />}
-            header="Deep Dive"
-            subtext="Why does this matter?"
+            icon={<span className="text-5xl">🔍</span>}
+            goldenHeader="Why does this matter?"
+            header="Deep Dive Reasoning"
+            subtext="What happens if you DON'T achieve this?"
           >
             <textarea
               value={data.deepDive}
               onChange={(e) => updateData({ deepDive: e.target.value })}
-              placeholder="What happens if you DON'T achieve this? What does success look like?"
+              placeholder="Describe what's at stake... What does success look like? What happens if you fail?"
               className="w-full h-48 px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"
               autoFocus
             />
           </ScreenContainer>
         );
 
-      case 6:
+      case 7:
+        return (
+          <BridgeScreen 
+            quote="We don't build on sand. We build on bedrock."
+            onContinue={nextScreen}
+          />
+        );
+
+      case 8:
         return (
           <ScreenContainer
             icon={<ListChecks className="w-12 h-12 text-cyan-400" />}
-            header="Existing Habits"
-            subtext="What are you ALREADY doing? (e.g., Gym, Reading)"
+            goldenHeader="What do you do even on your worst days?"
+            header="The Baseline"
+            subtext="List your current habits (Safe list)."
           >
             <div className="space-y-4">
               <div className="space-y-2">
                 {data.existingHabits && data.existingHabits.map((habit, index) => (
                   <div key={index} className="flex items-center gap-2 p-3 bg-gray-900 rounded-lg border border-gray-700">
                     <span className="flex-1 text-white">{habit.name}</span>
-                    <span className={`text-xs px-2 py-1 rounded ${habit.isSafe ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-400'}`}>
-                      {habit.isSafe ? 'Safe' : ''}
+                    <span className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-400">
+                      Safe
                     </span>
                     <button
                       onClick={() => {
                         const updated = data.existingHabits!.filter((_, i) => i !== index);
                         updateData({ existingHabits: updated });
                       }}
-                      className="text-red-400 hover:text-red-300"
+                      className="text-red-400 hover:text-red-300 text-xl"
                     >
                       ×
                     </button>
@@ -259,27 +283,28 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     }
   };
 
+  if (currentScreen === 1 || currentScreen === 4 || currentScreen === 7) {
+    return renderScreen();
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
       <div className="max-w-2xl w-full">
-        {/* Progress */}
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-400 mb-2">
             <span>Phase 1: The Download</span>
-            <span>Screen {currentScreen} of 6</span>
+            <span>Screen {currentScreen - Math.floor((currentScreen - 1) / 3)} of 5</span>
           </div>
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-blue-500 transition-all duration-300"
-              style={{ width: `${(currentScreen / 6) * 100}%` }}
+              style={{ width: `${(currentScreen / 8) * 100}%` }}
             />
           </div>
         </div>
 
-        {/* Screen Content */}
         {renderScreen()}
 
-        {/* Navigation */}
         <div className="flex gap-3 mt-8">
           <button
             onClick={prevScreen}
@@ -301,7 +326,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                 : 'bg-gray-800 text-gray-600 cursor-not-allowed'
             }`}
           >
-            {currentScreen === 6 ? 'Complete Phase 1' : 'Next'}
+            {currentScreen === 8 ? 'Complete Phase 1' : 'Next'}
           </button>
         </div>
       </div>
@@ -311,16 +336,20 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
 
 interface ScreenContainerProps {
   icon: React.ReactNode;
+  goldenHeader?: string;
   header: string;
   subtext: string;
   children: React.ReactNode;
 }
 
-function ScreenContainer({ icon, header, subtext, children }: ScreenContainerProps) {
+function ScreenContainer({ icon, goldenHeader, header, subtext, children }: ScreenContainerProps) {
   return (
     <div className="space-y-6 animate-fadeIn">
       <div className="text-center">
         <div className="flex justify-center mb-4">{icon}</div>
+        {goldenHeader && (
+          <p className="text-sm text-yellow-500 mb-2 uppercase tracking-wider">{goldenHeader}</p>
+        )}
         <h2 className="text-2xl font-bold text-white mb-2">{header}</h2>
         <p className="text-gray-400">{subtext}</p>
       </div>

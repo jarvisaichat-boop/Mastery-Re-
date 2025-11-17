@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Target } from 'lucide-react';
+import BridgeScreen from './BridgeScreen';
 
 interface Phase5NegotiationProps {
   profile: MasteryProfile;
@@ -10,13 +11,12 @@ interface Phase5NegotiationProps {
 export default function Phase5Negotiation({ profile, onComplete }: Phase5NegotiationProps) {
   const [currentScreen, setCurrentScreen] = useState(1);
   
-  // Generate initial habit based on profile
   const generateProposedHabit = () => {
     const goal = profile.northStar || 'your goal';
     const goldenHour = profile.goldenHour || 'morning';
     
     return {
-      name: `Deep Work: 45 mins`,
+      name: `Deep Work for 45 mins`,
       description: `Focused work session aligned with "${goal}" during your ${goldenHour} golden hour`,
       duration: 45,
       difficulty: 'challenging' as const,
@@ -29,14 +29,14 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
 
   const handleAccept = () => {
     setAccepted(true);
-    setCurrentScreen(2);
+    setCurrentScreen(3);
   };
 
   const handleTooHard = () => {
     const newDuration = 15;
     setFinalDuration(newDuration);
     setAccepted(true);
-    setCurrentScreen(2);
+    setCurrentScreen(3);
   };
 
   const handleComplete = () => {
@@ -54,11 +54,20 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
     switch (currentScreen) {
       case 1:
         return (
+          <BridgeScreen 
+            quote="A plan you can't stick to is a fantasy. Let's be real."
+            onContinue={() => setCurrentScreen(2)}
+          />
+        );
+
+      case 2:
+        return (
           <div className="space-y-8 animate-fadeIn">
             <div className="text-center">
               <Target className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">The Gap (New Habit Proposal)</h2>
-              <p className="text-gray-400">Based on your Goal and Baseline, I propose one new Core Habit</p>
+              <p className="text-sm text-yellow-500 mb-2 uppercase tracking-wider">Core Habit: [Deep Work] for 45 mins</p>
+              <h2 className="text-2xl font-bold text-white mb-2">The Gap</h2>
+              <p className="text-gray-400">Based on your goal and baseline</p>
             </div>
 
             <div className="bg-gray-900 border border-green-500/30 rounded-2xl p-6">
@@ -73,9 +82,6 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
                 <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">
                   {proposedHabit.duration} minutes
                 </span>
-                <span className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full">
-                  Challenging
-                </span>
               </div>
             </div>
 
@@ -84,7 +90,7 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
                 onClick={handleTooHard}
                 className="flex-1 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-medium border border-gray-700"
               >
-                Too Hard
+                Too Hard (Downgrade to 15 mins)
               </button>
               <button
                 onClick={handleAccept}
@@ -93,24 +99,18 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
                 Accept
               </button>
             </div>
-
-            {finalDuration < proposedHabit.duration && (
-              <div className="p-4 bg-blue-500/20 border border-blue-500/40 rounded-xl text-center">
-                <p className="text-blue-300">Downgraded to {finalDuration} mins</p>
-              </div>
-            )}
           </div>
         );
 
-      case 2:
+      case 3:
         return (
           <div className="space-y-8 animate-fadeIn">
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl">💧</span>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">The Habit Muscle (Non-Negotiable)</h2>
-              <p className="text-gray-400">We need one win that is impossible to fail</p>
+              <h2 className="text-2xl font-bold text-white mb-2">The Habit Muscle</h2>
+              <p className="text-gray-400">Fixed: "Drink Water" (Non-Negotiable)</p>
             </div>
 
             <div className="bg-gray-900 border border-blue-500/30 rounded-2xl p-6">
@@ -128,6 +128,14 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
               </div>
             </div>
 
+            {finalDuration < proposedHabit.duration && (
+              <div className="p-4 bg-blue-500/20 border border-blue-500/40 rounded-xl text-center">
+                <p className="text-blue-300">
+                  ✓ Downgraded to {finalDuration} mins (Easier start)
+                </p>
+              </div>
+            )}
+
             <button
               onClick={handleComplete}
               className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-lg rounded-xl"
@@ -142,13 +150,23 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
     }
   };
 
+  if (currentScreen === 1) {
+    return renderScreen();
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
       <div className="max-w-2xl w-full">
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-400 mb-2">
             <span>Phase 5: The Negotiation</span>
-            <span>Screen {currentScreen} of 2</span>
+            <span>Screen {currentScreen - 1} of 2</span>
+          </div>
+          <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-green-500 transition-all duration-300"
+              style={{ width: `${((currentScreen - 1) / 3) * 100}%` }}
+            />
           </div>
         </div>
 

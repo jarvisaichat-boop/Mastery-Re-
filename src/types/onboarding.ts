@@ -3,7 +3,7 @@
 export interface MasteryProfile {
   // Phase 1: Context & Baseline
   context: string;
-  mentalState: 'SPARK' | 'STUCK' | 'CURIOUS' | '';
+  mentalState: 'SPARK' | 'STUCK' | 'CURIOUS' | 'GOAL' | '';
   name: string;
   location: string;
   occupation: string;
@@ -15,6 +15,7 @@ export interface MasteryProfile {
   
   // Phase 2: Deep Discovery (Psychology)
   archetype: 'Commander' | 'Monk' | 'Warrior' | 'Explorer' | '';
+  mbti: string;
   fuel: 'Glory' | 'Fear' | '';
   saboteur: 'Perfectionist' | 'Distraction' | 'Exhaustion' | 'Time Scarcity' | '';
   stakes: 'Stagnant' | 'Regressing' | 'No-Think' | '';
