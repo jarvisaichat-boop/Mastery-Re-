@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, X, MessageCircle } from 'lucide-react';
 import { formatDate } from '../utils';
+import ReflectionCard, { ReflectionAnswer } from './ReflectionCard';
+import ReflectionSummaryCard from './ReflectionSummaryCard';
 
 interface Message {
     role: 'ai' | 'user';
@@ -8,25 +10,88 @@ interface Message {
     timestamp: number;
 }
 
+interface ReflectionEntry {
+    date: string;
+    answer: ReflectionAnswer;
+    reasoning: string;
+    timestamp: number;
+}
+
 interface ChatDailyCheckInProps {
-    date: Date;
-    onSubmit: (entry: { wins: string; challenges: string; messages: Message[] }) => void;
     onDismiss: () => void;
 }
 
-export default function ChatDailyCheckIn({ date, onSubmit, onDismiss }: ChatDailyCheckInProps) {
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            role: 'ai',
-            content: "Good morning! How did you do yesterday? 💪",
-            timestamp: Date.now()
-        }
-    ]);
+const LOCAL_STORAGE_REFLECTIONS_KEY = 'mastery-dashboard-reflections';
+
+function loadReflections(): ReflectionEntry[] {
+    try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_REFLECTIONS_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        console.error("Failed to load reflections", e);
+        return [];
+    }
+}
+
+function saveReflections(reflections: ReflectionEntry[]) {
+    try {
+        localStorage.setItem(LOCAL_STORAGE_REFLECTIONS_KEY, JSON.stringify(reflections));
+    } catch (e) {
+        console.error("Failed to save reflections", e);
+    }
+}
+
+function generateMotivationalResponse(answer: ReflectionAnswer): string {
+    const value = answer.value;
+    
+    if (value === 'very-great') {
+        const responses = [
+            "Hell yeah! 🔥 That's the kind of energy that builds empires. Keep this momentum going.",
+            "Crushing it! The fact you're even tracking this shows you're serious. Most people don't do that.",
+            "Love that you're feeling strong progress. This is how you build unstoppable momentum. 💪",
+            "That's what I'm talking about! You're in the zone. Stay locked in."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    
+    if (value === 'great') {
+        const responses = [
+            "Solid! Progress is progress. You showed up, and that's what counts. 🎯",
+            "Nice work! Every step forward matters. You're building something real here.",
+            "Good stuff! The fact you're reflecting means you're growing. Keep at it.",
+            "You're on track. Consistency over perfection—that's the secret."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    
+    if (value === 'okay') {
+        const responses = [
+            "I hear you. Some days are just about maintaining. That's okay. You're still in the game. 💪",
+            "Listen, showing up even when it's tough? That's real strength. You're building resilience.",
+            "The fact you're even reflecting on this? That's growth. Most people don't do that.",
+            "You're honest with yourself. That takes courage. Tomorrow's a new shot at greatness."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    
+    // not-great
+    const responses = [
+        "Real talk: You showed up today to think about this. That takes courage. You're on the right path.",
+        "I see you. Life throws punches, but you're still standing. That's already a win. 💪",
+        "The fact you're reflecting instead of avoiding? That's how winners are built. Respect.",
+        "Obstacles reveal character. You're here analyzing them, which means you're serious about growth."
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+}
+
+export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
+    const today = formatDate(new Date(), 'yyyy-MM-dd');
+    const [reflections, setReflections] = useState<ReflectionEntry[]>(loadReflections());
+    const todayReflection = reflections.find(r => r.date === today);
+    
+    const [showReflectionCard, setShowReflectionCard] = useState(!todayReflection);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
-    const [hasCollectedWins, setHasCollectedWins] = useState(false);
-    const [hasCollectedChallenges, setHasCollectedChallenges] = useState(false);
-    const [wins, setWins] = useState('');
-    const [challenges, setChallenges] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [isTyping, setIsTyping] = useState(false);
 
@@ -36,37 +101,49 @@ export default function ChatDailyCheckIn({ date, onSubmit, onDismiss }: ChatDail
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages, isTyping]);
+    }, [messages, isTyping, showReflectionCard]);
+
+    const handleReflectionComplete = (answer: ReflectionAnswer, reasoning: string) => {
+        const newEntry: ReflectionEntry = {
+            date: today,
+            answer,
+            reasoning,
+            timestamp: Date.now()
+        };
+
+        const updatedReflections = reflections.filter(r => r.date !== today);
+        updatedReflections.push(newEntry);
+        
+        setReflections(updatedReflections);
+        saveReflections(updatedReflections);
+        setShowReflectionCard(false);
+
+        // AI sends motivational response
+        setTimeout(() => {
+            setIsTyping(true);
+            setTimeout(() => {
+                const motivationalMessage: Message = {
+                    role: 'ai',
+                    content: generateMotivationalResponse(answer),
+                    timestamp: Date.now()
+                };
+                setMessages([motivationalMessage]);
+                setIsTyping(false);
+            }, 800);
+        }, 300);
+    };
+
+    const handleEditReflection = () => {
+        // Delete today's reflection and show card again
+        const updatedReflections = reflections.filter(r => r.date !== today);
+        setReflections(updatedReflections);
+        saveReflections(updatedReflections);
+        setShowReflectionCard(true);
+        setMessages([]);
+    };
 
     const generateAIResponse = (userMessage: string): string => {
         const messageLower = userMessage.toLowerCase();
-
-        if (!hasCollectedWins) {
-            const positiveResponses = [
-                "That's what I'm talking about! 🔥 Now, what challenges did you face?",
-                "Solid work! You're building momentum. What got in your way yesterday?",
-                "Hell yeah! Every win counts. What made things tough yesterday?",
-                "Love it! You showed up. What obstacles did you run into?",
-                "Crushing it! Keep that energy. What slowed you down yesterday?"
-            ];
-            setHasCollectedWins(true);
-            setWins(userMessage);
-            return positiveResponses[Math.floor(Math.random() * positiveResponses.length)];
-        }
-
-        if (!hasCollectedChallenges) {
-            const encouragingResponses = [
-                "I hear you. Life throws punches, but you're still standing. That's already a win. 💪",
-                "The fact you're even reflecting on this? That's growth. Most people don't do that.",
-                "Listen, challenges are just data points. You're learning what works and what doesn't. That's progress.",
-                "Real talk: You showed up today to think about this. That takes courage. You're on the right path.",
-                "Obstacles reveal character. The fact you're here analyzing them means you're serious about this. Respect.",
-                "Every stumble teaches you something. You're building resilience right now, whether you realize it or not."
-            ];
-            setHasCollectedChallenges(true);
-            setChallenges(userMessage);
-            return encouragingResponses[Math.floor(Math.random() * encouragingResponses.length)];
-        }
 
         if (messageLower.includes('better') || messageLower.includes('improve') || messageLower.includes('help')) {
             return "Here's the truth: You don't need to be perfect. You need to be consistent. Small wins compound. Focus on showing up, even when it's hard. That's how kings are made. 👑";
@@ -120,15 +197,7 @@ export default function ChatDailyCheckIn({ date, onSubmit, onDismiss }: ChatDail
         }, 800);
     };
 
-    const handleComplete = () => {
-        if (wins || challenges) {
-            onSubmit({ wins, challenges, messages });
-        }
-    };
-
-    const canComplete = hasCollectedWins && hasCollectedChallenges;
-    const yesterdayDate = new Date(date);
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const reflectionComplete = !!todayReflection || !showReflectionCard;
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -138,7 +207,7 @@ export default function ChatDailyCheckIn({ date, onSubmit, onDismiss }: ChatDail
                         <MessageCircle className="w-6 h-6 text-blue-400" />
                         <div>
                             <h2 className="text-2xl font-bold">Daily Check-In</h2>
-                            <p className="text-sm text-gray-400">{formatDate(yesterdayDate, 'MMMM d, yyyy')}</p>
+                            <p className="text-sm text-gray-400">{formatDate(new Date(), 'EEEE, MMMM d, yyyy')}</p>
                         </div>
                     </div>
                     <button
@@ -150,7 +219,19 @@ export default function ChatDailyCheckIn({ date, onSubmit, onDismiss }: ChatDail
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                    {messages.map((message, index) => (
+                    {/* Reflection Card or Summary */}
+                    {showReflectionCard ? (
+                        <ReflectionCard onComplete={handleReflectionComplete} />
+                    ) : todayReflection ? (
+                        <ReflectionSummaryCard 
+                            answer={todayReflection.answer}
+                            reasoning={todayReflection.reasoning}
+                            onEdit={handleEditReflection}
+                        />
+                    ) : null}
+
+                    {/* Chat Messages */}
+                    {reflectionComplete && messages.map((message, index) => (
                         <div
                             key={index}
                             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -170,7 +251,7 @@ export default function ChatDailyCheckIn({ date, onSubmit, onDismiss }: ChatDail
                         </div>
                     ))}
 
-                    {isTyping && (
+                    {reflectionComplete && isTyping && (
                         <div className="flex justify-start">
                             <div className="bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3">
                                 <div className="text-xs text-gray-400 mb-1 font-semibold">Stoic Coach</div>
@@ -186,47 +267,29 @@ export default function ChatDailyCheckIn({ date, onSubmit, onDismiss }: ChatDail
                     <div ref={messagesEndRef} />
                 </div>
 
-                <div className="p-6 border-t border-gray-700">
-                    <div className="flex gap-3">
-                        <input
-                            type="text"
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder={
-                                !hasCollectedWins
-                                    ? "What went well yesterday?"
-                                    : !hasCollectedChallenges
-                                    ? "What challenges did you face?"
-                                    : "Ask me anything..."
-                            }
-                            className="flex-1 p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                            autoFocus
-                        />
-                        <button
-                            onClick={handleSend}
-                            disabled={!inputValue.trim()}
-                            className="p-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
-                        >
-                            <Send className="w-5 h-5" />
-                        </button>
+                {/* Chat Input - Only show after reflection is complete */}
+                {reflectionComplete && (
+                    <div className="p-6 border-t border-gray-700">
+                        <div className="flex gap-3">
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                placeholder="Ask me anything..."
+                                className="flex-1 p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                                autoFocus={messages.length > 0}
+                            />
+                            <button
+                                onClick={handleSend}
+                                disabled={!inputValue.trim()}
+                                className="p-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                            >
+                                <Send className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
-
-                    {canComplete && (
-                        <button
-                            onClick={handleComplete}
-                            className="w-full mt-4 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors"
-                        >
-                            Complete Check-In ✓
-                        </button>
-                    )}
-
-                    <p className="text-xs text-gray-500 mt-3 text-center">
-                        {!hasCollectedWins && "Share what went well first"}
-                        {hasCollectedWins && !hasCollectedChallenges && "Now share your challenges"}
-                        {canComplete && "Chat complete! Click above to finish or ask more questions"}
-                    </p>
-                </div>
+                )}
             </div>
         </div>
     );

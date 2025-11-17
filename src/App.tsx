@@ -7,7 +7,6 @@ import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
 import InlineWeeklyReview from './components/InlineWeeklyReview';
 import StatsOverview from './components/StatsOverview';
-import ReflectionJournal from './components/ReflectionJournal';
 import { Habit } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
@@ -89,7 +88,6 @@ function App() {
     
     const [showDailyTrackingView, setShowDailyTrackingView] = useState(true);
     const [showStatsView, setShowStatsView] = useState(false);
-    const [showReflectionJournal, setShowReflectionJournal] = useState(false);
     
     const [weeklyRateMode, setWeeklyRateMode] = useState(loadRateMode);
     const [streakMode, setStreakMode] = useState(loadStreakMode);
@@ -162,22 +160,7 @@ function App() {
         } catch (e) { console.error("Failed to save motivation data", e); }
     }, [celebratedStreaks, dailyReasons, chatEntries]);
 
-    useEffect(() => {
-        const checkChatCheckIn = () => {
-            const today = formatDate(new Date(), 'yyyy-MM-dd');
-            const lastCheckIn = localStorage.getItem(LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY);
-            
-            if (lastCheckIn !== today && habits.length > 0) {
-                const now = new Date().getHours();
-                if (now >= 6) {
-                    setShowChatCheckIn(true);
-                }
-            }
-        };
-        
-        const timer = setTimeout(checkChatCheckIn, 2000);
-        return () => clearTimeout(timer);
-    }, [habits]);
+    // Removed automatic popup - Daily Check-In now only opens when user clicks Sparkles icon
 
     const startOfWeek = getStartOfWeek(currentDate);
     const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek, i));
@@ -312,11 +295,11 @@ function App() {
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
                 <div className="flex items-center space-x-2">
-                    {/* BUTTON 1: Reflection Journal */}
+                    {/* BUTTON 1: Daily Check-In (Reflection + Chat) */}
                     <button 
-                        onClick={() => setShowReflectionJournal(true)} 
+                        onClick={() => setShowChatCheckIn(true)} 
                         className="p-2 rounded-lg text-purple-400 hover:bg-gray-700 hover:text-purple-300"
-                        title="Reflection Journal"
+                        title="Daily Check-In"
                     >
                         <Sparkles className="w-5 h-5" />
                     </button>
@@ -432,17 +415,8 @@ function App() {
             
             {showChatCheckIn && (
                 <ChatDailyCheckIn 
-                    date={new Date()}
-                    onSubmit={handleChatCheckInSubmit}
-                    onDismiss={() => {
-                        setShowChatCheckIn(false);
-                        localStorage.setItem(LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY, formatDate(new Date(), 'yyyy-MM-dd'));
-                    }}
+                    onDismiss={() => setShowChatCheckIn(false)}
                 />
-            )}
-            
-            {showReflectionJournal && (
-                <ReflectionJournal onClose={() => setShowReflectionJournal(false)} />
             )}
             
             <AddHabitModal isOpen={showAddHabitModal} onClose={() => { setShowAddHabitModal(false); setSelectedHabitToEdit(null); }} onSaveHabit={handleSaveHabit} onDeleteHabit={handleDeleteHabit} habitToEdit={selectedHabitToEdit} habitMuscleCount={habitMuscleCount} lifeGoalsCount={lifeGoalsCount}/>
