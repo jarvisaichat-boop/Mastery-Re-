@@ -123,7 +123,7 @@ export function useDialogueManager(initialGoal?: string) {
         addMessage(nextQuestion, 'ai');
         setState(prev => ({
           ...prev,
-          context: updatedContext,
+          context: { ...updatedContext }, // Create new object reference
           currentQuestion: nextQuestion,
           slot: nextSlot,
         }));
@@ -132,17 +132,20 @@ export function useDialogueManager(initialGoal?: string) {
     }
 
     // All clarified!
-    updatedContext.clarified = true;
+    const clarifiedContext = {
+      ...updatedContext,
+      clarified: true,
+    };
     
-    const summary = `Perfect! So we're working on: ${updatedContext.specificMetric || updatedContext.originalGoal}${
-      updatedContext.timeframe ? ` by ${updatedContext.timeframe}` : ''
+    const summary = `Perfect! So we're working on: ${clarifiedContext.specificMetric || clarifiedContext.originalGoal}${
+      clarifiedContext.timeframe ? ` by ${clarifiedContext.timeframe}` : ''
     }. That's clear and measurable. Let's build the logic for how we get there.`;
     
     addMessage(summary, 'ai');
 
     setState(prev => ({
       ...prev,
-      context: updatedContext,
+      context: clarifiedContext, // Use new object with clarified flag
       awaitingClarification: false,
       currentQuestion: null,
       slot: null,

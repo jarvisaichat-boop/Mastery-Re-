@@ -24,6 +24,16 @@ export default function ConversationalGoalInput({
     }
   }, []);
 
+  // Watch for clarified goal and trigger callback
+  useEffect(() => {
+    if (dialogue.state.context?.clarified && dialogue.state.context) {
+      const goal = dialogue.state.context.specificMetric || dialogue.state.context.originalGoal;
+      setTimeout(() => {
+        onGoalClarified(goal, dialogue.state.context);
+      }, 1500);
+    }
+  }, [dialogue.state.context?.clarified, dialogue.state.context, onGoalClarified]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
@@ -35,28 +45,12 @@ export default function ConversationalGoalInput({
       // First submission - analyze the goal
       dialogue.addMessage(message, 'user');
       setHasSubmittedInitial(true);
-
-      const canProceed = dialogue.processGoalInput(message);
-      
-      if (canProceed && dialogue.state.context) {
-        // Goal is clear, can proceed
-        setTimeout(() => {
-          onGoalClarified(message, dialogue.state.context);
-        }, 1500);
-      }
+      dialogue.processGoalInput(message);
+      // Note: callback will be triggered by useEffect watching for clarified state
     } else {
       // Follow-up clarification
-      const canProceed = dialogue.handleClarification(message);
-      
-      if (canProceed && dialogue.state.context) {
-        // All clarified, can proceed
-        setTimeout(() => {
-          onGoalClarified(
-            dialogue.state.context!.specificMetric || dialogue.state.context!.originalGoal,
-            dialogue.state.context
-          );
-        }, 1500);
-      }
+      dialogue.handleClarification(message);
+      // Note: callback will be triggered by useEffect watching for clarified state
     }
   };
 

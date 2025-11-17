@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MasteryProfile, OnboardingPhase } from '../types/onboarding';
 import { Habit } from '../types';
-import { SkipForward } from 'lucide-react';
+import { Home, Target } from 'lucide-react';
 import Phase0Manifesto from './mastery-onboarding/Phase0Manifesto';
 import Phase1ContextBaseline from './mastery-onboarding/Phase1ContextBaseline';
 import Phase2DeepDiscovery from './mastery-onboarding/Phase2DeepDiscovery';
@@ -192,23 +192,24 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
         </button>
       )}
       
-      {/* Debug Phase Jump Button */}
+      {/* Quick Access Buttons - Jump to Phase 0 or Phase 4 */}
       {!isPreview && (
-        <button
-          onClick={() => {
-            const phase = prompt('Jump to phase (0-7):');
-            if (phase !== null) {
-              const phaseNum = parseInt(phase);
-              if (phaseNum >= 0 && phaseNum <= 7) {
-                setCurrentPhase(phaseNum as OnboardingPhase);
-              }
-            }
-          }}
-          className="fixed top-4 left-4 z-50 p-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg border border-gray-700 transition-colors"
-          title="Jump to Phase (Debug)"
-        >
-          <SkipForward className="w-4 h-4" />
-        </button>
+        <div className="fixed top-4 left-4 z-50 flex gap-2">
+          <button
+            onClick={() => setCurrentPhase(0)}
+            className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg border border-gray-700 transition-colors"
+            title="Jump to Start (Phase 0 - Manifesto)"
+          >
+            <Home className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setCurrentPhase(4)}
+            className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg border border-gray-700 transition-colors"
+            title="Jump to Phase 4 (Logic Tree)"
+          >
+            <Target className="w-4 h-4" />
+          </button>
+        </div>
       )}
       
       {renderPhase()}
