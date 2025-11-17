@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, TrendingUp, BarChart3, Sparkles } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import Onboarding from './components/Onboarding';
 import AICoachWidget from './components/AICoachWidget';
 import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
-import InlineWeeklyReview from './components/InlineWeeklyReview';
 import StatsOverview from './components/StatsOverview';
 import { Habit } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate } from './utils';
@@ -99,7 +98,6 @@ function App() {
     const [selectedHabitToEdit, setSelectedHabitToEdit] = useState<Habit | null>(null);
     const [draggedHabitId, setDraggedHabitId] = useState<number | null>(null);
 
-    const [showWeeklyReview, setShowWeeklyReview] = useState(false);
     const [aiCoachMessage, setAiCoachMessage] = useState('');
     const [showAiCoach, setShowAiCoach] = useState(false);
     const [streakCelebration, setStreakCelebration] = useState<{ habitName: string; days: number } | null>(null);
@@ -278,13 +276,6 @@ function App() {
         setStreakMode(p => p === 'hard' ? 'easy' : 'hard');
     }, []);
 
-    const handleWeeklyReviewAdjust = (adjustedHabits: Habit[]) => {
-        setHabits(adjustedHabits);
-    };
-
-    const handleWeeklyReviewShare = () => {
-        setShowWeeklyReview(false);
-    };
 
     if (!onboardingComplete) {
         return <Onboarding onComplete={handleOnboardingComplete} />;
@@ -306,44 +297,41 @@ function App() {
                     
                     {/* BUTTON 2: Stats View Toggle */}
                     <button 
-                        onClick={() => {
-                            setShowStatsView(p => !p);
-                            if (!showStatsView) {
-                                setShowWeeklyReview(false);
-                            }
-                        }} 
+                        onClick={() => setShowStatsView(p => !p)} 
                         className={`p-2 rounded-lg hover:bg-gray-700 ${showStatsView ? 'text-blue-400' : 'text-gray-400'}`}
                         title="Stats Dashboard"
                     >
                         <BarChart3 className="w-5 h-5" />
                     </button>
                     
-                    {/* BUTTON 3: Detailed/Simple List View Toggle */}
-                    {!showStatsView && (
-                        <button onClick={() => setShowDailyTrackingView(p => !p)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-700">
-                            {showDailyTrackingView ? <List className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
-                        </button>
-                    )}
-                    
-                    {/* BUTTON 4: Add New Habit */}
+                    {/* BUTTON 3: Add New Habit */}
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
-                    
-                    {/* BUTTON 5: Toggle Weekly Review */}
-                    {!showStatsView && (
-                        <button 
-                            onClick={() => setShowWeeklyReview(p => !p)} 
-                            className={`p-2 rounded-full hover:bg-gray-700 ${showWeeklyReview ? 'text-blue-400' : 'text-gray-400'}`}
-                            title="Weekly Review"
-                        >
-                            <TrendingUp className="w-6 h-6" />
-                        </button>
-                    )}
                 </div>
             </div>
             <div className="max-w-2xl mx-auto">
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
-                    <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
+                    <p className="text-gray-400 mb-4">Track your habits and build a better you, one day at a time.</p>
+                    
+                    {/* View Mode Toggle - Moved from top right */}
+                    <div className="flex justify-center">
+                        <button 
+                            onClick={() => setShowDailyTrackingView(p => !p)} 
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+                        >
+                            {showDailyTrackingView ? (
+                                <>
+                                    <List className="w-4 h-4" />
+                                    <span className="text-sm">Simple View</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Calendar className="w-4 h-4" />
+                                    <span className="text-sm">Weekly View</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* STATS OVERVIEW */}
@@ -355,16 +343,6 @@ function App() {
                         goal={goal}
                         onGoalUpdate={setGoal}
                         habits={habits}
-                    />
-                )}
-
-                {/* INLINE WEEKLY REVIEW */}
-                {!showStatsView && showWeeklyReview && (
-                    <InlineWeeklyReview 
-                        habits={habits}
-                        dailyReasons={dailyReasons}
-                        onAdjust={handleWeeklyReviewAdjust}
-                        onShare={handleWeeklyReviewShare}
                     />
                 )}
 
