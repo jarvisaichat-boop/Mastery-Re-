@@ -30,13 +30,22 @@ The core system follows a 7-phase coaching cycle:
 -   **Habit Tracking**: Supports daily, weekly, and custom frequency habits.
 -   **Stats Dashboard**: Provides comprehensive weekly analysis, completion rates, streak breakdowns, and heatmaps.
 -   **AI Integration**: Simulated AI for goal validation, habit generation, real-time motivational reactions, tailored responses, and conversational goal understanding.
--   **Conversational AI System** (November 2025):
-    -   **DialogueManager Hook**: Manages multi-turn conversation state, slot tracking (goalType, timeframe, specificMetric), and context propagation.
-    -   **Goal Understanding Service**: Detects ambiguous inputs (e.g., "100K EOY") and generates clarifying questions.
-    -   **Chat UI Components**: ChatBubble and ConversationThread for natural dialogue flow with auto-scroll.
-    -   **State Management**: Uses fresh object references for React state updates to ensure proper useEffect triggering.
-    -   **Phase 1 Integration**: North Star goal input transformed into conversational interface with real-time AI clarification.
--   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase) is saved in localStorage.
+-   **Onboarding Flow** (Restructured November 17, 2025):
+    -   **Phase 1 - Context Baseline**: 3 screens (Context, Spark, Profile) - simplified from 6 screens
+    -   **Phase 2 - Deep Discovery**: Collects archetype, fuel, saboteur
+    -   **Phase 3 - Logistics**: Collects golden hour preference
+    -   **Phase 5 - Synthesis**: AI persona calibration (Drill Sergeant/Hype Man/Wise Mentor) based on collected profile data
+    -   **Phase 4 - The Architect**: 4 screens including goal input, existing habits, conversational logic tree builder, and vision check
+    -   **Phase 6 - Negotiation**: Habit suggestions based on logic tree daily action
+    -   **Phase 7 - Contract**: Final commitment
+-   **Conversational Logic Tree** (November 2025):
+    -   **ConversationalArchitect Component**: Consultant-style chat interface in Phase 4 Screen 3 that builds milestone + daily action pathway
+    -   **Persona Integration**: AI tone adapts based on Phase 5 selection (Drill Sergeant: tactical/direct, Hype Man: energetic/motivational, Wise Mentor: reflective/patient)
+    -   **Context Awareness**: References existing habits in conversation opener
+    -   **Slot Tracking**: Validates milestone (measurable checkpoint) and action (daily practice) through multi-turn dialogue
+    -   **Data Flow**: Logic tree outputs (logicTreeBranch/Leaf) feed directly into Phase 6 habit suggestions
+-   **Vision Check**: Phase 4 Screen 4 asks users to visualize the complete pathway (action → milestone → goal) before proceeding
+-   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.
 -   **Quick Navigation**: Home icon (jump to Phase 0) and Target icon (jump to Phase 4) in top-left corner.
 
