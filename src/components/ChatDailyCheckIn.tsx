@@ -104,6 +104,8 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
     }, [messages, isTyping, showReflectionCard]);
 
     const handleReflectionComplete = (answer: ReflectionAnswer, reasoning: string) => {
+        const isEditing = !!todayReflection;
+        
         const newEntry: ReflectionEntry = {
             date: today,
             answer,
@@ -118,25 +120,26 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
         saveReflections(updatedReflections);
         setShowReflectionCard(false);
 
-        // AI sends motivational response
-        setTimeout(() => {
-            setIsTyping(true);
+        // Only generate AI motivational response for new reflections, not edits
+        if (!isEditing) {
             setTimeout(() => {
-                const motivationalMessage: Message = {
-                    role: 'ai',
-                    content: generateMotivationalResponse(answer),
-                    timestamp: Date.now()
-                };
-                setMessages([motivationalMessage]);
-                setIsTyping(false);
-            }, 800);
-        }, 300);
+                setIsTyping(true);
+                setTimeout(() => {
+                    const motivationalMessage: Message = {
+                        role: 'ai',
+                        content: generateMotivationalResponse(answer),
+                        timestamp: Date.now()
+                    };
+                    setMessages([motivationalMessage]);
+                    setIsTyping(false);
+                }, 800);
+            }, 300);
+        }
     };
 
     const handleEditReflection = () => {
-        // Show card again with existing data - don't delete until user saves
+        // Show card again with existing data - keep chat messages
         setShowReflectionCard(true);
-        setMessages([]);
     };
 
     const generateAIResponse = (userMessage: string): string => {

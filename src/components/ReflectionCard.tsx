@@ -54,6 +54,11 @@ export default function ReflectionCard({ onComplete, initialAnswer = null, initi
         onComplete(selectedAnswer, reasoning.trim());
     };
 
+    const handleChangeAnswer = () => {
+        setSelectedAnswer(null);
+        // Keep reasoning - user might want to keep their reflection when changing answer
+    };
+
     const handleBack = () => {
         setSelectedAnswer(null);
         setReasoning('');
@@ -113,10 +118,16 @@ export default function ReflectionCard({ onComplete, initialAnswer = null, initi
                         <div className="p-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 border-2 border-green-500/50 rounded-xl">
                             <div className="flex items-center gap-3 mb-3">
                                 <span className="text-3xl">✅</span>
-                                <div>
+                                <div className="flex-1">
                                     <p className="text-base font-bold text-white">Nice! You answered the question!</p>
                                     <p className="text-xs text-gray-300">That was easy, right?</p>
                                 </div>
+                                <button
+                                    onClick={handleChangeAnswer}
+                                    className="px-3 py-1 bg-gray-700/50 hover:bg-gray-600 text-xs text-white font-medium rounded-lg transition-all"
+                                >
+                                    Change
+                                </button>
                             </div>
                             <div className="flex items-center gap-2 p-2 bg-gray-800/50 rounded-lg">
                                 <span className="text-xl">{selectedAnswer.emoji}</span>
