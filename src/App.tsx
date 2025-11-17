@@ -82,6 +82,7 @@ function isOnboardingComplete(): boolean {
 
 function App() {
     const [onboardingComplete, setOnboardingComplete] = useState(isOnboardingComplete);
+    const [previewOnboarding, setPreviewOnboarding] = useState(false);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
     
@@ -277,24 +278,21 @@ function App() {
     }, []);
 
 
-    if (!onboardingComplete) {
-        return <MasteryOnboarding onComplete={handleOnboardingComplete} />;
+    if (!onboardingComplete || previewOnboarding) {
+        return <MasteryOnboarding 
+            onComplete={handleOnboardingComplete} 
+            isPreview={previewOnboarding}
+            onExitPreview={() => setPreviewOnboarding(false)}
+        />;
     }
-
-    const resetToOnboarding = () => {
-        if (confirm('Reset to onboarding? This will clear all current habits and data.')) {
-            localStorage.clear();
-            window.location.reload();
-        }
-    };
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
-            {/* Dev Testing: Reset to Onboarding */}
+            {/* Dev Testing: Preview Onboarding */}
             <button
-                onClick={resetToOnboarding}
+                onClick={() => setPreviewOnboarding(true)}
                 className="fixed top-4 left-4 z-50 p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                title="Reset to Onboarding (Dev Testing)"
+                title="Preview Onboarding Flow"
             >
                 <RotateCcw className="w-5 h-5 text-gray-400" />
             </button>

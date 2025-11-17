@@ -14,9 +14,11 @@ const PHASE_STORAGE_KEY = 'mastery-onboarding-phase';
 
 interface MasteryOnboardingProps {
   onComplete: (habits: Omit<Habit, 'id' | 'createdAt'>[], goal: string, aspirations: string, profile: MasteryProfile) => void;
+  isPreview?: boolean;
+  onExitPreview?: () => void;
 }
 
-export default function MasteryOnboarding({ onComplete }: MasteryOnboardingProps) {
+export default function MasteryOnboarding({ onComplete, isPreview = false, onExitPreview }: MasteryOnboardingProps) {
   const [currentPhase, setCurrentPhase] = useState<OnboardingPhase>(() => {
     // Load saved phase on mount
     try {
@@ -171,6 +173,15 @@ export default function MasteryOnboarding({ onComplete }: MasteryOnboardingProps
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
+      {/* Exit Preview Button - Only show when in preview mode */}
+      {isPreview && onExitPreview && (
+        <button
+          onClick={onExitPreview}
+          className="fixed top-4 right-4 z-50 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
+        >
+          Exit to Dashboard
+        </button>
+      )}
       {renderPhase()}
     </div>
   );
