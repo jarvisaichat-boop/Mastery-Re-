@@ -200,97 +200,95 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
     const reflectionComplete = !!todayReflection || !showReflectionCard;
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col border border-gray-700">
-                <div className="flex items-center justify-between p-6 border-b border-gray-700">
-                    <div className="flex items-center gap-3">
-                        <MessageCircle className="w-6 h-6 text-blue-400" />
-                        <div>
-                            <h2 className="text-2xl font-bold">Daily Check-In</h2>
-                            <p className="text-sm text-gray-400">{formatDate(new Date(), 'EEEE, MMMM d, yyyy')}</p>
+        <div className="fixed inset-0 bg-gray-950 z-50 flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+                <div className="flex items-center gap-3">
+                    <MessageCircle className="w-6 h-6 text-blue-400" />
+                    <div>
+                        <h2 className="text-2xl font-bold">Daily Check-In</h2>
+                        <p className="text-sm text-gray-400">{formatDate(new Date(), 'EEEE, MMMM d, yyyy')}</p>
+                    </div>
+                </div>
+                <button
+                    onClick={onDismiss}
+                    className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                    <X className="w-5 h-5 text-gray-400" />
+                </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 max-w-4xl mx-auto w-full">
+                {/* Reflection Card or Summary */}
+                {showReflectionCard ? (
+                    <ReflectionCard onComplete={handleReflectionComplete} />
+                ) : todayReflection ? (
+                    <ReflectionSummaryCard 
+                        answer={todayReflection.answer}
+                        reasoning={todayReflection.reasoning}
+                        onEdit={handleEditReflection}
+                    />
+                ) : null}
+
+                {/* Chat Messages */}
+                {reflectionComplete && messages.map((message, index) => (
+                    <div
+                        key={index}
+                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                        <div
+                            className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                                message.role === 'user'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-800 text-gray-100 border border-gray-700'
+                            }`}
+                        >
+                            {message.role === 'ai' && (
+                                <div className="text-xs text-gray-400 mb-1 font-semibold">Stoic Coach</div>
+                            )}
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                         </div>
                     </div>
-                    <button
-                        onClick={onDismiss}
-                        className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-                    >
-                        <X className="w-5 h-5 text-gray-400" />
-                    </button>
-                </div>
+                ))}
 
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                    {/* Reflection Card or Summary */}
-                    {showReflectionCard ? (
-                        <ReflectionCard onComplete={handleReflectionComplete} />
-                    ) : todayReflection ? (
-                        <ReflectionSummaryCard 
-                            answer={todayReflection.answer}
-                            reasoning={todayReflection.reasoning}
-                            onEdit={handleEditReflection}
-                        />
-                    ) : null}
-
-                    {/* Chat Messages */}
-                    {reflectionComplete && messages.map((message, index) => (
-                        <div
-                            key={index}
-                            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div
-                                className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                                    message.role === 'user'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-800 text-gray-100 border border-gray-700'
-                                }`}
-                            >
-                                {message.role === 'ai' && (
-                                    <div className="text-xs text-gray-400 mb-1 font-semibold">Stoic Coach</div>
-                                )}
-                                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                {reflectionComplete && isTyping && (
+                    <div className="flex justify-start">
+                        <div className="bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3">
+                            <div className="text-xs text-gray-400 mb-1 font-semibold">Stoic Coach</div>
+                            <div className="flex gap-1">
+                                <span className="animate-bounce text-gray-400" style={{ animationDelay: '0ms' }}>●</span>
+                                <span className="animate-bounce text-gray-400" style={{ animationDelay: '150ms' }}>●</span>
+                                <span className="animate-bounce text-gray-400" style={{ animationDelay: '300ms' }}>●</span>
                             </div>
-                        </div>
-                    ))}
-
-                    {reflectionComplete && isTyping && (
-                        <div className="flex justify-start">
-                            <div className="bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3">
-                                <div className="text-xs text-gray-400 mb-1 font-semibold">Stoic Coach</div>
-                                <div className="flex gap-1">
-                                    <span className="animate-bounce text-gray-400" style={{ animationDelay: '0ms' }}>●</span>
-                                    <span className="animate-bounce text-gray-400" style={{ animationDelay: '150ms' }}>●</span>
-                                    <span className="animate-bounce text-gray-400" style={{ animationDelay: '300ms' }}>●</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div ref={messagesEndRef} />
-                </div>
-
-                {/* Chat Input - Only show after reflection is complete */}
-                {reflectionComplete && (
-                    <div className="p-6 border-t border-gray-700">
-                        <div className="flex gap-3">
-                            <input
-                                type="text"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                placeholder="Ask me anything..."
-                                className="flex-1 p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                                autoFocus={messages.length > 0}
-                            />
-                            <button
-                                onClick={handleSend}
-                                disabled={!inputValue.trim()}
-                                className="p-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
-                            >
-                                <Send className="w-5 h-5" />
-                            </button>
                         </div>
                     </div>
                 )}
+
+                <div ref={messagesEndRef} />
             </div>
+
+            {/* Chat Input - Only show after reflection is complete */}
+            {reflectionComplete && (
+                <div className="p-6 border-t border-gray-700">
+                    <div className="flex gap-3 max-w-4xl mx-auto w-full">
+                        <input
+                            type="text"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                            placeholder="Ask me anything..."
+                            className="flex-1 p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                            autoFocus={messages.length > 0}
+                        />
+                        <button
+                            onClick={handleSend}
+                            disabled={!inputValue.trim()}
+                            className="p-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                        >
+                            <Send className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
