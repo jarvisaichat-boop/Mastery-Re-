@@ -9,7 +9,7 @@ export interface MasteryProfile {
   occupation: string;
   interests: string;
   northStar: string;
-  northStarTimeline: '1 Month' | '3 Months' | '';
+  northStarTimeline: '1 Month' | '3 Months' | '6 Months' | '1 Year' | '';
   deepDive: string;
   existingHabits: Array<{name: string; isSafe: boolean}>;
   
@@ -33,6 +33,7 @@ export interface MasteryProfile {
   logicTreeBranch: string;
   logicTreeLeaf: string;
   agreedToLogic: boolean;
+  canEnvisionPath: boolean;
   
   // Phase 5: Synthesis
   aiPersona: string; // "Hype Man" or "Drill Sergeant"

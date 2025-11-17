@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
-import { Brain, ListChecks } from 'lucide-react';
-import ConversationalGoalInput from './ConversationalGoalInput';
+import { Brain } from 'lucide-react';
 
 interface Phase1ContextBaselineProps {
   profile: Partial<MasteryProfile>;
@@ -17,10 +16,6 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     location: profile.location || '',
     occupation: profile.occupation || '',
     interests: profile.interests || '',
-    northStar: profile.northStar || '',
-    northStarTimeline: profile.northStarTimeline || '',
-    deepDive: profile.deepDive || '',
-    existingHabits: profile.existingHabits || [],
   });
 
   const updateData = (updates: Partial<MasteryProfile>) => {
@@ -28,7 +23,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
   };
 
   const nextScreen = () => {
-    if (currentScreen < 6) {
+    if (currentScreen < 3) {
       setCurrentScreen(prev => prev + 1);
     } else {
       onComplete(data);
@@ -46,9 +41,6 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
       case 1: return data.context && data.context.length > 0;
       case 2: return data.mentalState !== '';
       case 3: return data.name !== '';
-      case 4: return data.northStar && data.northStar.length > 0;
-      case 5: return data.deepDive && data.deepDive.length > 0;
-      case 6: return true; // Existing habits are optional
       default: return false;
     }
   };
@@ -154,92 +146,6 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           </ScreenContainer>
         );
 
-      case 4:
-        return (
-          <div className="animate-fadeIn">
-            <ConversationalGoalInput
-              onGoalClarified={(goal, context) => {
-                // Extract timeline from context if present, otherwise default to 3 months
-                const timeline = context.timeframe || '3 Months';
-                updateData({
-                  northStar: goal,
-                  northStarTimeline: timeline as '1 Month' | '3 Months',
-                });
-                // Auto-advance after goal is clarified
-                setTimeout(() => nextScreen(), 500);
-              }}
-            />
-          </div>
-        );
-
-      case 5:
-        return (
-          <ScreenContainer
-            icon={<span className="text-5xl">🔍</span>}
-            goldenHeader="Why does this matter?"
-            header="Deep Dive Reasoning"
-            subtext="What happens if you DON'T achieve this?"
-          >
-            <textarea
-              value={data.deepDive}
-              onChange={(e) => updateData({ deepDive: e.target.value })}
-              placeholder="Describe what's at stake... What does success look like? What happens if you fail?"
-              className="w-full h-48 px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-lg text-white text-base placeholder-gray-400 focus:border-blue-500 focus:outline-none resize-none"
-              autoFocus
-            />
-          </ScreenContainer>
-        );
-
-      case 6:
-        return (
-          <ScreenContainer
-            icon={<ListChecks className="w-12 h-12 text-cyan-400" />}
-            goldenHeader="What do you do even on your worst days?"
-            header="The Baseline"
-            subtext="List your current habits (Safe list)."
-          >
-            <div className="space-y-4">
-              <div className="space-y-2">
-                {data.existingHabits && data.existingHabits.map((habit, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-900/30 rounded-lg border-2 border-gray-700/50">
-                    <span className="flex-1 text-white text-base">{habit.name}</span>
-                    <span className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-300 font-medium">
-                      Safe
-                    </span>
-                    <button
-                      onClick={() => {
-                        const updated = data.existingHabits!.filter((_, i) => i !== index);
-                        updateData({ existingHabits: updated });
-                      }}
-                      className="text-red-400 hover:text-red-300 text-xl"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  id="new-habit-input"
-                  placeholder="Type a habit and press Enter"
-                  className="flex-1 px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-lg text-white text-base placeholder-gray-400 focus:border-blue-500 focus:outline-none"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                      const newHabit = { name: e.currentTarget.value.trim(), isSafe: true };
-                      updateData({ existingHabits: [...(data.existingHabits || []), newHabit] });
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-              </div>
-              <p className="text-sm text-gray-400">
-                These habits are marked as "Safe" and won't be changed
-              </p>
-            </div>
-          </ScreenContainer>
-        );
-
       default:
         return null;
     }
@@ -251,12 +157,12 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-400 mb-3">
             <span className="font-medium">Phase 1: The Download</span>
-            <span>Screen {currentScreen} of 6</span>
+            <span>Screen {currentScreen} of 3</span>
           </div>
           <div className="w-full h-2 bg-gray-800/50 rounded-full overflow-hidden">
             <div
               className="h-full bg-blue-500 transition-all duration-300"
-              style={{ width: `${(currentScreen / 6) * 100}%` }}
+              style={{ width: `${(currentScreen / 3) * 100}%` }}
             />
           </div>
         </div>
@@ -284,7 +190,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                 : 'bg-gray-800/30 text-gray-600 cursor-not-allowed'
             }`}
           >
-            {currentScreen === 6 ? 'Complete Phase 1' : 'Next'}
+            {currentScreen === 3 ? 'Complete Phase 1' : 'Next'}
           </button>
         </div>
       </div>

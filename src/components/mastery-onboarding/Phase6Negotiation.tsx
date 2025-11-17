@@ -12,14 +12,24 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
   const [currentScreen, setCurrentScreen] = useState(1);
   
   const generateProposedHabit = () => {
+    const action = profile.logicTreeLeaf || 'Deep Work for 45 mins';
     const goal = profile.northStar || 'your goal';
     const goldenHour = profile.goldenHour || 'morning';
     
+    // Extract duration from action if present (e.g., "30 min" or "1 hour")
+    let duration = 45;
+    const durationMatch = action.match(/(\d+)\s*(min|minute|hour)/i);
+    if (durationMatch) {
+      const value = parseInt(durationMatch[1]);
+      const unit = durationMatch[2].toLowerCase();
+      duration = unit.startsWith('hour') ? value * 60 : value;
+    }
+    
     return {
-      name: `Deep Work for 45 mins`,
-      description: `Focused work session aligned with "${goal}" during your ${goldenHour} golden hour`,
-      duration: 45,
-      difficulty: 'challenging' as const,
+      name: action,
+      description: `Your daily action to achieve "${goal}" - optimized for your ${goldenHour} golden hour`,
+      duration: duration,
+      difficulty: duration >= 30 ? ('challenging' as const) : ('moderate' as const),
     };
   };
 
@@ -57,9 +67,9 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
           <div className="space-y-8 animate-fadeIn">
             <div className="text-center">
               <Target className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <p className="text-sm text-yellow-500 mb-2 uppercase tracking-wider">Core Habit: [Deep Work] for 45 mins</p>
-              <h2 className="text-2xl font-bold text-white mb-2">The Gap</h2>
-              <p className="text-gray-400">Based on your goal and baseline</p>
+              <p className="text-sm text-yellow-500 mb-2 uppercase tracking-wider">From Your Logic Tree</p>
+              <h2 className="text-2xl font-bold text-white mb-2">Let's Optimize Your Habit</h2>
+              <p className="text-gray-400">Based on our conversation, here's your refined action</p>
             </div>
 
             <div className="bg-gray-900 border border-green-500/30 rounded-2xl p-6">
@@ -78,7 +88,7 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
             </div>
 
             <AIFeedback
-              message="Here's the science: a 45-minute habit has a 23% completion rate for beginners. A 15-minute habit has an 87% completion rate. Consistency > Intensity. Starting smaller builds the habit muscle first, then we scale up."
+              message={`Here's the science: ${finalDuration >= 30 ? 'a longer habit (30+ min) has a 23% completion rate for beginners, while' : ''} a 15-minute habit has an 87% completion rate. Consistency > Intensity. Starting smaller builds the habit muscle first, then we scale up.`}
               type="info"
             />
 

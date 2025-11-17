@@ -48,7 +48,6 @@ export default function Phase4Synthesis({ profile, onComplete }: Phase4Synthesis
               <ProfileRow label="Archetype" value={profile.archetype} />
               <ProfileRow label="Fuel" value={profile.fuel} />
               <ProfileRow label="Saboteur" value={profile.saboteur} />
-              <ProfileRow label="North Star" value={profile.northStar} />
               <ProfileRow label="Golden Hour" value={profile.goldenHour} />
             </div>
 

@@ -87,17 +87,20 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
 
   const handlePhase3Complete = (data: Partial<MasteryProfile>) => {
     updateProfile(data);
-    nextPhase();
+    // After Phase 3, jump to Phase 5 (Synthesis) instead of Phase 4
+    setCurrentPhase(5);
   };
 
   const handlePhase4Complete = (data: Partial<MasteryProfile>) => {
     updateProfile(data);
-    nextPhase();
+    // After Phase 4 (Architect), go to Phase 6
+    setCurrentPhase(6);
   };
 
   const handlePhase5Complete = (persona: string) => {
     updateProfile({ aiPersona: persona });
-    nextPhase();
+    // After Phase 5 (Synthesis), go to Phase 4 (Architect)
+    setCurrentPhase(4);
   };
 
   const handlePhase6Complete = (habitData: Partial<MasteryProfile>) => {

@@ -4,28 +4,51 @@ import ConversationThread, { Message } from './ConversationThread';
 
 interface ConversationalArchitectProps {
   goal: string;
+  existingHabits?: Array<{name: string; isSafe: boolean}>;
+  aiPersona?: string;
   onLogicComplete: (data: { milestone: string; action: string }) => void;
 }
 
-export default function ConversationalArchitect({ goal, onLogicComplete }: ConversationalArchitectProps) {
+export default function ConversationalArchitect({ goal, existingHabits, aiPersona, onLogicComplete }: ConversationalArchitectProps) {
+  // Personalize messages based on AI Persona
+  const getPersonalizedGreeting = () => {
+    const habitsContext = existingHabits && existingHabits.length > 0 
+      ? ` I see you're already doing ${existingHabits.map(h => h.name).join(', ')} - that's a solid foundation.`
+      : '';
+    
+    if (aiPersona === 'Drill Sergeant') {
+      return `Listen up. We're breaking down "${goal}" into a battle plan. No fluff, just results.${habitsContext} First: what's your milestone?`;
+    } else if (aiPersona === 'Hype Man') {
+      return `Let's GO! We're about to build the roadmap to "${goal}" and it's going to be LEGENDARY!${habitsContext} First up: what's your milestone?`;
+    } else if (aiPersona === 'Wise Mentor') {
+      return `Let us reflect on "${goal}" and craft a wise pathway forward.${habitsContext} Tell me, what milestone would signal meaningful progress?`;
+    }
+    return `Alright, let's break down "${goal}" into a logical pathway.${habitsContext} First, I need to understand what milestone would prove you're making progress.`;
+  };
+
+  const getMilestoneExplanation = () => {
+    if (aiPersona === 'Drill Sergeant') {
+      return 'A milestone is a tactical checkpoint. Specific. Measurable. Trackable. Example: "2 clients at $400 each" or "$10K monthly sales." Got it?';
+    } else if (aiPersona === 'Hype Man') {
+      return 'A milestone is your PROOF OF PROGRESS! Something you can track and CELEBRATE! Like "2 clients at $400 each" or "$10K in monthly sales!" What\'s yours?';
+    } else if (aiPersona === 'Wise Mentor') {
+      return 'A milestone, young one, is a marker on your journey - concrete and measurable. Perhaps "securing 2 clients at $400 each" or "achieving $10K in monthly revenue." What feels right for you?';
+    }
+    return 'A milestone is a concrete checkpoint - something measurable you can track. For example: "Sign 2 clients at $400 each" or "Hit $10K in monthly sales."';
+  };
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      message: `Alright, let's break down "${goal}" into a logical pathway. First, I need to understand what milestone would prove you're making progress.`,
+      message: getPersonalizedGreeting(),
       sender: 'ai',
       timestamp: Date.now(),
     },
     {
       id: '2',
-      message: 'A milestone is a concrete checkpoint - something measurable you can track. For example, if your goal is $100K in revenue, a milestone might be "Sign 2 clients at $400 each" or "Hit $10K in monthly sales."',
+      message: getMilestoneExplanation(),
       sender: 'ai',
       timestamp: Date.now() + 100,
-    },
-    {
-      id: '3',
-      message: 'What milestone makes sense for your goal?',
-      sender: 'ai',
-      timestamp: Date.now() + 200,
     },
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -55,32 +78,43 @@ export default function ConversationalArchitect({ goal, onLogicComplete }: Conve
     if (stage === 'milestone') {
       setMilestone(message);
 
-      // AI validates milestone
+      // AI validates milestone with personalized response
       setTimeout(() => {
-        addMessage(
-          `"${message}" - Great! That's specific and measurable. Now I need to understand what daily action will get you there.`,
-          'ai'
-        );
+        const validation = aiPersona === 'Drill Sergeant' 
+          ? `"${message}" - SOLID. Specific and measurable. Now: what's your daily action to get there?`
+          : aiPersona === 'Hype Man'
+          ? `"${message}" - YES! That's what I'm talking about! Now let's define the ACTION that makes it happen!`
+          : aiPersona === 'Wise Mentor'
+          ? `"${message}" - A worthy milestone. Now, what daily practice will guide you there?`
+          : `"${message}" - Great! That's specific and measurable. Now I need to understand what daily action will get you there.`;
+        
+        addMessage(validation, 'ai');
 
         setTimeout(() => {
-          addMessage(
-            'An action is something you can do consistently. For example: "Reach out to 5 potential clients daily" or "Post content 3 times per week."',
-            'ai'
-          );
-
-          setTimeout(() => {
-            addMessage('What action will you take to reach that milestone?', 'ai');
-            setStage('action');
-          }, 1000);
+          const actionExplanation = aiPersona === 'Drill Sergeant'
+            ? 'Your daily action is your discipline. Something you execute consistently. Examples: "5 client outreaches daily" or "3 content posts per week." What\'s yours?'
+            : aiPersona === 'Hype Man'
+            ? 'Your daily action is your SUPERPOWER! Something you do consistently to CRUSH IT! Like "Reach out to 5 potential clients daily" or "Post content 3x per week!" What\'s your move?'
+            : aiPersona === 'Wise Mentor'
+            ? 'A daily action is your practice - the ritual that builds mastery. Perhaps "reaching out to 5 clients daily" or "sharing your wisdom 3 times weekly." What calls to you?'
+            : 'An action is something you can do consistently. For example: "Reach out to 5 potential clients daily" or "Post content 3 times per week."';
+          
+          addMessage(actionExplanation, 'ai');
+          setStage('action');
         }, 1000);
       }, 500);
     } else {
-      // AI validates action and completes
+      // AI validates action and completes with personalized summary
       setTimeout(() => {
-        addMessage(
-          `Perfect! Here's your logic chain:\n\n"${message}" (daily action) → "${milestone}" (milestone) → "${goal}" (goal)\n\nThis is your roadmap. Simple, measurable, achievable.`,
-          'ai'
-        );
+        const summary = aiPersona === 'Drill Sergeant'
+          ? `LOCKED IN. Here's your battle plan:\n\n"${message}" (execute daily) → "${milestone}" (tactical checkpoint) → "${goal}" (mission accomplished)\n\nThis is your operational roadmap. Follow it. No excuses.`
+          : aiPersona === 'Hype Man'
+          ? `YESSS! Here's your success formula:\n\n"${message}" (your daily grind) → "${milestone}" (PROOF you're winning) → "${goal}" (THE DREAM ACHIEVED!)\n\nThis is YOUR roadmap to greatness! Let's DO THIS!`
+          : aiPersona === 'Wise Mentor'
+          ? `Excellent. Your path is now clear:\n\n"${message}" (daily practice) → "${milestone}" (meaningful progress) → "${goal}" (your aspiration realized)\n\nThis is your journey. Walk it with intention and patience.`
+          : `Perfect! Here's your logic chain:\n\n"${message}" (daily action) → "${milestone}" (milestone) → "${goal}" (goal)\n\nThis is your roadmap. Simple, measurable, achievable.`;
+        
+        addMessage(summary, 'ai');
 
         setTimeout(() => {
           onLogicComplete({ milestone, action: message });
