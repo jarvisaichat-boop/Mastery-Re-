@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Target } from 'lucide-react';
+import AIFeedback from './AIFeedback';
 
 interface Phase5NegotiationProps {
   profile: MasteryProfile;
@@ -75,6 +76,11 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
                 </span>
               </div>
             </div>
+
+            <AIFeedback
+              message="Here's the science: a 45-minute habit has a 23% completion rate for beginners. A 15-minute habit has an 87% completion rate. Consistency > Intensity. Starting smaller builds the habit muscle first, then we scale up."
+              type="info"
+            />
 
             <div className="flex gap-3">
               <button

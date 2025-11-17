@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Users, Flame, Shield, AlertTriangle } from 'lucide-react';
 import CoachFeedback from './CoachFeedback';
+import AIFeedback from './AIFeedback';
 
 interface Phase2DeepDiscoveryProps {
   profile: Partial<MasteryProfile>;
@@ -84,6 +85,21 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
                 selected={data.archetype || ''}
                 onSelect={(value) => updateData({ archetype: value })}
               />
+              
+              {data.archetype && (
+                <AIFeedback 
+                  message={
+                    data.archetype === 'Commander'
+                      ? "As a Commander, you thrive on systems and efficiency. Your habits will be structured, measurable, and designed to optimize your day. You'll love tracking progress metrics."
+                      : data.archetype === 'Monk'
+                      ? "As a Monk, you value deep focus and intentionality. Your habits will emphasize quality over quantity, creating space for deliberate practice and mindfulness."
+                      : data.archetype === 'Warrior'
+                      ? "As a Warrior, you're driven by grit and pushing through resistance. Your habits will challenge you physically and mentally, building resilience through consistent action."
+                      : "As an Explorer, you thrive on curiosity and variety. Your habits will stay fresh and interesting, letting you experiment while building sustainable momentum."
+                  }
+                  type="insight"
+                />
+              )}
             </div>
           </ScreenContainer>
         );
@@ -104,6 +120,18 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
               selected={data.fuel || ''}
               onSelect={(value) => updateData({ fuel: value })}
             />
+            
+            {data.fuel && (
+              <AIFeedback 
+                message={
+                  data.fuel === 'Glory'
+                    ? "🎉 You're fueled by Glory! I'll be your Hype Man - celebrating your wins, building streaks, and amplifying your achievements. Every small victory gets recognized."
+                    : "🔥 You're fueled by Fear! Drill Sergeant mode activated. I'll remind you what's at stake, call out excuses, and hold you accountable. No fluff, just results."
+                }
+                type={data.fuel === 'Glory' ? 'success' : 'warning'}
+              />
+            )}
+            
             <p className="text-xs text-gray-500 mt-4 text-center">
               This determines if AI is "Hype Man" (Glory) or "Drill Sergeant" (Fear)
             </p>
@@ -128,6 +156,21 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
               selected={data.saboteur || ''}
               onSelect={handleSaboteurSelect}
             />
+            
+            {data.saboteur && (
+              <AIFeedback 
+                message={
+                  data.saboteur === 'Perfectionist'
+                    ? "Perfectionism is fear in disguise. The antidote: 'Stupid Small' habits - so easy you can't fail. We'll make starting effortless."
+                    : data.saboteur === 'Distraction'
+                    ? "Distraction thrives in ambiguity. The antidote: time-boxing and environmental design. We'll create a frictionless focus zone."
+                    : data.saboteur === 'Exhaustion'
+                    ? "Low energy isn't just willpower - it's biological. The antidote: strategic habit timing during your natural energy peaks, plus micro-rest protocols."
+                    : "Time scarcity is often a myth - it's priority confusion. The antidote: ruthless habit stacking and killing low-value activities."
+                }
+                type="warning"
+              />
+            )}
           </ScreenContainer>
         );
 

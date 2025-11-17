@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Clock, Sun } from 'lucide-react';
+import AIFeedback from './AIFeedback';
 
 interface Phase3LogisticsProps {
   profile: Partial<MasteryProfile>;
@@ -72,14 +73,30 @@ export default function Phase3Logistics({ profile, onComplete }: Phase3Logistics
                   />
                 </div>
                 {data.wakeTime && data.sleepTime && (
-                  <div className="p-3 bg-yellow-500/20 border border-yellow-500/40 rounded-lg text-sm text-yellow-300">
+                  <>
+                    <div className="p-3 bg-yellow-500/20 border border-yellow-500/40 rounded-lg text-sm text-yellow-300">
+                      {(() => {
+                        const wake = parseInt(data.wakeTime.split(':')[0]);
+                        const sleep = parseInt(data.sleepTime.split(':')[0]);
+                        const sleepHours = sleep > wake ? sleep - wake : 24 - wake + sleep;
+                        return sleepHours < 6 ? '⚠️ Low Battery Warning: Sleep < 6hrs' : '✓ Good energy window';
+                      })()}
+                    </div>
                     {(() => {
                       const wake = parseInt(data.wakeTime.split(':')[0]);
                       const sleep = parseInt(data.sleepTime.split(':')[0]);
                       const sleepHours = sleep > wake ? sleep - wake : 24 - wake + sleep;
-                      return sleepHours < 6 ? '⚠️ Low Battery Warning: Sleep < 6hrs' : '✓ Good energy window';
+                      if (sleepHours < 6) {
+                        return (
+                          <AIFeedback 
+                            message="Red flag: Habits won't stick on 6 hours of sleep. Your energy is your foundation. We'll need to protect your sleep or schedule habits during your peak energy window only."
+                            type="warning"
+                          />
+                        );
+                      }
+                      return null;
                     })()}
-                  </div>
+                  </>
                 )}
               </div>
 
@@ -149,6 +166,21 @@ export default function Phase3Logistics({ profile, onComplete }: Phase3Logistics
                 </button>
               ))}
             </div>
+            
+            {data.goldenHour && (
+              <AIFeedback 
+                message={
+                  data.goldenHour === 'Morning'
+                    ? "Morning is your power window. Your willpower and decision-making are strongest here. This is prime real estate for your most important habit."
+                    : data.goldenHour === 'Lunch'
+                    ? "Lunch is a smart anchor point - predictable and energy-neutral. We'll design a habit that refreshes you rather than drains you."
+                    : data.goldenHour === 'After Work'
+                    ? "After Work is transition time. We'll use this as a 'context switch' habit - helping you shift from work mode to personal growth mode."
+                    : "Late Night works if you're a night owl. We'll keep the habit light and low-friction since willpower is depleted by this time."
+                }
+                type="info"
+              />
+            )}
           </ScreenContainer>
         );
 

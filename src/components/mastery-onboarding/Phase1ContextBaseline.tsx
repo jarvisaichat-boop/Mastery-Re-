@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Brain, Target, ListChecks } from 'lucide-react';
+import AIFeedback from './AIFeedback';
 
 interface Phase1ContextBaselineProps {
   profile: Partial<MasteryProfile>;
@@ -188,6 +189,17 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   ))}
                 </div>
               </div>
+              
+              {data.northStar && data.northStarTimeline && (
+                <AIFeedback 
+                  message={
+                    data.northStarTimeline === '1 Month'
+                      ? `A 1-month timeline for "${data.northStar}" is ambitious! This creates urgency and focus. We'll design micro-habits that compound fast to hit this goal.`
+                      : `3 months for "${data.northStar}" gives us room to build sustainable systems. You're thinking long-term - that's the path to mastery.`
+                  }
+                  type="insight"
+                />
+              )}
             </div>
           </ScreenContainer>
         );
