@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Clock, Sun } from 'lucide-react';
-import BridgeScreen from './BridgeScreen';
 
 interface Phase3LogisticsProps {
   profile: Partial<MasteryProfile>;
@@ -23,7 +22,7 @@ export default function Phase3Logistics({ profile, onComplete }: Phase3Logistics
   };
 
   const nextScreen = () => {
-    if (currentScreen < 3) {
+    if (currentScreen < 2) {
       setCurrentScreen(prev => prev + 1);
     } else {
       onComplete(data);
@@ -36,9 +35,8 @@ export default function Phase3Logistics({ profile, onComplete }: Phase3Logistics
 
   const canProceed = () => {
     switch (currentScreen) {
-      case 1: return true; // Bridge
-      case 2: return data.wakeTime !== '' && data.sleepTime !== '' && data.weekdayStructure !== '' && data.weekendStructure !== '';
-      case 3: return data.goldenHour !== '';
+      case 1: return data.wakeTime !== '' && data.sleepTime !== '' && data.weekdayStructure !== '' && data.weekendStructure !== '';
+      case 2: return data.goldenHour !== '';
       default: return false;
     }
   };
@@ -46,14 +44,6 @@ export default function Phase3Logistics({ profile, onComplete }: Phase3Logistics
   const renderScreen = () => {
     switch (currentScreen) {
       case 1:
-        return (
-          <BridgeScreen 
-            quote="Time management is a myth. Energy management is reality."
-            onContinue={nextScreen}
-          />
-        );
-
-      case 2:
         return (
           <ScreenContainer
             icon={<Clock className="w-12 h-12 text-cyan-400" />}
@@ -136,7 +126,7 @@ export default function Phase3Logistics({ profile, onComplete }: Phase3Logistics
           </ScreenContainer>
         );
 
-      case 3:
+      case 2:
         return (
           <ScreenContainer
             icon={<Sun className="w-12 h-12 text-yellow-400" />}
@@ -167,22 +157,18 @@ export default function Phase3Logistics({ profile, onComplete }: Phase3Logistics
     }
   };
 
-  if (currentScreen === 1) {
-    return renderScreen();
-  }
-
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
       <div className="max-w-2xl w-full">
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-400 mb-2">
             <span>Phase 3: Logistics</span>
-            <span>Screen {currentScreen - 1} of 2</span>
+            <span>Screen {currentScreen} of 2</span>
           </div>
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-cyan-500 transition-all duration-300"
-              style={{ width: `${((currentScreen - 1) / 2) * 100}%` }}
+              style={{ width: `${(currentScreen / 2) * 100}%` }}
             />
           </div>
         </div>
@@ -210,7 +196,7 @@ export default function Phase3Logistics({ profile, onComplete }: Phase3Logistics
                 : 'bg-gray-800 text-gray-600 cursor-not-allowed'
             }`}
           >
-            {currentScreen === 3 ? 'Complete Phase 3' : 'Next'}
+            {currentScreen === 2 ? 'Complete Phase 3' : 'Next'}
           </button>
         </div>
       </div>

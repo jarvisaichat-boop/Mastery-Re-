@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Brain, Target, ListChecks } from 'lucide-react';
-import BridgeScreen from './BridgeScreen';
 
 interface Phase1ContextBaselineProps {
   profile: Partial<MasteryProfile>;
@@ -28,7 +27,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
   };
 
   const nextScreen = () => {
-    if (currentScreen < 8) {
+    if (currentScreen < 6) {
       setCurrentScreen(prev => prev + 1);
     } else {
       onComplete(data);
@@ -43,14 +42,12 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
 
   const canProceed = () => {
     switch (currentScreen) {
-      case 1: return true; // Bridge
-      case 2: return data.context && data.context.length > 0;
-      case 3: return data.mentalState !== '' && data.name !== '';
-      case 4: return true; // Bridge
-      case 5: return data.northStar && data.northStar.length > 0;
-      case 6: return data.deepDive && data.deepDive.length > 0;
-      case 7: return true; // Bridge
-      case 8: return true; // Existing habits are optional
+      case 1: return data.context && data.context.length > 0;
+      case 2: return data.mentalState !== '';
+      case 3: return data.name !== '';
+      case 4: return data.northStar && data.northStar.length > 0;
+      case 5: return data.deepDive && data.deepDive.length > 0;
+      case 6: return true; // Existing habits are optional
       default: return false;
     }
   };
@@ -58,14 +55,6 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
   const renderScreen = () => {
     switch (currentScreen) {
       case 1:
-        return (
-          <BridgeScreen 
-            quote="To guide you, I need to know the terrain. Your past struggles are data, not failures."
-            onContinue={nextScreen}
-          />
-        );
-
-      case 2:
         return (
           <ScreenContainer
             icon={<Brain className="w-12 h-12 text-blue-400" />}
@@ -88,82 +77,83 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           </ScreenContainer>
         );
 
+      case 2:
+        return (
+          <ScreenContainer
+            icon={<span className="text-5xl">⚡</span>}
+            goldenHeader="What brought you here?"
+            header="The Spark"
+            subtext="Choose the one that resonates"
+          >
+            <div className="space-y-3">
+              {[
+                { value: 'STUCK' as const, emoji: '🧱', label: 'STUCK', sub: 'I need to break through' },
+                { value: 'GOAL' as const, emoji: '🎯', label: 'Specific GOAL', sub: 'I know what I want' },
+                { value: 'CURIOUS' as const, emoji: '🧐', label: 'Just CURIOUS', sub: 'Show me what this is' },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => updateData({ mentalState: option.value })}
+                  className={`w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
+                    data.mentalState === option.value
+                      ? 'bg-purple-500/20 border-purple-500'
+                      : 'bg-gray-900 border-gray-700 hover:border-gray-600'
+                  }`}
+                >
+                  <span className="text-3xl">{option.emoji}</span>
+                  <div className="flex-1">
+                    <p className="font-bold text-white">{option.label}</p>
+                    <p className="text-sm text-gray-400">{option.sub}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </ScreenContainer>
+        );
+
       case 3:
         return (
           <ScreenContainer
             icon={<span className="text-5xl">👤</span>}
-            goldenHeader="What brought you here?"
-            header="The Spark & Profile"
-            subtext="Cards: Stuck, Specific Goal, etc."
+            goldenHeader="Who are you?"
+            header="Your Profile"
+            subtext="Tell me about yourself"
           >
-            <div className="space-y-6">
-              <div className="space-y-3">
-                {[
-                  { value: 'STUCK' as const, emoji: '🧱', label: 'STUCK', sub: 'I need to break through' },
-                  { value: 'GOAL' as const, emoji: '🎯', label: 'Specific GOAL', sub: 'I know what I want' },
-                  { value: 'CURIOUS' as const, emoji: '🧐', label: 'Just CURIOUS', sub: 'Show me what this is' },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => updateData({ mentalState: option.value })}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
-                      data.mentalState === option.value
-                        ? 'bg-purple-500/20 border-purple-500'
-                        : 'bg-gray-900 border-gray-700 hover:border-gray-600'
-                    }`}
-                  >
-                    <span className="text-3xl">{option.emoji}</span>
-                    <div className="flex-1">
-                      <p className="font-bold text-white">{option.label}</p>
-                      <p className="text-sm text-gray-400">{option.sub}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-              
-              <div className="pt-4 border-t border-gray-800 space-y-3">
-                <input
-                  type="text"
-                  value={data.name}
-                  onChange={(e) => updateData({ name: e.target.value })}
-                  placeholder="Name"
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-                />
-                <input
-                  type="text"
-                  value={data.location}
-                  onChange={(e) => updateData({ location: e.target.value })}
-                  placeholder="Location (Optional)"
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-                />
-                <input
-                  type="text"
-                  value={data.occupation}
-                  onChange={(e) => updateData({ occupation: e.target.value })}
-                  placeholder="Occupation"
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-                />
-                <input
-                  type="text"
-                  value={data.interests}
-                  onChange={(e) => updateData({ interests: e.target.value })}
-                  placeholder="Interests (Business, Fitness, Creative, etc.)"
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-                />
-              </div>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={data.name}
+                onChange={(e) => updateData({ name: e.target.value })}
+                placeholder="Name"
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                autoFocus
+              />
+              <input
+                type="text"
+                value={data.location}
+                onChange={(e) => updateData({ location: e.target.value })}
+                placeholder="Location (Optional)"
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+              <input
+                type="text"
+                value={data.occupation}
+                onChange={(e) => updateData({ occupation: e.target.value })}
+                placeholder="Occupation"
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+              <input
+                type="text"
+                value={data.interests}
+                onChange={(e) => updateData({ interests: e.target.value })}
+                placeholder="Interests (Business, Fitness, Creative, etc.)"
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+              />
             </div>
           </ScreenContainer>
         );
 
       case 4:
-        return (
-          <BridgeScreen 
-            quote="Amateurs focus on the prize. Masters focus on the person."
-            onContinue={nextScreen}
-          />
-        );
-
-      case 5:
         return (
           <ScreenContainer
             icon={<Target className="w-12 h-12 text-green-400" />}
@@ -202,7 +192,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           </ScreenContainer>
         );
 
-      case 6:
+      case 5:
         return (
           <ScreenContainer
             icon={<span className="text-5xl">🔍</span>}
@@ -220,15 +210,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           </ScreenContainer>
         );
 
-      case 7:
-        return (
-          <BridgeScreen 
-            quote="We don't build on sand. We build on bedrock."
-            onContinue={nextScreen}
-          />
-        );
-
-      case 8:
+      case 6:
         return (
           <ScreenContainer
             icon={<ListChecks className="w-12 h-12 text-cyan-400" />}
@@ -283,22 +265,18 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     }
   };
 
-  if (currentScreen === 1 || currentScreen === 4 || currentScreen === 7) {
-    return renderScreen();
-  }
-
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
       <div className="max-w-2xl w-full">
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-400 mb-2">
             <span>Phase 1: The Download</span>
-            <span>Screen {currentScreen > 7 ? 5 : currentScreen > 4 ? currentScreen - 2 : currentScreen > 1 ? currentScreen - 1 : 1} of 5</span>
+            <span>Screen {currentScreen} of 6</span>
           </div>
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-blue-500 transition-all duration-300"
-              style={{ width: `${(currentScreen / 8) * 100}%` }}
+              style={{ width: `${(currentScreen / 6) * 100}%` }}
             />
           </div>
         </div>
@@ -326,7 +304,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                 : 'bg-gray-800 text-gray-600 cursor-not-allowed'
             }`}
           >
-            {currentScreen === 8 ? 'Complete Phase 1' : 'Next'}
+            {currentScreen === 6 ? 'Complete Phase 1' : 'Next'}
           </button>
         </div>
       </div>

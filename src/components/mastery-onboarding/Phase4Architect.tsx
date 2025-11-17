@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Target, GitBranch } from 'lucide-react';
-import BridgeScreen from './BridgeScreen';
 
 interface Phase4ArchitectProps {
   profile: Partial<MasteryProfile>;
@@ -23,7 +22,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
   };
 
   const nextScreen = () => {
-    if (currentScreen < 4) {
+    if (currentScreen < 3) {
       setCurrentScreen(prev => prev + 1);
     } else {
       onComplete(data);
@@ -36,10 +35,9 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
 
   const canProceed = () => {
     switch (currentScreen) {
-      case 1: return true; // Bridge
-      case 2: return data.specificMetric && data.specificMetric.length > 0 && data.logicTreeRoot && data.logicTreeRoot.length > 0;
-      case 3: return data.logicTreeRoot && data.logicTreeBranch && data.logicTreeLeaf && data.logicTreeRoot.length > 0 && data.logicTreeBranch.length > 0 && data.logicTreeLeaf.length > 0;
-      case 4: return data.agreedToLogic;
+      case 1: return data.specificMetric && data.specificMetric.length > 0 && data.logicTreeRoot && data.logicTreeRoot.length > 0;
+      case 2: return data.logicTreeRoot && data.logicTreeBranch && data.logicTreeLeaf && data.logicTreeRoot.length > 0 && data.logicTreeBranch.length > 0 && data.logicTreeLeaf.length > 0;
+      case 3: return data.agreedToLogic;
       default: return false;
     }
   };
@@ -47,14 +45,6 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
   const renderScreen = () => {
     switch (currentScreen) {
       case 1:
-        return (
-          <BridgeScreen 
-            quote="Vague goals die. Logical systems survive. Let's deconstruct your vision."
-            onContinue={nextScreen}
-          />
-        );
-
-      case 2:
         return (
           <ScreenContainer
             icon={<Target className="w-12 h-12 text-green-400" />}
@@ -87,7 +77,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
           </ScreenContainer>
         );
 
-      case 3:
+      case 2:
         return (
           <ScreenContainer
             icon={<GitBranch className="w-12 h-12 text-blue-400" />}
@@ -147,7 +137,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
           </ScreenContainer>
         );
 
-      case 4:
+      case 3:
         return (
           <ScreenContainer
             icon={<span className="text-5xl">🤝</span>}
@@ -197,22 +187,18 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
     }
   };
 
-  if (currentScreen === 1) {
-    return renderScreen();
-  }
-
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
       <div className="max-w-2xl w-full">
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-400 mb-2">
             <span>Phase 4: The Architect</span>
-            <span>Screen {currentScreen - 1} of 3</span>
+            <span>Screen {currentScreen} of 3</span>
           </div>
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-green-500 to-blue-500 transition-all duration-300"
-              style={{ width: `${((currentScreen - 1) / 3) * 100}%` }}
+              style={{ width: `${(currentScreen / 3) * 100}%` }}
             />
           </div>
         </div>
@@ -240,7 +226,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                 : 'bg-gray-800 text-gray-600 cursor-not-allowed'
             }`}
           >
-            {currentScreen === 4 ? 'Complete Phase 4' : 'Next'}
+            {currentScreen === 3 ? 'Complete Phase 4' : 'Next'}
           </button>
         </div>
       </div>

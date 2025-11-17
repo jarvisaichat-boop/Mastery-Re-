@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Users, Flame, Shield, AlertTriangle } from 'lucide-react';
-import BridgeScreen from './BridgeScreen';
 import CoachFeedback from './CoachFeedback';
 
 interface Phase2DeepDiscoveryProps {
@@ -26,7 +25,7 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
   };
 
   const nextScreen = () => {
-    if (currentScreen < 5) {
+    if (currentScreen < 4) {
       setCurrentScreen(prev => prev + 1);
     } else {
       onComplete(data);
@@ -41,12 +40,10 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
 
   const canProceed = () => {
     switch (currentScreen) {
-      case 1: return true; // Bridge
-      case 2: return data.archetype !== '';
-      case 3: return data.fuel !== '';
-      case 4: return data.saboteur !== '';
-      case 5: return data.stakes !== '';
-      case 6: return false; // Safety guard - should never reach
+      case 1: return data.archetype !== '';
+      case 2: return data.fuel !== '';
+      case 3: return data.saboteur !== '';
+      case 4: return data.stakes !== '';
       default: return false;
     }
   };
@@ -62,14 +59,6 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
   const renderScreen = () => {
     switch (currentScreen) {
       case 1:
-        return (
-          <BridgeScreen 
-            quote="Discipline is an Ecosystem. Let's align your Personality & Environment."
-            onContinue={nextScreen}
-          />
-        );
-
-      case 2:
         return (
           <ScreenContainer
             icon={<Users className="w-12 h-12 text-blue-400" />}
@@ -99,7 +88,7 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
           </ScreenContainer>
         );
 
-      case 3:
+      case 2:
         return (
           <ScreenContainer
             icon={<Flame className="w-12 h-12 text-orange-400" />}
@@ -121,7 +110,7 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
           </ScreenContainer>
         );
 
-      case 4:
+      case 3:
         return (
           <ScreenContainer
             icon={<Shield className="w-12 h-12 text-red-400" />}
@@ -142,7 +131,7 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
           </ScreenContainer>
         );
 
-      case 5:
+      case 4:
         return (
           <div className="min-h-[70vh] bg-gradient-to-b from-red-950/30 to-gray-950 rounded-2xl p-8 border-2 border-red-900/50">
             <ScreenContainer
@@ -169,22 +158,18 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
     }
   };
 
-  if (currentScreen === 1) {
-    return renderScreen();
-  }
-
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
       <div className="max-w-2xl w-full">
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-400 mb-2">
             <span>Phase 2: Deep Discovery</span>
-            <span>Screen {currentScreen - 1} of 4</span>
+            <span>Screen {currentScreen} of 4</span>
           </div>
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-purple-500 transition-all duration-300"
-              style={{ width: `${((currentScreen - 1) / 5) * 100}%` }}
+              style={{ width: `${(currentScreen / 4) * 100}%` }}
             />
           </div>
         </div>
@@ -212,7 +197,7 @@ export default function Phase2DeepDiscovery({ profile, onComplete }: Phase2DeepD
                 : 'bg-gray-800 text-gray-600 cursor-not-allowed'
             }`}
           >
-            {currentScreen === 5 ? 'Complete Phase 2' : 'Next'}
+            {currentScreen === 4 ? 'Complete Phase 2' : 'Next'}
           </button>
         </div>
       </div>

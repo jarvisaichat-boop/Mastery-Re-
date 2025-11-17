@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MasteryProfile } from '../../types/onboarding';
 import { Target } from 'lucide-react';
-import BridgeScreen from './BridgeScreen';
 
 interface Phase5NegotiationProps {
   profile: MasteryProfile;
@@ -29,14 +28,14 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
 
   const handleAccept = () => {
     setAccepted(true);
-    setCurrentScreen(3);
+    setCurrentScreen(2);
   };
 
   const handleTooHard = () => {
     const newDuration = 15;
     setFinalDuration(newDuration);
     setAccepted(true);
-    setCurrentScreen(3);
+    setCurrentScreen(2);
   };
 
   const handleComplete = () => {
@@ -53,14 +52,6 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
   const renderScreen = () => {
     switch (currentScreen) {
       case 1:
-        return (
-          <BridgeScreen 
-            quote="A plan you can't stick to is a fantasy. Let's be real."
-            onContinue={() => setCurrentScreen(2)}
-          />
-        );
-
-      case 2:
         return (
           <div className="space-y-8 animate-fadeIn">
             <div className="text-center">
@@ -102,7 +93,7 @@ export default function Phase5Negotiation({ profile, onComplete }: Phase5Negotia
           </div>
         );
 
-      case 3:
+      case 2:
         return (
           <div className="space-y-8 animate-fadeIn">
             <div className="text-center">
