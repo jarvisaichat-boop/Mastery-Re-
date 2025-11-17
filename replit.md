@@ -39,6 +39,13 @@ The core of the system is a 7-phase coaching cycle:
 -   **Deployment**: Replit environment (configured for port 5000 and `0.0.0.0` host)
 
 ## Recent Changes
+- **2025-11-17**: Save/Resume Onboarding Functionality
+  - **Phase Persistence**: Current onboarding phase now saved to localStorage
+  - **Auto-Resume**: Users return to exact phase they were on when reloading page
+  - **Data Preservation**: All answers and selections persist across browser refreshes
+  - **Smart Cleanup**: Both profile and phase data cleared when onboarding completes
+  - **User Experience**: Can exit onboarding at any time and return days later to same spot
+
 - **2025-11-17**: Comprehensive Mastery Onboarding Module (MAJOR FEATURE)
   - **Complete Replacement**: Built comprehensive 6-phase onboarding system replacing simple onboarding
   - **Phase 0 - Manifesto**: 3-slide carousel introducing philosophy (willpower myth, science, promise) with smooth transitions
