@@ -28,7 +28,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
   };
 
   const nextScreen = () => {
-    if (currentScreen < 9) {
+    if (currentScreen < 8) {
       setCurrentScreen(prev => prev + 1);
     } else {
       onComplete(data);
@@ -293,7 +293,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-400 mb-2">
             <span>Phase 1: The Download</span>
-            <span>Screen {currentScreen - Math.floor((currentScreen - 1) / 3)} of 5</span>
+            <span>Screen {currentScreen > 7 ? 5 : currentScreen > 4 ? currentScreen - 2 : currentScreen > 1 ? currentScreen - 1 : 1} of 5</span>
           </div>
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
