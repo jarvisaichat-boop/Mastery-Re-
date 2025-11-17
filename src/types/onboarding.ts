@@ -27,10 +27,17 @@ export interface MasteryProfile {
   weekendStructure: 'Structured' | 'Total Rest' | 'Chaos' | '';
   goldenHour: 'Morning' | 'Lunch' | 'After Work' | 'Late Night' | '';
   
-  // Phase 4: Synthesis
+  // Phase 4: The Architect (Logic Tree)
+  specificMetric: string;
+  logicTreeRoot: string;
+  logicTreeBranch: string;
+  logicTreeLeaf: string;
+  agreedToLogic: boolean;
+  
+  // Phase 5: Synthesis
   aiPersona: string; // "Hype Man" or "Drill Sergeant"
   
-  // Phase 5: Negotiation
+  // Phase 6: Negotiation
   proposedHabit: {
     name: string;
     description: string;
@@ -40,12 +47,12 @@ export interface MasteryProfile {
   acceptedHabit: boolean;
   finalHabitDuration: number;
   
-  // Phase 6: Contract
+  // Phase 7: Contract
   committed: boolean;
   completedAt: number;
 }
 
-export type OnboardingPhase = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type OnboardingPhase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export interface OnboardingState {
   currentPhase: OnboardingPhase;

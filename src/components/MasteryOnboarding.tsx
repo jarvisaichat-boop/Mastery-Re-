@@ -5,9 +5,10 @@ import Phase0Manifesto from './mastery-onboarding/Phase0Manifesto';
 import Phase1ContextBaseline from './mastery-onboarding/Phase1ContextBaseline';
 import Phase2DeepDiscovery from './mastery-onboarding/Phase2DeepDiscovery';
 import Phase3Logistics from './mastery-onboarding/Phase3Logistics';
-import Phase4Synthesis from './mastery-onboarding/Phase4Synthesis';
-import Phase5Negotiation from './mastery-onboarding/Phase5Negotiation';
-import Phase6Contract from './mastery-onboarding/Phase6Contract';
+import Phase4Architect from './mastery-onboarding/Phase4Architect';
+import Phase5Synthesis from './mastery-onboarding/Phase5Synthesis';
+import Phase6Negotiation from './mastery-onboarding/Phase6Negotiation';
+import Phase7Contract from './mastery-onboarding/Phase7Contract';
 
 const STORAGE_KEY = 'mastery-onboarding-profile';
 const PHASE_STORAGE_KEY = 'mastery-onboarding-phase';
@@ -61,7 +62,7 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
   };
 
   const nextPhase = () => {
-    setCurrentPhase(prev => Math.min(prev + 1, 6) as OnboardingPhase);
+    setCurrentPhase(prev => Math.min(prev + 1, 7) as OnboardingPhase);
   };
 
   const handlePhase0Complete = () => {
@@ -83,17 +84,22 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
     nextPhase();
   };
 
-  const handlePhase4Complete = (persona: string) => {
+  const handlePhase4Complete = (data: Partial<MasteryProfile>) => {
+    updateProfile(data);
+    nextPhase();
+  };
+
+  const handlePhase5Complete = (persona: string) => {
     updateProfile({ aiPersona: persona });
     nextPhase();
   };
 
-  const handlePhase5Complete = (habitData: Partial<MasteryProfile>) => {
+  const handlePhase6Complete = (habitData: Partial<MasteryProfile>) => {
     updateProfile(habitData);
     nextPhase();
   };
 
-  const handlePhase6Complete = () => {
+  const handlePhase7Complete = () => {
     const completedProfile: MasteryProfile = {
       ...profile,
       committed: true,
@@ -161,11 +167,13 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
       case 3:
         return <Phase3Logistics profile={profile} onComplete={handlePhase3Complete} />;
       case 4:
-        return <Phase4Synthesis profile={profile as MasteryProfile} onComplete={handlePhase4Complete} />;
+        return <Phase4Architect profile={profile} onComplete={handlePhase4Complete} />;
       case 5:
-        return <Phase5Negotiation profile={profile as MasteryProfile} onComplete={handlePhase5Complete} />;
+        return <Phase5Synthesis profile={profile as MasteryProfile} onComplete={handlePhase5Complete} />;
       case 6:
-        return <Phase6Contract onComplete={handlePhase6Complete} />;
+        return <Phase6Negotiation profile={profile as MasteryProfile} onComplete={handlePhase6Complete} />;
+      case 7:
+        return <Phase7Contract onComplete={handlePhase7Complete} />;
       default:
         return null;
     }

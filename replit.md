@@ -39,6 +39,20 @@ The core of the system is a 7-phase coaching cycle:
 -   **Deployment**: Replit environment (configured for port 5000 and `0.0.0.0` host)
 
 ## Recent Changes
+- **2025-11-17**: The Architect Phase - Logic Tree Breakdown (STRATEGIC MASTERSTROKE)
+  - **NEW PHASE 4 - THE ARCHITECT**: Inserted between Logistics and Synthesis, transforming onboarding from "Setup Wizard" into "Strategy Session"
+  - **The "Doctor Frame" (Authority)**: AI takes control by building a logical breakdown that proves the goal is achievable
+  - **The Logic Tree**: Visual breakdown showing Root (Goal) → Branch (Milestone) → Leaf (Action) with user input
+  - **Reality Check Screen**: Users define specific metric (e.g., "$10k/mo", "10% Body Fat") to eliminate "blank canvas paralysis"
+  - **Logic Tree Builder**: Interactive tree diagram with user-filled milestones and actions, creating psychological investment
+  - **Agreement Screen**: Users commit to the logic: "Does this logic hold up? Do you agree that consistent [Action] makes [Goal] realistic?"
+  - **The "Sunk Cost" Investment**: By spending 3-5 minutes building logic tree, users become invested and unlikely to abandon app
+  - **The "Aha Moment"**: Users realize "This system is smarter than me. I should listen to it."
+  - **Bridge Quote**: "Vague goals die. Logical systems survive. Let's deconstruct your vision."
+  - **Phase Renumbering**: Previous Phase 4 (Synthesis) → Phase 5, Phase 5 (Negotiation) → Phase 6, Phase 6 (Contract) → Phase 7
+  - **New 7-Phase Flow**: Manifesto → Download → Deep Discovery → Logistics → **👉 ARCHITECT** → Negotiation → Contract
+  - **Type System**: Added specificMetric, logicTreeRoot, logicTreeBranch, logicTreeLeaf, agreedToLogic fields to MasteryProfile
+
 - **2025-11-17**: Enriched Onboarding Module - "Pulse & Punch" UI Pattern (MAJOR ENHANCEMENT)
   - **BridgeScreen Component**: Interstitial wisdom screens between phases with philosophical quotes and "Tap Anywhere to Continue" interaction
   - **CoachFeedback Component**: Toast/overlay notifications that trigger after specific user selections (e.g., selecting "Perfectionist" shows "Perfectionism is fear. We'll fix this with 'Stupid Small' micro-habits.")
@@ -73,11 +87,11 @@ The core of the system is a 7-phase coaching cycle:
   - **User Experience**: Can exit onboarding at any time and return days later to same spot
 
 - **2025-11-17**: Comprehensive Mastery Onboarding Module (MAJOR FEATURE)
-  - **Complete Replacement**: Built comprehensive 6-phase onboarding system replacing simple onboarding
+  - **Complete Replacement**: Built comprehensive 7-phase onboarding system replacing simple onboarding
   - **Phase 0 - Manifesto**: 3-slide carousel introducing philosophy (willpower myth, science, promise) with smooth transitions
-  - **Phase 1 - Context & Baseline**: 6 screens collecting context dump, mental state (SPARK/STUCK/CURIOUS), identity (name/occupation), north star goal with timeline, deep dive reasoning, and existing habits marked as "Safe"
+  - **Phase 1 - The Download**: 8 screens collecting context dump, mental state (SPARK/STUCK/CURIOUS/GOAL), identity (name/occupation), north star goal with timeline, deep dive reasoning, and existing habits marked as "Safe"
   - **Phase 2 - Deep Discovery**: 5 screens for psychological profiling using card-based selection UI
-    - Archetype selection (Commander/Monk/Warrior/Explorer)
+    - Archetype selection (Commander/Monk/Warrior/Explorer) with MBTI field
     - Fuel type (Glory/Fear) - determines AI coach persona (Hype Man vs Drill Sergeant)
     - Saboteur identification (Perfectionist/Distraction/Exhaustion/Time Scarcity)
     - Stakes assessment (Stagnant/Regressing/No-Think) with heavy red visual treatment
@@ -85,12 +99,16 @@ The core of the system is a 7-phase coaching cycle:
     - Bio-clock with wake/sleep time pickers and low battery warnings
     - Structure scan for weekday/weekend routines
     - Golden hour selection (Morning/Lunch/After Work/Late Night)
-  - **Phase 4 - Synthesis**: Displays collected profile summary and AI persona calibration
-  - **Phase 5 - Negotiation**: 2 screens for habit proposal
+  - **Phase 4 - The Architect**: 3 screens for logic tree breakdown (NEW!)
+    - Reality Check: Define specific metric for goal
+    - Logic Tree: Visual breakdown of Root → Branch → Leaf
+    - Agreement: Psychological contract for logical pathway
+  - **Phase 5 - Synthesis**: Displays collected profile summary and AI persona calibration
+  - **Phase 6 - Negotiation**: 2 screens for habit proposal
     - Context-aware core habit generated from north star goal and golden hour
     - Accept/Too Hard interaction (downgrades 45min → 15min)
     - Non-negotiable "Drink Water" habit displayed as read-only commitment
-  - **Phase 6 - Contract**: Commitment screen with checkboxes and "Sign & Enter Dojo" button
+  - **Phase 7 - Contract**: Commitment screen with checkboxes and "Sign & Enter Dojo" button
   - **Data Architecture**: MasteryProfile type system covering all collected data points
   - **Persistence**: Auto-save functionality via localStorage for all profile data
   - **Integration**: Seamlessly creates habits and transitions to main dashboard
