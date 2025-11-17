@@ -295,16 +295,14 @@ function App() {
                         <Sparkles className="w-5 h-5" />
                     </button>
                     
-                    {/* BUTTON 2: Habit Tracker View - Shows when NOT in Stats View (highlighted in blue) */}
-                    {!showStatsView && (
-                        <button 
-                            onClick={() => {}} 
-                            className="p-2 rounded-lg text-blue-400 hover:bg-gray-700"
-                            title="Habit Tracker"
-                        >
-                            <List className="w-5 h-5" />
-                        </button>
-                    )}
+                    {/* BUTTON 2: Habit Tracker View - Always visible, highlighted when active */}
+                    <button 
+                        onClick={() => setShowStatsView(false)} 
+                        className={`p-2 rounded-lg hover:bg-gray-700 ${!showStatsView ? 'text-blue-400' : 'text-gray-400'}`}
+                        title="Habit Tracker"
+                    >
+                        <List className="w-5 h-5" />
+                    </button>
                     
                     {/* BUTTON 3: Stats View Toggle */}
                     <button 
