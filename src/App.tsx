@@ -304,7 +304,18 @@ function App() {
                         <BarChart3 className="w-5 h-5" />
                     </button>
                     
-                    {/* BUTTON 3: Add New Habit */}
+                    {/* BUTTON 3: Habit Tracker View - Shows when in Stats View */}
+                    {showStatsView && (
+                        <button 
+                            onClick={() => setShowStatsView(false)} 
+                            className="p-2 rounded-lg text-gray-400 hover:bg-gray-700"
+                            title="Habit Tracker"
+                        >
+                            <List className="w-5 h-5" />
+                        </button>
+                    )}
+                    
+                    {/* BUTTON 4: Add New Habit */}
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
                 </div>
             </div>
@@ -313,25 +324,27 @@ function App() {
                     <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
                     <p className="text-gray-400 mb-4">Track your habits and build a better you, one day at a time.</p>
                     
-                    {/* View Mode Toggle - Moved from top right */}
-                    <div className="flex justify-center">
-                        <button 
-                            onClick={() => setShowDailyTrackingView(p => !p)} 
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
-                        >
-                            {showDailyTrackingView ? (
-                                <>
-                                    <List className="w-4 h-4" />
-                                    <span className="text-sm">Simple View</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Calendar className="w-4 h-4" />
-                                    <span className="text-sm">Weekly View</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
+                    {/* View Mode Toggle - Only show on Habit Tracker page */}
+                    {!showStatsView && (
+                        <div className="flex justify-center">
+                            <button 
+                                onClick={() => setShowDailyTrackingView(p => !p)} 
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+                            >
+                                {showDailyTrackingView ? (
+                                    <>
+                                        <List className="w-4 h-4" />
+                                        <span className="text-sm">Simple View</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Calendar className="w-4 h-4" />
+                                        <span className="text-sm">Weekly View</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* STATS OVERVIEW */}
