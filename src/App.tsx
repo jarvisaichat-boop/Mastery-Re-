@@ -124,21 +124,42 @@ function App() {
     });
 
     const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string, profile?: any) => {
-        const now = Date.now();
-        const habitsWithIds = newHabits.map((h, index) => ({
-            ...h,
-            id: now + index,
-            createdAt: now,
-            order: index,
-        }));
+        console.log('🎊 App.tsx handleOnboardingComplete called');
+        console.log('📦 Received habits:', newHabits);
+        console.log('🎯 Received goal:', userGoal);
         
-        setHabits(habitsWithIds);
-        setGoal(userGoal);
-        setAspirations(userAspirations);
-        setOnboardingComplete(true);
-        localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
-        localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, userGoal);
-        localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, userAspirations);
+        try {
+            const now = Date.now();
+            const habitsWithIds = newHabits.map((h, index) => ({
+                ...h,
+                id: now + index,
+                createdAt: now,
+                order: index,
+            }));
+            
+            console.log('✅ Habits with IDs:', habitsWithIds);
+            
+            setHabits(habitsWithIds);
+            console.log('✅ setHabits called');
+            
+            setGoal(userGoal);
+            console.log('✅ setGoal called');
+            
+            setAspirations(userAspirations);
+            console.log('✅ setAspirations called');
+            
+            setOnboardingComplete(true);
+            console.log('✅ setOnboardingComplete(true) called');
+            
+            localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
+            localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, userGoal);
+            localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, userAspirations);
+            
+            console.log('🎉 App.tsx handleOnboardingComplete finished successfully!');
+        } catch (error) {
+            console.error('❌ Error in App.tsx handleOnboardingComplete:', error);
+            alert(`Error completing onboarding in App: ${error instanceof Error ? error.message : String(error)}`);
+        }
     };
 
     useEffect(() => {
