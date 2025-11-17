@@ -53,3 +53,4 @@ The core of the system is a 7-phase coaching cycle:
   - Embedded ReflectionCard component with gradient design
   - AI motivational responses tailored to reflection answers
   - User-controlled access via Sparkles icon (no automatic popups)
+  - **Bug Fix**: Edit Reflection now pre-populates form with existing answer and reasoning instead of starting fresh
