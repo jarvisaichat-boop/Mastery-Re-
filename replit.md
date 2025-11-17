@@ -37,3 +37,19 @@ The core of the system is a 7-phase coaching cycle:
 -   **Styling**: Tailwind CSS
 -   **Icons**: Lucide React
 -   **Deployment**: Replit environment (configured for port 5000 and `0.0.0.0` host)
+
+## Recent Changes
+- **2025-11-17**: UI Navigation and Toggle Improvements
+  - **View Toggle Redesign**: Changed Simple/Weekly toggle to icon-only dual-button design (both icons always visible, active one highlighted in blue)
+  - **Page Indicators**: Blue-highlighted List icon appears on top right when on Habit Tracker page
+  - **Stats Dashboard Icon**: BarChart icon highlights in blue when viewing Stats Dashboard
+  - **Conditional Toggle Display**: View mode toggle only appears on Habit Tracker page (hidden when viewing Stats)
+  - **Toggle Positioning**: View toggle centered below "Mastery Dashboard" description
+  - **Removed Weekly Review**: Removed InlineWeeklyReview component and TrendingUp icon
+
+- **2025-11-17**: Unified Daily Check-In
+  - Merged Reflection Journal into Chat interface for single daily touchpoint
+  - Full-page rounded-corner container design (removed centered modal)
+  - Embedded ReflectionCard component with gradient design
+  - AI motivational responses tailored to reflection answers
+  - User-controlled access via Sparkles icon (no automatic popups)
