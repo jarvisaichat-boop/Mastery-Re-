@@ -39,6 +39,25 @@ The core of the system is a 7-phase coaching cycle:
 -   **Deployment**: Replit environment (configured for port 5000 and `0.0.0.0` host)
 
 ## Recent Changes
+- **2025-11-17**: Enriched Onboarding Module - "Pulse & Punch" UI Pattern (MAJOR ENHANCEMENT)
+  - **BridgeScreen Component**: Interstitial wisdom screens between phases with philosophical quotes and "Tap Anywhere to Continue" interaction
+  - **CoachFeedback Component**: Toast/overlay notifications that trigger after specific user selections (e.g., selecting "Perfectionist" shows "Perfectionism is fear. We'll fix this with 'Stupid Small' micro-habits.")
+  - **Golden Wisdom Headers**: Small yellow uppercase text headers above main questions throughout all phases for added guidance
+  - **MBTI Text Field**: Added optional "My MBTI is..." input field to Phase 2 Archetype screen for enhanced personality profiling
+  - **Phase-specific Bridges**: Added 7 wisdom bridges with quotes like:
+    - Phase 1: "To guide you, I need to know the terrain. Your past struggles are data, not failures."
+    - Phase 2: "Discipline is an Ecosystem. Let's align your Personality & Environment."
+    - Phase 3: "Time management is a myth. Energy management is reality."
+    - Phase 5: "A plan you can't stick to is a fantasy. Let's be real."
+  - **Refined Content**: Updated all question text, sub-headers, and copy to match detailed specification
+  - **Enhanced Phase 1**: Now includes 3 bridge screens interwoven with 5 content screens (Context Injection, Spark & Profile combined, North Star, Deep Dive, Baseline)
+  - **Enhanced Phase 2**: Added bridge, MBTI field, and feedback trigger for Perfectionist selection
+  - **Enhanced Phase 3**: Consolidated bio-clock and structure into single screen, added bridge
+  - **Enhanced Phase 4**: Updated synthesis text to match spec: "[Name], you are a [Archetype] driven by [Fuel]. Your [Saboteur] is the risk. We will stack habits during [Golden Hour]."
+  - **Enhanced Phase 5**: Added bridge before negotiation, refined "Too Hard" downgrade messaging
+  - **Type Safety**: Added 'GOAL' to mentalState union type and 'mbti' field to MasteryProfile
+  - **UX Polish**: Smooth transitions, auto-dismissing toasts (3s duration), and consistent visual hierarchy
+
 - **2025-11-17**: Onboarding Preview Mode (Dev Feature)
   - **Preview Button**: Top-left ⟲ icon on dashboard allows previewing onboarding without data loss
   - **Exit to Dashboard**: Blue "Exit to Dashboard" button appears in top-right during preview
