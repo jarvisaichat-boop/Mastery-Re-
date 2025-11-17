@@ -200,24 +200,25 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
     const reflectionComplete = !!todayReflection || !showReflectionCard;
 
     return (
-        <div className="fixed inset-0 bg-gray-950 z-50 flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-gray-700">
-                <div className="flex items-center gap-3">
-                    <MessageCircle className="w-6 h-6 text-blue-400" />
-                    <div>
-                        <h2 className="text-2xl font-bold">Daily Check-In</h2>
-                        <p className="text-sm text-gray-400">{formatDate(new Date(), 'EEEE, MMMM d, yyyy')}</p>
+        <div className="fixed inset-0 bg-black z-50 flex items-center justify-center p-6">
+            <div className="bg-gray-900 rounded-3xl shadow-2xl w-full max-w-5xl h-full flex flex-col border border-gray-700">
+                <div className="flex items-center justify-between p-6 border-b border-gray-700">
+                    <div className="flex items-center gap-3">
+                        <MessageCircle className="w-6 h-6 text-blue-400" />
+                        <div>
+                            <h2 className="text-2xl font-bold">Daily Check-In</h2>
+                            <p className="text-sm text-gray-400">{formatDate(new Date(), 'EEEE, MMMM d, yyyy')}</p>
+                        </div>
                     </div>
+                    <button
+                        onClick={onDismiss}
+                        className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                    >
+                        <X className="w-5 h-5 text-gray-400" />
+                    </button>
                 </div>
-                <button
-                    onClick={onDismiss}
-                    className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-                >
-                    <X className="w-5 h-5 text-gray-400" />
-                </button>
-            </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 max-w-4xl mx-auto w-full">
+                <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {/* Reflection Card or Summary */}
                 {showReflectionCard ? (
                     <ReflectionCard onComplete={handleReflectionComplete} />
@@ -266,29 +267,30 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Chat Input - Only show after reflection is complete */}
-            {reflectionComplete && (
-                <div className="p-6 border-t border-gray-700">
-                    <div className="flex gap-3 max-w-4xl mx-auto w-full">
-                        <input
-                            type="text"
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder="Ask me anything..."
-                            className="flex-1 p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                            autoFocus={messages.length > 0}
-                        />
-                        <button
-                            onClick={handleSend}
-                            disabled={!inputValue.trim()}
-                            className="p-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
-                        >
-                            <Send className="w-5 h-5" />
-                        </button>
+                {/* Chat Input - Only show after reflection is complete */}
+                {reflectionComplete && (
+                    <div className="p-6 border-t border-gray-700">
+                        <div className="flex gap-3">
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                placeholder="Ask me anything..."
+                                className="flex-1 p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                                autoFocus={messages.length > 0}
+                            />
+                            <button
+                                onClick={handleSend}
+                                disabled={!inputValue.trim()}
+                                className="p-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                            >
+                                <Send className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }
