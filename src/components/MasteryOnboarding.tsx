@@ -23,7 +23,9 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
     // Load saved phase on mount
     try {
       const saved = localStorage.getItem(PHASE_STORAGE_KEY);
-      return saved ? parseInt(saved, 10) as OnboardingPhase : 0;
+      const phase = saved ? parseInt(saved, 10) as OnboardingPhase : 0;
+      console.log('[MasteryOnboarding] Loading phase from localStorage:', phase, 'isPreview:', isPreview);
+      return phase;
     } catch {
       return 0;
     }
@@ -32,7 +34,9 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
     // Load saved profile on mount
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : {};
+      const loadedProfile = saved ? JSON.parse(saved) : {};
+      console.log('[MasteryOnboarding] Loading profile from localStorage:', loadedProfile, 'isPreview:', isPreview);
+      return loadedProfile;
     } catch {
       return {};
     }
@@ -41,6 +45,7 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
   // Auto-save profile to localStorage whenever it changes
   useEffect(() => {
     try {
+      console.log('[MasteryOnboarding] Saving profile to localStorage:', profile);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
     } catch (e) {
       console.error('Failed to save onboarding progress', e);
@@ -50,6 +55,7 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
   // Auto-save current phase to localStorage whenever it changes
   useEffect(() => {
     try {
+      console.log('[MasteryOnboarding] Saving phase to localStorage:', currentPhase);
       localStorage.setItem(PHASE_STORAGE_KEY, currentPhase.toString());
     } catch (e) {
       console.error('Failed to save onboarding phase', e);

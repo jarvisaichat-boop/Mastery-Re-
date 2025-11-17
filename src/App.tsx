@@ -280,6 +280,7 @@ function App() {
 
     if (!onboardingComplete || previewOnboarding) {
         return <MasteryOnboarding 
+            key={previewOnboarding ? 'preview-mode' : 'normal-mode'}
             onComplete={handleOnboardingComplete} 
             isPreview={previewOnboarding}
             onExitPreview={() => setPreviewOnboarding(false)}
