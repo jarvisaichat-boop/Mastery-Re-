@@ -19,8 +19,6 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
   });
   const [showMilestoneSuggestions, setShowMilestoneSuggestions] = useState(false);
   const [showActionSuggestions, setShowActionSuggestions] = useState(false);
-  const [milestoneEntered, setMilestoneEntered] = useState(false);
-  const [actionEntered, setActionEntered] = useState(false);
   
   const generateMilestoneSuggestions = () => {
     const goal = profile.northStar || '';
@@ -147,7 +145,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                     </p>
                   </div>
                   
-                  {!milestoneEntered && (
+                  {!data.logicTreeBranch && (
                     <>
                       <p className="text-sm text-gray-300">
                         What do you think it should be? Do you already have something in mind?
@@ -155,12 +153,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                       <input
                         type="text"
                         value={data.logicTreeBranch}
-                        onChange={(e) => {
-                          updateData({ logicTreeBranch: e.target.value });
-                          if (e.target.value.length > 3) {
-                            setMilestoneEntered(true);
-                          }
-                        }}
+                        onChange={(e) => updateData({ logicTreeBranch: e.target.value })}
                         placeholder="Type your milestone here..."
                         className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                       />
@@ -182,7 +175,6 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                               key={idx}
                               onClick={() => {
                                 updateData({ logicTreeBranch: suggestion });
-                                setMilestoneEntered(true);
                                 setShowMilestoneSuggestions(false);
                               }}
                               className="w-full text-left px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-300 transition-all"
@@ -195,12 +187,12 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                     </>
                   )}
                   
-                  {milestoneEntered && data.logicTreeBranch && (
+                  {data.logicTreeBranch && (
                     <>
                       <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                         <p className="text-white font-medium mb-1">{data.logicTreeBranch}</p>
                         <button
-                          onClick={() => setMilestoneEntered(false)}
+                          onClick={() => updateData({ logicTreeBranch: '' })}
                           className="text-xs text-blue-400 hover:text-blue-300"
                         >
                           Edit
@@ -216,7 +208,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
               </div>
 
               {/* Action Section - Only show after milestone is entered */}
-              {milestoneEntered && data.logicTreeBranch && (
+              {data.logicTreeBranch && (
                 <div className="pl-16 space-y-3">
                   <div className="flex items-center gap-2 text-gray-500 text-sm">
                     <div className="w-8 h-px bg-gray-600"></div>
@@ -235,7 +227,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                       </p>
                     </div>
                     
-                    {!actionEntered && (
+                    {!data.logicTreeLeaf && (
                       <>
                         <p className="text-sm text-gray-300">
                           What do you think your daily action should be?
@@ -243,12 +235,7 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                         <input
                           type="text"
                           value={data.logicTreeLeaf}
-                          onChange={(e) => {
-                            updateData({ logicTreeLeaf: e.target.value });
-                            if (e.target.value.length > 3) {
-                              setActionEntered(true);
-                            }
-                          }}
+                          onChange={(e) => updateData({ logicTreeLeaf: e.target.value })}
                           placeholder="Type your action here..."
                           className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-orange-500 focus:outline-none"
                         />
@@ -270,7 +257,6 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                                 key={idx}
                                 onClick={() => {
                                   updateData({ logicTreeLeaf: suggestion });
-                                  setActionEntered(true);
                                   setShowActionSuggestions(false);
                                 }}
                                 className="w-full text-left px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-300 transition-all"
@@ -283,12 +269,12 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                       </>
                     )}
                     
-                    {actionEntered && data.logicTreeLeaf && (
+                    {data.logicTreeLeaf && (
                       <>
                         <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
                           <p className="text-white font-medium mb-1">{data.logicTreeLeaf}</p>
                           <button
-                            onClick={() => setActionEntered(false)}
+                            onClick={() => updateData({ logicTreeLeaf: '' })}
                             className="text-xs text-orange-400 hover:text-orange-300"
                           >
                             Edit
