@@ -22,6 +22,12 @@ interface ChatDailyCheckInProps {
 }
 
 const LOCAL_STORAGE_REFLECTIONS_KEY = 'mastery-dashboard-reflections';
+const LOCAL_STORAGE_DAILY_CHAT_KEY = 'mastery-dashboard-daily-chat';
+
+interface DailyChatEntry {
+    date: string;
+    messages: Message[];
+}
 
 function loadReflections(): ReflectionEntry[] {
     try {
@@ -38,6 +44,24 @@ function saveReflections(reflections: ReflectionEntry[]) {
         localStorage.setItem(LOCAL_STORAGE_REFLECTIONS_KEY, JSON.stringify(reflections));
     } catch (e) {
         console.error("Failed to save reflections", e);
+    }
+}
+
+function loadDailyChat(): DailyChatEntry[] {
+    try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_DAILY_CHAT_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        console.error("Failed to load daily chat", e);
+        return [];
+    }
+}
+
+function saveDailyChat(chatEntries: DailyChatEntry[]) {
+    try {
+        localStorage.setItem(LOCAL_STORAGE_DAILY_CHAT_KEY, JSON.stringify(chatEntries));
+    } catch (e) {
+        console.error("Failed to save daily chat", e);
     }
 }
 
@@ -90,7 +114,14 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
     const todayReflection = reflections.find(r => r.date === today);
     
     const [showReflectionCard, setShowReflectionCard] = useState(!todayReflection);
-    const [messages, setMessages] = useState<Message[]>([]);
+    
+    // Load existing messages for today
+    const [messages, setMessages] = useState<Message[]>(() => {
+        const allChat = loadDailyChat();
+        const todayChat = allChat.find(c => c.date === today);
+        return todayChat?.messages || [];
+    });
+    
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [isTyping, setIsTyping] = useState(false);
@@ -102,6 +133,14 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
     useEffect(() => {
         scrollToBottom();
     }, [messages, isTyping, showReflectionCard]);
+
+    // Save messages to localStorage whenever they change
+    useEffect(() => {
+        const allChat = loadDailyChat();
+        const otherDays = allChat.filter(c => c.date !== today);
+        const updatedChat = [...otherDays, { date: today, messages }];
+        saveDailyChat(updatedChat);
+    }, [messages, today]);
 
     const handleReflectionComplete = (answer: ReflectionAnswer, reasoning: string) => {
         const isEditing = !!todayReflection;
@@ -130,7 +169,7 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
                         content: generateMotivationalResponse(answer),
                         timestamp: Date.now()
                     };
-                    setMessages([motivationalMessage]);
+                    setMessages(prev => [...prev, motivationalMessage]);
                     setIsTyping(false);
                 }, 800);
             }, 300);
