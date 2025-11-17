@@ -148,12 +148,18 @@ function App() {
             setAspirations(userAspirations);
             console.log('✅ setAspirations called');
             
-            setOnboardingComplete(true);
-            console.log('✅ setOnboardingComplete(true) called');
-            
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
             localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, userGoal);
             localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, userAspirations);
+            console.log('✅ localStorage flags set');
+            
+            // Clear onboarding-specific storage
+            localStorage.removeItem('mastery-onboarding-profile');
+            localStorage.removeItem('mastery-onboarding-phase');
+            console.log('🧹 Cleared onboarding localStorage');
+            
+            setOnboardingComplete(true);
+            console.log('✅ setOnboardingComplete(true) called - should trigger dashboard render');
             
             console.log('🎉 App.tsx handleOnboardingComplete finished successfully!');
         } catch (error) {

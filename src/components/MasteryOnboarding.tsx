@@ -181,11 +181,8 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
       
       console.log('✨ onComplete called successfully');
 
-      // Clear onboarding data from storage AFTER onComplete sets the flag
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(PHASE_STORAGE_KEY);
-
-      console.log('🧹 Cleared localStorage');
+      // NOTE: Don't clear localStorage here - let App.tsx handle cleanup
+      // Clearing here causes React re-render issues
     } catch (error) {
       console.error('❌ Error in handlePhase7Complete:', error);
       alert(`Error completing onboarding: ${error instanceof Error ? error.message : String(error)}`);
