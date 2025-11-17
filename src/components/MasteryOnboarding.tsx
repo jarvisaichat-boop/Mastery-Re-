@@ -109,60 +109,87 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
   };
 
   const handlePhase7Complete = () => {
-    const completedProfile: MasteryProfile = {
-      ...profile,
-      committed: true,
-      completedAt: Date.now(),
-    } as MasteryProfile;
+    console.log('🚀 Phase 7 Complete called');
+    console.log('📊 Current profile:', profile);
+    
+    try {
+      const completedProfile: MasteryProfile = {
+        ...profile,
+        committed: true,
+        completedAt: Date.now(),
+      } as MasteryProfile;
 
-    // Create habits from the onboarding
-    const habits: Omit<Habit, 'id' | 'createdAt'>[] = [];
+      console.log('✅ Completed profile:', completedProfile);
 
-    // Add the non-negotiable water habit
-    habits.push({
-      name: 'Drink 1 Glass of Water',
-      description: 'The easy win - hydration for clarity',
-      color: 'blue',
-      type: 'Anchor Habit',
-      categories: [{ main: 'Health', sub: 'Hydration' }],
-      frequencyType: 'Everyday',
-      selectedDays: [],
-      timesPerPeriod: 1,
-      periodUnit: 'Day',
-      repeatDays: 1,
-      completed: {},
-      order: 0,
-    });
+      // Create habits from the onboarding
+      const habits: Omit<Habit, 'id' | 'createdAt'>[] = [];
 
-    // Add the proposed/negotiated habit if accepted
-    if (completedProfile.acceptedHabit && completedProfile.proposedHabit) {
+      // Add the non-negotiable water habit
       habits.push({
-        name: completedProfile.proposedHabit.name,
-        description: completedProfile.proposedHabit.description,
-        color: 'purple',
-        type: 'Life Goal Habit',
-        categories: [{ main: 'Personal Growth', sub: 'Core Habit' }],
+        name: 'Drink 1 Glass of Water',
+        description: 'The easy win - hydration for clarity',
+        color: 'blue',
+        type: 'Anchor Habit',
+        categories: [{ main: 'Health', sub: 'Hydration' }],
         frequencyType: 'Everyday',
         selectedDays: [],
         timesPerPeriod: 1,
         periodUnit: 'Day',
         repeatDays: 1,
         completed: {},
-        order: 1,
+        order: 0,
       });
+
+      console.log('💧 Water habit added');
+
+      // Add the proposed/negotiated habit if accepted
+      if (completedProfile.acceptedHabit && completedProfile.proposedHabit) {
+        console.log('🎯 Adding proposed habit:', completedProfile.proposedHabit);
+        habits.push({
+          name: completedProfile.proposedHabit.name,
+          description: completedProfile.proposedHabit.description,
+          color: 'purple',
+          type: 'Life Goal Habit',
+          categories: [{ main: 'Personal Growth', sub: 'Core Habit' }],
+          frequencyType: 'Everyday',
+          selectedDays: [],
+          timesPerPeriod: 1,
+          periodUnit: 'Day',
+          repeatDays: 1,
+          completed: {},
+          order: 1,
+        });
+      } else {
+        console.log('⚠️ Proposed habit NOT added. acceptedHabit:', completedProfile.acceptedHabit, 'proposedHabit:', completedProfile.proposedHabit);
+      }
+
+      console.log('📝 Total habits to create:', habits.length);
+
+      // Clear onboarding data from storage
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(PHASE_STORAGE_KEY);
+
+      console.log('🧹 Cleared localStorage');
+
+      // Pass data to parent
+      console.log('🎉 Calling onComplete with:', {
+        habitsCount: habits.length,
+        goal: completedProfile.northStar || 'My Mastery Journey',
+        deepDive: completedProfile.deepDive || '',
+      });
+      
+      onComplete(
+        habits,
+        completedProfile.northStar || 'My Mastery Journey',
+        completedProfile.deepDive || '',
+        completedProfile
+      );
+      
+      console.log('✨ onComplete called successfully');
+    } catch (error) {
+      console.error('❌ Error in handlePhase7Complete:', error);
+      alert(`Error completing onboarding: ${error instanceof Error ? error.message : String(error)}`);
     }
-
-    // Clear onboarding data from storage
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(PHASE_STORAGE_KEY);
-
-    // Pass data to parent
-    onComplete(
-      habits,
-      completedProfile.northStar || 'My Mastery Journey',
-      completedProfile.deepDive || '',
-      completedProfile
-    );
   };
 
   const renderPhase = () => {
