@@ -53,6 +53,7 @@ The core of the system is a 7-phase coaching cycle:
   - Embedded ReflectionCard component with gradient design
   - AI motivational responses tailored to reflection answers
   - User-controlled access via Sparkles icon (no automatic popups)
+  - **Chat Persistence**: Daily chat messages now saved to localStorage per date - conversations persist when closing/reopening Daily Check-In
   - **Bug Fix #1**: Edit Reflection now pre-populates form with existing answer and reasoning instead of starting fresh
   - **Bug Fix #2**: Added "Change" button in celebration box to allow changing answer selection while preserving reasoning text
   - **Bug Fix #3**: Chat messages now persist when editing reflections (no longer cleared on edit/save)
