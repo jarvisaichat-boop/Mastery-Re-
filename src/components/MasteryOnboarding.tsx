@@ -165,13 +165,7 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
 
       console.log('📝 Total habits to create:', habits.length);
 
-      // Clear onboarding data from storage
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(PHASE_STORAGE_KEY);
-
-      console.log('🧹 Cleared localStorage');
-
-      // Pass data to parent
+      // Pass data to parent FIRST before clearing storage
       console.log('🎉 Calling onComplete with:', {
         habitsCount: habits.length,
         goal: completedProfile.northStar || 'My Mastery Journey',
@@ -186,6 +180,12 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
       );
       
       console.log('✨ onComplete called successfully');
+
+      // Clear onboarding data from storage AFTER onComplete sets the flag
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(PHASE_STORAGE_KEY);
+
+      console.log('🧹 Cleared localStorage');
     } catch (error) {
       console.error('❌ Error in handlePhase7Complete:', error);
       alert(`Error completing onboarding: ${error instanceof Error ? error.message : String(error)}`);

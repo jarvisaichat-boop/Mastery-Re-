@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 
 interface Phase6ContractProps {
@@ -5,6 +6,16 @@ interface Phase6ContractProps {
 }
 
 export default function Phase6Contract({ onComplete }: Phase6ContractProps) {
+  const [isCompleting, setIsCompleting] = useState(false);
+
+  const handleComplete = () => {
+    if (isCompleting) return; // Prevent multiple clicks
+    
+    console.log('🔵 Sign & Enter Dojo button clicked');
+    setIsCompleting(true);
+    onComplete();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950 to-gray-950 flex items-center justify-center p-6">
       <div className="max-w-2xl w-full">
@@ -45,10 +56,15 @@ export default function Phase6Contract({ onComplete }: Phase6ContractProps) {
           {/* Action */}
           <div>
             <button
-              onClick={onComplete}
-              className="px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-xl font-bold rounded-xl transition-all transform hover:scale-105 shadow-lg"
+              onClick={handleComplete}
+              disabled={isCompleting}
+              className={`px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xl font-bold rounded-xl transition-all shadow-lg ${
+                isCompleting 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:from-blue-500 hover:to-purple-500 transform hover:scale-105'
+              }`}
             >
-              Sign & Enter Dojo
+              {isCompleting ? 'Entering Dojo...' : 'Sign & Enter Dojo'}
             </button>
             <p className="text-xs text-gray-500 mt-4">
               Saves entire profile to AsyncStorage and redirects to Dashboard
