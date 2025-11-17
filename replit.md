@@ -39,6 +39,30 @@ The core of the system is a 7-phase coaching cycle:
 -   **Deployment**: Replit environment (configured for port 5000 and `0.0.0.0` host)
 
 ## Recent Changes
+- **2025-11-17**: Comprehensive Mastery Onboarding Module (MAJOR FEATURE)
+  - **Complete Replacement**: Built comprehensive 6-phase onboarding system replacing simple onboarding
+  - **Phase 0 - Manifesto**: 3-slide carousel introducing philosophy (willpower myth, science, promise) with smooth transitions
+  - **Phase 1 - Context & Baseline**: 6 screens collecting context dump, mental state (SPARK/STUCK/CURIOUS), identity (name/occupation), north star goal with timeline, deep dive reasoning, and existing habits marked as "Safe"
+  - **Phase 2 - Deep Discovery**: 5 screens for psychological profiling using card-based selection UI
+    - Archetype selection (Commander/Monk/Warrior/Explorer)
+    - Fuel type (Glory/Fear) - determines AI coach persona (Hype Man vs Drill Sergeant)
+    - Saboteur identification (Perfectionist/Distraction/Exhaustion/Time Scarcity)
+    - Stakes assessment (Stagnant/Regressing/No-Think) with heavy red visual treatment
+  - **Phase 3 - Logistics**: 3 screens for time audit and scheduling
+    - Bio-clock with wake/sleep time pickers and low battery warnings
+    - Structure scan for weekday/weekend routines
+    - Golden hour selection (Morning/Lunch/After Work/Late Night)
+  - **Phase 4 - Synthesis**: Displays collected profile summary and AI persona calibration
+  - **Phase 5 - Negotiation**: 2 screens for habit proposal
+    - Context-aware core habit generated from north star goal and golden hour
+    - Accept/Too Hard interaction (downgrades 45min → 15min)
+    - Non-negotiable "Drink Water" habit displayed as read-only commitment
+  - **Phase 6 - Contract**: Commitment screen with checkboxes and "Sign & Enter Dojo" button
+  - **Data Architecture**: MasteryProfile type system covering all collected data points
+  - **Persistence**: Auto-save functionality via localStorage for all profile data
+  - **Integration**: Seamlessly creates habits and transitions to main dashboard
+  - **Bug Fix**: Fixed Phase 2 navigation - primer screen now allows progression with proper canProceed() logic
+
 - **2025-11-17**: UI Navigation and Toggle Improvements
   - **View Toggle Redesign**: Changed Simple/Weekly toggle to icon-only dual-button design (both icons always visible, active one highlighted in blue)
   - **Page Indicators**: Blue-highlighted List icon appears on top right when on Habit Tracker page
