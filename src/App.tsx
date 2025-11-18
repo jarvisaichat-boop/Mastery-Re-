@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import MicroWinProtocol from './components/MicroWinProtocol';
@@ -94,6 +94,7 @@ function App() {
     const [onboardingComplete, setOnboardingComplete] = useState(isOnboardingComplete);
     const [microWinComplete, setMicroWinComplete] = useState(isMicroWinComplete);
     const [previewOnboarding, setPreviewOnboarding] = useState(false);
+    const [previewMicroWin, setPreviewMicroWin] = useState(false);
     const [jumpToPhase, setJumpToPhase] = useState<number | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
@@ -325,6 +326,7 @@ function App() {
     const handleMicroWinComplete = () => {
         console.log('🎯 Micro-Win Protocol completed');
         setMicroWinComplete(true);
+        setPreviewMicroWin(false);
         localStorage.setItem(LOCAL_STORAGE_MICRO_WIN_KEY, 'true');
     };
 
@@ -343,34 +345,22 @@ function App() {
 
     // Auto-skip micro-win if no Life Goal habit exists
     useEffect(() => {
-        if (onboardingComplete && !microWinComplete && habits.length > 0) {
+        if (onboardingComplete && !microWinComplete && !previewMicroWin && habits.length > 0) {
             const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
             if (!coreHabit) {
                 console.log('⚠️ No Life Goal habit found, skipping Micro-Win Protocol');
                 handleMicroWinComplete();
             }
         }
-    }, [onboardingComplete, microWinComplete, habits]);
+    }, [onboardingComplete, microWinComplete, previewMicroWin, habits]);
 
-    // Show Micro-Win Protocol after onboarding but before dashboard
-    if (onboardingComplete && !microWinComplete) {
-        const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
-        if (coreHabit) {
-            return <MicroWinProtocol 
-                habit={{
-                    name: coreHabit.name,
-                    description: coreHabit.description || ''
-                }}
-                onComplete={handleMicroWinComplete}
-            />;
-        }
-        // Render nothing while waiting for useEffect to skip
-        return null;
-    }
+    // Determine if we should show Micro-Win (either first time or preview)
+    const shouldShowMicroWin = (onboardingComplete && !microWinComplete) || previewMicroWin;
+    const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
-            {/* Quick Access to Onboarding Phases */}
+            {/* Quick Access Icons */}
             <div className="fixed top-4 left-4 z-50 flex gap-2">
                 <button
                     onClick={() => {
@@ -392,6 +382,15 @@ function App() {
                 >
                     <Target className="w-4 h-4" />
                 </button>
+                {coreHabit && (
+                    <button
+                        onClick={() => setPreviewMicroWin(true)}
+                        className="p-2 bg-gray-800 hover:bg-gray-700 text-yellow-400 hover:text-yellow-300 rounded-lg border border-gray-700 transition-colors"
+                        title="Preview Micro-Win Protocol"
+                    >
+                        <Zap className="w-4 h-4" />
+                    </button>
+                )}
             </div>
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
@@ -515,6 +514,18 @@ function App() {
             {showChatCheckIn && (
                 <ChatDailyCheckIn 
                     onDismiss={() => setShowChatCheckIn(false)}
+                />
+            )}
+            
+            {shouldShowMicroWin && coreHabit && (
+                <MicroWinProtocol 
+                    habit={{
+                        name: coreHabit.name,
+                        description: coreHabit.description || ''
+                    }}
+                    onComplete={handleMicroWinComplete}
+                    isPreview={previewMicroWin}
+                    onDismiss={() => setPreviewMicroWin(false)}
                 />
             )}
             
