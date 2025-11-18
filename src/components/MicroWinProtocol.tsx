@@ -191,9 +191,9 @@ export default function MicroWinProtocol({ habit, aiPersona, onComplete, isPrevi
         );
 
       case 5:
-        // Execution: Timer Running
+        // Execution: Timer Running (Full-Screen)
         return (
-          <div className="min-h-screen bg-gradient-to-br from-red-950 via-black to-red-950 flex items-center justify-center p-6">
+          <div className="fixed inset-0 z-[60] bg-gradient-to-br from-red-950 via-black to-red-950 flex items-center justify-center p-6">
             <div className="max-w-2xl w-full space-y-8 animate-fadeIn">
               <div className="text-center space-y-6">
                 <div className="relative">
