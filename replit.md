@@ -45,7 +45,14 @@ The core system follows a 7-phase coaching cycle:
     -   **Slot Tracking**: Validates milestone (measurable checkpoint) and action (daily practice) through multi-turn dialogue
     -   **Data Flow**: Logic tree outputs (logicTreeBranch/Leaf) feed directly into Phase 6 habit suggestions
 -   **Vision Check**: Phase 4 Screen 4 asks users to visualize the complete pathway (action → milestone → goal) before proceeding
--   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree) is saved in localStorage.
+-   **Micro-Win Protocol** (November 18, 2025):
+    -   **7-Step Cold Start Solution**: Mandatory 60-second action immediately after onboarding to combat "Planning Trap"
+    -   **Flow**: Education → Instruction (shrink to 60s) → Consensus ("I am gonna do it!") → Trigger → Execution (countdown timer) → Victory → Momentum Push
+    -   **Dual Victory Paths**: Success measured by action, not duration - both timer completion AND expiry show green victory screen
+    -   **Psychology**: "Effort = Win" - celebrates showing up regardless of whether user completes within 60 seconds
+    -   **Integration**: Fires between onboarding completion and dashboard access, uses Life Goal habit as anchor action
+    -   **Auto-Advance**: Timer expiry automatically transitions to victory screen via useEffect
+-   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win completion) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.
 -   **Quick Navigation**: Home icon (jump to Phase 0) and Target icon (jump to Phase 4) in top-left corner.
 
