@@ -161,6 +161,11 @@ function App() {
             setOnboardingComplete(true);
             console.log('✅ setOnboardingComplete(true) called - should trigger dashboard render');
             
+            // Reset preview mode to ensure dashboard actually shows
+            setPreviewOnboarding(false);
+            setJumpToPhase(null);
+            console.log('✅ Reset preview states');
+            
             console.log('🎉 App.tsx handleOnboardingComplete finished successfully!');
         } catch (error) {
             console.error('❌ Error in App.tsx handleOnboardingComplete:', error);
