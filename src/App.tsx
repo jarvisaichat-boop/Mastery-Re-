@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
+import MicroWinProtocol from './components/MicroWinProtocol';
 import AICoachWidget from './components/AICoachWidget';
 import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
@@ -14,6 +15,7 @@ const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
 const LOCAL_STORAGE_RATE_MODE_KEY = 'mastery-dashboard-rate-mode-v1';
 const LOCAL_STORAGE_STREAK_MODE_KEY = 'mastery-dashboard-streak-mode-v1';
 const LOCAL_STORAGE_ONBOARDING_KEY = 'mastery-dashboard-onboarding-complete';
+const LOCAL_STORAGE_MICRO_WIN_KEY = 'mastery-dashboard-micro-win-complete';
 const LOCAL_STORAGE_CELEBRATED_STREAKS_KEY = 'mastery-dashboard-celebrated-streaks';
 const LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY = 'mastery-dashboard-last-daily-summary';
 const LOCAL_STORAGE_DAILY_REASONS_KEY = 'mastery-dashboard-daily-reasons';
@@ -80,8 +82,17 @@ function isOnboardingComplete(): boolean {
   }
 }
 
+function isMicroWinComplete(): boolean {
+  try {
+    return localStorage.getItem(LOCAL_STORAGE_MICRO_WIN_KEY) === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
 function App() {
     const [onboardingComplete, setOnboardingComplete] = useState(isOnboardingComplete);
+    const [microWinComplete, setMicroWinComplete] = useState(isMicroWinComplete);
     const [previewOnboarding, setPreviewOnboarding] = useState(false);
     const [jumpToPhase, setJumpToPhase] = useState<number | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -311,6 +322,13 @@ function App() {
     }, []);
 
 
+    const handleMicroWinComplete = () => {
+        console.log('🎯 Micro-Win Protocol completed');
+        setMicroWinComplete(true);
+        localStorage.setItem(LOCAL_STORAGE_MICRO_WIN_KEY, 'true');
+    };
+
+    // Show onboarding if not complete or in preview mode
     if (!onboardingComplete || previewOnboarding) {
         return <MasteryOnboarding 
             onComplete={handleOnboardingComplete} 
@@ -321,6 +339,33 @@ function App() {
             }}
             initialPhase={jumpToPhase}
         />;
+    }
+
+    // Auto-skip micro-win if no Life Goal habit exists
+    useEffect(() => {
+        if (onboardingComplete && !microWinComplete && habits.length > 0) {
+            const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
+            if (!coreHabit) {
+                console.log('⚠️ No Life Goal habit found, skipping Micro-Win Protocol');
+                handleMicroWinComplete();
+            }
+        }
+    }, [onboardingComplete, microWinComplete, habits]);
+
+    // Show Micro-Win Protocol after onboarding but before dashboard
+    if (onboardingComplete && !microWinComplete) {
+        const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
+        if (coreHabit) {
+            return <MicroWinProtocol 
+                habit={{
+                    name: coreHabit.name,
+                    description: coreHabit.description || ''
+                }}
+                onComplete={handleMicroWinComplete}
+            />;
+        }
+        // Render nothing while waiting for useEffect to skip
+        return null;
     }
 
     return (
