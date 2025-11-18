@@ -52,6 +52,9 @@ The core system follows a 7-phase coaching cycle:
     -   **Psychology**: "Effort = Win" - celebrates showing up regardless of whether user completes within 60 seconds
     -   **Integration**: Fires between onboarding completion and dashboard access, uses Life Goal habit as anchor action
     -   **Auto-Advance**: Timer expiry automatically transitions to victory screen via useEffect
+    -   **UI Pattern**: Steps 1-4, 6-7 render as floating modal overlays on top of dashboard; Step 5 (timer) remains full-screen for urgency
+    -   **Preview Mode**: Zap icon (⚡) in top-left corner allows manual preview of protocol; preview mode includes X button to dismiss
+    -   **First-Time Flow**: During automatic post-onboarding trigger, modal cannot be dismissed to ensure completion
 -   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win completion) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.
 -   **Quick Navigation**: Home icon (jump to Phase 0) and Target icon (jump to Phase 4) in top-left corner.
