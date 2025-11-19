@@ -121,7 +121,7 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
   // Don't render until element is ready
   if (!elementReady) {
     return (
-      <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center">
+      <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center">
         <div className="text-white text-xl">Loading tour...</div>
       </div>
     );
@@ -132,11 +132,11 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
       {/* Dimmed backdrop with spotlight cutout */}
       <div className="fixed inset-0 z-[100] pointer-events-none">
         {/* Full dark overlay */}
-        <div className="absolute inset-0 bg-black/80"></div>
+        <div className="absolute inset-0 bg-black/50"></div>
         
         {/* Spotlight cutout - lighter area */}
         <div
-          className="absolute rounded-xl border-4 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.8)] transition-all duration-500 pointer-events-auto"
+          className="absolute rounded-xl border-4 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] transition-all duration-500 pointer-events-auto"
           style={spotlightStyle}
         ></div>
       </div>
