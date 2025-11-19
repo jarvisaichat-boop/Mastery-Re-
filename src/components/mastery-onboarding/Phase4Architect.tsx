@@ -160,8 +160,6 @@ export default function Phase4Architect({ profile, onComplete }: Phase4Architect
                   logicTreeBranch: logicTree.milestone,
                   logicTreeLeaf: logicTree.action,
                 });
-                // Auto-advance after logic tree is complete
-                setTimeout(() => nextScreen(), 1000);
               }}
             />
           </div>
