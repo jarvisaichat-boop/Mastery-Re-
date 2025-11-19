@@ -19,9 +19,10 @@ interface MasteryOnboardingProps {
   isPreview?: boolean;
   onExitPreview?: () => void;
   initialPhase?: number | null;
+  initialProfile?: Partial<MasteryProfile>;
 }
 
-export default function MasteryOnboarding({ onComplete, isPreview = false, onExitPreview, initialPhase }: MasteryOnboardingProps) {
+export default function MasteryOnboarding({ onComplete, isPreview = false, onExitPreview, initialPhase, initialProfile }: MasteryOnboardingProps) {
   const [currentPhase, setCurrentPhase] = useState<OnboardingPhase>(() => {
     // If initialPhase is provided (from quick access buttons), use it
     if (initialPhase !== null && initialPhase !== undefined) {
@@ -36,6 +37,10 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
     }
   });
   const [profile, setProfile] = useState<Partial<MasteryProfile>>(() => {
+    // If initialProfile is provided, use it (for testing/preview)
+    if (initialProfile) {
+      return initialProfile;
+    }
     // Load saved profile on mount
     try {
       const saved = localStorage.getItem(STORAGE_KEY);

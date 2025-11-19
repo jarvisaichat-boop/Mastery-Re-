@@ -366,6 +366,33 @@ function App() {
 
     // Show onboarding if not complete or in preview mode
     if (!onboardingComplete || previewOnboarding) {
+        // When jumping to Phase 7, pre-populate with mock data to test full flow
+        const mockProfileForPhase7 = jumpToPhase === 7 ? {
+            name: 'Test User',
+            context: 'Testing the flow',
+            mentalState: 'STUCK' as const,
+            archetype: 'Warrior' as const,
+            fuel: 'Glory' as const,
+            saboteur: 'Perfectionist' as const,
+            goldenHour: 'Morning' as const,
+            aiPersona: 'Drill Sergeant' as const,
+            northStar: 'Build a successful habit tracking app',
+            northStarTimeline: '3 Months' as const,
+            logicTreeRoot: 'Build a successful habit tracking app',
+            logicTreeBranch: 'Complete MVP with core features',
+            logicTreeLeaf: 'Code for 30 minutes daily',
+            existingHabits: [],
+            canEnvisionPath: true,
+            proposedHabit: {
+                name: 'Code for 30 minutes daily',
+                description: 'Your daily action to achieve "Build a successful habit tracking app" - optimized for your morning golden hour',
+                duration: 30,
+                difficulty: 'challenging' as const
+            },
+            acceptedHabit: true,
+            finalHabitDuration: 30
+        } : undefined;
+
         return <MasteryOnboarding 
             onComplete={handleOnboardingComplete} 
             isPreview={previewOnboarding}
@@ -374,6 +401,7 @@ function App() {
                 setJumpToPhase(null);
             }}
             initialPhase={jumpToPhase}
+            initialProfile={mockProfileForPhase7}
         />;
     }
 
