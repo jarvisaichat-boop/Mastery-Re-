@@ -8,6 +8,7 @@ interface AppTourProps {
 
 export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [elementReady, setElementReady] = useState(false);
 
   const tourStops = [
     {
@@ -41,6 +42,21 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
       onToggleStatsView(false);
     }
   }, [currentStep, currentStop.requireStatsView, onToggleStatsView]);
+
+  // Wait for DOM element to be ready
+  useEffect(() => {
+    setElementReady(false);
+    const checkElement = () => {
+      const element = document.querySelector(currentStop.spotlightSelector);
+      if (element) {
+        setElementReady(true);
+      } else {
+        // Retry after a short delay
+        setTimeout(checkElement, 100);
+      }
+    };
+    checkElement();
+  }, [currentStop.spotlightSelector]);
 
   const handleNext = () => {
     if (currentStep < tourStops.length - 1) {
@@ -101,6 +117,15 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
 
   const spotlightStyle = getSpotlightStyle();
   const tooltipStyle = getTooltipStyle();
+
+  // Don't render until element is ready
+  if (!elementReady) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center">
+        <div className="text-white text-xl">Loading tour...</div>
+      </div>
+    );
+  }
 
   return (
     <>
