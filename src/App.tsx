@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
@@ -105,6 +105,7 @@ function App() {
     const [appTourComplete, setAppTourComplete] = useState(isAppTourComplete);
     const [microWinComplete, setMicroWinComplete] = useState(isMicroWinComplete);
     const [previewOnboarding, setPreviewOnboarding] = useState(false);
+    const [previewAppTour, setPreviewAppTour] = useState(false);
     const [previewMicroWin, setPreviewMicroWin] = useState(false);
     const [jumpToPhase, setJumpToPhase] = useState<number | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -369,10 +370,11 @@ function App() {
         />;
     }
 
-    // Show App Tour after onboarding, before Micro-Win
-    if (onboardingComplete && !appTourComplete) {
+    // Show App Tour after onboarding, before Micro-Win (or in preview mode)
+    if ((onboardingComplete && !appTourComplete) || previewAppTour) {
         return <AppTour onComplete={() => {
             setAppTourComplete(true);
+            setPreviewAppTour(false);
         }} />;
     }
 
@@ -399,6 +401,13 @@ function App() {
                     title="Jump to Phase 4 (Logic Tree)"
                 >
                     <Target className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => setPreviewAppTour(true)}
+                    className="p-2 bg-gray-800 hover:bg-gray-700 text-blue-400 hover:text-blue-300 rounded-lg border border-gray-700 transition-colors"
+                    title="Preview App Tour"
+                >
+                    <BookOpen className="w-4 h-4" />
                 </button>
                 {coreHabit && (
                     <button
