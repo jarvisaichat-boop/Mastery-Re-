@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight, X, Sparkles } from 'lucide-react';
+import DailyCheckInPreview from './DailyCheckInPreview';
 
 interface AppTourProps {
   onComplete: () => void;
   onToggleStatsView?: (show: boolean) => void;
-  onToggleDailyCheckIn?: (show: boolean) => void;
 }
 
-export default function AppTour({ onComplete, onToggleStatsView, onToggleDailyCheckIn }: AppTourProps) {
+export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [elementReady, setElementReady] = useState(false);
 
@@ -23,6 +23,7 @@ export default function AppTour({ onComplete, onToggleStatsView, onToggleDailyCh
       description: 'Click the sparkles button to open your AI coach chat. Reflect on your day, share wins and challenges, and get personalized encouragement tailored to your coaching style.',
       spotlightSelector: 'button[title="Daily Check-In"]',
       position: 'bottom' as const,
+      showPreview: true,
     },
     {
       title: 'Mastery Dashboard',
@@ -116,8 +117,38 @@ export default function AppTour({ onComplete, onToggleStatsView, onToggleDailyCh
     }
   };
 
+  // Get preview position (for Daily Check-in) with viewport awareness
+  const getPreviewStyle = () => {
+    const element = document.querySelector(currentStop.spotlightSelector);
+    if (!element) return {};
+
+    const rect = element.getBoundingClientRect();
+    const previewWidth = 380;
+    const gap = 32;
+    const viewportWidth = window.innerWidth;
+    
+    // Try to position to the right first
+    const rightPosition = rect.right + gap;
+    const wouldOverflow = rightPosition + previewWidth > viewportWidth;
+    
+    if (wouldOverflow) {
+      // Position to the left instead
+      return {
+        top: `${rect.top}px`,
+        right: `${viewportWidth - rect.left + gap}px`,
+      };
+    }
+    
+    // Default: position to the right
+    return {
+      top: `${rect.top}px`,
+      left: `${rightPosition}px`,
+    };
+  };
+
   const spotlightStyle = getSpotlightStyle();
   const tooltipStyle = getTooltipStyle();
+  const previewStyle = getPreviewStyle();
 
   // Don't render until element is ready
   if (!elementReady) {
@@ -141,6 +172,17 @@ export default function AppTour({ onComplete, onToggleStatsView, onToggleDailyCh
           style={spotlightStyle}
         ></div>
       </div>
+
+      {/* Daily Check-in Preview (Step 2 only) */}
+      {currentStop.showPreview && (
+        <div
+          className="fixed z-[101] animate-fadeIn"
+          style={previewStyle}
+          aria-hidden="true"
+        >
+          <DailyCheckInPreview />
+        </div>
+      )}
 
       {/* Floating tooltip */}
       <div
