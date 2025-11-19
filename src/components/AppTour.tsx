@@ -176,7 +176,7 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
       {/* Daily Check-in Preview (Step 2 only) */}
       {currentStop.showPreview && (
         <div
-          className="fixed z-[102] animate-fadeIn"
+          className="fixed z-[101] animate-fadeIn pointer-events-none"
           style={previewStyle}
           aria-hidden="true"
         >
@@ -186,7 +186,7 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
 
       {/* Floating tooltip */}
       <div
-        className="fixed z-[101] max-w-md animate-fadeIn pointer-events-auto"
+        className="fixed z-[104] max-w-md animate-fadeIn pointer-events-auto"
         style={tooltipStyle}
       >
         <div className="bg-gray-900 border-2 border-blue-500 rounded-2xl p-6 shadow-2xl">
