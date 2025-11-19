@@ -449,15 +449,13 @@ function App() {
                 >
                     <BookOpen className="w-4 h-4" />
                 </button>
-                {coreHabit && (
-                    <button
-                        onClick={() => setPreviewMicroWin(true)}
-                        className="p-2 bg-gray-800 hover:bg-gray-700 text-yellow-400 hover:text-yellow-300 rounded-lg border border-gray-700 transition-colors"
-                        title="Preview Micro-Win Protocol"
-                    >
-                        <Zap className="w-4 h-4" />
-                    </button>
-                )}
+                <button
+                    onClick={() => setPreviewMicroWin(true)}
+                    className="p-2 bg-gray-800 hover:bg-gray-700 text-yellow-400 hover:text-yellow-300 rounded-lg border border-gray-700 transition-colors"
+                    title="Preview Micro-Win Protocol"
+                >
+                    <Zap className="w-4 h-4" />
+                </button>
             </div>
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1"></div>
