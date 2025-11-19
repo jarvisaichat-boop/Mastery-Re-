@@ -4,9 +4,10 @@ import { ChevronRight, X, Sparkles } from 'lucide-react';
 interface AppTourProps {
   onComplete: () => void;
   onToggleStatsView?: (show: boolean) => void;
+  onToggleDailyCheckIn?: (show: boolean) => void;
 }
 
-export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps) {
+export default function AppTour({ onComplete, onToggleStatsView, onToggleDailyCheckIn }: AppTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [elementReady, setElementReady] = useState(false);
 
@@ -20,8 +21,9 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
     {
       title: 'Daily Check-In Chat',
       description: 'Share your wins and challenges. Your AI coach adapts to your personality and provides personalized encouragement.',
-      spotlightSelector: 'button[title="Daily Check-In"]',
+      spotlightSelector: '.daily-checkin-modal',
       position: 'bottom' as const,
+      requireDailyCheckIn: true,
     },
     {
       title: 'Mastery Dashboard',
@@ -41,7 +43,14 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
     } else if (!currentStop.requireStatsView && onToggleStatsView && currentStep > 0) {
       onToggleStatsView(false);
     }
-  }, [currentStep, currentStop.requireStatsView, onToggleStatsView]);
+
+    // Auto-open daily check-in for step 2
+    if (currentStop.requireDailyCheckIn && onToggleDailyCheckIn) {
+      onToggleDailyCheckIn(true);
+    } else if (!currentStop.requireDailyCheckIn && onToggleDailyCheckIn) {
+      onToggleDailyCheckIn(false);
+    }
+  }, [currentStep, currentStop.requireStatsView, currentStop.requireDailyCheckIn, onToggleStatsView, onToggleDailyCheckIn]);
 
   // Wait for DOM element to be ready
   useEffect(() => {
@@ -71,9 +80,12 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
   };
 
   const handleComplete = () => {
-    // Reset to habit tracker view
+    // Reset to habit tracker view and close modals
     if (onToggleStatsView) {
       onToggleStatsView(false);
+    }
+    if (onToggleDailyCheckIn) {
+      onToggleDailyCheckIn(false);
     }
     localStorage.setItem('mastery-dashboard-app-tour-complete', 'true');
     onComplete();

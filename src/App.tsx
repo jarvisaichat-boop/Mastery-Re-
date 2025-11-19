@@ -560,6 +560,7 @@ function App() {
                         setPreviewAppTour(false);
                     }}
                     onToggleStatsView={setShowStatsView}
+                    onToggleDailyCheckIn={setShowChatCheckIn}
                 />
             )}
             
