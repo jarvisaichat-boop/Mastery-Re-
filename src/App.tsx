@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen, FileCheck } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
@@ -403,6 +403,16 @@ function App() {
                     title="Jump to Phase 4 (Logic Tree)"
                 >
                     <Target className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => {
+                        setJumpToPhase(7);
+                        setPreviewOnboarding(true);
+                    }}
+                    className="p-2 bg-gray-800 hover:bg-gray-700 text-green-400 hover:text-green-300 rounded-lg border border-gray-700 transition-colors"
+                    title="Jump to Phase 7 (Contract - Test Full Flow)"
+                >
+                    <FileCheck className="w-4 h-4" />
                 </button>
                 <button
                     onClick={() => setPreviewAppTour(true)}
