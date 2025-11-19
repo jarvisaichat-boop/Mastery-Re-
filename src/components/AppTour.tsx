@@ -20,10 +20,9 @@ export default function AppTour({ onComplete, onToggleStatsView, onToggleDailyCh
     },
     {
       title: 'Daily Check-In Chat',
-      description: 'Share your wins and challenges. Your AI coach adapts to your personality and provides personalized encouragement.',
-      spotlightSelector: '.daily-checkin-modal',
+      description: 'Click the sparkles button to open your AI coach chat. Reflect on your day, share wins and challenges, and get personalized encouragement tailored to your coaching style.',
+      spotlightSelector: 'button[title="Daily Check-In"]',
       position: 'bottom' as const,
-      requireDailyCheckIn: true,
     },
     {
       title: 'Mastery Dashboard',
@@ -43,14 +42,7 @@ export default function AppTour({ onComplete, onToggleStatsView, onToggleDailyCh
     } else if (!currentStop.requireStatsView && onToggleStatsView && currentStep > 0) {
       onToggleStatsView(false);
     }
-
-    // Auto-open daily check-in for step 2
-    if (currentStop.requireDailyCheckIn && onToggleDailyCheckIn) {
-      onToggleDailyCheckIn(true);
-    } else if (!currentStop.requireDailyCheckIn && onToggleDailyCheckIn) {
-      onToggleDailyCheckIn(false);
-    }
-  }, [currentStep, currentStop.requireStatsView, currentStop.requireDailyCheckIn, onToggleStatsView, onToggleDailyCheckIn]);
+  }, [currentStep, currentStop.requireStatsView, onToggleStatsView]);
 
   // Wait for DOM element to be ready
   useEffect(() => {
@@ -80,12 +72,9 @@ export default function AppTour({ onComplete, onToggleStatsView, onToggleDailyCh
   };
 
   const handleComplete = () => {
-    // Reset to habit tracker view and close modals
+    // Reset to habit tracker view
     if (onToggleStatsView) {
       onToggleStatsView(false);
-    }
-    if (onToggleDailyCheckIn) {
-      onToggleDailyCheckIn(false);
     }
     localStorage.setItem('mastery-dashboard-app-tour-complete', 'true');
     onComplete();
