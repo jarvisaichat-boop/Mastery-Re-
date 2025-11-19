@@ -176,7 +176,7 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
       {/* Daily Check-in Preview (Step 2 only) */}
       {currentStop.showPreview && (
         <div
-          className="fixed z-[101] animate-fadeIn"
+          className="fixed z-[102] animate-fadeIn"
           style={previewStyle}
           aria-hidden="true"
         >
