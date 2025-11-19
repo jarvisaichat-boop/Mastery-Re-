@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
+import AppTour from './components/AppTour';
 import MicroWinProtocol from './components/MicroWinProtocol';
 import AICoachWidget from './components/AICoachWidget';
 import StreakCelebration from './components/StreakCelebration';
@@ -15,6 +16,7 @@ const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
 const LOCAL_STORAGE_RATE_MODE_KEY = 'mastery-dashboard-rate-mode-v1';
 const LOCAL_STORAGE_STREAK_MODE_KEY = 'mastery-dashboard-streak-mode-v1';
 const LOCAL_STORAGE_ONBOARDING_KEY = 'mastery-dashboard-onboarding-complete';
+const LOCAL_STORAGE_APP_TOUR_KEY = 'mastery-dashboard-app-tour-complete';
 const LOCAL_STORAGE_MICRO_WIN_KEY = 'mastery-dashboard-micro-win-complete';
 const LOCAL_STORAGE_CELEBRATED_STREAKS_KEY = 'mastery-dashboard-celebrated-streaks';
 const LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY = 'mastery-dashboard-last-daily-summary';
@@ -82,6 +84,14 @@ function isOnboardingComplete(): boolean {
   }
 }
 
+function isAppTourComplete(): boolean {
+  try {
+    return localStorage.getItem(LOCAL_STORAGE_APP_TOUR_KEY) === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
 function isMicroWinComplete(): boolean {
   try {
     return localStorage.getItem(LOCAL_STORAGE_MICRO_WIN_KEY) === 'true';
@@ -92,6 +102,7 @@ function isMicroWinComplete(): boolean {
 
 function App() {
     const [onboardingComplete, setOnboardingComplete] = useState(isOnboardingComplete);
+    const [appTourComplete, setAppTourComplete] = useState(isAppTourComplete);
     const [microWinComplete, setMicroWinComplete] = useState(isMicroWinComplete);
     const [previewOnboarding, setPreviewOnboarding] = useState(false);
     const [previewMicroWin, setPreviewMicroWin] = useState(false);
@@ -330,6 +341,21 @@ function App() {
         localStorage.setItem(LOCAL_STORAGE_MICRO_WIN_KEY, 'true');
     };
 
+    // Auto-skip micro-win if no Life Goal habit exists (MUST be before returns!)
+    useEffect(() => {
+        if (onboardingComplete && appTourComplete && !microWinComplete && !previewMicroWin && habits.length > 0) {
+            const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
+            if (!coreHabit) {
+                console.log('⚠️ No Life Goal habit found, skipping Micro-Win Protocol');
+                handleMicroWinComplete();
+            }
+        }
+    }, [onboardingComplete, appTourComplete, microWinComplete, previewMicroWin, habits]);
+
+    // Determine if we should show Micro-Win (either first time or preview)
+    const shouldShowMicroWin = (onboardingComplete && appTourComplete && !microWinComplete) || previewMicroWin;
+    const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
+
     // Show onboarding if not complete or in preview mode
     if (!onboardingComplete || previewOnboarding) {
         return <MasteryOnboarding 
@@ -343,20 +369,12 @@ function App() {
         />;
     }
 
-    // Auto-skip micro-win if no Life Goal habit exists
-    useEffect(() => {
-        if (onboardingComplete && !microWinComplete && !previewMicroWin && habits.length > 0) {
-            const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
-            if (!coreHabit) {
-                console.log('⚠️ No Life Goal habit found, skipping Micro-Win Protocol');
-                handleMicroWinComplete();
-            }
-        }
-    }, [onboardingComplete, microWinComplete, previewMicroWin, habits]);
-
-    // Determine if we should show Micro-Win (either first time or preview)
-    const shouldShowMicroWin = (onboardingComplete && !microWinComplete) || previewMicroWin;
-    const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
+    // Show App Tour after onboarding, before Micro-Win
+    if (onboardingComplete && !appTourComplete) {
+        return <AppTour onComplete={() => {
+            setAppTourComplete(true);
+        }} />;
+    }
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
