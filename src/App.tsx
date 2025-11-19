@@ -370,13 +370,8 @@ function App() {
         />;
     }
 
-    // Show App Tour after onboarding, before Micro-Win (or in preview mode)
-    if ((onboardingComplete && !appTourComplete) || previewAppTour) {
-        return <AppTour onComplete={() => {
-            setAppTourComplete(true);
-            setPreviewAppTour(false);
-        }} />;
-    }
+    // Determine if we should show App Tour overlay
+    const shouldShowAppTour = (onboardingComplete && !appTourComplete) || previewAppTour;
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
@@ -483,14 +478,16 @@ function App() {
 
                 {/* STATS OVERVIEW */}
                 {showStatsView && (
-                    <StatsOverview 
-                        dashboardData={dashboardData}
-                        onToggleRateMode={handleToggleRateMode}
-                        onToggleStreakMode={handleToggleStreakMode}
-                        goal={goal}
-                        onGoalUpdate={setGoal}
-                        habits={habits}
-                    />
+                    <div className="stats-dashboard-area">
+                        <StatsOverview 
+                            dashboardData={dashboardData}
+                            onToggleRateMode={handleToggleRateMode}
+                            onToggleStreakMode={handleToggleStreakMode}
+                            goal={goal}
+                            onGoalUpdate={setGoal}
+                            habits={habits}
+                        />
+                    </div>
                 )}
 
                 {/* Calendar Header shown for all calendar views (week/month/year) when showDailyTrackingView is true */}
@@ -503,7 +500,7 @@ function App() {
 
                 {/* Habit rows only show in week view (calendar mode) or simple list mode */}
                 {!showStatsView && (viewMode === 'week' || !showDailyTrackingView) && (
-                    <div className="space-y-2">
+                    <div className="habit-tracker-area space-y-2">
                         {sortedHabits.map(habit => (
                             <HabitRow 
                                 key={habit.id} 
@@ -553,6 +550,16 @@ function App() {
                     onComplete={handleMicroWinComplete}
                     isPreview={previewMicroWin}
                     onDismiss={() => setPreviewMicroWin(false)}
+                />
+            )}
+            
+            {shouldShowAppTour && (
+                <AppTour
+                    onComplete={() => {
+                        setAppTourComplete(true);
+                        setPreviewAppTour(false);
+                    }}
+                    onToggleStatsView={setShowStatsView}
                 />
             )}
             

@@ -55,7 +55,16 @@ The core system follows a 7-phase coaching cycle:
     -   **UI Pattern**: Steps 1-4, 6-7 render as floating modal overlays on top of dashboard; Step 5 (timer) remains full-screen for urgency
     -   **Preview Mode**: Zap icon (⚡) in top-left corner allows manual preview of protocol; preview mode includes X button to dismiss
     -   **First-Time Flow**: During automatic post-onboarding trigger, modal cannot be dismissed to ensure completion
--   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win completion) is saved in localStorage.
+-   **App Tour** (November 19, 2025):
+    -   **Interactive Overlay System**: Spotlights real UI elements on actual dashboard instead of showing mockups
+    -   **3 Tour Stops**: Habit Tracker list → Daily Check-in button (Sparkles) → Stats Dashboard view
+    -   **Spotlight Effect**: Dimmed backdrop with blue border cutout highlighting active element
+    -   **Floating Tooltips**: Text bubbles with arrows pointing to real features, positioned above/below spotlighted elements
+    -   **Auto-View Switching**: Tour automatically toggles to Stats view for stop 3, resets to Habit Tracker on completion
+    -   **Navigation**: Next button, skip button (X), progress dots showing current/completed steps
+    -   **Integration**: Renders as overlay on top of dashboard, receives dashboard state controls via props
+    -   **Preview Access**: Blue book icon (📖) in top-left corner allows manual tour preview anytime
+-   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.
 -   **Quick Navigation**: Home icon (jump to Phase 0) and Target icon (jump to Phase 4) in top-left corner.
 
