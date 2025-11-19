@@ -182,6 +182,13 @@ function App() {
             localStorage.removeItem('mastery-onboarding-phase');
             console.log('🧹 Cleared onboarding localStorage');
             
+            // Reset App Tour and Micro-Win flags to ensure proper flow
+            localStorage.removeItem(LOCAL_STORAGE_APP_TOUR_KEY);
+            localStorage.removeItem(LOCAL_STORAGE_MICRO_WIN_KEY);
+            setAppTourComplete(false);
+            setMicroWinComplete(false);
+            console.log('🔄 Reset App Tour and Micro-Win flags for fresh flow');
+            
             setOnboardingComplete(true);
             console.log('✅ setOnboardingComplete(true) called - should trigger dashboard render');
             
