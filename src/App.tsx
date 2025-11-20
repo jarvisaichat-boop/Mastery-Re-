@@ -13,8 +13,9 @@ import StatsOverview from './components/StatsOverview';
 import HoldToIgnite from './components/HoldToIgnite';
 import BreathPacer from './components/BreathPacer';
 import JournalModule from './components/JournalModule';
+import { ProgramLibraryModal } from './components/ProgramLibraryModal';
 import { Toast } from './components/Toast';
-import { Habit } from './types';
+import { Habit, HabitTemplate } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay, isHabitLoggable, getHabitStrictness } from './utils';
 import { NotificationService } from './services/NotificationService';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
@@ -139,6 +140,7 @@ function App() {
     const [goal, setGoal] = useState(() => localStorage.getItem(LOCAL_STORAGE_GOAL_KEY) || 'Set your #1 priority');
     const [aspirations, setAspirations] = useState(() => localStorage.getItem(LOCAL_STORAGE_ASPIRATIONS_KEY) || '');
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
+    const [showProgramLibrary, setShowProgramLibrary] = useState(false);
     const [selectedHabitToEdit, setSelectedHabitToEdit] = useState<Habit | null>(null);
     const [draggedHabitId, setDraggedHabitId] = useState<number | null>(null);
 
@@ -347,6 +349,38 @@ function App() {
     const handleDateClick = (date: Date) => { setCurrentDate(date); setViewMode('week'); };
     const handleAddNewHabit = () => { setSelectedHabitToEdit(null); setShowAddHabitModal(true); };
     const handleEditHabit = (habit: Habit) => { setSelectedHabitToEdit(habit); setShowAddHabitModal(true); };
+    
+    const handleOpenProgramLibrary = () => {
+        setShowAddHabitModal(false);
+        setShowProgramLibrary(true);
+    };
+    
+    const handleSelectProgramHabits = async (habitTemplates: HabitTemplate[], programId: string) => {
+        const now = Date.now();
+        const currentMaxOrder = Math.max(...habits.map(h => h.order), -1);
+        
+        const newHabits: Habit[] = habitTemplates.map((template, index) => ({
+            ...template,
+            id: now + index,
+            order: currentMaxOrder + index + 1,
+            completed: {},
+            createdAt: now,
+            sourceProgramId: programId
+        }));
+        
+        // Request notification permission if any habit has scheduledTime
+        const hasScheduledTime = newHabits.some(h => h.scheduledTime);
+        if (hasScheduledTime) {
+            const granted = await NotificationService.requestPermission();
+            if (!granted) {
+                alert('Notifications are blocked. Some habits have scheduled reminders that won\'t work until you enable notifications in your browser settings.');
+            }
+        }
+        
+        setHabits(prev => [...prev, ...newHabits]);
+        setToastMessage(`Added ${newHabits.length} habit${newHabits.length !== 1 ? 's' : ''} from program!`);
+        setTimeout(() => setToastMessage(null), 3000);
+    };
 
     const handleSaveHabit = async (habitData: any) => {
         // Request notification permission if habit has scheduledTime
@@ -981,7 +1015,22 @@ function App() {
                 />
             )}
             
-            <AddHabitModal isOpen={showAddHabitModal} onClose={() => { setShowAddHabitModal(false); setSelectedHabitToEdit(null); }} onSaveHabit={handleSaveHabit} onDeleteHabit={handleDeleteHabit} habitToEdit={selectedHabitToEdit} habitMuscleCount={habitMuscleCount} lifeGoalsCount={lifeGoalsCount}/>
+            <AddHabitModal 
+                isOpen={showAddHabitModal} 
+                onClose={() => { setShowAddHabitModal(false); setSelectedHabitToEdit(null); }} 
+                onSaveHabit={handleSaveHabit} 
+                onDeleteHabit={handleDeleteHabit} 
+                habitToEdit={selectedHabitToEdit} 
+                habitMuscleCount={habitMuscleCount} 
+                lifeGoalsCount={lifeGoalsCount}
+                onOpenProgramLibrary={handleOpenProgramLibrary}
+            />
+            
+            <ProgramLibraryModal
+                isOpen={showProgramLibrary}
+                onClose={() => setShowProgramLibrary(false)}
+                onSelectHabits={handleSelectProgramHabits}
+            />
         </div>
     );
 }
