@@ -97,10 +97,13 @@ The core system follows a 7-phase coaching cycle:
         -   **Implementation**: Micro-Win Protocol Step 5 now uses completely black background
         -   **Minimal UI**: Only shows subtle pulsing circle indicator, no visible countdown numbers
         -   **Psychology**: Removes clock-watching anxiety, encourages focus on action over time
-    -   **Visual Indicators**: Time-sensitive UI elements show urgency status
-        -   **Lock Icons**: Appear on day circles when window has expired (cannot log)
-        -   **Time Badges**: Show hours remaining for today's uncompleted strict habits
-        -   **Color Coding**: Fresh (blue), Warning (yellow <12h), Urgent (red <6h), Locked (gray)
+    -   **Visual Indicators**: Subtle, path-focused UI that shows journey without blocking
+        -   **Past Expired Dates**: Rendered at 15% opacity - barely visible but still part of the path
+        -   **Future Dates**: Normal brightness - the path ahead remains clear and inviting
+        -   **No Lock Icons**: System enforces rules silently without visual barriers
+        -   **No Time Badges**: Clean interface without countdown pressure
+        -   **Info Toast**: Clicking unloggable habits shows friendly explanation ("Goal habit is loggable for 48 hours" or "Habit Muscle is loggable for 24 hours")
+        -   **Philosophy**: "Path not blocks" - motivating, not restrictive
 -   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.
 -   **Quick Navigation**: Home icon (jump to Phase 0) and Target icon (jump to Phase 4) in top-left corner.
