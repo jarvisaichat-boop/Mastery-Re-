@@ -135,7 +135,8 @@ const DayCircle: React.FC<{
     habit: Habit;
     date: Date;
     onUnloggableClick?: (habitType: string) => void;
-}> = ({ completionStatus, isScheduled, onPress, habitColor, habit, date, onUnloggableClick }) => {
+    isInCurrentWeek: boolean;
+}> = ({ completionStatus, isScheduled, onPress, habitColor, habit, date, onUnloggableClick, isInCurrentWeek }) => {
     const colors = getColorClasses(habitColor);
     const strictness = getHabitStrictness(habit);
     const isLoggable = strictness === 'anytime' ? true : isHabitLoggable(habit, date, new Date());
@@ -146,6 +147,9 @@ const DayCircle: React.FC<{
     const dateToCheck = new Date(date);
     dateToCheck.setHours(0, 0, 0, 0);
     const isPastExpired = !isLoggable && dateToCheck < today && strictness !== 'anytime';
+    
+    // Only dim past expired dates from PREVIOUS weeks (not current week)
+    const shouldDim = isPastExpired && !isInCurrentWeek;
     
     let circleClasses = `w-9 h-9 rounded-full border transition-colors flex items-center justify-center text-sm font-medium `;
     let circleContent = null;
@@ -165,11 +169,11 @@ const DayCircle: React.FC<{
     } else if (completionStatus === false) {
         circleClasses += 'bg-red-900/30 border-red-800/50 text-red-400 cursor-pointer';
         circleContent = <X className="w-4 h-4" />;
-    } else if (isPastExpired) {
-        // Past expired: dimmed to 15% opacity, no lock icon, but clickable for info
+    } else if (shouldDim) {
+        // Past expired from PREVIOUS week: dimmed to 15% opacity for history context
         circleClasses += 'bg-gray-700 border-gray-600 text-gray-300 cursor-pointer opacity-[0.15]';
     } else if (!isLoggable && strictness !== 'anytime') {
-        // Future unloggable: normal styling, clickable for info
+        // Current week expired or future unloggable: normal styling, clickable for info
         circleClasses += 'bg-gray-700 border-gray-600 text-gray-300 cursor-pointer';
     } else {
         circleClasses += 'bg-gray-700 border-gray-600 text-gray-300 cursor-pointer hover:bg-gray-600';
@@ -217,6 +221,15 @@ export const HabitRow: React.FC<{
     
     const currentStreak = calculateStreak();
     
+    // Check if the week being displayed is the current week (contains today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isCurrentWeek = weekDates.some(date => {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime() === today.getTime();
+    });
+    
     return (
         <div 
             className={`mt-3 ${isDragging ? 'opacity-50' : ''} transition-opacity cursor-move`}
@@ -252,7 +265,7 @@ export const HabitRow: React.FC<{
                         return (
                             <React.Fragment key={dateString}>
                                 {index > 0 && <div className={`h-1 flex-grow mx-1 ${showConnectingLine ? getColorClasses(habit.color).bg : 'bg-transparent'}`} />}
-                                <DayCircle completionStatus={habit.completed[dateString]} isScheduled={isScheduled} onPress={() => onToggle(habit.id, dateString)} habitColor={habit.color} habit={habit} date={date} onUnloggableClick={onUnloggableClick}/>
+                                <DayCircle completionStatus={habit.completed[dateString]} isScheduled={isScheduled} onPress={() => onToggle(habit.id, dateString)} habitColor={habit.color} habit={habit} date={date} onUnloggableClick={onUnloggableClick} isInCurrentWeek={isCurrentWeek}/>
                             </React.Fragment>
                         );
                     })}
