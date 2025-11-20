@@ -357,10 +357,27 @@ function App() {
             }
         }
 
-        setHabits(prev => habitData.id
-            ? prev.map(h => h.id === habitData.id ? { ...h, ...habitData } : h)
-            : [...prev, { ...habitData, id: Date.now(), order: Math.max(...prev.map(h => h.order), -1) + 1, completed: {}, createdAt: Date.now() }]
-        );
+        setHabits(prev => {
+            if (habitData.id) {
+                // Editing existing habit
+                return prev.map(h => h.id === habitData.id ? { 
+                    ...h, 
+                    ...habitData,
+                    miniAppType: habitData.miniAppType !== undefined ? habitData.miniAppType : h.miniAppType
+                } : h);
+            } else {
+                // Creating new habit
+                const newHabit: Habit = {
+                    ...habitData,
+                    id: Date.now(),
+                    order: Math.max(...prev.map(h => h.order), -1) + 1,
+                    completed: {},
+                    createdAt: Date.now(),
+                    miniAppType: habitData.miniAppType || null
+                };
+                return [...prev, newHabit];
+            }
+        });
     };
 
     const handleDeleteHabit = (habitId: number) => {

@@ -70,6 +70,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
   const [periodUnit, setPeriodUnit] = useState('Week');
   const [repeatDays, setRepeatDays] = useState(1);
   const [scheduledTime, setScheduledTime] = useState<string | undefined>(undefined);
+  const [miniAppType, setMiniAppType] = useState<'breath' | 'journal' | 'vision' | null>(null);
   const [showCategorySelection, setShowCategorySelection] = useState(false);
   const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
   const [customMainCategoryInput, setCustomMainCategoryInput] = useState('');
@@ -227,6 +228,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
         setPeriodUnit(habitToEdit.periodUnit);
         setRepeatDays(habitToEdit.repeatDays);
         setScheduledTime(habitToEdit.scheduledTime);
+        setMiniAppType(habitToEdit.miniAppType || null);
       } else {
         setHabitName('');
         setHabitDescription('');
@@ -239,6 +241,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
         setPeriodUnit('Week');
         setRepeatDays(1);
         setScheduledTime(undefined);
+        setMiniAppType(null);
       }
     }
   }, [isOpen, habitToEdit]);
@@ -265,6 +268,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
         periodUnit,
         repeatDays,
         scheduledTime,
+        miniAppType,
       };
       onSaveHabit(habitData);
       onClose();
@@ -553,6 +557,46 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Mini-App Experience */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Mini-App Experience (optional)</label>
+            <p className="text-xs text-gray-500 mb-3">Turn this habit into an immersive experience instead of a simple checkbox</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setMiniAppType(miniAppType === 'breath' ? null : 'breath')}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  miniAppType === 'breath'
+                    ? 'border-blue-500 bg-blue-500/20 text-white'
+                    : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
+                }`}
+              >
+                <div className="text-2xl mb-2">🧘</div>
+                <div className="font-semibold text-sm">Breath Pacer</div>
+                <div className="text-xs mt-1 opacity-75">Guided breathing</div>
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setMiniAppType(miniAppType === 'journal' ? null : 'journal')}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  miniAppType === 'journal'
+                    ? 'border-green-500 bg-green-500/20 text-white'
+                    : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
+                }`}
+              >
+                <div className="text-2xl mb-2">📝</div>
+                <div className="font-semibold text-sm">Journal</div>
+                <div className="text-xs mt-1 opacity-75">Gratitude writing</div>
+              </button>
+            </div>
+            {miniAppType && (
+              <p className="text-xs text-green-400 mt-2">
+                ✓ Clicking this habit will open the {miniAppType === 'breath' ? 'Breath Pacer' : 'Journal'} experience
+              </p>
+            )}
           </div>
 
           {/* Notification Scheduling */}

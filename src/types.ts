@@ -39,6 +39,8 @@ export interface AddHabitModalProps {
     timesPerPeriod: number;
     periodUnit: string;
     repeatDays: number;
+    scheduledTime?: string;
+    miniAppType?: 'breath' | 'journal' | 'vision' | null;
   }) => void;
   onDeleteHabit?: (habitId: number) => void;
   habitToEdit?: Habit | null;
