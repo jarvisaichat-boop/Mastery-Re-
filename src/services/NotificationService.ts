@@ -58,7 +58,12 @@ class NotificationServiceClass {
     habitName: string,
     type: 'gentle' | 'urgent' | 'buzzing'
   ) {
-    if (!this.permissionGranted) return;
+    if (!this.permissionGranted) {
+      console.warn(`❌ [Notification] Cannot show ${type} notification for "${habitName}" - permission not granted`);
+      return;
+    }
+    
+    console.log(`📣 [Notification] Showing ${type} notification for "${habitName}"`);
 
     const messages = {
       gentle: {
@@ -111,12 +116,19 @@ class NotificationServiceClass {
     // If scheduled time is in the past today, schedule for tomorrow
     if (scheduledDate <= now) {
       scheduledDate.setDate(scheduledDate.getDate() + 1);
+      console.log(`📅 [Notification] "${habitName}" scheduled time (${scheduledTime}) already passed today, scheduling for tomorrow`);
     }
 
     // Calculate trigger times
     const gentleTime = new Date(scheduledDate.getTime() - 5 * 60 * 1000); // T-5 minutes
     const urgentTime = new Date(scheduledDate.getTime()); // T-0
     const buzzingTime = new Date(scheduledDate.getTime() + 5 * 60 * 1000); // T+5 minutes
+
+    console.log(`🔔 [Notification] Scheduling notifications for "${habitName}":
+  - Gentle reminder (T-5): ${gentleTime.toLocaleTimeString()}
+  - Urgent (T-0): ${urgentTime.toLocaleTimeString()}
+  - Buzzing (T+5): ${buzzingTime.toLocaleTimeString()}
+  Permission granted: ${this.permissionGranted}`);
 
     // Schedule notifications
     const scheduleNotif = (
@@ -126,6 +138,7 @@ class NotificationServiceClass {
       const delay = triggerTime.getTime() - now.getTime();
       if (delay > 0) {
         const timeoutId = window.setTimeout(() => {
+          console.log(`🔥 [Notification] Firing ${type} notification for "${habitName}"`);
           this.showNotification(habitId, habitName, type);
         }, delay);
 
@@ -136,6 +149,10 @@ class NotificationServiceClass {
           type,
           triggerTime,
         });
+        
+        console.log(`✅ [Notification] ${type} scheduled in ${Math.round(delay / 1000)}s (${triggerTime.toLocaleTimeString()})`);
+      } else {
+        console.log(`⏭️ [Notification] ${type} time already passed, skipping`);
       }
     };
 
@@ -213,6 +230,38 @@ class NotificationServiceClass {
     });
     this.activeNotifications = [];
     this.schedules = [];
+  }
+
+  // Testing & Debugging Methods
+  testNotification(habitName: string = 'Test Habit') {
+    console.log(`🧪 [Notification] Firing test notification for "${habitName}"`);
+    if (!this.permissionGranted) {
+      console.warn('❌ [Notification] Test failed - permission not granted');
+      alert('Notification permission not granted. Please enable notifications in your browser settings.');
+      return;
+    }
+    this.showNotification(999, habitName, 'urgent');
+  }
+
+  getDebugInfo() {
+    return {
+      permissionGranted: this.permissionGranted,
+      browserSupport: 'Notification' in window,
+      browserPermission: 'Notification' in window ? Notification.permission : 'N/A',
+      activeSchedules: this.schedules,
+      activeNotifications: this.activeNotifications.map(n => ({
+        id: n.id,
+        type: n.type,
+        triggerTime: n.triggerTime.toLocaleTimeString(),
+        timeRemaining: Math.round((n.triggerTime.getTime() - Date.now()) / 1000) + 's'
+      }))
+    };
+  }
+
+  logDebugInfo() {
+    const info = this.getDebugInfo();
+    console.log('🔍 [Notification Debug Info]', info);
+    return info;
   }
 }
 

@@ -561,6 +561,23 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
               onChange={setScheduledTime}
               label="Daily Reminder (optional)"
             />
+            {scheduledTime && (
+              <div className="mt-2 space-y-2">
+                <p className="text-xs text-gray-400">
+                  You'll get notifications at T-5min (gentle), T-0 (urgent), and T+5min (buzzing)
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const { NotificationService } = require('../services/NotificationService');
+                    NotificationService.testNotification(habitName || 'Test Habit');
+                  }}
+                  className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+                >
+                  🧪 Test Notification Now
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3 pt-4">
