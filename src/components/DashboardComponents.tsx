@@ -1,8 +1,8 @@
 // src/components/DashboardComponents.tsx
 import React from 'react';
-import { X, Lock, Clock } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Habit } from '../types';
-import { formatDate, getMonthCalendarDays, isHabitScheduledOnDay, getStartOfWeek, addDays, getColorClasses, getTextColorClass, isHabitLoggable, getTimeRemainingForHabit, getHabitStrictness } from '../utils';
+import { formatDate, getMonthCalendarDays, isHabitScheduledOnDay, getStartOfWeek, addDays, getColorClasses, getTextColorClass, isHabitLoggable, getHabitStrictness } from '../utils';
 
 // Header item for a single day (e.g., MON 25)
 export const DayHeader: React.FC<{ date: Date }> = ({ date }) => (
@@ -134,13 +134,29 @@ const DayCircle: React.FC<{
     habitColor: string;
     habit: Habit;
     date: Date;
-}> = ({ completionStatus, isScheduled, onPress, habitColor, habit, date }) => {
+    onUnloggableClick?: (habitType: string) => void;
+}> = ({ completionStatus, isScheduled, onPress, habitColor, habit, date, onUnloggableClick }) => {
     const colors = getColorClasses(habitColor);
     const strictness = getHabitStrictness(habit);
     const isLoggable = strictness === 'anytime' ? true : isHabitLoggable(habit, date, new Date());
     
+    // Check if this is a past expired date (not loggable and before today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dateToCheck = new Date(date);
+    dateToCheck.setHours(0, 0, 0, 0);
+    const isPastExpired = !isLoggable && dateToCheck < today && strictness !== 'anytime';
+    
     let circleClasses = `w-9 h-9 rounded-full border transition-colors flex items-center justify-center text-sm font-medium `;
     let circleContent = null;
+
+    const handleClick = () => {
+        if (isScheduled && isLoggable) {
+            onPress();
+        } else if (isScheduled && !isLoggable && strictness !== 'anytime' && onUnloggableClick) {
+            onUnloggableClick(habit.type);
+        }
+    };
 
     if (!isScheduled) {
         circleClasses += 'bg-gray-800 border-gray-700 text-gray-500 opacity-50 cursor-not-allowed';
@@ -149,15 +165,17 @@ const DayCircle: React.FC<{
     } else if (completionStatus === false) {
         circleClasses += 'bg-red-900/30 border-red-800/50 text-red-400 cursor-pointer';
         circleContent = <X className="w-4 h-4" />;
+    } else if (isPastExpired) {
+        // Past expired: dimmed to 15% opacity, no lock icon, but clickable for info
+        circleClasses += 'bg-gray-700 border-gray-600 text-gray-300 cursor-pointer opacity-[0.15]';
     } else if (!isLoggable && strictness !== 'anytime') {
-        // Locked: cannot log this habit anymore
-        circleClasses += 'bg-gray-900 border-gray-800 text-gray-600 cursor-not-allowed opacity-50';
-        circleContent = <Lock className="w-3 h-3" />;
+        // Future unloggable: normal styling, clickable for info
+        circleClasses += 'bg-gray-700 border-gray-600 text-gray-300 cursor-pointer';
     } else {
         circleClasses += 'bg-gray-700 border-gray-600 text-gray-300 cursor-pointer hover:bg-gray-600';
     }
     
-    return <button onClick={isScheduled && isLoggable ? onPress : undefined} disabled={!isScheduled || !isLoggable} className={circleClasses}>{circleContent}</button>;
+    return <button onClick={handleClick} className={circleClasses}>{circleContent}</button>;
 };
 
 // A row for a single habit
@@ -171,7 +189,8 @@ export const HabitRow: React.FC<{
     onDragOver: (e: React.DragEvent) => void;
     onDrop: (e: React.DragEvent, targetHabitId: number) => void;
     isDragging: boolean;
-}> = ({ habit, weekDates, onToggle, onEditHabit, showCircles, onDragStart, onDragOver, onDrop, isDragging }) => {
+    onUnloggableClick?: (habitType: string) => void;
+}> = ({ habit, weekDates, onToggle, onEditHabit, showCircles, onDragStart, onDragOver, onDrop, isDragging, onUnloggableClick }) => {
     const getHabitBackgroundColor = (habitType: string): string => {
         if (habitType === 'Anchor Habit') return 'bg-blue-500/10 rounded-lg';
         if (habitType === 'Life Goal Habit') return 'bg-red-500/10 rounded-lg';
@@ -198,14 +217,6 @@ export const HabitRow: React.FC<{
     
     const currentStreak = calculateStreak();
     
-    // Get time remaining for strict habits (only if scheduled today)
-    const strictness = getHabitStrictness(habit);
-    const today = new Date();
-    const todayStr = formatDate(today, 'yyyy-MM-dd');
-    const isScheduledToday = isHabitScheduledOnDay(habit, today);
-    const timeRemaining = (strictness !== 'anytime' && isScheduledToday) ? getTimeRemainingForHabit(habit, today, new Date()) : null;
-    const isCompleted = habit.completed[todayStr];
-    
     return (
         <div 
             className={`mt-3 ${isDragging ? 'opacity-50' : ''} transition-opacity cursor-move`}
@@ -214,22 +225,6 @@ export const HabitRow: React.FC<{
             <div className="flex justify-between items-center mb-4">
                 <button onClick={() => onEditHabit(habit)} className={`text-base font-medium ${getTextColorClass(habit.color)} hover:opacity-75 transition-opacity text-left flex-1`}>
                     <span className={`${getHabitBackgroundColor(habit.type)} px-2 py-1 rounded-lg`}>{habit.name}</span>
-                    {timeRemaining && !isCompleted && (
-                        <span className={`ml-2 text-xs px-2 py-1 rounded ${
-                            timeRemaining.status === 'urgent' ? 'bg-red-500/20 text-red-400' :
-                            timeRemaining.status === 'warning' ? 'bg-yellow-500/20 text-yellow-400' :
-                            timeRemaining.status === 'locked' ? 'bg-gray-700 text-gray-500' :
-                            'bg-blue-500/20 text-blue-400'
-                        }`}>
-                            {timeRemaining.status === 'locked' ? (
-                                <span className="flex items-center gap-1"><Lock className="w-3 h-3" /> Locked</span>
-                            ) : strictness === 'same-day' ? (
-                                'TODAY ONLY'
-                            ) : (
-                                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {timeRemaining.hours}h left</span>
-                            )}
-                        </span>
-                    )}
                 </button>
                 <div className="flex items-center space-x-3">
                     {currentStreak > 0 && <span className="text-sm text-gray-400 font-medium">{currentStreak} day{currentStreak !== 1 ? 's' : ''}</span>}
@@ -257,7 +252,7 @@ export const HabitRow: React.FC<{
                         return (
                             <React.Fragment key={dateString}>
                                 {index > 0 && <div className={`h-1 flex-grow mx-1 ${showConnectingLine ? getColorClasses(habit.color).bg : 'bg-transparent'}`} />}
-                                <DayCircle completionStatus={habit.completed[dateString]} isScheduled={isScheduled} onPress={() => onToggle(habit.id, dateString)} habitColor={habit.color} habit={habit} date={date}/>
+                                <DayCircle completionStatus={habit.completed[dateString]} isScheduled={isScheduled} onPress={() => onToggle(habit.id, dateString)} habitColor={habit.color} habit={habit} date={date} onUnloggableClick={onUnloggableClick}/>
                             </React.Fragment>
                         );
                     })}

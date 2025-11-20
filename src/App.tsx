@@ -10,6 +10,7 @@ import AICoachWidget from './components/AICoachWidget';
 import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
 import StatsOverview from './components/StatsOverview';
+import { Toast } from './components/Toast';
 import { Habit } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay, isHabitLoggable, getHabitStrictness } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
@@ -161,6 +162,7 @@ function App() {
             return stored ? JSON.parse(stored) : {};
         } catch { return {}; }
     });
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
 
     const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string, profile?: any) => {
         console.log('🎊 App.tsx handleOnboardingComplete called');
@@ -396,6 +398,14 @@ function App() {
             return updatedHabits;
         });
     }, [celebratedStreaks, emergencyMode, habits]);
+
+    const handleUnloggableClick = useCallback((habitType: string) => {
+        if (habitType === 'Life Goal Habit') {
+            setToastMessage('Goal habit is loggable for 48 hours');
+        } else if (habitType === 'Anchor Habit') {
+            setToastMessage('Habit Muscle is loggable for 24 hours');
+        }
+    }, []);
 
     const handleChatCheckInSubmit = (entry: { wins: string; challenges: string; messages: any[] }) => {
         const today = formatDate(new Date(), 'yyyy-MM-dd');
@@ -745,6 +755,7 @@ function App() {
                                 onDragOver={handleDragOver} 
                                 onDrop={handleDrop} 
                                 isDragging={draggedHabitId === habit.id}
+                                onUnloggableClick={handleUnloggableClick}
                             />
                         ))}
                     </div>
@@ -808,6 +819,13 @@ function App() {
                         setPreviewAppTour(false);
                     }}
                     onToggleStatsView={setShowStatsView}
+                />
+            )}
+            
+            {toastMessage && (
+                <Toast
+                    message={toastMessage}
+                    onClose={() => setToastMessage(null)}
                 />
             )}
             
