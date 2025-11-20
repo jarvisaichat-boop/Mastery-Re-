@@ -3,6 +3,7 @@ import { X, Check, Trash2, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { Category, AddHabitModalProps } from '../types';
 import { isHabitScheduledOnDay, formatDate } from '../utils';
 import TimePicker from './TimePicker';
+import { NotificationService } from '../services/NotificationService';
 
 // Constants for localStorage
 const LOCAL_STORAGE_CATEGORIES_KEY = 'bolt_habit_categories';
@@ -569,7 +570,6 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    const { NotificationService } = require('../services/NotificationService');
                     NotificationService.testNotification(habitName || 'Test Habit');
                   }}
                   className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"

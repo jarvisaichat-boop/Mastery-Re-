@@ -255,11 +255,16 @@ function App() {
         });
 
         // Schedule notifications for all habits with scheduledTime
+        console.log('📱 [App] Scheduling notifications on mount...');
         habits.forEach(habit => {
             if (habit.scheduledTime) {
+                console.log(`📅 [App] Found habit "${habit.name}" with scheduled time: ${habit.scheduledTime}`);
                 NotificationService.scheduleHabit(habit.id, habit.name, habit.scheduledTime);
             }
         });
+        
+        // Expose debug helper to window for testing
+        (window as any).debugNotifications = () => NotificationService.logDebugInfo();
 
         return () => {
             NotificationService.clearAll();
