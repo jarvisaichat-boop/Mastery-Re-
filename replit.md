@@ -44,7 +44,16 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
     -   **BreathPacer**: Immersive 4-second box breathing with animation, audio, and vocal cues.
     -   **JournalModule**: Typewriter-style gratitude journaling with prompts and word count tracking.
     -   Mini-app selection integrated into the Add Habit Modal.
--   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules, mini-app types, journal entries) is saved in localStorage.
+-   **Program Library**: Pre-packaged habit programs for instant habit creation.
+    -   **Browse Button**: "Browse Program Library" CTA in Add Habit Modal opens full-screen program browser.
+    -   **Program Grid**: Visual cards showing program name, description, difficulty, category, and habit count.
+    -   **Program Detail**: Clicking program reveals all included habits with descriptions and mini-app badges.
+    -   **Multi-Select**: Users can select all habits or cherry-pick specific ones via checkboxes.
+    -   **Batch Creation**: Selected habits instantly added to dashboard with mini-apps pre-configured.
+    -   **Initial Programs**: Morning Starter, Deep Morning, Quick Reset, Gratitude Practice (4 programs with 1-2 habits each).
+    -   **Habit Tracking**: sourceProgramId field tracks which program habits came from for future analytics.
+    -   **Success Feedback**: Toast notification confirms habit additions ("Added 2 habits from program!").
+-   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules, mini-app types, journal entries, program library selections) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp.
 -   **Quick Navigation**: Home and Target icons for quick access to key phases.
 
