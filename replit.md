@@ -65,13 +65,31 @@ The core system follows a 7-phase coaching cycle:
     -   **Integration**: Renders as overlay on top of dashboard, receives dashboard state controls via props
     -   **Preview Access**: Blue book icon (📖) in top-left corner allows manual tour preview anytime
 -   **Discipline Engine: Phase 1 - Foundation Enhancements** (November 20, 2025):
-    -   **Emergency Latch**: "I'm Overwhelmed" toggle that shrinks ALL habits to 60-second micro-wins
+    -   **Three-Tier Urgency System**: Different logging windows based on habit type
+        -   **Anchor Habit** (Habit Muscle 💪): Same-day only (24-hour window)
+            -   Can ONLY be logged on the calendar day it was scheduled
+            -   Locks at midnight - no backfilling allowed
+            -   Shows "TODAY ONLY" badge when uncompleted
+            -   Designed to build strict discipline muscle
+        -   **Life Goal Habit** (Life Goals ⭐): 72-hour window (scheduled day + 48 hours)
+            -   Can be logged for the entire scheduled day plus 48 more hours
+            -   Monday habit loggable until Wednesday 11:59pm
+            -   Shows countdown timer ("Xh left") when uncompleted
+            -   Balances urgency with realistic grace period
+        -   **Regular Habit**: Backfill anytime
+            -   No time restrictions - can log any past date
+            -   Perfect for casual tracking and experimentation
+            -   No urgency pressure, just stats collection
+    -   **Emergency Latch**: "I'm Overwhelmed" toggle that shrinks strict habits to 60-second micro-wins
         -   **UI**: Prominent button in dashboard header with Shield icon, red when active
-        -   **Behavior**: When active, clicking any uncompleted habit opens Emergency Habit Action modal with 60s countdown
+        -   **Behavior**: When active, clicking any uncompleted Anchor/Life Goal habit opens Emergency Habit Action modal with 60s countdown
+        -   **Scope**: Only affects strict habits (Anchor/Life Goal), Regular habits unaffected
         -   **Visual Indicator**: Red banner displays when Emergency Mode is active
         -   **Persistence**: Emergency Mode state saved in localStorage
-    -   **Streak Repair**: Auto-detection of broken streaks with instant redemption flow
-        -   **Detection**: On app load, checks for habits scheduled yesterday but not completed (only if habit has prior completions)
+    -   **Streak Repair**: Auto-detection of broken streaks with instant redemption flow (respects three-tier system)
+        -   **Anchor Habits**: Triggers next morning if yesterday's habit was missed
+        -   **Life Goal Habits**: Triggers after 72-hour window expires (checks up to 4 days back)
+        -   **Regular Habits**: Never triggers (can backfill anytime)
         -   **Offer**: Modal prompts user to do 60-second action RIGHT NOW to save streak
         -   **Multi-Habit**: Iterates through all broken streaks sequentially
         -   **Once-Daily Check**: Uses localStorage flag to prevent repeated prompts on same day
@@ -79,6 +97,10 @@ The core system follows a 7-phase coaching cycle:
         -   **Implementation**: Micro-Win Protocol Step 5 now uses completely black background
         -   **Minimal UI**: Only shows subtle pulsing circle indicator, no visible countdown numbers
         -   **Psychology**: Removes clock-watching anxiety, encourages focus on action over time
+    -   **Visual Indicators**: Time-sensitive UI elements show urgency status
+        -   **Lock Icons**: Appear on day circles when window has expired (cannot log)
+        -   **Time Badges**: Show hours remaining for today's uncompleted strict habits
+        -   **Color Coding**: Fresh (blue), Warning (yellow <12h), Urgent (red <6h), Locked (gray)
 -   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.
 -   **Quick Navigation**: Home icon (jump to Phase 0) and Target icon (jump to Phase 4) in top-left corner.

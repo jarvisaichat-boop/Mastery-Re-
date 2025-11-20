@@ -11,7 +11,7 @@ import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
 import StatsOverview from './components/StatsOverview';
 import { Habit } from './types';
-import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay } from './utils';
+import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay, isHabitLoggable, getHabitStrictness } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
 
 const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
@@ -239,7 +239,7 @@ function App() {
         } catch (e) { console.error("Failed to save motivation data", e); }
     }, [celebratedStreaks, dailyReasons, chatEntries]);
 
-    // Streak Repair: Detect broken streaks on app load
+    // Streak Repair: Detect broken streaks on app load (respects three-tier system)
     useEffect(() => {
         if (!onboardingComplete || habits.length === 0) return;
         
@@ -249,24 +249,44 @@ function App() {
         // Only check once per day
         if (lastCheck === today) return;
         
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayString = formatDate(yesterday, 'yyyy-MM-dd');
-        
+        const now = new Date();
         const broken: Array<{ habit: Habit; dateString: string }> = [];
         
         habits.forEach(habit => {
-            // Check if habit was scheduled for yesterday
-            if (!isHabitScheduledOnDay(habit, yesterday)) return;
+            const strictness = getHabitStrictness(habit);
             
-            // Check if habit was NOT completed yesterday
-            if (habit.completed[yesterdayString]) return;
+            // Skip regular habits - they can backfill anytime
+            if (strictness === 'anytime') return;
             
             // Check if habit has at least one completion (has an active streak)
             const hasAnyCompletion = Object.values(habit.completed).some(v => v === true);
             if (!hasAnyCompletion) return;
             
-            broken.push({ habit, dateString: yesterdayString });
+            if (strictness === 'same-day') {
+                // Anchor Habit: Check yesterday only
+                const yesterday = new Date(now);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayString = formatDate(yesterday, 'yyyy-MM-dd');
+                
+                if (isHabitScheduledOnDay(habit, yesterday) && !habit.completed[yesterdayString]) {
+                    broken.push({ habit, dateString: yesterdayString });
+                }
+            } else if (strictness === '48-hour') {
+                // Life Goal Habit: Check all dates beyond 72-hour window (scheduled day + 48h)
+                // Need to check up to 4 days back to catch all expired 72h windows
+                for (let i = 1; i <= 4; i++) {
+                    const checkDate = new Date(now);
+                    checkDate.setDate(checkDate.getDate() - i);
+                    const checkDateString = formatDate(checkDate, 'yyyy-MM-dd');
+                    
+                    if (isHabitScheduledOnDay(habit, checkDate) && 
+                        !habit.completed[checkDateString] &&
+                        !isHabitLoggable(habit, checkDate, now)) {
+                        broken.push({ habit, dateString: checkDateString });
+                        break; // Only add once per habit
+                    }
+                }
+            }
         });
         
         if (broken.length > 0) {
@@ -303,9 +323,25 @@ function App() {
     const handleDeleteHabit = (habitId: number) => setHabits(p => p.filter(h => h.id !== habitId));
     
     const handleToggleHabit = useCallback((habitId: number, dateString: string) => {
-        // Emergency Mode: Open micro-win action instead of direct toggle
-        if (emergencyMode) {
-            const habit = habits.find(h => h.id === habitId);
+        const habit = habits.find(h => h.id === habitId);
+        if (!habit) return;
+        
+        // Check if habit is loggable based on three-tier system
+        const habitDate = new Date(dateString);
+        const currentDate = new Date();
+        const strictness = getHabitStrictness(habit);
+        
+        // Only enforce loggability check for strict habits (Anchor/Life Goal)
+        if (strictness !== 'anytime') {
+            const loggable = isHabitLoggable(habit, habitDate, currentDate);
+            if (!loggable && !habit.completed[dateString]) {
+                // Show a message or prevent action - for now just return
+                return;
+            }
+        }
+        
+        // Emergency Mode: Open micro-win action instead of direct toggle (only for Anchor/Life Goal)
+        if (emergencyMode && strictness !== 'anytime') {
             if (habit && !habit.completed[dateString]) {
                 setEmergencyHabitAction({ habit, date: dateString });
                 return;

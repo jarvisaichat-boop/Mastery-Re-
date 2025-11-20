@@ -66,6 +66,70 @@ export const isHabitScheduledOnDay = (habit: Habit, date: Date): boolean => {
     }
 };
 
+// --- Three-Tier Urgency System ---
+export type HabitStrictness = 'same-day' | '48-hour' | 'anytime';
+
+export const getHabitStrictness = (habit: Habit): HabitStrictness => {
+    if (!habit || !habit.type) return 'anytime';
+    if (habit.type === 'Anchor Habit') return 'same-day';
+    if (habit.type === 'Life Goal Habit') return '48-hour';
+    return 'anytime';
+};
+
+export const isHabitLoggable = (habit: Habit, scheduledDate: Date, attemptTime: Date = new Date()): boolean => {
+    const strictness = getHabitStrictness(habit);
+    
+    if (strictness === 'anytime') return true;
+    
+    if (strictness === 'same-day') {
+        // Anchor: Can only log on the same calendar day
+        const scheduledDateStr = formatDate(scheduledDate, 'yyyy-MM-dd');
+        const attemptDateStr = formatDate(attemptTime, 'yyyy-MM-dd');
+        return scheduledDateStr === attemptDateStr;
+    }
+    
+    if (strictness === '48-hour') {
+        // Life Goal: Can log within 48 hours from START of scheduled day
+        // This gives you the whole scheduled day + 48 more hours
+        const scheduledStart = new Date(scheduledDate);
+        scheduledStart.setHours(0, 0, 0, 0);
+        
+        const hoursSinceScheduled = (attemptTime.getTime() - scheduledStart.getTime()) / (1000 * 60 * 60);
+        return hoursSinceScheduled >= 0 && hoursSinceScheduled < 72; // Full day (24h) + 48h = 72h total
+    }
+    
+    return false;
+};
+
+export const getTimeRemainingForHabit = (habit: Habit, scheduledDate: Date, attemptTime: Date = new Date()): { hours: number; status: 'fresh' | 'warning' | 'urgent' | 'locked' } => {
+    const strictness = getHabitStrictness(habit);
+    
+    if (strictness === 'anytime') {
+        return { hours: Infinity, status: 'fresh' };
+    }
+    
+    const scheduledStart = new Date(scheduledDate);
+    scheduledStart.setHours(0, 0, 0, 0);
+    
+    let windowHours: number;
+    if (strictness === 'same-day') {
+        // Anchor: Window is just the calendar day (24 hours)
+        windowHours = 24;
+    } else {
+        // Life Goal: Full scheduled day + 48 more hours = 72 hours total
+        windowHours = 72;
+    }
+    
+    const hoursSinceScheduled = (attemptTime.getTime() - scheduledStart.getTime()) / (1000 * 60 * 60);
+    const hoursRemaining = windowHours - hoursSinceScheduled;
+    
+    if (hoursRemaining <= 0) return { hours: 0, status: 'locked' };
+    if (hoursRemaining <= 6) return { hours: Math.ceil(hoursRemaining), status: 'urgent' };
+    if (hoursRemaining <= 12) return { hours: Math.ceil(hoursRemaining), status: 'warning' };
+    
+    return { hours: Math.ceil(hoursRemaining), status: 'fresh' };
+};
+
 const getFirstDayOfMonth = (date: Date): Date => {
     return new Date(date.getFullYear(), date.getMonth(), 1);
 };
