@@ -1,7 +1,7 @@
 # Mastery Dashboard
 
 ## Overview
-**Path - Self Mastery** is a gamified, AI-powered habit coaching program designed to guide users through a 7-phase coaching cycle: Intake, Goal Contract, Plan, Do, Review, Accountability, and Loop. The application aims to provide an engaging and effective platform for habit formation, leveraging a "Duolingo for Habit Forming" model. It features a dark mode "Focus Dojo" aesthetic.
+**Path - Self Mastery** is a gamified, AI-powered habit coaching program designed to guide users through a 7-phase coaching cycle: Intake, Goal Contract, Plan, Do, Review, Accountability, and Loop. The application aims to provide an engaging and effective platform for habit formation, leveraging a "Duolingo for Habit Forming" model with a dark mode "Focus Dojo" aesthetic.
 
 ## User Preferences
 I want to enable the AI to make changes to my codebase. I prefer detailed explanations. I want iterative development. I prefer simple language. I prefer that you ask me before making major changes. I like functional programming.
@@ -9,140 +9,48 @@ I want to enable the AI to make changes to my codebase. I prefer detailed explan
 ## System Architecture
 The application is a single-page application (SPA) built with React 18 and TypeScript, using Vite 5 as the build tool. Tailwind CSS is used for styling, and Lucide React for icons. State management is handled via React Hooks with data persistence managed through localStorage.
 
-The core system follows a 7-phase coaching cycle:
-1.  **The Intake**: AI-driven interview for aspirations and distractions, includes a Stoic Coach reflection.
-2.  **Goal Contract**: AI-validated goal definition using keyword analysis across four domains (business, fitness, learning, creative).
-3.  **Weekly Plan**: AI generates 2-3 context-aware habits based on the validated goal.
-4.  **The "Do" Week**: Main dashboard for habit tracking, daily check-ins, stats, and streak monitoring.
-5.  **Weekly Progress**: Review mechanism using positive language (Keep, Challenged, Progress) with AI suggestions.
-6.  **Accountability**: Features for sharing commitments via social channels.
-7.  **The Loop**: Users cycle back to Phase 4 with an optimized plan.
+The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly Plan, The "Do" Week, Weekly Progress, Accountability, and The Loop.
 
 **UI/UX Decisions:**
--   **Aesthetic**: Dark mode "Focus Dojo" theme with improved readability through larger text, better contrast, and cleaner backgrounds.
+-   **Aesthetic**: Dark mode "Focus Dojo" theme with improved readability.
 -   **Interaction**: Intuitive habit tracking, drag-and-drop reordering, multiple calendar views.
--   **Gamification**: AI Coach reactions, streak celebrations (confetti modals), unified daily check-ins with reflection and AI chat.
--   **Positive Reinforcement**: Emphasis on celebrating wins and supportive language for challenges.
--   **Onboarding**: Comprehensive multi-phase onboarding with conversational AI for goal understanding, logic tree builder ("The Architect" phase), interstitial wisdom screens, and coach feedback.
+-   **Gamification**: AI Coach reactions, streak celebrations, unified daily check-ins with reflection and AI chat.
+-   **Positive Reinforcement**: Emphasis on celebrating wins and supportive language.
+-   **Onboarding**: Comprehensive multi-phase onboarding with conversational AI for goal understanding, a logic tree builder ("The Architect" phase), interstitial wisdom screens, and coach feedback.
 -   **Daily Check-in**: Unified daily check-in within a chat interface, with AI motivational responses.
+-   **Vision Check**: Users visualize the complete pathway (action → milestone → goal) before proceeding.
+-   **Micro-Win Protocol**: A mandatory 60-second action immediately after onboarding to combat "Planning Trap".
+-   **App Tour**: Interactive overlay system with spotlights and tooltips guiding users through key dashboard features.
+-   **Discipline Engine Visuals**: Subtle, path-focused UI with past dates at 15% opacity, current and future dates at normal brightness. Information toasts provide friendly explanations for unloggable habits.
 
 **Technical Implementations:**
 -   **Habit Tracking**: Supports daily, weekly, and custom frequency habits.
 -   **Stats Dashboard**: Provides comprehensive weekly analysis, completion rates, streak breakdowns, and heatmaps.
--   **AI Integration**: Simulated AI for goal validation, habit generation, real-time motivational reactions, tailored responses, and conversational goal understanding.
--   **Onboarding Flow** (Restructured November 17, 2025):
-    -   **Phase 1 - Context Baseline**: 3 screens (Context, Spark, Profile) - simplified from 6 screens
-    -   **Phase 2 - Deep Discovery**: Collects archetype, fuel, saboteur
-    -   **Phase 3 - Logistics**: Collects golden hour preference
-    -   **Phase 5 - Synthesis**: AI persona calibration (Drill Sergeant/Hype Man/Wise Mentor) based on collected profile data
-    -   **Phase 4 - The Architect**: 4 screens including goal input, existing habits, conversational logic tree builder, and vision check
-    -   **Phase 6 - Negotiation**: Habit suggestions based on logic tree daily action
-    -   **Phase 7 - Contract**: Final commitment
--   **Conversational Logic Tree** (November 2025):
-    -   **ConversationalArchitect Component**: Consultant-style chat interface in Phase 4 Screen 3 that builds milestone + daily action pathway
-    -   **Persona Integration**: AI tone adapts based on Phase 5 selection (Drill Sergeant: tactical/direct, Hype Man: energetic/motivational, Wise Mentor: reflective/patient)
-    -   **Context Awareness**: References existing habits in conversation opener
-    -   **Slot Tracking**: Validates milestone (measurable checkpoint) and action (daily practice) through multi-turn dialogue
-    -   **Data Flow**: Logic tree outputs (logicTreeBranch/Leaf) feed directly into Phase 6 habit suggestions
--   **Vision Check**: Phase 4 Screen 4 asks users to visualize the complete pathway (action → milestone → goal) before proceeding
--   **Micro-Win Protocol** (November 18, 2025):
-    -   **7-Step Cold Start Solution**: Mandatory 60-second action immediately after onboarding to combat "Planning Trap"
-    -   **Flow**: Education → Instruction (shrink to 60s) → Consensus ("I am gonna do it!") → Trigger → Execution (countdown timer) → Victory → Momentum Push
-    -   **Dual Victory Paths**: Success measured by action, not duration - both timer completion AND expiry show green victory screen
-    -   **Psychology**: "Effort = Win" - celebrates showing up regardless of whether user completes within 60 seconds
-    -   **Integration**: Fires between onboarding completion and dashboard access, uses Life Goal habit as anchor action
-    -   **Auto-Advance**: Timer expiry automatically transitions to victory screen via useEffect
-    -   **UI Pattern**: Steps 1-4, 6-7 render as floating modal overlays on top of dashboard; Step 5 (timer) remains full-screen for urgency
-    -   **Preview Mode**: Zap icon (⚡) in top-left corner allows manual preview of protocol; preview mode includes X button to dismiss
-    -   **First-Time Flow**: During automatic post-onboarding trigger, modal cannot be dismissed to ensure completion
--   **App Tour** (November 19, 2025):
-    -   **Interactive Overlay System**: Spotlights real UI elements on actual dashboard instead of showing mockups
-    -   **3 Tour Stops**: Habit Tracker list → Daily Check-in button (Sparkles) → Stats Dashboard view
-    -   **Spotlight Effect**: Dimmed backdrop with blue border cutout highlighting active element
-    -   **Floating Tooltips**: Text bubbles with arrows pointing to real features, positioned above/below spotlighted elements
-    -   **Auto-View Switching**: Tour automatically toggles to Stats view for stop 3, resets to Habit Tracker on completion
-    -   **Navigation**: Next button, skip button (X), progress dots showing current/completed steps
-    -   **Integration**: Renders as overlay on top of dashboard, receives dashboard state controls via props
-    -   **Preview Access**: Blue book icon (📖) in top-left corner allows manual tour preview anytime
--   **Discipline Engine: Phase 1 - Foundation Enhancements** (November 20, 2025):
-    -   **Three-Tier Urgency System**: Different logging windows based on habit type
-        -   **Anchor Habit** (Habit Muscle 💪): Same-day only (24-hour window)
-            -   Can ONLY be logged on the calendar day it was scheduled
-            -   Locks at midnight - no backfilling allowed
-            -   Shows "TODAY ONLY" badge when uncompleted
-            -   Designed to build strict discipline muscle
-        -   **Life Goal Habit** (Life Goals ⭐): 2-day window (scheduled day + next day)
-            -   Can be logged on the scheduled day or the next day
-            -   Monday habit loggable Monday OR Tuesday (locks Wednesday)
-            -   Balances urgency with realistic grace period
-        -   **Regular Habit**: Backfill anytime
-            -   No time restrictions - can log any past date
-            -   Perfect for casual tracking and experimentation
-            -   No urgency pressure, just stats collection
-    -   **Emergency Latch**: "I'm Overwhelmed" toggle that shrinks strict habits to 60-second micro-wins
-        -   **UI**: Prominent button in dashboard header with Shield icon, red when active
-        -   **Behavior**: When active, clicking any uncompleted Anchor/Life Goal habit opens Emergency Habit Action modal with 60s countdown
-        -   **Scope**: Only affects strict habits (Anchor/Life Goal), Regular habits unaffected
-        -   **Visual Indicator**: Red banner displays when Emergency Mode is active
-        -   **Persistence**: Emergency Mode state saved in localStorage
-    -   **Streak Repair**: Auto-detection of broken streaks with instant redemption flow (respects three-tier system)
-        -   **Anchor Habits**: Triggers next morning if yesterday's habit was missed
-        -   **Life Goal Habits**: Triggers after 2-day window expires (checks up to 2 days back)
-        -   **Regular Habits**: Never triggers (can backfill anytime)
-        -   **Offer**: Modal prompts user to do 60-second action RIGHT NOW to save streak
-        -   **Multi-Habit**: Iterates through all broken streaks sequentially
-        -   **Once-Daily Check**: Uses localStorage flag to prevent repeated prompts on same day
-    -   **Enhanced Dark Timer**: Blind execution mode for countdown timers
-        -   **Implementation**: Micro-Win Protocol Step 5 now uses completely black background
-        -   **Minimal UI**: Only shows subtle pulsing circle indicator, no visible countdown numbers
-        -   **Psychology**: Removes clock-watching anxiety, encourages focus on action over time
-    -   **Visual Indicators**: Subtle, path-focused UI that shows journey without blocking
-        -   **Current Week**: Always at normal brightness - no failure highlighting, keeps focus forward
-        -   **Previous Weeks**: Past expired dates rendered at 15% opacity for historical context
-        -   **Future Dates**: Normal brightness - the path ahead remains clear and inviting
-        -   **No Lock Icons**: System enforces rules silently without visual barriers
-        -   **No Time Badges**: Clean interface without countdown pressure
-        -   **Info Toast**: Clicking unloggable habits shows friendly explanation ("Goal habit is loggable today or yesterday" or "Habit Muscle is loggable today only")
-        -   **Philosophy**: "Path not blocks" - motivating, not restrictive
-    -   **Emergency Mode Timer Fix** (November 20, 2025):
-        -   **Start-Focused Psychology**: Timer creates urgency to START, not pressure to finish
-        -   **"I'm Doing It!" Button**: During countdown, user can click button to immediately commit to action
-        -   **Dual Success Paths**: Both button click OR timer expiry lead to victory screen + habit completion
-        -   **Auto-Complete**: Clicking "I'm Doing It!" shows 2s victory screen then auto-marks habit complete
-        -   **Messaging**: Emphasizes "just begin" - showing up IS the victory
--   **Discipline Engine: Phase 2 - Smart Notification System** (November 20, 2025):
-    -   **Habit Scheduling**: Optional per-habit notification time picker in AddHabitModal
-        -   **UI**: TimePicker component with clear/X button for easy removal
-        -   **Persistence**: `scheduledTime` field (HH:MM format) stored in Habit type + localStorage
-        -   **Optional**: Defaults to no notification if not set
-    -   **NotificationService**: Browser notification management with escalation logic
-        -   **T-5 Minutes (Gentle)**: "Time to [habit] 🌟 - Your habit is coming up in 5 minutes"
-        -   **T-0 (Urgent)**: "[Habit] - START NOW - Your habit starts right now. Hold to ignite! 🔥"
-        -   **T+5 Minutes (Buzzing)**: "[Habit] - YOU'RE LATE! - You missed your window. Quick 60s action NOW! ⚡"
-        -   **Persistent Across Reloads**: Constructor checks `Notification.permission` on initialization
-        -   **Permission Request**: Auto-requests on first habit schedule, alerts if blocked
-        -   **Auto-Scheduling**: Habits with `scheduledTime` auto-schedule notifications on app load
-        -   **Auto-Cleanup**: Deleting habits auto-unschedules notifications
-    -   **Hold-to-Ignite Modal**: Direct-to-action flow triggered by notification click
-        -   **2-Second Hold Button**: User must hold flame button for 2 seconds to ignite
-        -   **Circular Progress**: Visual progress ring fills as user holds
-        -   **Flame Animation**: Pulsing flame icon during hold
-        -   **Habit Color**: Uses habit's color for personalization (fallback: green #22c55e)
-        -   **Victory Screen**: 🔥 "IGNITED! [Habit Name] - Let's go!" celebration
-        -   **Auto-Complete**: Completing ignition marks habit as done for today
-        -   **Cancel Option**: X button in top-right to dismiss without completing
-    -   **Expo Portability**: Clean architecture for easy React Native migration
-        -   **Notification Delivery Layer**: Separated from core logic
-        -   **Core Logic**: Timing, escalation, scheduling system portable to `expo-notifications`
-        -   **Interface Design**: NotificationService uses methods that map directly to Expo APIs
-        -   **Migration Path**: Swap browser `Notification` API for `expo-notifications` package
--   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules) is saved in localStorage.
--   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.
--   **Quick Navigation**: Home icon (jump to Phase 0) and Target icon (jump to Phase 4) in top-left corner.
+-   **AI Integration**: Simulated AI for goal validation, habit generation, real-time motivational reactions, tailored responses, and conversational goal understanding, with persona calibration (Drill Sergeant, Hype Man, Wise Mentor).
+-   **Conversational Logic Tree**: A chat interface for building milestone and daily action pathways, with AI tone adapting to selected persona.
+-   **Discipline Engine - Urgency System**:
+    -   **Anchor Habit**: Same-day logging only (24-hour window).
+    -   **Life Goal Habit**: 2-day logging window (scheduled day + next day).
+    -   **Regular Habit**: Backfill anytime.
+-   **Emergency Latch**: An "I'm Overwhelmed" toggle to shrink strict habits to 60-second micro-wins, triggered by a button in the dashboard header.
+-   **Streak Repair**: Auto-detection of broken streaks with an instant redemption flow (60-second action) respecting the three-tier urgency system.
+-   **Enhanced Dark Timer**: Blind execution mode for countdown timers with a black background and minimal UI to encourage focus on action. Includes an "I'm Doing It!" button for immediate commitment.
+-   **Smart Notification System**:
+    -   Optional per-habit notification time picker.
+    -   Browser notification management with escalation logic (Gentle, Urgent, Buzzing).
+    -   "Hold-to-Ignite" modal for direct-to-action flow triggered by notification clicks.
+    -   Clean architecture for potential React Native migration.
+-   **Engine A Mini-Apps (Mental Exercise System)**: Habits can be linked to immersive full-screen mini-app experiences.
+    -   **BreathPacer**: Immersive 4-second box breathing with animation, audio, and vocal cues.
+    -   **JournalModule**: Typewriter-style gratitude journaling with prompts and word count tracking.
+    -   Mini-app selection integrated into the Add Habit Modal.
+-   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules, mini-app types, journal entries) is saved in localStorage.
+-   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp.
+-   **Quick Navigation**: Home and Target icons for quick access to key phases.
 
 ## External Dependencies
 -   **Frontend Framework**: React 18
 -   **Build Tool**: Vite 5
 -   **Styling**: Tailwind CSS
 -   **Icons**: Lucide React
--   **Deployment**: Replit environment (configured for port 5000 and `0.0.0.0` host)
+-   **Deployment**: Replit environment
