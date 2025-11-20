@@ -64,7 +64,22 @@ The core system follows a 7-phase coaching cycle:
     -   **Navigation**: Next button, skip button (X), progress dots showing current/completed steps
     -   **Integration**: Renders as overlay on top of dashboard, receives dashboard state controls via props
     -   **Preview Access**: Blue book icon (📖) in top-left corner allows manual tour preview anytime
--   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion) is saved in localStorage.
+-   **Discipline Engine: Phase 1 - Foundation Enhancements** (November 20, 2025):
+    -   **Emergency Latch**: "I'm Overwhelmed" toggle that shrinks ALL habits to 60-second micro-wins
+        -   **UI**: Prominent button in dashboard header with Shield icon, red when active
+        -   **Behavior**: When active, clicking any uncompleted habit opens Emergency Habit Action modal with 60s countdown
+        -   **Visual Indicator**: Red banner displays when Emergency Mode is active
+        -   **Persistence**: Emergency Mode state saved in localStorage
+    -   **Streak Repair**: Auto-detection of broken streaks with instant redemption flow
+        -   **Detection**: On app load, checks for habits scheduled yesterday but not completed (only if habit has prior completions)
+        -   **Offer**: Modal prompts user to do 60-second action RIGHT NOW to save streak
+        -   **Multi-Habit**: Iterates through all broken streaks sequentially
+        -   **Once-Daily Check**: Uses localStorage flag to prevent repeated prompts on same day
+    -   **Enhanced Dark Timer**: Blind execution mode for countdown timers
+        -   **Implementation**: Micro-Win Protocol Step 5 now uses completely black background
+        -   **Minimal UI**: Only shows subtle pulsing circle indicator, no visible countdown numbers
+        -   **Psychology**: Removes clock-watching anxiety, encourages focus on action over time
+-   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.
 -   **Quick Navigation**: Home icon (jump to Phase 0) and Target icon (jump to Phase 4) in top-left corner.
 

@@ -1,15 +1,17 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen, FileCheck } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen, FileCheck, Shield } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
 import MicroWinProtocol from './components/MicroWinProtocol';
+import EmergencyHabitAction from './components/EmergencyHabitAction';
+import StreakRepair from './components/StreakRepair';
 import AICoachWidget from './components/AICoachWidget';
 import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
 import StatsOverview from './components/StatsOverview';
 import { Habit } from './types';
-import { getStartOfWeek, addDays, calculateDashboardData, formatDate } from './utils';
+import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay } from './utils';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
 
 const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
@@ -24,6 +26,8 @@ const LOCAL_STORAGE_DAILY_REASONS_KEY = 'mastery-dashboard-daily-reasons';
 const LOCAL_STORAGE_GOAL_KEY = 'mastery-dashboard-goal';
 const LOCAL_STORAGE_ASPIRATIONS_KEY = 'mastery-dashboard-aspirations';
 const LOCAL_STORAGE_CHAT_ENTRIES_KEY = 'mastery-dashboard-chat-entries';
+const LOCAL_STORAGE_EMERGENCY_MODE_KEY = 'mastery-dashboard-emergency-mode';
+const LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY = 'mastery-dashboard-last-streak-repair-check';
 
 function loadRateMode(): 'basic' | 'hard' {
   try {
@@ -100,10 +104,19 @@ function isMicroWinComplete(): boolean {
   }
 }
 
+function isEmergencyModeActive(): boolean {
+  try {
+    return localStorage.getItem(LOCAL_STORAGE_EMERGENCY_MODE_KEY) === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
 function App() {
     const [onboardingComplete, setOnboardingComplete] = useState(isOnboardingComplete);
     const [appTourComplete, setAppTourComplete] = useState(isAppTourComplete);
     const [microWinComplete, setMicroWinComplete] = useState(isMicroWinComplete);
+    const [emergencyMode, setEmergencyMode] = useState(isEmergencyModeActive);
     const [previewOnboarding, setPreviewOnboarding] = useState(false);
     const [previewAppTour, setPreviewAppTour] = useState(false);
     const [previewMicroWin, setPreviewMicroWin] = useState(false);
@@ -128,6 +141,8 @@ function App() {
     const [showAiCoach, setShowAiCoach] = useState(false);
     const [streakCelebration, setStreakCelebration] = useState<{ habitName: string; days: number } | null>(null);
     const [showChatCheckIn, setShowChatCheckIn] = useState(false);
+    const [emergencyHabitAction, setEmergencyHabitAction] = useState<{ habit: Habit; date: string } | null>(null);
+    const [brokenStreaks, setBrokenStreaks] = useState<Array<{ habit: Habit; dateString: string }>>([]);
     const [celebratedStreaks, setCelebratedStreaks] = useState<Set<string>>(() => {
         try {
             const stored = localStorage.getItem(LOCAL_STORAGE_CELEBRATED_STREAKS_KEY);
@@ -211,9 +226,10 @@ function App() {
             localStorage.setItem(LOCAL_STORAGE_STREAK_MODE_KEY, streakMode);
             localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, goal);
             localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, aspirations);
+            localStorage.setItem(LOCAL_STORAGE_EMERGENCY_MODE_KEY, String(emergencyMode));
         }
         catch (e) { console.error("Failed to save habits", e); }
-    }, [habits, weeklyRateMode, streakMode, goal, aspirations]);
+    }, [habits, weeklyRateMode, streakMode, goal, aspirations, emergencyMode]);
 
     useEffect(() => {
         try {
@@ -222,6 +238,43 @@ function App() {
             localStorage.setItem(LOCAL_STORAGE_CHAT_ENTRIES_KEY, JSON.stringify(chatEntries));
         } catch (e) { console.error("Failed to save motivation data", e); }
     }, [celebratedStreaks, dailyReasons, chatEntries]);
+
+    // Streak Repair: Detect broken streaks on app load
+    useEffect(() => {
+        if (!onboardingComplete || habits.length === 0) return;
+        
+        const today = formatDate(new Date(), 'yyyy-MM-dd');
+        const lastCheck = localStorage.getItem(LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY);
+        
+        // Only check once per day
+        if (lastCheck === today) return;
+        
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayString = formatDate(yesterday, 'yyyy-MM-dd');
+        
+        const broken: Array<{ habit: Habit; dateString: string }> = [];
+        
+        habits.forEach(habit => {
+            // Check if habit was scheduled for yesterday
+            if (!isHabitScheduledOnDay(habit, yesterday)) return;
+            
+            // Check if habit was NOT completed yesterday
+            if (habit.completed[yesterdayString]) return;
+            
+            // Check if habit has at least one completion (has an active streak)
+            const hasAnyCompletion = Object.values(habit.completed).some(v => v === true);
+            if (!hasAnyCompletion) return;
+            
+            broken.push({ habit, dateString: yesterdayString });
+        });
+        
+        if (broken.length > 0) {
+            setBrokenStreaks(broken);
+        }
+        
+        localStorage.setItem(LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY, today);
+    }, [onboardingComplete, habits]);
 
     // Removed automatic popup - Daily Check-In now only opens when user clicks Sparkles icon
 
@@ -250,6 +303,15 @@ function App() {
     const handleDeleteHabit = (habitId: number) => setHabits(p => p.filter(h => h.id !== habitId));
     
     const handleToggleHabit = useCallback((habitId: number, dateString: string) => {
+        // Emergency Mode: Open micro-win action instead of direct toggle
+        if (emergencyMode) {
+            const habit = habits.find(h => h.id === habitId);
+            if (habit && !habit.completed[dateString]) {
+                setEmergencyHabitAction({ habit, date: dateString });
+                return;
+            }
+        }
+        
         setHabits(p => {
             const updatedHabits = p.map(h => {
                 if (h.id === habitId) {
@@ -297,13 +359,69 @@ function App() {
             });
             return updatedHabits;
         });
-    }, [celebratedStreaks]);
+    }, [celebratedStreaks, emergencyMode, habits]);
 
     const handleChatCheckInSubmit = (entry: { wins: string; challenges: string; messages: any[] }) => {
         const today = formatDate(new Date(), 'yyyy-MM-dd');
         setChatEntries(prev => ({ ...prev, [today]: entry }));
         localStorage.setItem(LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY, today);
         setShowChatCheckIn(false);
+    };
+
+    const handleEmergencyHabitComplete = () => {
+        if (!emergencyHabitAction) return;
+        
+        const { habit, date } = emergencyHabitAction;
+        
+        // Directly mark habit as complete (bypass emergency mode check)
+        setHabits(p => {
+            const updatedHabits = p.map(h => {
+                if (h.id === habit.id) {
+                    const streak = 1; // Calculate streak for celebration
+                    let checkDate = new Date(date);
+                    checkDate.setDate(checkDate.getDate() - 1);
+                    
+                    const celebrationKey = `${habit.id}-${streak}`;
+                    if ([3, 7, 14, 30].includes(streak) && !celebratedStreaks.has(celebrationKey)) {
+                        setStreakCelebration({ habitName: habit.name, days: streak });
+                        setCelebratedStreaks(prev => new Set(prev).add(celebrationKey));
+                    }
+                    
+                    const messages = [
+                        "Hell yeah! 🔥",
+                        "Keep crushing it! 💪",
+                        "That's what I'm talking about! 🎯",
+                        "You're building momentum! 🚀",
+                        "Consistency is key! ⭐"
+                    ];
+                    setAiCoachMessage(messages[Math.floor(Math.random() * messages.length)]);
+                    setShowAiCoach(true);
+                    
+                    return { ...h, completed: { ...h.completed, [date]: true } };
+                }
+                return h;
+            });
+            return updatedHabits;
+        });
+        
+        setEmergencyHabitAction(null);
+    };
+
+    const handleEmergencyHabitCancel = () => {
+        setEmergencyHabitAction(null);
+    };
+
+    const handleStreakRepairComplete = (habitId: number, dateString: string) => {
+        // Mark the habit as complete for the given date (usually yesterday)
+        setHabits(p => p.map(h => 
+            h.id === habitId 
+                ? { ...h, completed: { ...h.completed, [dateString]: true } }
+                : h
+        ));
+    };
+
+    const handleStreakRepairDismiss = () => {
+        setBrokenStreaks([]);
     };
 
     const handleDragStart = (e: React.DragEvent, habitId: number) => { setDraggedHabitId(habitId); e.dataTransfer.effectAllowed = 'move'; };
@@ -458,7 +576,21 @@ function App() {
                 </button>
             </div>
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
-                <div className="flex-1"></div>
+                <div className="flex-1">
+                    {/* Emergency Latch Toggle */}
+                    <button
+                        onClick={() => setEmergencyMode(!emergencyMode)}
+                        className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                            emergencyMode 
+                                ? 'bg-red-600 text-white hover:bg-red-500' 
+                                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'
+                        }`}
+                        title={emergencyMode ? "Emergency Mode Active - All habits are 60-second micro-wins" : "Activate Emergency Mode - Shrink all habits to 60 seconds"}
+                    >
+                        <Shield className="w-4 h-4 inline-block mr-2" />
+                        {emergencyMode ? "Emergency ON" : "I'm Overwhelmed"}
+                    </button>
+                </div>
                 <div className="flex items-center space-x-2">
                     {/* BUTTON 1: Daily Check-In (Reflection + Chat) */}
                     <button 
@@ -492,6 +624,27 @@ function App() {
                 </div>
             </div>
             <div className="max-w-2xl mx-auto">
+                {/* Emergency Mode Banner */}
+                {emergencyMode && (
+                    <div className="mb-6 p-4 bg-red-600/20 border border-red-500 rounded-lg">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Shield className="w-6 h-6 text-red-400" />
+                                <div>
+                                    <h3 className="font-bold text-red-400">Emergency Mode Active</h3>
+                                    <p className="text-sm text-gray-300">All habits are now 60-second micro-wins. Just show up.</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setEmergencyMode(false)}
+                                className="text-sm px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded transition-colors"
+                            >
+                                Deactivate
+                            </button>
+                        </div>
+                    </div>
+                )}
+                
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
                     <p className="text-gray-400 mb-4">Track your habits and build a better you, one day at a time.</p>
@@ -581,6 +734,22 @@ function App() {
             {showChatCheckIn && (
                 <ChatDailyCheckIn 
                     onDismiss={() => setShowChatCheckIn(false)}
+                />
+            )}
+            
+            {emergencyHabitAction && (
+                <EmergencyHabitAction
+                    habitName={emergencyHabitAction.habit.name}
+                    onComplete={handleEmergencyHabitComplete}
+                    onCancel={handleEmergencyHabitCancel}
+                />
+            )}
+            
+            {brokenStreaks.length > 0 && (
+                <StreakRepair
+                    brokenHabits={brokenStreaks}
+                    onRepairComplete={handleStreakRepairComplete}
+                    onDismiss={handleStreakRepairDismiss}
                 />
             )}
             

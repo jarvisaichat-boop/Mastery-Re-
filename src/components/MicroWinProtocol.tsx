@@ -191,30 +191,25 @@ export default function MicroWinProtocol({ habit, aiPersona, onComplete, isPrevi
         );
 
       case 5:
-        // Execution: Timer Running (Full-Screen)
+        // Execution: Timer Running (Full-Screen) - DARK MODE for blind execution
         return (
-          <div className="fixed inset-0 z-[60] bg-gradient-to-br from-red-950 via-black to-red-950 flex items-center justify-center p-6">
-            <div className="max-w-2xl w-full space-y-8 animate-fadeIn">
+          <div className="fixed inset-0 z-[60] bg-black flex items-center justify-center p-6">
+            <div className="max-w-2xl w-full space-y-16 animate-fadeIn">
               <div className="text-center space-y-6">
+                {/* Just a subtle pulse indicator - no visible timer */}
                 <div className="relative">
-                  <div className="text-9xl font-bold text-red-400 animate-pulse">
-                    {timeRemaining}
+                  <div className="w-32 h-32 mx-auto rounded-full bg-gray-900 border-4 border-gray-800 flex items-center justify-center">
+                    <div className="w-24 h-24 rounded-full bg-gray-800 animate-pulse"></div>
                   </div>
-                  <p className="text-gray-400 text-xl mt-4">seconds remaining</p>
-                </div>
-
-                <div className="bg-black/50 border-2 border-red-500/50 rounded-2xl p-6">
-                  <p className="text-white text-xl">
-                    <span className="text-red-400 font-bold">NOW:</span> {microAction}
-                  </p>
+                  <p className="text-gray-700 text-sm mt-6">Focus on the action...</p>
                 </div>
               </div>
 
               <button
                 onClick={handleMissionComplete}
-                className="w-full px-12 py-8 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-3xl font-bold rounded-xl transition-all transform hover:scale-105 shadow-2xl animate-pulse"
+                className="w-full px-12 py-8 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-gray-300 text-2xl font-bold rounded-xl transition-all border border-gray-800"
               >
-                MISSION COMPLETE!
+                Done
               </button>
             </div>
           </div>
