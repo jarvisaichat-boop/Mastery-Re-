@@ -98,7 +98,8 @@ The core system follows a 7-phase coaching cycle:
         -   **Minimal UI**: Only shows subtle pulsing circle indicator, no visible countdown numbers
         -   **Psychology**: Removes clock-watching anxiety, encourages focus on action over time
     -   **Visual Indicators**: Subtle, path-focused UI that shows journey without blocking
-        -   **Past Expired Dates**: Rendered at 15% opacity - barely visible but still part of the path
+        -   **Current Week**: Always at normal brightness - no failure highlighting, keeps focus forward
+        -   **Previous Weeks**: Past expired dates rendered at 15% opacity for historical context
         -   **Future Dates**: Normal brightness - the path ahead remains clear and inviting
         -   **No Lock Icons**: System enforces rules silently without visual barriers
         -   **No Time Badges**: Clean interface without countdown pressure
