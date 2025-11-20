@@ -50,14 +50,15 @@ const saveCategoriesToLocalStorage = (categoriesMap: Record<string, string[]>) =
 };
 
 
-const AddHabitModal: React.FC<AddHabitModalProps> = ({
+const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () => void }> = ({
   isOpen,
   onClose,
   onSaveHabit,
   onDeleteHabit,
   habitToEdit,
   habitMuscleCount,
-  lifeGoalsCount
+  lifeGoalsCount,
+  onOpenProgramLibrary
 }) => {
   const [habitName, setHabitName] = useState('');
   const [habitDescription, setHabitDescription] = useState('');
@@ -300,6 +301,37 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
           <h2 className="text-xl font-bold text-white">{habitToEdit ? 'Edit Habit' : 'Create New Habit'}</h2>
           <button onClick={onClose} className="p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700"><X className="w-5 h-5" /></button>
         </div>
+        
+        {!habitToEdit && onOpenProgramLibrary && (
+          <div className="mb-6">
+            <button
+              type="button"
+              onClick={onOpenProgramLibrary}
+              className="w-full p-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-xl hover:from-purple-600/30 hover:to-blue-600/30 hover:border-purple-500/50 transition-all group"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-2xl">📚</span>
+                <div className="text-left">
+                  <div className="text-white font-semibold group-hover:text-purple-300 transition-colors">
+                    Browse Program Library
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    Add multiple habits from pre-built programs
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-600"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-[#2C2C2E] text-gray-400">or create custom habit</span>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {habitToEdit && (
           <div className="mb-6">
             <div className="grid grid-cols-2 gap-4">
