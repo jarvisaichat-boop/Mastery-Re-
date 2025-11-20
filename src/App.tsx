@@ -11,6 +11,8 @@ import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
 import StatsOverview from './components/StatsOverview';
 import HoldToIgnite from './components/HoldToIgnite';
+import BreathPacer from './components/BreathPacer';
+import JournalModule from './components/JournalModule';
 import { Toast } from './components/Toast';
 import { Habit } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay, isHabitLoggable, getHabitStrictness } from './utils';
@@ -166,6 +168,7 @@ function App() {
     });
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [igniteHabit, setIgniteHabit] = useState<Habit | null>(null);
+    const [activeMiniApp, setActiveMiniApp] = useState<{ habit: Habit; date: string; type: 'breath' | 'journal' | 'vision' } | null>(null);
 
     const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string, profile?: any) => {
         console.log('🎊 App.tsx handleOnboardingComplete called');
@@ -368,6 +371,12 @@ function App() {
     const handleToggleHabit = useCallback((habitId: number, dateString: string) => {
         const habit = habits.find(h => h.id === habitId);
         if (!habit) return;
+        
+        // Check if habit has a mini-app experience - open it instead of toggling
+        if (habit.miniAppType && !habit.completed[dateString]) {
+            setActiveMiniApp({ habit, date: dateString, type: habit.miniAppType });
+            return;
+        }
         
         // Check if habit is loggable based on three-tier system
         const habitDate = new Date(dateString);
@@ -860,6 +869,69 @@ function App() {
                     habitColor={igniteHabit.color || '#22c55e'}
                     onComplete={handleIgniteComplete}
                     onCancel={handleIgniteCancel}
+                />
+            )}
+
+            {activeMiniApp && activeMiniApp.type === 'breath' && (
+                <BreathPacer
+                    habitName={activeMiniApp.habit.name}
+                    onComplete={() => {
+                        // Mark habit as complete for the date
+                        const habitId = activeMiniApp.habit.id;
+                        const dateString = activeMiniApp.date;
+                        
+                        setHabits(p => p.map(h => {
+                            if (h.id === habitId) {
+                                return { ...h, completed: { ...h.completed, [dateString]: true } };
+                            }
+                            return h;
+                        }));
+                        
+                        setActiveMiniApp(null);
+                        
+                        // Show AI coach message
+                        const messages = [
+                            "Beautiful practice! 🌟",
+                            "Your breath is your power! 💨",
+                            "Centered and focused! 🎯",
+                            "That's mindfulness! 🧘",
+                        ];
+                        setAiCoachMessage(messages[Math.floor(Math.random() * messages.length)]);
+                        setShowAiCoach(true);
+                    }}
+                    onCancel={() => setActiveMiniApp(null)}
+                />
+            )}
+
+            {activeMiniApp && activeMiniApp.type === 'journal' && (
+                <JournalModule
+                    habitName={activeMiniApp.habit.name}
+                    habitId={activeMiniApp.habit.id}
+                    onComplete={() => {
+                        // Mark habit as complete for the date
+                        const habitId = activeMiniApp.habit.id;
+                        const dateString = activeMiniApp.date;
+                        
+                        setHabits(p => p.map(h => {
+                            if (h.id === habitId) {
+                                return { ...h, completed: { ...h.completed, [dateString]: true } };
+                            }
+                            return h;
+                        }));
+                        
+                        setActiveMiniApp(null);
+                        
+                        // Show AI coach message
+                        const messages = [
+                            "Gratitude unlocks abundance! ✨",
+                            "Your heart is full! 💖",
+                            "Beautiful reflections! 📝",
+                            "That's the spirit! 🌟",
+                        ];
+                        setAiCoachMessage(messages[Math.floor(Math.random() * messages.length)]);
+                        setShowAiCoach(true);
+                    }}
+                    onCancel={() => setActiveMiniApp(null)}
                 />
             )}
             
