@@ -10,9 +10,11 @@ import AICoachWidget from './components/AICoachWidget';
 import StreakCelebration from './components/StreakCelebration';
 import ChatDailyCheckIn from './components/ChatDailyCheckIn';
 import StatsOverview from './components/StatsOverview';
+import HoldToIgnite from './components/HoldToIgnite';
 import { Toast } from './components/Toast';
 import { Habit } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay, isHabitLoggable, getHabitStrictness } from './utils';
+import { NotificationService } from './services/NotificationService';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
 
 const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
@@ -163,6 +165,7 @@ function App() {
         } catch { return {}; }
     });
     const [toastMessage, setToastMessage] = useState<string | null>(null);
+    const [igniteHabit, setIgniteHabit] = useState<Habit | null>(null);
 
     const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string, profile?: any) => {
         console.log('🎊 App.tsx handleOnboardingComplete called');
@@ -241,6 +244,28 @@ function App() {
         } catch (e) { console.error("Failed to save motivation data", e); }
     }, [celebratedStreaks, dailyReasons, chatEntries]);
 
+    // Initialize Notification Service
+    useEffect(() => {
+        // Set up notification click handler
+        NotificationService.setClickHandler((habitId) => {
+            const habit = habits.find(h => h.id === habitId);
+            if (habit) {
+                setIgniteHabit(habit);
+            }
+        });
+
+        // Schedule notifications for all habits with scheduledTime
+        habits.forEach(habit => {
+            if (habit.scheduledTime) {
+                NotificationService.scheduleHabit(habit.id, habit.name, habit.scheduledTime);
+            }
+        });
+
+        return () => {
+            NotificationService.clearAll();
+        };
+    }, [habits]);
+
     // Streak Repair: Detect broken streaks on app load (respects three-tier system)
     useEffect(() => {
         if (!onboardingComplete || habits.length === 0) return;
@@ -315,14 +340,25 @@ function App() {
     const handleAddNewHabit = () => { setSelectedHabitToEdit(null); setShowAddHabitModal(true); };
     const handleEditHabit = (habit: Habit) => { setSelectedHabitToEdit(habit); setShowAddHabitModal(true); };
 
-    const handleSaveHabit = (habitData: any) => {
+    const handleSaveHabit = async (habitData: any) => {
+        // Request notification permission if habit has scheduledTime
+        if (habitData.scheduledTime) {
+            const granted = await NotificationService.requestPermission();
+            if (!granted) {
+                alert('Notifications are blocked. Please enable them in your browser settings to receive habit reminders.');
+            }
+        }
+
         setHabits(prev => habitData.id
             ? prev.map(h => h.id === habitData.id ? { ...h, ...habitData } : h)
             : [...prev, { ...habitData, id: Date.now(), order: Math.max(...prev.map(h => h.order), -1) + 1, completed: {}, createdAt: Date.now() }]
         );
     };
 
-    const handleDeleteHabit = (habitId: number) => setHabits(p => p.filter(h => h.id !== habitId));
+    const handleDeleteHabit = (habitId: number) => {
+        NotificationService.unscheduleHabit(habitId);
+        setHabits(p => p.filter(h => h.id !== habitId));
+    };
     
     const handleToggleHabit = useCallback((habitId: number, dateString: string) => {
         const habit = habits.find(h => h.id === habitId);
@@ -468,6 +504,19 @@ function App() {
 
     const handleStreakRepairDismiss = () => {
         setBrokenStreaks([]);
+    };
+
+    const handleIgniteComplete = () => {
+        if (!igniteHabit) return;
+        
+        // Mark habit as complete for today
+        const today = formatDate(new Date(), 'yyyy-MM-dd');
+        handleToggleHabit(igniteHabit.id, today);
+        setIgniteHabit(null);
+    };
+
+    const handleIgniteCancel = () => {
+        setIgniteHabit(null);
     };
 
     const handleDragStart = (e: React.DragEvent, habitId: number) => { setDraggedHabitId(habitId); e.dataTransfer.effectAllowed = 'move'; };
@@ -797,6 +846,15 @@ function App() {
                     brokenHabits={brokenStreaks}
                     onRepairComplete={handleStreakRepairComplete}
                     onDismiss={handleStreakRepairDismiss}
+                />
+            )}
+
+            {igniteHabit && (
+                <HoldToIgnite
+                    habitName={igniteHabit.name}
+                    habitColor={igniteHabit.color || '#22c55e'}
+                    onComplete={handleIgniteComplete}
+                    onCancel={handleIgniteCancel}
                 />
             )}
             

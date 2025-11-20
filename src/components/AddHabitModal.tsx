@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Check, Trash2, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { Category, AddHabitModalProps } from '../types';
 import { isHabitScheduledOnDay, formatDate } from '../utils';
+import TimePicker from './TimePicker';
 
 // Constants for localStorage
 const LOCAL_STORAGE_CATEGORIES_KEY = 'bolt_habit_categories';
@@ -67,6 +68,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
   const [timesPerPeriod, setTimesPerPeriod] = useState(1);
   const [periodUnit, setPeriodUnit] = useState('Week');
   const [repeatDays, setRepeatDays] = useState(1);
+  const [scheduledTime, setScheduledTime] = useState<string | undefined>(undefined);
   const [showCategorySelection, setShowCategorySelection] = useState(false);
   const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
   const [customMainCategoryInput, setCustomMainCategoryInput] = useState('');
@@ -223,6 +225,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
         setTimesPerPeriod(habitToEdit.timesPerPeriod);
         setPeriodUnit(habitToEdit.periodUnit);
         setRepeatDays(habitToEdit.repeatDays);
+        setScheduledTime(habitToEdit.scheduledTime);
       } else {
         setHabitName('');
         setHabitDescription('');
@@ -234,6 +237,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
         setTimesPerPeriod(1);
         setPeriodUnit('Week');
         setRepeatDays(1);
+        setScheduledTime(undefined);
       }
     }
   }, [isOpen, habitToEdit]);
@@ -259,6 +263,7 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
         timesPerPeriod,
         periodUnit,
         repeatDays,
+        scheduledTime,
       };
       onSaveHabit(habitData);
       onClose();
@@ -548,6 +553,16 @@ const AddHabitModal: React.FC<AddHabitModalProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Notification Scheduling */}
+          <div>
+            <TimePicker
+              value={scheduledTime}
+              onChange={setScheduledTime}
+              label="Daily Reminder (optional)"
+            />
+          </div>
+
           <div className="space-y-3 pt-4">
             {habitToEdit && onDeleteHabit && (
               <button type="button" onClick={handleDelete} className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-red-400 bg-red-900/30 border border-red-800/50 rounded-lg hover:bg-red-900/50">

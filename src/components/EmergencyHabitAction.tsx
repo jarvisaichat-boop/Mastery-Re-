@@ -36,14 +36,14 @@ export default function EmergencyHabitAction({ habitName, onComplete, onCancel }
             <h2 className="text-2xl font-bold mb-2 text-red-400">Emergency Mode</h2>
             <h3 className="text-xl font-semibold mb-4">{habitName}</h3>
             <p className="text-gray-300 mb-6">
-              Just 60 seconds. Don't overthink it. Action beats perfection.
+              You have 60 seconds to START. Just begin - that's all that matters.
             </p>
             
             <button
               onClick={() => setStep('countdown')}
               className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-bold text-lg rounded-lg transition-colors"
             >
-              Start 60s Action
+              Start NOW
             </button>
           </div>
         </div>
@@ -53,13 +53,28 @@ export default function EmergencyHabitAction({ habitName, onComplete, onCancel }
 
   if (step === 'countdown') {
     return (
-      <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
-        <div className="text-center">
+      <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-4">
+        <div className="text-center mb-8">
           <div className="text-8xl font-bold text-red-400 mb-4">
             {timeRemaining}
           </div>
-          <p className="text-2xl text-gray-400">Keep going...</p>
+          <p className="text-2xl text-gray-400 mb-2">Time to start...</p>
         </div>
+        
+        <button
+          onClick={() => {
+            setStep('victory');
+            // Immediately mark habit as complete when user commits to action
+            setTimeout(() => onComplete(), 2000); // Auto-complete after 2s victory screen
+          }}
+          className="px-12 py-6 bg-green-600 hover:bg-green-500 text-white font-bold text-2xl rounded-lg transition-colors shadow-lg"
+        >
+          I'm Doing It!
+        </button>
+        
+        <p className="text-gray-500 text-sm mt-4">
+          Click when you start, or keep going until timer expires - both = success
+        </p>
       </div>
     );
   }

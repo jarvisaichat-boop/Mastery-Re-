@@ -20,6 +20,7 @@ export interface Habit {
   completed: Record<string, boolean | null>;
   order: number;
   createdAt: number;
+  scheduledTime?: string; // Optional notification time (HH:MM format)
 }
 
 export interface AddHabitModalProps {
