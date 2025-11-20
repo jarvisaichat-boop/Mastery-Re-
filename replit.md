@@ -71,10 +71,9 @@ The core system follows a 7-phase coaching cycle:
             -   Locks at midnight - no backfilling allowed
             -   Shows "TODAY ONLY" badge when uncompleted
             -   Designed to build strict discipline muscle
-        -   **Life Goal Habit** (Life Goals ⭐): 72-hour window (scheduled day + 48 hours)
-            -   Can be logged for the entire scheduled day plus 48 more hours
-            -   Monday habit loggable until Wednesday 11:59pm
-            -   Shows countdown timer ("Xh left") when uncompleted
+        -   **Life Goal Habit** (Life Goals ⭐): 2-day window (scheduled day + next day)
+            -   Can be logged on the scheduled day or the next day
+            -   Monday habit loggable Monday OR Tuesday (locks Wednesday)
             -   Balances urgency with realistic grace period
         -   **Regular Habit**: Backfill anytime
             -   No time restrictions - can log any past date
@@ -88,7 +87,7 @@ The core system follows a 7-phase coaching cycle:
         -   **Persistence**: Emergency Mode state saved in localStorage
     -   **Streak Repair**: Auto-detection of broken streaks with instant redemption flow (respects three-tier system)
         -   **Anchor Habits**: Triggers next morning if yesterday's habit was missed
-        -   **Life Goal Habits**: Triggers after 72-hour window expires (checks up to 4 days back)
+        -   **Life Goal Habits**: Triggers after 2-day window expires (checks up to 2 days back)
         -   **Regular Habits**: Never triggers (can backfill anytime)
         -   **Offer**: Modal prompts user to do 60-second action RIGHT NOW to save streak
         -   **Multi-Habit**: Iterates through all broken streaks sequentially
@@ -103,7 +102,7 @@ The core system follows a 7-phase coaching cycle:
         -   **Future Dates**: Normal brightness - the path ahead remains clear and inviting
         -   **No Lock Icons**: System enforces rules silently without visual barriers
         -   **No Time Badges**: Clean interface without countdown pressure
-        -   **Info Toast**: Clicking unloggable habits shows friendly explanation ("Goal habit is loggable for 48 hours" or "Habit Muscle is loggable for 24 hours")
+        -   **Info Toast**: Clicking unloggable habits shows friendly explanation ("Goal habit is loggable today or yesterday" or "Habit Muscle is loggable today only")
         -   **Philosophy**: "Path not blocks" - motivating, not restrictive
 -   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.

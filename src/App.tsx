@@ -274,9 +274,9 @@ function App() {
                     broken.push({ habit, dateString: yesterdayString });
                 }
             } else if (strictness === '48-hour') {
-                // Life Goal Habit: Check all dates beyond 72-hour window (scheduled day + 48h)
-                // Need to check up to 4 days back to catch all expired 72h windows
-                for (let i = 1; i <= 4; i++) {
+                // Life Goal Habit: Check dates beyond 2-day window (scheduled day + next day)
+                // Check up to 2 days back to catch all expired windows
+                for (let i = 1; i <= 2; i++) {
                     const checkDate = new Date(now);
                     checkDate.setDate(checkDate.getDate() - i);
                     const checkDateString = formatDate(checkDate, 'yyyy-MM-dd');
@@ -401,9 +401,9 @@ function App() {
 
     const handleUnloggableClick = useCallback((habitType: string) => {
         if (habitType === 'Life Goal Habit') {
-            setToastMessage('Goal habit is loggable for 48 hours');
+            setToastMessage('Goal habit is loggable today or yesterday');
         } else if (habitType === 'Anchor Habit') {
-            setToastMessage('Habit Muscle is loggable for 24 hours');
+            setToastMessage('Habit Muscle is loggable today only');
         }
     }, []);
 

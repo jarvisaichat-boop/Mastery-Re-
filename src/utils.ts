@@ -89,13 +89,17 @@ export const isHabitLoggable = (habit: Habit, scheduledDate: Date, attemptTime: 
     }
     
     if (strictness === '48-hour') {
-        // Life Goal: Can log within 48 hours from START of scheduled day
-        // This gives you the whole scheduled day + 48 more hours
-        const scheduledStart = new Date(scheduledDate);
-        scheduledStart.setHours(0, 0, 0, 0);
+        // Life Goal: Can log on scheduled day OR the next day (2 calendar days total)
+        const scheduledDateStr = formatDate(scheduledDate, 'yyyy-MM-dd');
+        const attemptDateStr = formatDate(attemptTime, 'yyyy-MM-dd');
         
-        const hoursSinceScheduled = (attemptTime.getTime() - scheduledStart.getTime()) / (1000 * 60 * 60);
-        return hoursSinceScheduled >= 0 && hoursSinceScheduled < 72; // Full day (24h) + 48h = 72h total
+        // Check if attempt is on scheduled day
+        if (scheduledDateStr === attemptDateStr) return true;
+        
+        // Check if attempt is on the day after scheduled day
+        const nextDay = addDays(scheduledDate, 1);
+        const nextDayStr = formatDate(nextDay, 'yyyy-MM-dd');
+        return attemptDateStr === nextDayStr;
     }
     
     return false;
@@ -108,20 +112,19 @@ export const getTimeRemainingForHabit = (habit: Habit, scheduledDate: Date, atte
         return { hours: Infinity, status: 'fresh' };
     }
     
-    const scheduledStart = new Date(scheduledDate);
-    scheduledStart.setHours(0, 0, 0, 0);
-    
-    let windowHours: number;
+    let windowEnd: Date;
     if (strictness === 'same-day') {
-        // Anchor: Window is just the calendar day (24 hours)
-        windowHours = 24;
+        // Anchor: Window ends at the end of the scheduled day
+        windowEnd = new Date(scheduledDate);
+        windowEnd.setHours(23, 59, 59, 999);
     } else {
-        // Life Goal: Full scheduled day + 48 more hours = 72 hours total
-        windowHours = 72;
+        // Life Goal: Window ends at the end of the next day (scheduled day + 1)
+        const nextDay = addDays(scheduledDate, 1);
+        windowEnd = new Date(nextDay);
+        windowEnd.setHours(23, 59, 59, 999);
     }
     
-    const hoursSinceScheduled = (attemptTime.getTime() - scheduledStart.getTime()) / (1000 * 60 * 60);
-    const hoursRemaining = windowHours - hoursSinceScheduled;
+    const hoursRemaining = (windowEnd.getTime() - attemptTime.getTime()) / (1000 * 60 * 60);
     
     if (hoursRemaining <= 0) return { hours: 0, status: 'locked' };
     if (hoursRemaining <= 6) return { hours: Math.ceil(hoursRemaining), status: 'urgent' };
