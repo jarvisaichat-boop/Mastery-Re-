@@ -21,6 +21,7 @@ export interface Habit {
   order: number;
   createdAt: number;
   scheduledTime?: string; // Optional notification time (HH:MM format)
+  miniAppType?: 'breath' | 'journal' | 'vision' | null; // Mini-app experience type
 }
 
 export interface AddHabitModalProps {
