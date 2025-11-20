@@ -22,6 +22,7 @@ export interface Habit {
   createdAt: number;
   scheduledTime?: string; // Optional notification time (HH:MM format)
   miniAppType?: 'breath' | 'journal' | 'vision' | null; // Mini-app experience type
+  sourceProgramId?: string; // Optional tracking of which program this habit came from
 }
 
 export interface AddHabitModalProps {
@@ -70,4 +71,30 @@ export interface DashboardOverviewProps {
     dashboardData: DashboardData;
     onToggleRateMode: () => void;
     onToggleStreakMode: () => void;
+}
+
+// PROGRAM LIBRARY TYPES
+export interface HabitTemplate {
+  name: string;
+  description: string;
+  color: string;
+  type: string; // 'habit_muscle' | 'life_goal' | 'regular'
+  categories: Category[];
+  frequencyType: string;
+  selectedDays: string[];
+  timesPerPeriod: number;
+  periodUnit: string;
+  repeatDays: number;
+  scheduledTime?: string;
+  miniAppType?: 'breath' | 'journal' | 'vision' | null;
+}
+
+export interface Program {
+  id: string;
+  name: string;
+  description: string;
+  category: 'morning' | 'focus' | 'evening' | 'wellness';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  icon: string; // Emoji or icon identifier
+  habits: HabitTemplate[];
 }
