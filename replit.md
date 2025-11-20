@@ -104,7 +104,39 @@ The core system follows a 7-phase coaching cycle:
         -   **No Time Badges**: Clean interface without countdown pressure
         -   **Info Toast**: Clicking unloggable habits shows friendly explanation ("Goal habit is loggable today or yesterday" or "Habit Muscle is loggable today only")
         -   **Philosophy**: "Path not blocks" - motivating, not restrictive
--   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode) is saved in localStorage.
+    -   **Emergency Mode Timer Fix** (November 20, 2025):
+        -   **Start-Focused Psychology**: Timer creates urgency to START, not pressure to finish
+        -   **"I'm Doing It!" Button**: During countdown, user can click button to immediately commit to action
+        -   **Dual Success Paths**: Both button click OR timer expiry lead to victory screen + habit completion
+        -   **Auto-Complete**: Clicking "I'm Doing It!" shows 2s victory screen then auto-marks habit complete
+        -   **Messaging**: Emphasizes "just begin" - showing up IS the victory
+-   **Discipline Engine: Phase 2 - Smart Notification System** (November 20, 2025):
+    -   **Habit Scheduling**: Optional per-habit notification time picker in AddHabitModal
+        -   **UI**: TimePicker component with clear/X button for easy removal
+        -   **Persistence**: `scheduledTime` field (HH:MM format) stored in Habit type + localStorage
+        -   **Optional**: Defaults to no notification if not set
+    -   **NotificationService**: Browser notification management with escalation logic
+        -   **T-5 Minutes (Gentle)**: "Time to [habit] 🌟 - Your habit is coming up in 5 minutes"
+        -   **T-0 (Urgent)**: "[Habit] - START NOW - Your habit starts right now. Hold to ignite! 🔥"
+        -   **T+5 Minutes (Buzzing)**: "[Habit] - YOU'RE LATE! - You missed your window. Quick 60s action NOW! ⚡"
+        -   **Persistent Across Reloads**: Constructor checks `Notification.permission` on initialization
+        -   **Permission Request**: Auto-requests on first habit schedule, alerts if blocked
+        -   **Auto-Scheduling**: Habits with `scheduledTime` auto-schedule notifications on app load
+        -   **Auto-Cleanup**: Deleting habits auto-unschedules notifications
+    -   **Hold-to-Ignite Modal**: Direct-to-action flow triggered by notification click
+        -   **2-Second Hold Button**: User must hold flame button for 2 seconds to ignite
+        -   **Circular Progress**: Visual progress ring fills as user holds
+        -   **Flame Animation**: Pulsing flame icon during hold
+        -   **Habit Color**: Uses habit's color for personalization (fallback: green #22c55e)
+        -   **Victory Screen**: 🔥 "IGNITED! [Habit Name] - Let's go!" celebration
+        -   **Auto-Complete**: Completing ignition marks habit as done for today
+        -   **Cancel Option**: X button in top-right to dismiss without completing
+    -   **Expo Portability**: Clean architecture for easy React Native migration
+        -   **Notification Delivery Layer**: Separated from core logic
+        -   **Core Logic**: Timing, escalation, scheduling system portable to `expo-notifications`
+        -   **Interface Design**: NotificationService uses methods that map directly to Expo APIs
+        -   **Migration Path**: Swap browser `Notification` API for `expo-notifications` package
+-   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp for accurate scheduling and stats.
 -   **Quick Navigation**: Home icon (jump to Phase 0) and Target icon (jump to Phase 4) in top-left corner.
 
