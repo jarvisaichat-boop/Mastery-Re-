@@ -1,0 +1,68 @@
+🚀 Phased Rollout Plan: The Discipline Engine
+I'll break this into 5 phases that build on each other, starting with quick wins that enhance what you already have, then progressively adding the infrastructure for the full vision.
+
+Phase 1: Foundation Enhancements ⚡
+Build on existing Micro-Win Protocol
+
+What we're adding:
+
+Emergency Latch: "I'm Overwhelmed" toggle that shrinks ALL habits to 60-second micro-wins
+Streak Repair: Popup when user missed yesterday - "Do a 60s action RIGHT NOW to save your streak"
+Enhanced Hold-to-Ignite: Dark timer (screen goes black during countdown, only shows completion)
+Why first: Uses infrastructure you already have (Micro-Win Protocol, habit data, localStorage)
+
+Phase 2: Smart Notification System 🔔
+The "Drill Sergeant" trigger escalation
+
+What we're adding:
+
+Notification Service: Browser notifications with escalation logic (T-5 gentle → T-0 urgent → T+5 buzzing)
+Habit Scheduling: Set custom times for each habit
+Direct-to-Ignition Flow: Clicking notification opens a focused habit card (NOT dashboard)
+One-Button Interface: Single glowing "Hold-to-Ignite" button on habit cards
+Why second: This is the core "hook" that pulls users back into the app
+
+Phase 3: Dual-Engine System 🎭
+Follower Mode vs Leader Mode
+
+What we're adding:
+
+Engine Mode Selection: Per-habit toggle (Follower/Leader/Balanced)
+Follower Tools:
+Visual Pacer (breathing circle animation)
+Audio Player (guided meditation/workout tracks)
+Leader Enforcement:
+Snooze Tax (5 squats to dismiss notification)
+Countdown Lockdown (can't exit until timer completes)
+Why third: Requires notification system from Phase 2 to be meaningful
+
+Phase 4: Advanced Enforcement 📸
+Proof-of-Work & Consequences
+
+What we're adding:
+
+Camera Lock: Must take photo of gym/book to close habit
+External Action Bridge: Deep links to other apps (Strava, Spotify, etc.)
+Offline Arsenal: Make Follower/Leader tools available outside app (Day 0+)
+Why fourth: Complex integrations - camera API, external app routing, offline capability
+
+Phase 5: Polish & Optimization ✨
+The final touches
+
+What we're adding:
+
+Performance Optimization: Reduce notification battery drain
+Analytics Dashboard: Track which engine modes work best
+Smart Defaults: AI suggests Follower/Leader based on habit type
+Open Arsenal Rule: All tools available from Day 0 (no waiting period)
+Why last: Refinement after seeing how users interact with core systems
+
+📊 Visual Roadmap:
+Phase 1 (Week 1)     → Emergency features on existing foundation
+Phase 2 (Week 2-3)   → Notification system (the "hook")
+Phase 3 (Week 4-5)   → Dual-Engine personality
+Phase 4 (Week 6-7)   → Advanced enforcement
+Phase 5 (Week 8)     → Polish & analytics
+
+💡 My Recommendation:
+Start with Phase 1 - it's high-impact, low-complexity, and immediately makes the app more powerful. Emergency Latch alone could be a game-changer for overwhelmed users.
