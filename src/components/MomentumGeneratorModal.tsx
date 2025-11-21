@@ -176,6 +176,30 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setConfetti(pieces);
     }
   }, [currentStep, confetti.length]);
+
+  // Generate random vision content once when entering vision step
+  useEffect(() => {
+    if (currentStep === 'vision' && !randomVisionContent) {
+      const randomWhys = [
+        "To create the life you've always imagined, one day at a time",
+        "To prove to yourself that you're capable of anything you commit to",
+        "To build unshakeable discipline that transforms your entire life",
+        "To become the person your future self will thank you for being",
+        "To break free from limitation and step into your full potential"
+      ];
+      
+      const randomRoutines = [
+        "Morning: Mindful movement, focused work, energized action",
+        "Ideal Day: Deep focus, intentional breaks, powerful completion",
+        "Daily Flow: Present in the moment, building unstoppable momentum",
+        "Your Rhythm: Wake with purpose, execute with precision, rest with gratitude",
+        "Perfect Day: Aligned actions, consistent progress, compound results"
+      ];
+      
+      const newVision = `${randomWhys[Math.floor(Math.random() * randomWhys.length)]}\n\n${randomRoutines[Math.floor(Math.random() * randomRoutines.length)]}`;
+      setRandomVisionContent(newVision);
+    }
+  }, [currentStep, randomVisionContent]);
   
   const content = selectedContent;
 
@@ -585,30 +609,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       </div>
     );
   }
-
-  // Generate random vision content once when entering vision step
-  useEffect(() => {
-    if (currentStep === 'vision' && !randomVisionContent) {
-      const randomWhys = [
-        "To create the life you've always imagined, one day at a time",
-        "To prove to yourself that you're capable of anything you commit to",
-        "To build unshakeable discipline that transforms your entire life",
-        "To become the person your future self will thank you for being",
-        "To break free from limitation and step into your full potential"
-      ];
-      
-      const randomRoutines = [
-        "Morning: Mindful movement, focused work, energized action",
-        "Ideal Day: Deep focus, intentional breaks, powerful completion",
-        "Daily Flow: Present in the moment, building unstoppable momentum",
-        "Your Rhythm: Wake with purpose, execute with precision, rest with gratitude",
-        "Perfect Day: Aligned actions, consistent progress, compound results"
-      ];
-      
-      const newVision = `${randomWhys[Math.floor(Math.random() * randomWhys.length)]}\n\n${randomRoutines[Math.floor(Math.random() * randomRoutines.length)]}`;
-      setRandomVisionContent(newVision);
-    }
-  }, [currentStep, randomVisionContent]);
 
   // Step 2: Goal and Grand Vision
   if (currentStep === 'vision') {
