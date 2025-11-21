@@ -255,6 +255,19 @@ function App() {
     const [igniteHabit, setIgniteHabit] = useState<Habit | null>(null);
     const [activeMiniApp, setActiveMiniApp] = useState<{ habit: Habit; date: string; type: 'breath' | 'journal' | 'vision' } | null>(null);
 
+    // Dev override: Ctrl+Shift+M to reset momentum completion for multiple daily launches
+    useEffect(() => {
+        const handleDevOverride = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'M') {
+                setMomentumLastCompleted(null);
+                localStorage.removeItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY);
+                console.log('🔧 Dev override: Momentum completion reset');
+            }
+        };
+        window.addEventListener('keydown', handleDevOverride);
+        return () => window.removeEventListener('keydown', handleDevOverride);
+    }, []);
+
     const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string, profile?: any) => {
         console.log('🎊 App.tsx handleOnboardingComplete called');
         console.log('📦 Received habits:', newHabits);
