@@ -63,3 +63,35 @@
 .scrollbar-track-gray-900::-webkit-scrollbar-track {
   background-color: rgb(17 24 39);
 }
+
+/* Confetti Animation */
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.animate-confetti {
+  animation: confetti linear infinite;
+}
+
+/* Smoke Animation */
+@keyframes smoke {
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.animate-smoke {
+  animation: smoke 2s ease-out infinite;
+}

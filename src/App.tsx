@@ -216,6 +216,7 @@ function App() {
     const [draggedHabitId, setDraggedHabitId] = useState<number | null>(null);
     
     // Momentum Generator state
+    const [showMomentumConfirmation, setShowMomentumConfirmation] = useState(false);
     const [showMomentumGenerator, setShowMomentumGenerator] = useState(false);
     const [showContentLibraryManager, setShowContentLibraryManager] = useState(false);
     const [contentLibrary, setContentLibrary] = useState<ContentLibraryItem[]>(() => loadContentLibrary());
@@ -979,7 +980,7 @@ function App() {
                 {onboardingComplete && !showStatsView && (
                     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 group">
                         <button
-                            onClick={() => setShowMomentumGenerator(true)}
+                            onClick={() => setShowMomentumConfirmation(true)}
                             disabled={isMomentumCompletedToday}
                             className="relative w-40 h-20 bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 rounded-t-full hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 transition-all duration-500 shadow-2xl flex flex-col items-center justify-center gap-1 font-bold text-black hover:scale-110 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0 animate-pulse"
                             style={{
@@ -1167,12 +1168,47 @@ function App() {
             />
             
             {/* Momentum Generator - Daily Ignition Flow */}
+            {/* Pre-Launch Confirmation Popup */}
+            {showMomentumConfirmation && (
+                <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 animate-fadeIn">
+                    <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-10 shadow-2xl max-w-lg mx-auto text-center animate-scaleIn"
+                         style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.4)'}}>
+                        <div className="text-8xl mb-6 animate-bounce">🚀</div>
+                        <h3 className="text-3xl font-black text-yellow-400 mb-6" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
+                            Ready to Launch?
+                        </h3>
+                        <p className="text-xl text-gray-300 mb-10 leading-relaxed">
+                            Are you ready to launch your rocket<br/>and kickstart your habits today?
+                        </p>
+                        <div className="flex gap-4 justify-center">
+                            <button
+                                onClick={() => {
+                                    setShowMomentumConfirmation(false);
+                                    setShowMomentumGenerator(true);
+                                }}
+                                className="px-10 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50"
+                            >
+                                Yes, Let's Go! 🔥
+                            </button>
+                            <button
+                                onClick={() => setShowMomentumConfirmation(false)}
+                                className="px-10 py-4 bg-gray-800 border border-gray-700 text-gray-300 font-semibold text-lg rounded-2xl hover:bg-gray-700 hover:text-white transition-all duration-300"
+                            >
+                                Not Yet
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Momentum Generator - Daily Ignition Flow */}
             <MomentumGeneratorModal
                 isOpen={showMomentumGenerator}
                 onClose={() => setShowMomentumGenerator(false)}
                 onComplete={handleMomentumComplete}
                 habits={habits}
                 goal={goal}
+                aspirations={aspirations}
                 contentLibrary={contentLibrary}
                 onAddContentLibrary={() => setShowContentLibraryManager(true)}
                 isCompletedToday={isMomentumCompletedToday}
