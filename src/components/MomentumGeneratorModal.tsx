@@ -137,13 +137,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setConfetti([]); // Reset confetti
       setYoutubeMetadata(null); // Reset YouTube metadata
       if (player) {
-        try {
-          const iframe = document.getElementById('youtube-player');
-          if (iframe && player.destroy) {
-            player.destroy();
-          }
-        } catch (e) {
-          console.log('Player cleanup on close:', e);
+        // Clear the container instead of calling destroy to avoid DOM errors
+        const container = document.getElementById('youtube-player');
+        if (container) {
+          container.innerHTML = '';
         }
         setPlayer(null);
       }
@@ -206,15 +203,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
     // Cleanup old player if navigating away from content step
     if (currentStep !== 'content' && player) {
-      try {
-        // Check if the iframe still exists before destroying
-        const iframe = document.getElementById('youtube-player');
-        if (iframe && player.destroy) {
-          player.destroy();
-        }
-      } catch (e) {
-        // Silently handle cleanup errors
-        console.log('Player cleanup:', e);
+      // Clear the container instead of calling destroy to avoid DOM errors
+      const container = document.getElementById('youtube-player');
+      if (container) {
+        container.innerHTML = '';
       }
       setPlayer(null);
       return;
@@ -425,12 +417,15 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     });
 
     return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-hidden">
-        {/* Falling Confetti Animation */}
+      <div 
+        className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-hidden cursor-pointer"
+        onClick={handleNextStep}
+      >
+        {/* Falling Confetti Animation - Infinite Loop */}
         {confetti.map((piece) => (
           <div
             key={`confetti-${piece.id}`}
-            className="absolute top-0 w-3 h-3 animate-confetti"
+            className="absolute top-0 w-3 h-3 animate-confetti-infinite"
             style={{
               left: `${piece.left}%`,
               backgroundColor: ['#FF6B6B', '#4ECDC4', '#FFD93D', '#6BCB77'][piece.id % 4],
@@ -478,27 +473,19 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               <div className="text-2xl text-yellow-200/80 font-light tracking-wide">
                 The chain is unbroken
               </div>
+              <div className="text-sm text-gray-500 mt-6 italic">Click anywhere to continue</div>
             </div>
           </div>
-          
-          {/* Continue Button Below Card */}
-          <button
-            onClick={handleNextStep}
-            className="group mt-8 px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center mx-auto gap-3"
-          >
-            Continue
-            <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform" />
-          </button>
         </div>
 
-        {/* Confetti CSS Animation */}
+        {/* Confetti CSS Animation - Infinite Loop */}
         <style>{`
-          @keyframes confetti {
+          @keyframes confetti-infinite {
             0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
           }
-          .animate-confetti {
-            animation: confetti 3s ease-out forwards;
+          .animate-confetti-infinite {
+            animation: confetti-infinite 4s linear infinite;
           }
         `}</style>
       </div>
@@ -525,17 +512,23 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 </div>
               </div>
               
-              {/* Grand Vision / Everyday Reminder */}
-              {aspirations && (
-                <div className="mt-12 p-10 bg-gradient-to-br from-yellow-500/20 via-orange-500/15 to-yellow-500/10 border-2 border-yellow-400/50 rounded-3xl">
-                  <div className="text-2xl text-yellow-300 font-black mb-6 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
-                    Your Everyday Reminder
+              {/* Grand Vision Section - Always visible */}
+              <div className="mt-12 p-10 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-3xl min-h-[150px]">
+                {aspirations ? (
+                  <>
+                    <div className="text-2xl text-yellow-300 font-black mb-6 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
+                      Your Grander Vision
+                    </div>
+                    <p className="text-3xl text-yellow-50 leading-relaxed font-light">
+                      {aspirations}
+                    </p>
+                  </>
+                ) : (
+                  <div className="text-center text-gray-500 italic py-8">
+                    Your grander vision will appear here
                   </div>
-                  <p className="text-3xl text-yellow-50 leading-relaxed font-light">
-                    {aspirations}
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
               
               <div className="text-2xl text-gray-300 mt-12 font-light italic">
                 This is where today takes you.
