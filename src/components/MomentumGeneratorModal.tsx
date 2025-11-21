@@ -347,8 +347,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           setShakeScreen(true);
           setTimeout(() => {
             setShakeScreen(false);
-            setCurrentStep('launch');
           }, 800);
+          setTimeout(() => {
+            setCurrentStep('launch');
+          }, 1200);
         }
       }, 10);
     };
