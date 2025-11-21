@@ -238,7 +238,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         </div>
         
         {/* Premium 3D Card */}
-        <div className={`relative transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`relative transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl max-w-2xl mx-6"
                style={{
                  boxShadow: '0 0 60px rgba(251, 191, 36, 0.4), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
@@ -275,7 +275,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (currentStep === 'vision') {
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center">
-        <div className={`max-w-4xl mx-auto px-6 transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`max-w-4xl mx-auto px-6 transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <div className="text-center">
@@ -283,17 +283,26 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 <Target size={56} className="text-yellow-400 animate-pulse" style={{filter: 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.6))'}} />
               </div>
               <h3 className="text-3xl font-bold text-yellow-400 mb-8 tracking-wide uppercase">Your North Star</h3>
-              <div className="text-5xl font-black text-white leading-tight tracking-tight mb-6" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.3)'}}>
-                {goal}
+              
+              {/* Goal Section with Label */}
+              <div className="mb-8">
+                <div className="text-lg text-yellow-400/80 font-semibold mb-3 uppercase tracking-wider">Goal:</div>
+                <div className="text-5xl font-black text-white leading-tight tracking-tight" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.3)'}}>
+                  {goal}
+                </div>
               </div>
+              
+              {/* Grand Vision Section */}
               {aspirations && (
-                <div className="mt-8 p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl">
-                  <p className="text-lg text-yellow-100/90 leading-relaxed italic">
-                    "{aspirations}"
+                <div className="mt-10 p-8 bg-gradient-to-br from-yellow-500/15 to-orange-500/10 border-2 border-yellow-500/40 rounded-2xl">
+                  <div className="text-xl text-yellow-300 font-bold mb-4 uppercase tracking-wide">Your Vision</div>
+                  <p className="text-2xl text-yellow-50 leading-relaxed font-light">
+                    {aspirations}
                   </p>
                 </div>
               )}
-              <div className="text-xl text-gray-400 mt-8 font-light">
+              
+              <div className="text-xl text-gray-400 mt-10 font-light italic">
                 This is where today takes you.
               </div>
             </div>
@@ -315,7 +324,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (currentStep === 'content') {
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
-        <div className={`max-w-5xl mx-auto w-full transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`max-w-5xl mx-auto w-full transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           {content ? (
             <>
               <div className="aspect-video bg-black rounded-3xl overflow-hidden mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
@@ -361,7 +370,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (currentStep === 'question') {
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
-        <div className={`max-w-3xl mx-auto w-full transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`max-w-3xl mx-auto w-full transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           {/* Video Rating Section */}
           <div className="mb-8 bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/30 rounded-2xl p-8">
             <h4 className="text-xl font-bold text-yellow-400 mb-4 text-center">Rate this video</h4>
@@ -439,8 +448,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (currentStep === 'habits') {
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
-        <div className={`max-w-5xl mx-auto w-full transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
-          <h3 className="text-4xl font-bold text-yellow-400 mb-10 text-center tracking-tight">Choose Your Path</h3>
+        <div className={`max-w-5xl mx-auto w-full transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+          <h3 className="text-4xl font-bold text-yellow-400 mb-10 text-center tracking-tight">Which habits will you do now?</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             {lifeGoals.map(habit => (
               <button
@@ -517,7 +526,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (currentStep === 'pledge') {
     return (
       <div className={`fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center transition-all duration-300 ${shakeScreen ? 'animate-pulse' : ''}`}>
-        <div className={`max-w-2xl mx-6 transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`max-w-2xl mx-6 transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <h3 className="text-4xl font-black text-yellow-400 mb-12 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
@@ -579,7 +588,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-hidden">
         {!launchActive ? (
-          <div className={`max-w-2xl mx-6 transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+          <div className={`max-w-2xl mx-6 transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
             <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl text-center"
                  style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
               <div className="text-9xl mb-8 animate-bounce">🚀</div>
@@ -637,15 +646,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   {launchCountdown}
                 </div>
                 <p className={`text-5xl font-black transition-all mb-4 ${
-                  launchCountdown <= 10 ? 'text-white animate-bounce' : 'text-gray-400'
-                }`} style={{textShadow: '0 0 20px rgba(255, 255, 255, 0.6)'}}>
-                  {launchCountdown <= 10 ? 'LAUNCH!!' : 'Get Ready...'}
+                  launchCountdown <= 10 ? 'text-white animate-bounce' : 'text-yellow-400'
+                }`} style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.8)'}}>
+                  LAUNCH!!
                 </p>
-                {launchCountdown <= 10 && (
-                  <p className="text-2xl text-yellow-400 font-semibold animate-pulse">
-                    Break the stasis NOW!
-                  </p>
-                )}
+                <p className={`text-2xl font-semibold ${launchCountdown <= 10 ? 'text-yellow-400 animate-pulse' : 'text-gray-400'}`}>
+                  Break the stasis NOW!
+                </p>
               </div>
             </div>
             
