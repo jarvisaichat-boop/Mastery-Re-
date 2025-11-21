@@ -99,10 +99,11 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   ];
   
   // Get user's life goal habits and merge with starters (remove duplicates)
+  // Maximum 3 total life goal habits allowed
   const userLifeGoals = habits.filter(h => h.type === 'Life Goal Habit');
   const starterIds = new Set(starterHabits.map(h => h.id));
   const uniqueUserHabits = userLifeGoals.filter(h => !starterIds.has(h.id));
-  const lifeGoals = [...starterHabits, ...uniqueUserHabits];
+  const lifeGoals = [...starterHabits, ...uniqueUserHabits].slice(0, 3);
   const currentStreak = calculateStreak();
   
   // Load YouTube iframe API
