@@ -5,6 +5,13 @@ export interface Category {
   sub?: string; // CHANGE: Made 'sub' optional
 }
 
+export interface MicroWin {
+  id: string;
+  level: number; // 1 = Main, 2 = Micro Win, 3 = Fallback, 4 = Bare Minimum
+  description: string;
+  effortLevel: 'high' | 'medium' | 'low' | 'minimal';
+}
+
 export interface Habit {
   id: number;
   name: string;
@@ -23,6 +30,7 @@ export interface Habit {
   scheduledTime?: string; // Optional notification time (HH:MM format)
   miniAppType?: 'breath' | 'journal' | 'vision' | null; // Mini-app experience type
   sourceProgramId?: string; // Optional tracking of which program this habit came from
+  microWins?: MicroWin[]; // Optional difficulty levels for the habit
 }
 
 export interface AddHabitModalProps {
@@ -97,4 +105,21 @@ export interface Program {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   icon: string; // Emoji or icon identifier
   habits: HabitTemplate[];
+}
+
+// MOMENTUM GENERATOR TYPES
+export interface ContentLibraryItem {
+  id: string;
+  title: string;
+  youtubeUrl: string;
+  duration: number; // in minutes
+  question: string;
+  category: 'discipline' | 'psychology' | 'strategy' | 'mindset';
+  dayOfWeek?: number; // 0-6, for specific day scheduling (0 = Sunday)
+}
+
+export interface MomentumGeneratorState {
+  lastCompletedDate: string | null; // YYYY-MM-DD
+  reflectionAnswers: Record<string, string>; // key = date, value = user's answer to question
+  selectedHabits: number[]; // IDs of habits selected in last session
 }
