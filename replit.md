@@ -53,7 +53,16 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
     -   **Initial Programs**: Morning Starter, Deep Morning, Quick Reset, Gratitude Practice (4 programs with 1-2 habits each).
     -   **Habit Tracking**: sourceProgramId field tracks which program habits came from for future analytics.
     -   **Success Feedback**: Toast notification confirms habit additions ("Added 2 habits from program!").
--   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules, mini-app types, journal entries, program library selections) is saved in localStorage.
+-   **Momentum Generator**: 7-step daily ritual transforming passive tracking into active execution.
+    -   **Streak**: Radial firework burst celebration effect (30 particles bursting outward in all directions).
+    -   **Vision**: Goal display with "Your Everyday Reminder" section showing grand vision/aspirations.
+    -   **Video**: "Today's Lesson" with YouTube iframe API integration, channel name display, completion tracking, 10-second timeout with manual "Continue Anyway" override.
+    -   **Reflection**: Daily question with text input.
+    -   **Habits**: 3 pre-generated starter habits (Morning Movement, Deep Work, Evening Reflection) with micro-wins + user's life goal habits merged.
+    -   **Pledge**: Interactive pledge visualization with progress animation.
+    -   **Launch**: 60-second countdown with dark timer mode.
+    -   **Transitions**: Smooth 1200ms weighted transitions (200ms for video→question), flash bug eliminated.
+-   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules, mini-app types, journal entries, program library selections, momentum generator content) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp.
 -   **Quick Navigation**: Home and Target icons for quick access to key phases.
 
