@@ -6,6 +6,7 @@ import { formatDate } from '../utils';
 interface MomentumGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onComplete: () => void;
   habits: Habit[];
   goal: string;
   contentLibrary: ContentLibraryItem[];
@@ -18,6 +19,7 @@ type Step = 'streak' | 'vision' | 'content' | 'question' | 'habits' | 'pledge' |
 export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   isOpen,
   onClose,
+  onComplete,
   habits,
   goal,
   contentLibrary,
@@ -136,6 +138,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setLaunchCountdown(prev => {
         if (prev <= 1) {
           clearInterval(interval);
+          onComplete();
           setTimeout(() => {
             onClose();
           }, 1000);
@@ -146,7 +149,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [currentStep, launchActive, onClose]);
+  }, [currentStep, launchActive, onClose, onComplete]);
 
   const handleNextStep = () => {
     const steps: Step[] = ['streak', 'vision', 'content', 'question', 'habits', 'pledge', 'launch'];
@@ -462,17 +465,31 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             </button>
           </div>
         ) : (
-          <div className="text-center animate-pulse">
-            <div className={`text-[12rem] font-black font-mono mb-16 transition-all duration-300 ${
-              launchCountdown <= 10 ? 'text-red-500' : 'text-red-400'
-            }`} style={{textShadow: `0 0 ${launchCountdown <= 10 ? '100px' : '60px'} rgba(239, 68, 68, 0.8)`}}>
-              {launchCountdown}
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className={`text-[12rem] font-black font-mono mb-16 transition-all duration-300 ${
+                launchCountdown <= 10 ? 'text-red-500' : 'text-red-400'
+              }`} style={{textShadow: `0 0 ${launchCountdown <= 10 ? '100px' : '60px'} rgba(239, 68, 68, 0.8)`}}>
+                {launchCountdown}
+              </div>
+              <p className={`text-3xl font-bold transition-all mb-12 ${
+                launchCountdown <= 10 ? 'text-white animate-bounce' : 'text-gray-400'
+              }`}>
+                {launchCountdown <= 10 ? 'GO NOW!' : 'GET READY...'}
+              </p>
             </div>
-            <p className={`text-3xl font-bold transition-all ${
-              launchCountdown <= 10 ? 'text-white animate-bounce' : 'text-gray-400'
-            }`}>
-              {launchCountdown <= 10 ? 'GO NOW!' : 'GET READY...'}
-            </p>
+            <button
+              onClick={() => {
+                if (navigator.vibrate) {
+                  navigator.vibrate(200);
+                }
+                onComplete();
+                setTimeout(onClose, 500);
+              }}
+              className="px-8 py-3 bg-gray-800/50 border border-gray-700 text-gray-300 font-semibold rounded-xl hover:bg-gray-700/50 hover:text-white transition-all duration-300 text-sm"
+            >
+              Skip / I'm Ready Now
+            </button>
           </div>
         )}
       </div>

@@ -87,7 +87,74 @@ function loadHabitsFromStorage(): Habit[] {
     }
   } catch (e) { console.error("Failed to load habits", e); }
   
-  return [];
+  return [
+    {
+      id: 9999991,
+      name: 'Morning Movement',
+      description: 'Start your day with intentional motion',
+      color: '#3b82f6',
+      type: 'Life Goal Habit',
+      categories: [{ main: 'Health', sub: 'Movement' }],
+      frequencyType: 'daily',
+      selectedDays: [],
+      timesPerPeriod: 1,
+      periodUnit: 'day',
+      repeatDays: 1,
+      completed: {},
+      order: 0,
+      createdAt: 1700000000000,
+      scheduledTime: '07:00',
+      microWins: [
+        { id: 'mw1', level: 2, description: '5 jumping jacks', effortLevel: 'low' },
+        { id: 'mw2', level: 3, description: '2-minute walk outside', effortLevel: 'medium' },
+        { id: 'mw3', level: 4, description: 'Stretch arms overhead', effortLevel: 'minimal' }
+      ]
+    },
+    {
+      id: 9999992,
+      name: 'Deep Work Session',
+      description: 'Build focus muscle through deliberate practice',
+      color: '#8b5cf6',
+      type: 'Life Goal Habit',
+      categories: [{ main: 'Productivity', sub: 'Focus' }],
+      frequencyType: 'daily',
+      selectedDays: [],
+      timesPerPeriod: 1,
+      periodUnit: 'day',
+      repeatDays: 1,
+      completed: {},
+      order: 1,
+      createdAt: 1700000000001,
+      scheduledTime: '09:00',
+      microWins: [
+        { id: 'mw4', level: 2, description: 'Open work file', effortLevel: 'minimal' },
+        { id: 'mw5', level: 3, description: 'Write one sentence', effortLevel: 'low' },
+        { id: 'mw6', level: 4, description: 'Set 5-minute timer', effortLevel: 'low' }
+      ]
+    },
+    {
+      id: 9999993,
+      name: 'Evening Reflection',
+      description: 'Close the day with gratitude and presence',
+      color: '#10b981',
+      type: 'Life Goal Habit',
+      categories: [{ main: 'Mindfulness', sub: 'Gratitude' }],
+      frequencyType: 'daily',
+      selectedDays: [],
+      timesPerPeriod: 1,
+      periodUnit: 'day',
+      repeatDays: 1,
+      completed: {},
+      order: 2,
+      createdAt: 1700000000002,
+      scheduledTime: '21:00',
+      microWins: [
+        { id: 'mw7', level: 2, description: 'Take 3 deep breaths', effortLevel: 'minimal' },
+        { id: 'mw8', level: 3, description: 'Write 1 gratitude', effortLevel: 'low' },
+        { id: 'mw9', level: 4, description: 'Close eyes for 60 seconds', effortLevel: 'minimal' }
+      ]
+    }
+  ];
 }
 
 function isOnboardingComplete(): boolean {
@@ -199,13 +266,17 @@ function App() {
                 ...h,
                 id: now + index,
                 createdAt: now,
-                order: index,
+                order: index + 3,
             }));
             
             console.log('✅ Habits with IDs:', habitsWithIds);
             
-            setHabits(habitsWithIds);
-            console.log('✅ setHabits called');
+            // Preserve starter habits (IDs 9999991-9999993) and merge with new habits
+            const starterHabits = habits.filter(h => h.id >= 9999990 && h.id <= 9999999);
+            const mergedHabits = [...starterHabits, ...habitsWithIds];
+            
+            setHabits(mergedHabits);
+            console.log('✅ setHabits called with merged habits (starters + new)');
             
             setGoal(userGoal);
             console.log('✅ setGoal called');
@@ -904,16 +975,22 @@ function App() {
                     </div>
                 )}
                 
-                {/* Launch Pad Button - Half-circle at bottom-center */}
+                {/* Launch Pad Button - Premium Half-circle at bottom-center */}
                 {onboardingComplete && !showStatsView && (
-                    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40">
+                    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 group">
                         <button
                             onClick={() => setShowMomentumGenerator(true)}
-                            className="w-32 h-16 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-t-full hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-2xl flex items-center justify-center gap-2 font-bold text-lg text-black"
+                            disabled={isMomentumCompletedToday}
+                            className="relative w-40 h-20 bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 rounded-t-full hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 transition-all duration-500 shadow-2xl flex flex-col items-center justify-center gap-1 font-bold text-black hover:scale-110 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0 animate-pulse"
+                            style={{
+                              boxShadow: '0 -10px 40px rgba(251, 191, 36, 0.5), 0 -5px 20px rgba(251, 191, 36, 0.3)'
+                            }}
                             title={isMomentumCompletedToday ? "Come back tomorrow for the launch ritual" : "Launch the daily ignition sequence"}
                         >
-                            <Rocket size={24} />
-                            Launch
+                            <Rocket size={32} className="group-hover:rotate-12 transition-transform duration-300" />
+                            <span className="text-sm font-black uppercase tracking-wider opacity-90 group-hover:opacity-100 transition-opacity">
+                                Ignite
+                            </span>
                         </button>
                     </div>
                 )}
@@ -1079,6 +1156,7 @@ function App() {
             <MomentumGeneratorModal
                 isOpen={showMomentumGenerator}
                 onClose={() => setShowMomentumGenerator(false)}
+                onComplete={handleMomentumComplete}
                 habits={habits}
                 goal={goal}
                 contentLibrary={contentLibrary}
