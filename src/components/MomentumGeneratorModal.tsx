@@ -282,7 +282,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         };
 
         try {
-          const newPlayer = new window.YT.Player('youtube-player', {
+          // Use ref instead of getElementById to avoid React DOM conflicts
+          if (!playerContainerRef.current) {
+            console.error('Player container ref not available');
+            return;
+          }
+          
+          const newPlayer = new window.YT.Player(playerContainerRef.current, {
             videoId: videoId,
             playerVars: {
               autoplay: 1,
@@ -579,7 +585,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           {content ? (
             <>
               <div className="aspect-video bg-black rounded-3xl overflow-hidden mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
-                <div id="youtube-player" style={{width: '100%', height: '100%'}}></div>
+                <div ref={playerContainerRef} style={{width: '100%', height: '100%'}}></div>
               </div>
               {/* Video Header */}
               <div className="text-center mb-8">
