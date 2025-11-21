@@ -112,6 +112,7 @@ export interface ContentLibraryItem {
   id: string;
   title: string;
   youtubeUrl: string;
+  channelName: string;
   duration: number; // in minutes
   question: string;
   category: 'discipline' | 'psychology' | 'strategy' | 'mindset';

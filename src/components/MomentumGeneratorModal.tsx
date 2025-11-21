@@ -3,6 +3,14 @@ import { ChevronRight, Sparkles, Target } from 'lucide-react';
 import { Habit, ContentLibraryItem } from '../types';
 import { formatDate } from '../utils';
 
+// YouTube Player TypeScript declaration
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
 interface MomentumGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -41,15 +49,78 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackReason, setFeedbackReason] = useState('');
   const [feedbackComment, setFeedbackComment] = useState('');
+  const [videoCompleted, setVideoCompleted] = useState(false);
+  const [player, setPlayer] = useState<any>(null);
+  const [videoError, setVideoError] = useState(false);
 
-  const lifeGoals = habits.filter(h => h.type === 'Life Goal Habit');
+  // Always include these 3 pre-generated life goal habits
+  const starterHabits = [
+    {
+      id: 9999991,
+      name: 'Morning Movement',
+      description: 'Start your day with intentional motion',
+      color: '#3b82f6',
+      type: 'Life Goal Habit',
+      microWins: [
+        { id: 'mw1', description: '5 jumping jacks' },
+        { id: 'mw2', description: '2-minute walk outside' },
+        { id: 'mw3', description: 'Stretch arms overhead' }
+      ]
+    },
+    {
+      id: 9999992,
+      name: 'Deep Work Session',
+      description: 'Build focus muscle through deliberate practice',
+      color: '#8b5cf6',
+      type: 'Life Goal Habit',
+      microWins: [
+        { id: 'mw4', description: 'Open work file' },
+        { id: 'mw5', description: 'Write one sentence' },
+        { id: 'mw6', description: 'Set 5-minute timer' }
+      ]
+    },
+    {
+      id: 9999993,
+      name: 'Evening Reflection',
+      description: 'Close the day with gratitude and presence',
+      color: '#10b981',
+      type: 'Life Goal Habit',
+      microWins: [
+        { id: 'mw7', description: 'Write 3 things you\'re grateful for' },
+        { id: 'mw8', description: 'Take 3 deep breaths' },
+        { id: 'mw9', description: 'Review tomorrow\'s top priority' }
+      ]
+    }
+  ];
+  
+  // Get user's life goal habits and merge with starters (remove duplicates)
+  const userLifeGoals = habits.filter(h => h.type === 'Life Goal Habit');
+  const starterIds = new Set(starterHabits.map(h => h.id));
+  const uniqueUserHabits = userLifeGoals.filter(h => !starterIds.has(h.id));
+  const lifeGoals = [...starterHabits, ...uniqueUserHabits];
   const currentStreak = calculateStreak();
   
+  // Load YouTube iframe API
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      
+      // Set up callback for when API is ready
+      window.onYouTubeIframeAPIReady = () => {
+        console.log('YouTube iframe API ready');
+      };
+    }
+  }, []);
+
   // Lock in content selection when modal opens
   useEffect(() => {
     if (isOpen && contentLibrary.length > 0 && !selectedContent) {
       const randomContent = contentLibrary[Math.floor(Math.random() * contentLibrary.length)];
       setSelectedContent(randomContent);
+      setVideoCompleted(false); // Reset video completion
     } else if (!isOpen) {
       // Reset when modal closes
       setSelectedContent(null);
@@ -59,8 +130,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setPledgeProgress(0);
       setLaunchCountdown(60);
       setLaunchActive(false);
+      setVideoCompleted(false);
+      setVideoError(false);
+      if (player) {
+        player.destroy();
+        setPlayer(null);
+      }
     }
-  }, [isOpen, contentLibrary, selectedContent]);
+  }, [isOpen, contentLibrary, selectedContent, player]);
   
   const content = selectedContent;
 
@@ -87,12 +164,88 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return streak;
   }
 
-  // Slow fade in animation on step change (500-800ms for gravity)
+  // Smooth fade in animation on step change
   useEffect(() => {
+    // Don't flash on initial render
+    if (!isOpen) return;
+    
     setStepVisible(false);
-    const timer = setTimeout(() => setStepVisible(true), 300);
+    const timer = setTimeout(() => setStepVisible(true), 400);
     return () => clearTimeout(timer);
-  }, [currentStep]);
+  }, [currentStep, isOpen]);
+
+  // Initialize YouTube player when content step loads
+  useEffect(() => {
+    const getVideoId = (url: string) => {
+      const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+      return match ? match[1] : null;
+    };
+
+    // Cleanup old player if navigating away from content step
+    if (currentStep !== 'content' && player) {
+      try {
+        player.destroy();
+      } catch (e) {
+        console.error('Error destroying player:', e);
+      }
+      setPlayer(null);
+      return;
+    }
+
+    // Initialize new player when entering content step
+    if (currentStep === 'content' && content && !player) {
+      const videoId = getVideoId(content.youtubeUrl);
+      if (!videoId) return;
+
+      // Wait for YouTube API to be ready (with 10 second timeout)
+      let retries = 0;
+      const maxRetries = 100; // 10 seconds total (100ms * 100)
+      
+      const initPlayer = () => {
+        retries++;
+        
+        if (retries > maxRetries) {
+          console.error('YouTube API failed to load after 10 seconds');
+          setVideoError(true); // Show error message and enable manual override
+          return;
+        }
+        
+        if (!window.YT || !window.YT.Player) {
+          // API not loaded yet, try again in 100ms
+          setTimeout(initPlayer, 100);
+          return;
+        }
+
+        const onPlayerStateChange = (event: any) => {
+          // YT.PlayerState.ENDED === 0
+          if (event.data === 0) {
+            setVideoCompleted(true);
+          }
+        };
+
+        try {
+          const newPlayer = new window.YT.Player('youtube-player', {
+            videoId: videoId,
+            playerVars: {
+              autoplay: 1,
+              controls: 1,
+              modestbranding: 1,
+              rel: 0,
+            },
+            events: {
+              onStateChange: onPlayerStateChange,
+            },
+          });
+          
+          setPlayer(newPlayer);
+        } catch (e) {
+          console.error('Error creating YouTube player:', e);
+        }
+      };
+
+      initPlayer();
+    }
+  }, [currentStep, content, player]);
 
   // Pledge interaction handler
   useEffect(() => {
@@ -173,12 +326,15 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     const steps: Step[] = ['streak', 'vision', 'content', 'question', 'habits', 'pledge', 'launch'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
-      // Use setTimeout to avoid setState during render
+      const nextStep = steps[currentIndex + 1];
+      // Faster transition for video to question (200ms instead of 400ms)
+      const transitionDelay = (currentStep === 'content' && nextStep === 'question') ? 200 : 400;
+      
       requestAnimationFrame(() => {
         setStepVisible(false);
         setTimeout(() => {
-          setCurrentStep(steps[currentIndex + 1]);
-        }, 400);
+          setCurrentStep(nextStep);
+        }, transitionDelay);
       });
     }
   };
@@ -213,26 +369,34 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 1: Streak Card with Confetti
+  // Step 1: Streak Card with Firework Burst
   if (currentStep === 'streak') {
+    // Generate firework particles bursting outward from center
+    const fireworkParticles = [...Array(30)].map((_, i) => {
+      const angle = (i / 30) * 360;
+      const distance = 200 + Math.random() * 150;
+      const tx = Math.cos(angle * Math.PI / 180) * distance;
+      const ty = Math.sin(angle * Math.PI / 180) * distance;
+      return { tx, ty, delay: Math.random() * 0.3 };
+    });
+
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-hidden">
-        {/* Confetti Animation */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(20)].map((_, i) => (
+        {/* Firework Burst Animation */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          {fireworkParticles.map((particle, i) => (
             <div
               key={i}
-              className="absolute animate-confetti"
+              className="absolute animate-firework"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `-10%`,
-                width: '10px',
-                height: '10px',
-                backgroundColor: ['#FDE047', '#FB923C', '#FBBF24', '#F59E0B'][Math.floor(Math.random() * 4)],
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${3 + Math.random() * 2}s`,
-                opacity: 0.8,
-              }}
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: ['#FDE047', '#FB923C', '#FBBF24', '#F59E0B', '#EF4444'][Math.floor(Math.random() * 5)],
+                '--tx': `${particle.tx}px`,
+                '--ty': `${particle.ty}px`,
+                animationDelay: `${particle.delay}s`,
+              } as React.CSSProperties}
             />
           ))}
         </div>
@@ -271,7 +435,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 2: Your North Star with Aspirations
+  // Step 2: Goal and Grand Vision
   if (currentStep === 'vision') {
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center">
@@ -279,30 +443,31 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <div className="text-center">
-              <div className="mb-6 flex justify-center">
-                <Target size={56} className="text-yellow-400 animate-pulse" style={{filter: 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.6))'}} />
+              <div className="mb-8 flex justify-center">
+                <Target size={64} className="text-yellow-400 animate-pulse" style={{filter: 'drop-shadow(0 0 30px rgba(251, 191, 36, 0.8))'}} />
               </div>
-              <h3 className="text-3xl font-bold text-yellow-400 mb-8 tracking-wide uppercase">Your North Star</h3>
               
-              {/* Goal Section with Label */}
-              <div className="mb-8">
-                <div className="text-lg text-yellow-400/80 font-semibold mb-3 uppercase tracking-wider">Goal:</div>
-                <div className="text-5xl font-black text-white leading-tight tracking-tight" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.3)'}}>
+              {/* Goal */}
+              <div className="mb-10">
+                <div className="text-2xl text-yellow-400/90 font-bold mb-4 uppercase tracking-wider">Goal</div>
+                <div className="text-6xl font-black text-white leading-tight tracking-tight mb-4" style={{textShadow: '0 0 50px rgba(251, 191, 36, 0.4)'}}>
                   {goal}
                 </div>
               </div>
               
-              {/* Grand Vision Section */}
+              {/* Grand Vision / Everyday Reminder */}
               {aspirations && (
-                <div className="mt-10 p-8 bg-gradient-to-br from-yellow-500/15 to-orange-500/10 border-2 border-yellow-500/40 rounded-2xl">
-                  <div className="text-xl text-yellow-300 font-bold mb-4 uppercase tracking-wide">Your Vision</div>
-                  <p className="text-2xl text-yellow-50 leading-relaxed font-light">
+                <div className="mt-12 p-10 bg-gradient-to-br from-yellow-500/20 via-orange-500/15 to-yellow-500/10 border-2 border-yellow-400/50 rounded-3xl">
+                  <div className="text-2xl text-yellow-300 font-black mb-6 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
+                    Your Everyday Reminder
+                  </div>
+                  <p className="text-3xl text-yellow-50 leading-relaxed font-light">
                     {aspirations}
                   </p>
                 </div>
               )}
               
-              <div className="text-xl text-gray-400 mt-10 font-light italic">
+              <div className="text-2xl text-gray-300 mt-12 font-light italic">
                 This is where today takes you.
               </div>
             </div>
@@ -320,7 +485,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 3: Motivational Content
+  // Step 3: Motivational Content with YouTube Player
   if (currentStep === 'content') {
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
@@ -328,27 +493,29 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           {content ? (
             <>
               <div className="aspect-video bg-black rounded-3xl overflow-hidden mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`${content.youtubeUrl}?autoplay=1&controls=1&modestbranding=1`}
-                  title={content.title}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+                <div id="youtube-player" style={{width: '100%', height: '100%'}}></div>
               </div>
+              {/* Video Header */}
               <div className="text-center mb-8">
-                <h3 className="text-3xl font-bold text-white mb-3">{content.title}</h3>
-                <p className="text-gray-400 text-lg">{content.duration} min • Daily Intel</p>
+                <div className="text-yellow-400 text-2xl font-bold mb-4 uppercase tracking-wide">Today's Lesson</div>
+                <h3 className="text-3xl font-bold text-white mb-2">{content.title}</h3>
+                <p className="text-gray-400 text-lg">{content.channelName} • {content.duration} min</p>
+                {videoError ? (
+                  <p className="text-red-400 text-sm mt-3">Video failed to load. You may continue anyway.</p>
+                ) : !videoCompleted && (
+                  <p className="text-yellow-400/80 text-sm mt-3 italic">Watch until the end to continue</p>
+                )}
               </div>
-              <button
-                onClick={handleNextStep}
-                className="group px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center mx-auto gap-3"
-              >
-                Continue
-                <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform" />
-              </button>
+              <div className="flex gap-4 items-center justify-center">
+                <button
+                  onClick={handleNextStep}
+                  disabled={!videoCompleted && !videoError}
+                  className="group px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center gap-3"
+                >
+                  {videoCompleted ? 'Continue' : videoError ? 'Continue Anyway' : 'Finish Video First'}
+                  <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform" />
+                </button>
+              </div>
             </>
           ) : (
             <div className="text-center">
@@ -492,18 +659,22 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   <p className="text-gray-400 text-sm">{habit.description}</p>
                 </div>
                 
-                {/* Micro Wins - Expandable */}
-                {habit.microWins && habit.microWins.length > 0 && (
+                {/* Micro Wins - Always show if available */}
+                {habit.microWins && habit.microWins.length > 0 ? (
                   <div className="mt-4 pt-4 border-t border-gray-700/50">
                     <p className="text-yellow-400 font-semibold text-xs mb-2">Micro-Wins:</p>
                     <div className="space-y-1">
-                      {habit.microWins.slice(0, 3).map(mw => (
+                      {habit.microWins.slice(0, 3).map((mw: any) => (
                         <div key={mw.id} className="flex items-start gap-2">
                           <Sparkles size={10} className="text-yellow-400 mt-0.5 flex-shrink-0" />
                           <p className="text-xs text-gray-300">{mw.description}</p>
                         </div>
                       ))}
                     </div>
+                  </div>
+                ) : habit.description && (
+                  <div className="mt-4 pt-4 border-t border-gray-700/50">
+                    <p className="text-gray-400 text-xs italic">Tap to build your momentum</p>
                   </div>
                 )}
               </button>
