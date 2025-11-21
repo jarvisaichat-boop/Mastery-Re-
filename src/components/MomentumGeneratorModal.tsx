@@ -23,7 +23,7 @@ interface MomentumGeneratorModalProps {
   isCompletedToday: boolean;
 }
 
-type Step = 'streak' | 'vision' | 'content' | 'question' | 'habits' | 'pledge' | 'launch';
+type Step = 'streak' | 'vision' | 'content' | 'habits' | 'pledge' | 'launch';
 
 export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   isOpen,
@@ -45,10 +45,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [shakeScreen, setShakeScreen] = useState(false);
   const [stepVisible, setStepVisible] = useState(false);
   const [selectedContent, setSelectedContent] = useState<ContentLibraryItem | null>(null);
-  const [videoRating, setVideoRating] = useState(0);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [feedbackReason, setFeedbackReason] = useState('');
-  const [feedbackComment, setFeedbackComment] = useState('');
   const [videoCompleted, setVideoCompleted] = useState(false);
   const [player, setPlayer] = useState<any>(null);
   const [videoError, setVideoError] = useState(false);
@@ -56,6 +52,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [youtubeMetadata, setYoutubeMetadata] = useState<{ title: string; author: string } | null>(null);
   const [showSeizeTheDayPopup, setShowSeizeTheDayPopup] = useState(false);
   const [showVideoIntro, setShowVideoIntro] = useState(true);
+  const [preCountdown, setPreCountdown] = useState<number | null>(null);
+  const [randomVisionContent, setRandomVisionContent] = useState<string>('');
   
   // Ref for YouTube player container to isolate from React's DOM management
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -144,6 +142,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setYoutubeMetadata(null); // Reset YouTube metadata
       setShowSeizeTheDayPopup(false); // Reset popup
       setShowVideoIntro(true); // Reset video intro
+      setPreCountdown(null); // Reset pre-countdown
+      setRandomVisionContent(''); // Reset random vision content
       if (player) {
         try {
           // Destroy player and remove placeholder child
@@ -384,9 +384,24 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     };
   }, [currentStep]);
 
-  // Launch countdown
+  // 3-2-1 Pre-countdown
   useEffect(() => {
-    if (currentStep !== 'launch' || !launchActive) return;
+    if (preCountdown === null || preCountdown <= 0) return;
+
+    const timer = setTimeout(() => {
+      if (preCountdown === 1) {
+        setPreCountdown(null); // Trigger 60-second countdown
+      } else {
+        setPreCountdown(preCountdown - 1);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [preCountdown]);
+
+  // 60-second Launch countdown
+  useEffect(() => {
+    if (currentStep !== 'launch' || !launchActive || preCountdown !== null) return;
 
     const interval = setInterval(() => {
       setLaunchCountdown(prev => {
@@ -406,15 +421,15 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [currentStep, launchActive, onClose, onComplete]);
+  }, [currentStep, launchActive, preCountdown, onClose, onComplete]);
 
   const handleNextStep = () => {
-    const steps: Step[] = ['streak', 'vision', 'content', 'question', 'habits', 'pledge', 'launch'];
+    const steps: Step[] = ['streak', 'vision', 'content', 'habits', 'pledge', 'launch'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       const nextStep = steps[currentIndex + 1];
       // Slower, more deliberate transitions for premium feel
-      const transitionDelay = (currentStep === 'content' && nextStep === 'question') ? 500 : 900;
+      const transitionDelay = 900;
       
       requestAnimationFrame(() => {
         setStepVisible(false);
@@ -571,27 +586,33 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
+  // Generate random vision content once when entering vision step
+  useEffect(() => {
+    if (currentStep === 'vision' && !randomVisionContent) {
+      const randomWhys = [
+        "To create the life you've always imagined, one day at a time",
+        "To prove to yourself that you're capable of anything you commit to",
+        "To build unshakeable discipline that transforms your entire life",
+        "To become the person your future self will thank you for being",
+        "To break free from limitation and step into your full potential"
+      ];
+      
+      const randomRoutines = [
+        "Morning: Mindful movement, focused work, energized action",
+        "Ideal Day: Deep focus, intentional breaks, powerful completion",
+        "Daily Flow: Present in the moment, building unstoppable momentum",
+        "Your Rhythm: Wake with purpose, execute with precision, rest with gratitude",
+        "Perfect Day: Aligned actions, consistent progress, compound results"
+      ];
+      
+      const newVision = `${randomWhys[Math.floor(Math.random() * randomWhys.length)]}\n\n${randomRoutines[Math.floor(Math.random() * randomRoutines.length)]}`;
+      setRandomVisionContent(newVision);
+    }
+  }, [currentStep, randomVisionContent]);
+
   // Step 2: Goal and Grand Vision
   if (currentStep === 'vision') {
-    // Generate random inspirational content for Grand Vision if empty
-    const randomWhys = [
-      "To create the life you've always imagined, one day at a time",
-      "To prove to yourself that you're capable of anything you commit to",
-      "To build unshakeable discipline that transforms your entire life",
-      "To become the person your future self will thank you for being",
-      "To break free from limitation and step into your full potential"
-    ];
-    
-    const randomRoutines = [
-      "Morning: Mindful movement, focused work, energized action",
-      "Ideal Day: Deep focus, intentional breaks, powerful completion",
-      "Daily Flow: Present in the moment, building unstoppable momentum",
-      "Your Rhythm: Wake with purpose, execute with precision, rest with gratitude",
-      "Perfect Day: Aligned actions, consistent progress, compound results"
-    ];
-    
-    const randomVision = `${randomWhys[Math.floor(Math.random() * randomWhys.length)]}\n\n${randomRoutines[Math.floor(Math.random() * randomRoutines.length)]}`;
-    const displayVision = aspirations || randomVision;
+    const displayVision = aspirations || randomVisionContent;
     
     return (
       <div 
@@ -674,7 +695,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       );
     }
     
-    // Then show the actual video
+    // Then show the actual video with question overlay
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-4 sm:p-6">
         <div className={`max-w-5xl mx-auto w-full transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
@@ -695,17 +716,41 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 {videoError ? (
                   <p className="text-red-400 text-sm mt-3">Video failed to load. You may continue anyway.</p>
                 ) : !videoCompleted && (
-                  <p className="text-yellow-400/80 text-sm mt-3 italic">Watch until the end to continue</p>
+                  <p className="text-yellow-400/80 text-sm mt-3 italic">Watch the video and answer the question below</p>
                 )}
+              </div>
+              
+              {/* Question Overlay - Always visible */}
+              <div className="mb-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 text-center leading-relaxed">
+                  How will you apply this lesson today to your goals and habits?
+                </h3>
+                <textarea
+                  value={userQuestion}
+                  onChange={(e) => setUserQuestion(e.target.value)}
+                  placeholder="Type your answer while watching..."
+                  className="w-full h-32 sm:h-40 bg-gray-900/50 border-2 border-gray-700 focus:border-yellow-500 text-white text-base sm:text-lg rounded-2xl p-4 sm:p-6 placeholder-gray-500 focus:outline-none transition-all duration-300 resize-none"
+                  style={{boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.5)'}}
+                />
+                <p className="text-gray-500 text-xs sm:text-sm mt-2 text-center">
+                  {videoCompleted && userQuestion.trim().length > 0 
+                    ? '✓ Video completed and answer provided - ready to continue!' 
+                    : !videoCompleted && userQuestion.trim().length > 0
+                    ? 'Keep watching the video...'
+                    : !videoCompleted
+                    ? 'Watch the video and type your answer...'
+                    : 'Please answer the question to continue'
+                  }
+                </p>
               </div>
               
               <div className="flex gap-3 sm:gap-4 items-center justify-center">
                 <button
                   onClick={handleNextStep}
-                  disabled={!videoCompleted && !videoError}
+                  disabled={(!videoCompleted && !videoError) || userQuestion.trim().length === 0}
                   className="group px-8 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-lg sm:text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center gap-2 sm:gap-3"
                 >
-                  {videoCompleted ? 'Continue' : videoError ? 'Continue Anyway' : 'Finish Video First'}
+                  {!videoCompleted && !videoError ? 'Finish Video First' : userQuestion.trim().length === 0 ? 'Answer Question' : videoError ? 'Continue Anyway' : 'Continue'}
                   <ChevronRight size={24} className="sm:w-7 sm:h-7 group-hover:translate-x-2 transition-transform" />
                 </button>
               </div>
@@ -726,83 +771,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 4: Question with Video Rating
-  if (currentStep === 'question') {
-    return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
-        <div className={`max-w-3xl mx-auto w-full transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
-          {/* Video Rating Section */}
-          <div className="mb-8 bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/30 rounded-2xl p-8">
-            <h4 className="text-xl font-bold text-yellow-400 mb-4 text-center">Rate this video</h4>
-            <div className="flex justify-center gap-3 mb-4">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => {
-                    setVideoRating(star);
-                    setShowFeedback(star <= 2);
-                  }}
-                  className="text-5xl hover:scale-125 transition-transform duration-200"
-                >
-                  {star <= videoRating ? '⭐' : '☆'}
-                </button>
-              ))}
-            </div>
-            {/* Feedback Form for Low Ratings */}
-            {showFeedback && videoRating <= 2 && (
-              <div className="mt-6 p-6 bg-gray-900/50 rounded-xl border border-gray-700">
-                <p className="text-white font-semibold mb-4">Help us improve - what went wrong?</p>
-                <div className="space-y-2 mb-4">
-                  {['Not my kind of video', 'Too long', 'Not relevant', 'Poor quality'].map((reason) => (
-                    <button
-                      key={reason}
-                      onClick={() => setFeedbackReason(reason)}
-                      className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
-                        feedbackReason === reason
-                          ? 'bg-yellow-500 text-black font-semibold'
-                          : 'bg-gray-800 text-white hover:bg-gray-700'
-                      }`}
-                    >
-                      {reason}
-                    </button>
-                  ))}
-                </div>
-                <textarea
-                  value={feedbackComment}
-                  onChange={(e) => setFeedbackComment(e.target.value)}
-                  placeholder="Additional comments (optional)"
-                  className="w-full h-24 bg-gray-800 border border-gray-700 text-white text-sm rounded-lg p-3 placeholder-gray-500 resize-none"
-                />
-              </div>
-            )}
-          </div>
-          
-          {/* Question Section */}
-          <div className="mb-10">
-            <h3 className="text-2xl font-bold text-white mb-6 text-center leading-relaxed">
-              How will you apply this lesson today to your goals and habits?
-            </h3>
-            <textarea
-              value={userQuestion}
-              onChange={(e) => setUserQuestion(e.target.value)}
-              placeholder="Type your answer..."
-              className="w-full h-40 bg-gray-900/50 border-2 border-gray-700 focus:border-yellow-500 text-white text-lg rounded-2xl p-6 placeholder-gray-500 focus:outline-none transition-all duration-300 resize-none"
-              style={{boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.5)'}}
-            />
-            <p className="text-gray-500 text-sm mt-3 text-center">Minimum 1 sentence required</p>
-          </div>
-          <button
-            onClick={handleNextStep}
-            disabled={userQuestion.trim().length === 0}
-            className="group px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center mx-auto gap-3"
-          >
-            Continue
-            <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform" />
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Step 4: Question step removed - now integrated into content step
 
   // Step 5: Life Goal Habit Cards - Single Select
   if (currentStep === 'habits') {
@@ -889,7 +858,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <h3 className="text-4xl font-black text-yellow-400 mb-12 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
-              Mission Briefing
+              Make a commitment
             </h3>
             <div className="mb-12 cursor-pointer select-none">
               <div className="w-52 h-52 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative shadow-2xl"
@@ -940,9 +909,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 7: Launch with Rocket Animation
+  // Step 7: Launch with 3-2-1 Pre-Countdown then 60-second Timer
   if (currentStep === 'launch') {
-    const rocketProgress = launchActive ? ((60 - launchCountdown) / 60) * 100 : 0;
+    const rocketProgress = launchActive && preCountdown === null ? ((60 - launchCountdown) / 60) * 100 : 0;
     
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-hidden">
@@ -968,23 +937,31 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         )}
         
         {!launchActive ? (
-          <div className="max-w-2xl mx-4 sm:mx-6">
-            <div className={`bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-10 md:p-12 shadow-2xl text-center transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
-                 style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
-              <div className="text-7xl sm:text-8xl md:text-9xl mb-6 sm:mb-8 animate-bounce">🚀</div>
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-yellow-400 mb-6 sm:mb-8 tracking-tight uppercase" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.5)'}}>
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className={`transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-yellow-400 mb-8 sm:mb-12 text-center tracking-tight uppercase px-4" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.5)'}}>
                 Get ready for an action
               </h3>
-              <p className="text-lg sm:text-xl text-gray-300 mb-8 sm:mb-12 max-w-xl mx-auto leading-relaxed font-light">
-                You have 60 seconds to change your state.<br/>
-                Break the stasis. Bathroom. Water. Shoes. Move.
-              </p>
               <button
-                onClick={() => setLaunchActive(true)}
-                className="px-10 sm:px-14 md:px-16 py-6 sm:py-7 md:py-8 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-black text-2xl sm:text-3xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 uppercase tracking-wider"
+                onClick={() => {
+                  setLaunchActive(true);
+                  setPreCountdown(3);
+                }}
+                className="px-12 sm:px-16 md:px-20 py-6 sm:py-8 md:py-10 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-black text-2xl sm:text-3xl md:text-4xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 uppercase tracking-wider"
               >
                 Start Countdown
               </button>
+              <p className="text-base sm:text-lg md:text-xl text-gray-300 mt-8 sm:mt-12 max-w-2xl mx-auto leading-relaxed font-light text-center px-4">
+                You got 60 seconds to sprint into motion.<br/>
+                Do whatever you need to do to get to your habit as soon as possible -<br/>
+                get out of bed, get your shoes on, turn on your laptop, just gooo!
+              </p>
+            </div>
+          </div>
+        ) : preCountdown !== null && preCountdown > 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-[20rem] font-black text-yellow-400 animate-pulse" style={{textShadow: '0 0 100px rgba(251, 191, 36, 0.9)'}}>
+              {preCountdown}
             </div>
           </div>
         ) : (
