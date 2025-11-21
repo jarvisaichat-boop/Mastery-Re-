@@ -140,11 +140,21 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setConfetti([]); // Reset confetti
       setYoutubeMetadata(null); // Reset YouTube metadata
       if (player) {
-        // Clear the container instead of calling destroy to avoid DOM errors
-        const container = document.getElementById('youtube-player');
-        if (container) {
-          container.innerHTML = '';
+        // Stop video first, then clear container after a delay
+        try {
+          if (player.stopVideo) {
+            player.stopVideo();
+          }
+        } catch (e) {
+          console.log('Error stopping video on close:', e);
         }
+        
+        setTimeout(() => {
+          if (playerContainerRef.current) {
+            playerContainerRef.current.innerHTML = '';
+          }
+        }, 100);
+        
         setPlayer(null);
       }
     }
@@ -206,11 +216,21 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
     // Cleanup old player if navigating away from content step
     if (currentStep !== 'content' && player) {
-      // Clear the container instead of calling destroy to avoid DOM errors
-      const container = document.getElementById('youtube-player');
-      if (container) {
-        container.innerHTML = '';
+      // Stop video first, then clear container after a delay to avoid React DOM conflicts
+      try {
+        if (player.stopVideo) {
+          player.stopVideo();
+        }
+      } catch (e) {
+        console.log('Error stopping video:', e);
       }
+      
+      setTimeout(() => {
+        if (playerContainerRef.current) {
+          playerContainerRef.current.innerHTML = '';
+        }
+      }, 100);
+      
       setPlayer(null);
       return;
     }
