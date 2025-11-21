@@ -52,6 +52,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [videoCompleted, setVideoCompleted] = useState(false);
   const [player, setPlayer] = useState<any>(null);
   const [videoError, setVideoError] = useState(false);
+  const [confetti, setConfetti] = useState<{ id: number; left: number; delay: number }[]>([]);
+  const [youtubeMetadata, setYoutubeMetadata] = useState<{ title: string; author: string } | null>(null);
 
   // Always include these 3 pre-generated life goal habits
   const starterHabits = [
@@ -132,12 +134,33 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setLaunchActive(false);
       setVideoCompleted(false);
       setVideoError(false);
+      setConfetti([]); // Reset confetti
+      setYoutubeMetadata(null); // Reset YouTube metadata
       if (player) {
-        player.destroy();
+        try {
+          const iframe = document.getElementById('youtube-player');
+          if (iframe && player.destroy) {
+            player.destroy();
+          }
+        } catch (e) {
+          console.log('Player cleanup on close:', e);
+        }
         setPlayer(null);
       }
     }
   }, [isOpen, contentLibrary, selectedContent, player]);
+
+  // Initialize confetti when streak step is active
+  useEffect(() => {
+    if (currentStep === 'streak' && confetti.length === 0) {
+      const pieces = Array.from({ length: 50 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        delay: Math.random() * 0.5,
+      }));
+      setConfetti(pieces);
+    }
+  }, [currentStep, confetti.length]);
   
   const content = selectedContent;
 
@@ -184,9 +207,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     // Cleanup old player if navigating away from content step
     if (currentStep !== 'content' && player) {
       try {
-        player.destroy();
+        // Check if the iframe still exists before destroying
+        const iframe = document.getElementById('youtube-player');
+        if (iframe && player.destroy) {
+          player.destroy();
+        }
       } catch (e) {
-        console.error('Error destroying player:', e);
+        // Silently handle cleanup errors
+        console.log('Player cleanup:', e);
       }
       setPlayer(null);
       return;
@@ -216,6 +244,21 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           return;
         }
 
+        const onPlayerReady = (event: any) => {
+          // Fetch real YouTube metadata
+          try {
+            const videoData = event.target.getVideoData();
+            if (videoData) {
+              setYoutubeMetadata({
+                title: videoData.title || 'Video',
+                author: videoData.author || 'Unknown Channel',
+              });
+            }
+          } catch (e) {
+            console.log('Could not fetch video metadata:', e);
+          }
+        };
+
         const onPlayerStateChange = (event: any) => {
           // YT.PlayerState.ENDED === 0
           if (event.data === 0) {
@@ -233,6 +276,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               rel: 0,
             },
             events: {
+              onReady: onPlayerReady,
               onStateChange: onPlayerStateChange,
             },
           });
@@ -382,27 +426,42 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-hidden">
+        {/* Falling Confetti Animation */}
+        {confetti.map((piece) => (
+          <div
+            key={`confetti-${piece.id}`}
+            className="absolute top-0 w-3 h-3 animate-confetti"
+            style={{
+              left: `${piece.left}%`,
+              backgroundColor: ['#FF6B6B', '#4ECDC4', '#FFD93D', '#6BCB77'][piece.id % 4],
+              animationDelay: `${piece.delay}s`,
+              zIndex: 60,
+            }}
+          />
+        ))}
+
         {/* Firework Burst Animation */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center" style={{zIndex: 61}}>
           {fireworkParticles.map((particle, i) => (
             <div
-              key={i}
+              key={`firework-${i}`}
               className="absolute animate-firework"
               style={{
-                width: '8px',
-                height: '8px',
+                width: '10px',
+                height: '10px',
                 borderRadius: '50%',
                 backgroundColor: ['#FDE047', '#FB923C', '#FBBF24', '#F59E0B', '#EF4444'][Math.floor(Math.random() * 5)],
                 '--tx': `${particle.tx}px`,
                 '--ty': `${particle.ty}px`,
                 animationDelay: `${particle.delay}s`,
+                boxShadow: '0 0 10px currentColor',
               } as React.CSSProperties}
             />
           ))}
         </div>
         
         {/* Premium 3D Card */}
-        <div className={`relative transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`relative transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`} style={{zIndex: 55}}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl max-w-2xl mx-6"
                style={{
                  boxShadow: '0 0 60px rgba(251, 191, 36, 0.4), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
@@ -431,6 +490,17 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform" />
           </button>
         </div>
+
+        {/* Confetti CSS Animation */}
+        <style>{`
+          @keyframes confetti {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+          }
+          .animate-confetti {
+            animation: confetti 3s ease-out forwards;
+          }
+        `}</style>
       </div>
     );
   }
@@ -498,8 +568,12 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               {/* Video Header */}
               <div className="text-center mb-8">
                 <div className="text-yellow-400 text-2xl font-bold mb-4 uppercase tracking-wide">Today's Lesson</div>
-                <h3 className="text-3xl font-bold text-white mb-2">{content.title}</h3>
-                <p className="text-gray-400 text-lg">{content.channelName} • {content.duration} min</p>
+                <h3 className="text-3xl font-bold text-white mb-2">
+                  {youtubeMetadata?.title || content.title}
+                </h3>
+                <p className="text-gray-400 text-lg">
+                  {youtubeMetadata?.author || content.channelName} • {content.duration} min
+                </p>
                 {videoError ? (
                   <p className="text-red-400 text-sm mt-3">Video failed to load. You may continue anyway.</p>
                 ) : !videoCompleted && (
