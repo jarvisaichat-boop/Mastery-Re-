@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen, FileCheck, Shield } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen, FileCheck, Shield, Rocket } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
@@ -14,10 +14,13 @@ import HoldToIgnite from './components/HoldToIgnite';
 import BreathPacer from './components/BreathPacer';
 import JournalModule from './components/JournalModule';
 import { ProgramLibraryModal } from './components/ProgramLibraryModal';
+import { MomentumGeneratorModal } from './components/MomentumGeneratorModal';
+import { ContentLibraryManager } from './components/ContentLibraryManager';
 import { Toast } from './components/Toast';
-import { Habit, HabitTemplate } from './types';
+import { Habit, HabitTemplate, ContentLibraryItem } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay, isHabitLoggable, getHabitStrictness } from './utils';
 import { NotificationService } from './services/NotificationService';
+import { loadContentLibrary, saveContentLibrary } from './data/contentLibrary';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
 
 const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
@@ -34,6 +37,7 @@ const LOCAL_STORAGE_ASPIRATIONS_KEY = 'mastery-dashboard-aspirations';
 const LOCAL_STORAGE_CHAT_ENTRIES_KEY = 'mastery-dashboard-chat-entries';
 const LOCAL_STORAGE_EMERGENCY_MODE_KEY = 'mastery-dashboard-emergency-mode';
 const LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY = 'mastery-dashboard-last-streak-repair-check';
+const LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY = 'mastery-momentum-last-completed';
 
 function loadRateMode(): 'basic' | 'hard' {
   try {
@@ -143,6 +147,18 @@ function App() {
     const [showProgramLibrary, setShowProgramLibrary] = useState(false);
     const [selectedHabitToEdit, setSelectedHabitToEdit] = useState<Habit | null>(null);
     const [draggedHabitId, setDraggedHabitId] = useState<number | null>(null);
+    
+    // Momentum Generator state
+    const [showMomentumGenerator, setShowMomentumGenerator] = useState(false);
+    const [showContentLibraryManager, setShowContentLibraryManager] = useState(false);
+    const [contentLibrary, setContentLibrary] = useState<ContentLibraryItem[]>(() => loadContentLibrary());
+    const [momentumLastCompleted, setMomentumLastCompleted] = useState<string | null>(() => {
+        try {
+            return localStorage.getItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY);
+        } catch { return null; }
+    });
+    
+    const isMomentumCompletedToday = momentumLastCompleted === formatDate(new Date(), 'yyyy-MM-dd');
 
     const [aiCoachMessage, setAiCoachMessage] = useState('');
     const [showAiCoach, setShowAiCoach] = useState(false);
@@ -237,9 +253,10 @@ function App() {
             localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, goal);
             localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, aspirations);
             localStorage.setItem(LOCAL_STORAGE_EMERGENCY_MODE_KEY, String(emergencyMode));
+            localStorage.setItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY, momentumLastCompleted || '');
         }
         catch (e) { console.error("Failed to save habits", e); }
-    }, [habits, weeklyRateMode, streakMode, goal, aspirations, emergencyMode]);
+    }, [habits, weeklyRateMode, streakMode, goal, aspirations, emergencyMode, momentumLastCompleted]);
 
     useEffect(() => {
         try {
