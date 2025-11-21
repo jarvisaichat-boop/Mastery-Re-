@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Sparkles, Target } from 'lucide-react';
 import { Habit, ContentLibraryItem } from '../types';
 import { formatDate } from '../utils';
@@ -54,6 +54,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [videoError, setVideoError] = useState(false);
   const [confetti, setConfetti] = useState<{ id: number; left: number; delay: number }[]>([]);
   const [youtubeMetadata, setYoutubeMetadata] = useState<{ title: string; author: string } | null>(null);
+  
+  // Ref for YouTube player container to isolate from React's DOM management
+  const playerContainerRef = useRef<HTMLDivElement>(null);
 
   // Always include these 3 pre-generated life goal habits
   const starterHabits = [
