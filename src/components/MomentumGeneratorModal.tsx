@@ -54,6 +54,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [videoError, setVideoError] = useState(false);
   const [confetti, setConfetti] = useState<{ id: number; left: number; delay: number }[]>([]);
   const [youtubeMetadata, setYoutubeMetadata] = useState<{ title: string; author: string } | null>(null);
+  const [showSeizeTheDayPopup, setShowSeizeTheDayPopup] = useState(false);
   
   // Ref for YouTube player container to isolate from React's DOM management
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -140,6 +141,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setVideoError(false);
       setConfetti([]); // Reset confetti
       setYoutubeMetadata(null); // Reset YouTube metadata
+      setShowSeizeTheDayPopup(false); // Reset popup
       if (player) {
         try {
           // Destroy player and remove placeholder child
@@ -385,9 +387,12 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         if (prev <= 1) {
           clearInterval(interval);
           onComplete();
+          // Show "Go seize the day!" popup
+          setShowSeizeTheDayPopup(true);
           setTimeout(() => {
+            setShowSeizeTheDayPopup(false);
             onClose();
-          }, 1000);
+          }, 2000);
           return 0;
         }
         return prev - 1;
@@ -876,6 +881,26 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-hidden">
+        {/* "Go seize the day!" popup overlay - appears on top when countdown completes */}
+        {showSeizeTheDayPopup && (
+          <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn">
+            <div className="text-center px-6 animate-scaleIn">
+              <div className="mb-8">
+                <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse" 
+                     style={{textShadow: '0 0 100px rgba(251, 191, 36, 0.9)'}}>
+                  🔥
+                </div>
+              </div>
+              <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{textShadow: '0 0 60px rgba(251, 191, 36, 0.7)'}}>
+                Go Seize the Day!
+              </h2>
+              <p className="text-3xl text-yellow-400 font-light">
+                Your momentum starts NOW
+              </p>
+            </div>
+          </div>
+        )}
+        
         {!launchActive ? (
           <div className={`max-w-2xl mx-6 transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
             <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl text-center"
