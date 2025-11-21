@@ -244,8 +244,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       return;
     }
 
-    // Initialize new player when entering content step
-    if (currentStep === 'content' && content && !player) {
+    // Initialize new player when entering content step AND video intro is dismissed
+    if (currentStep === 'content' && content && !player && !showVideoIntro) {
       const videoId = getVideoId(content.youtubeUrl);
       if (!videoId) return;
 
@@ -326,7 +326,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
       initPlayer();
     }
-  }, [currentStep, content, player]);
+  }, [currentStep, content, player, showVideoIntro]);
 
   // Pledge interaction handler
   useEffect(() => {
@@ -642,40 +642,31 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       return (
         <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-y-auto p-4 sm:p-6">
           <div className={`max-w-3xl mx-auto w-full transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
-            <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-10 md:p-12 shadow-2xl" style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.4), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
-              <div className="text-center mb-10">
-                <div className="mb-6 sm:mb-8 flex justify-center">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-yellow-400/30 flex items-center justify-center">
-                    <Target size={40} className="sm:w-12 sm:h-12 text-yellow-300" />
-                  </div>
+            <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-8 sm:p-12 shadow-2xl text-center" style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.4), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
+              <div className="mb-10 sm:mb-12 flex justify-center">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-yellow-400/30 flex items-center justify-center">
+                  <Target size={48} className="sm:w-14 sm:h-14 text-yellow-300" />
                 </div>
-                
-                <div className="text-yellow-400 text-xl sm:text-2xl font-bold mb-4 sm:mb-6 uppercase tracking-wide">Today's Lesson</div>
-                <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4 sm:mb-6 leading-tight">
-                  {content.title}
-                </h3>
-                <p className="text-gray-400 text-base sm:text-lg mb-8 sm:mb-10">
-                  {content.channelName} • {content.duration} min
-                </p>
               </div>
               
-              <div className="mb-8 sm:mb-10 p-6 sm:p-8 bg-gradient-to-r from-yellow-500/20 via-orange-500/15 to-yellow-500/20 border-2 border-yellow-400/40 rounded-2xl">
-                <h4 className="text-xl sm:text-2xl font-bold text-yellow-300 mb-4 sm:mb-6 text-center">Why This Video Matters</h4>
-                <p className="text-base sm:text-lg text-gray-200 leading-relaxed text-center">
-                  This carefully selected lesson strengthens your mindset and strategy toward <span className="text-yellow-400 font-semibold">{goal}</span>. 
-                  <br/><br/>
-                  Each insight builds the mental foundation needed for lasting transformation.
-                  <br/><br/>
-                  <span className="text-yellow-300 font-semibold italic">Watch with full attention. Let it sink deep.</span>
-                </p>
-              </div>
+              <div className="text-yellow-400 text-2xl sm:text-3xl font-bold mb-6 uppercase tracking-wide">Today's Lesson</div>
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+                {content.title}
+              </h3>
+              <p className="text-gray-400 text-xl sm:text-2xl mb-12">
+                {content.channelName} • {content.duration} min
+              </p>
+              
+              <p className="text-2xl sm:text-3xl text-yellow-300 font-light mb-12 max-w-2xl mx-auto leading-relaxed">
+                Watch with full attention
+              </p>
               
               <button
                 onClick={() => setShowVideoIntro(false)}
-                className="w-full px-10 py-5 sm:py-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl sm:text-2xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center gap-3"
+                className="w-full px-10 py-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-2xl sm:text-3xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center gap-3"
               >
                 Begin Lesson
-                <ChevronRight size={32} className="group-hover:translate-x-2 transition-transform" />
+                <ChevronRight size={36} className="group-hover:translate-x-2 transition-transform" />
               </button>
             </div>
           </div>
