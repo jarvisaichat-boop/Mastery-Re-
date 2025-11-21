@@ -372,6 +372,18 @@ function App() {
         setShowProgramLibrary(true);
     };
     
+    const handleMomentumComplete = () => {
+        const today = formatDate(new Date(), 'yyyy-MM-dd');
+        setMomentumLastCompleted(today);
+        setShowMomentumGenerator(false);
+    };
+    
+    const handleSaveContentLibrary = (items: ContentLibraryItem[]) => {
+        setContentLibrary(items);
+        saveContentLibrary(items);
+        setShowContentLibraryManager(false);
+    };
+    
     const handleSelectProgramHabits = async (habitTemplates: HabitTemplate[], programId: string) => {
         const now = Date.now();
         const currentMaxOrder = Math.max(...habits.map(h => h.order), -1);
@@ -891,6 +903,20 @@ function App() {
                         ))}
                     </div>
                 )}
+                
+                {/* Launch Pad Button - Half-circle at bottom-center */}
+                {onboardingComplete && !showStatsView && (
+                    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40">
+                        <button
+                            onClick={() => setShowMomentumGenerator(true)}
+                            className="w-32 h-16 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-t-full hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-2xl flex items-center justify-center gap-2 font-bold text-lg text-black"
+                            title={isMomentumCompletedToday ? "Come back tomorrow for the launch ritual" : "Launch the daily ignition sequence"}
+                        >
+                            <Rocket size={24} />
+                            Launch
+                        </button>
+                    </div>
+                )}
 
             </div>
             
@@ -1047,6 +1073,25 @@ function App() {
                 isOpen={showProgramLibrary}
                 onClose={() => setShowProgramLibrary(false)}
                 onSelectHabits={handleSelectProgramHabits}
+            />
+            
+            {/* Momentum Generator - Daily Ignition Flow */}
+            <MomentumGeneratorModal
+                isOpen={showMomentumGenerator}
+                onClose={() => setShowMomentumGenerator(false)}
+                habits={habits}
+                goal={goal}
+                contentLibrary={contentLibrary}
+                onAddContentLibrary={() => setShowContentLibraryManager(true)}
+                isCompletedToday={isMomentumCompletedToday}
+            />
+            
+            {/* Content Library Manager - Admin Panel */}
+            <ContentLibraryManager
+                isOpen={showContentLibraryManager}
+                onClose={() => setShowContentLibraryManager(false)}
+                contentLibrary={contentLibrary}
+                onSave={handleSaveContentLibrary}
             />
         </div>
     );
