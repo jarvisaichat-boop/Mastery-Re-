@@ -55,6 +55,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [confetti, setConfetti] = useState<{ id: number; left: number; delay: number }[]>([]);
   const [youtubeMetadata, setYoutubeMetadata] = useState<{ title: string; author: string } | null>(null);
   const [showSeizeTheDayPopup, setShowSeizeTheDayPopup] = useState(false);
+  const [showVideoIntro, setShowVideoIntro] = useState(true);
   
   // Ref for YouTube player container to isolate from React's DOM management
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -142,6 +143,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setConfetti([]); // Reset confetti
       setYoutubeMetadata(null); // Reset YouTube metadata
       setShowSeizeTheDayPopup(false); // Reset popup
+      setShowVideoIntro(true); // Reset video intro
       if (player) {
         try {
           // Destroy player and remove placeholder child
@@ -163,13 +165,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }
   }, [isOpen, contentLibrary, selectedContent, player]);
 
-  // Initialize confetti when streak step is active
+  // Initialize confetti when streak step is active - stagger delays for continuous falling
   useEffect(() => {
     if (currentStep === 'streak' && confetti.length === 0) {
-      const pieces = Array.from({ length: 50 }, (_, i) => ({
+      const pieces = Array.from({ length: 60 }, (_, i) => ({
         id: i,
         left: Math.random() * 100,
-        delay: Math.random() * 0.5,
+        delay: (i * 0.1), // Staggered delays for continuous falling effect
       }));
       setConfetti(pieces);
     }
@@ -200,14 +202,18 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return streak;
   }
 
-  // Smooth fade in animation on step change
+  // Smooth fade in animation on step change - immediate visibility to prevent flash
   useEffect(() => {
-    // Don't flash on initial render
     if (!isOpen) return;
     
-    setStepVisible(false);
-    const timer = setTimeout(() => setStepVisible(true), 400);
-    return () => clearTimeout(timer);
+    // Immediate visibility for first step, smooth transition for subsequent steps
+    if (currentStep === 'streak') {
+      setStepVisible(true);
+    } else {
+      setStepVisible(false);
+      const timer = setTimeout(() => setStepVisible(true), 200);
+      return () => clearTimeout(timer);
+    }
   }, [currentStep, isOpen]);
 
   // Initialize YouTube player when content step loads
@@ -449,12 +455,21 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 1: Streak Card with Firework Burst
+  // Step 1: Streak Card with Side Fireworks
   if (currentStep === 'streak') {
-    // Generate firework particles bursting outward from center
-    const fireworkParticles = [...Array(30)].map((_, i) => {
-      const angle = (i / 30) * 360;
-      const distance = 200 + Math.random() * 150;
+    // Generate left firework particles bursting outward from left side
+    const leftFireworkParticles = [...Array(15)].map((_, i) => {
+      const angle = -60 + (i / 15) * 120; // Spread from left side
+      const distance = 150 + Math.random() * 100;
+      const tx = Math.cos(angle * Math.PI / 180) * distance;
+      const ty = Math.sin(angle * Math.PI / 180) * distance;
+      return { tx, ty, delay: Math.random() * 0.3 };
+    });
+    
+    // Generate right firework particles bursting outward from right side
+    const rightFireworkParticles = [...Array(15)].map((_, i) => {
+      const angle = 60 + (i / 15) * 120; // Spread from right side
+      const distance = 150 + Math.random() * 100;
       const tx = Math.cos(angle * Math.PI / 180) * distance;
       const ty = Math.sin(angle * Math.PI / 180) * distance;
       return { tx, ty, delay: Math.random() * 0.3 };
@@ -479,21 +494,41 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           />
         ))}
 
-        {/* Firework Burst Animation */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center" style={{zIndex: 61}}>
-          {fireworkParticles.map((particle, i) => (
+        {/* Left Firework Burst Animation */}
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none" style={{zIndex: 61}}>
+          {leftFireworkParticles.map((particle, i) => (
             <div
-              key={`firework-${i}`}
+              key={`left-firework-${i}`}
               className="absolute animate-firework"
               style={{
-                width: '10px',
-                height: '10px',
+                width: '12px',
+                height: '12px',
                 borderRadius: '50%',
                 backgroundColor: ['#FDE047', '#FB923C', '#FBBF24', '#F59E0B', '#EF4444'][Math.floor(Math.random() * 5)],
                 '--tx': `${particle.tx}px`,
                 '--ty': `${particle.ty}px`,
                 animationDelay: `${particle.delay}s`,
-                boxShadow: '0 0 10px currentColor',
+                boxShadow: '0 0 15px currentColor',
+              } as React.CSSProperties}
+            />
+          ))}
+        </div>
+        
+        {/* Right Firework Burst Animation */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" style={{zIndex: 61}}>
+          {rightFireworkParticles.map((particle, i) => (
+            <div
+              key={`right-firework-${i}`}
+              className="absolute animate-firework"
+              style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                backgroundColor: ['#FDE047', '#FB923C', '#FBBF24', '#F59E0B', '#EF4444'][Math.floor(Math.random() * 5)],
+                '--tx': `${particle.tx}px`,
+                '--ty': `${particle.ty}px`,
+                animationDelay: `${particle.delay}s`,
+                boxShadow: '0 0 15px currentColor',
               } as React.CSSProperties}
             />
           ))}
@@ -501,23 +536,23 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         
         {/* Premium 3D Card */}
         <div className={`relative transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`} style={{zIndex: 55}}>
-          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl max-w-2xl mx-6"
+          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl max-w-2xl mx-4 sm:mx-6"
                style={{
                  boxShadow: '0 0 60px rgba(251, 191, 36, 0.4), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
                  transform: 'perspective(1000px) rotateX(2deg)',
                }}>
             <div className="text-center">
-              <div className="text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-4 animate-pulse" 
+              <div className="text-6xl sm:text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-3 sm:mb-4 animate-pulse" 
                    style={{textShadow: '0 0 80px rgba(251, 191, 36, 0.8)'}}>
                 {currentStreak}
               </div>
-              <div className="text-6xl font-bold text-yellow-400 mb-4 tracking-wider">
+              <div className="text-3xl sm:text-5xl md:text-6xl font-bold text-yellow-400 mb-3 sm:mb-4 tracking-wider">
                 DAY STREAK!! 🔥
               </div>
-              <div className="text-2xl text-yellow-200/80 font-light tracking-wide">
+              <div className="text-lg sm:text-xl md:text-2xl text-yellow-200/80 font-light tracking-wide">
                 The chain is unbroken
               </div>
-              <div className="text-sm text-gray-500 mt-6 italic">Click anywhere to continue</div>
+              <div className="text-xs sm:text-sm text-gray-500 mt-4 sm:mt-6 italic">Click anywhere to continue</div>
             </div>
           </div>
         </div>
@@ -538,49 +573,61 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   // Step 2: Goal and Grand Vision
   if (currentStep === 'vision') {
+    // Generate random inspirational content for Grand Vision if empty
+    const randomWhys = [
+      "To create the life you've always imagined, one day at a time",
+      "To prove to yourself that you're capable of anything you commit to",
+      "To build unshakeable discipline that transforms your entire life",
+      "To become the person your future self will thank you for being",
+      "To break free from limitation and step into your full potential"
+    ];
+    
+    const randomRoutines = [
+      "Morning: Mindful movement, focused work, energized action",
+      "Ideal Day: Deep focus, intentional breaks, powerful completion",
+      "Daily Flow: Present in the moment, building unstoppable momentum",
+      "Your Rhythm: Wake with purpose, execute with precision, rest with gratitude",
+      "Perfect Day: Aligned actions, consistent progress, compound results"
+    ];
+    
+    const randomVision = `${randomWhys[Math.floor(Math.random() * randomWhys.length)]}\n\n${randomRoutines[Math.floor(Math.random() * randomRoutines.length)]}`;
+    const displayVision = aspirations || randomVision;
+    
     return (
       <div 
-        className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center cursor-pointer"
+        className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center cursor-pointer overflow-y-auto"
         onClick={handleNextStep}
       >
-        <div className={`max-w-4xl mx-auto px-6 transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
-          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
+        <div className={`max-w-4xl mx-auto px-4 sm:px-6 py-6 transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <div className="text-center">
-              <div className="mb-8 flex justify-center">
-                <Target size={64} className="text-yellow-400 animate-pulse" style={{filter: 'drop-shadow(0 0 30px rgba(251, 191, 36, 0.8))'}} />
+              <div className="mb-6 sm:mb-8 flex justify-center">
+                <Target size={48} className="sm:w-16 sm:h-16 text-yellow-400 animate-pulse" style={{filter: 'drop-shadow(0 0 30px rgba(251, 191, 36, 0.8))'}} />
               </div>
               
               {/* Goal */}
-              <div className="mb-10">
-                <div className="text-2xl text-yellow-400/90 font-bold mb-4 uppercase tracking-wider">Goal</div>
-                <div className="text-6xl font-black text-white leading-tight tracking-tight mb-4" style={{textShadow: '0 0 50px rgba(251, 191, 36, 0.4)'}}>
+              <div className="mb-8 sm:mb-10">
+                <div className="text-xl sm:text-2xl text-yellow-400/90 font-bold mb-3 sm:mb-4 uppercase tracking-wider">Goal</div>
+                <div className="text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight mb-4" style={{textShadow: '0 0 50px rgba(251, 191, 36, 0.4)'}}>
                   {goal}
                 </div>
               </div>
               
-              {/* Grand Vision Section - Always visible */}
-              <div className="mt-12 p-10 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-3xl min-h-[150px]">
-                {aspirations ? (
-                  <>
-                    <div className="text-2xl text-yellow-300 font-black mb-6 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
-                      Your Grander Vision
-                    </div>
-                    <p className="text-3xl text-yellow-50 leading-relaxed font-light">
-                      {aspirations}
-                    </p>
-                  </>
-                ) : (
-                  <div className="text-center text-gray-500 italic py-8">
-                    Your grander vision will appear here
-                  </div>
-                )}
+              {/* Grand Vision Section - Always visible with random content */}
+              <div className="mt-8 sm:mt-12 p-6 sm:p-10 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-3xl min-h-[150px]">
+                <div className="text-xl sm:text-2xl text-yellow-300 font-black mb-4 sm:mb-6 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
+                  Your Grander Vision
+                </div>
+                <p className="text-xl sm:text-2xl md:text-3xl text-yellow-50 leading-relaxed font-light whitespace-pre-line">
+                  {displayVision}
+                </p>
               </div>
               
-              <div className="text-2xl text-gray-300 mt-12 font-light italic">
+              <div className="text-lg sm:text-xl md:text-2xl text-gray-300 mt-8 sm:mt-12 font-light italic">
                 This is where today takes you.
               </div>
-              <div className="text-sm text-gray-500 mt-6 italic">Click anywhere to continue</div>
+              <div className="text-xs sm:text-sm text-gray-500 mt-4 sm:mt-6 italic">Click anywhere to continue</div>
             </div>
           </div>
         </div>
@@ -588,39 +635,70 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 3: Motivational Content with YouTube Player
+  // Step 3: Motivational Content with Full-Screen Intro then YouTube Player
   if (currentStep === 'content') {
+    // Show full-screen intro first
+    if (showVideoIntro && content) {
+      return (
+        <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-y-auto p-4 sm:p-6">
+          <div className={`max-w-3xl mx-auto w-full transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+            <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-10 md:p-12 shadow-2xl" style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.4), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
+              <div className="text-center mb-10">
+                <div className="mb-6 sm:mb-8 flex justify-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-yellow-400/30 flex items-center justify-center">
+                    <Target size={40} className="sm:w-12 sm:h-12 text-yellow-300" />
+                  </div>
+                </div>
+                
+                <div className="text-yellow-400 text-xl sm:text-2xl font-bold mb-4 sm:mb-6 uppercase tracking-wide">Today's Lesson</div>
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4 sm:mb-6 leading-tight">
+                  {content.title}
+                </h3>
+                <p className="text-gray-400 text-base sm:text-lg mb-8 sm:mb-10">
+                  {content.channelName} • {content.duration} min
+                </p>
+              </div>
+              
+              <div className="mb-8 sm:mb-10 p-6 sm:p-8 bg-gradient-to-r from-yellow-500/20 via-orange-500/15 to-yellow-500/20 border-2 border-yellow-400/40 rounded-2xl">
+                <h4 className="text-xl sm:text-2xl font-bold text-yellow-300 mb-4 sm:mb-6 text-center">Why This Video Matters</h4>
+                <p className="text-base sm:text-lg text-gray-200 leading-relaxed text-center">
+                  This carefully selected lesson strengthens your mindset and strategy toward <span className="text-yellow-400 font-semibold">{goal}</span>. 
+                  <br/><br/>
+                  Each insight builds the mental foundation needed for lasting transformation.
+                  <br/><br/>
+                  <span className="text-yellow-300 font-semibold italic">Watch with full attention. Let it sink deep.</span>
+                </p>
+              </div>
+              
+              <button
+                onClick={() => setShowVideoIntro(false)}
+                className="w-full px-10 py-5 sm:py-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl sm:text-2xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center gap-3"
+              >
+                Begin Lesson
+                <ChevronRight size={32} className="group-hover:translate-x-2 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Then show the actual video
     return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
+      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-4 sm:p-6">
         <div className={`max-w-5xl mx-auto w-full transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           {content ? (
             <>
-              {/* Floating Overlay - Why This Video */}
-              <div className="mb-6 p-6 bg-gradient-to-r from-yellow-500/20 via-orange-500/15 to-yellow-500/20 border-2 border-yellow-400/40 rounded-2xl backdrop-blur-sm">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-yellow-400/30 flex items-center justify-center">
-                    <Target size={24} className="text-yellow-300" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-lg font-bold text-yellow-300 mb-2">Why This Video Matters for Your Goal</h4>
-                    <p className="text-gray-300 leading-relaxed">
-                      This carefully selected lesson strengthens your mindset and strategy toward <span className="text-yellow-400 font-semibold">{goal}</span>. 
-                      Each insight builds the mental foundation needed for lasting transformation.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="aspect-video bg-black rounded-3xl overflow-hidden mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
+              <div className="aspect-video bg-black rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
                 <div ref={playerContainerRef} style={{width: '100%', height: '100%'}}></div>
               </div>
-              {/* Video Header */}
-              <div className="text-center mb-8">
-                <div className="text-yellow-400 text-2xl font-bold mb-4 uppercase tracking-wide">Today's Lesson</div>
-                <h3 className="text-3xl font-bold text-white mb-2">
+              
+              <div className="text-center mb-6 sm:mb-8">
+                <div className="text-yellow-400 text-xl sm:text-2xl font-bold mb-3 sm:mb-4 uppercase tracking-wide">Today's Lesson</div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                   {youtubeMetadata?.title || content.title}
                 </h3>
-                <p className="text-gray-400 text-lg">
+                <p className="text-gray-400 text-base sm:text-lg">
                   {youtubeMetadata?.author || content.channelName} • {content.duration} min
                 </p>
                 {videoError ? (
@@ -629,23 +707,24 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   <p className="text-yellow-400/80 text-sm mt-3 italic">Watch until the end to continue</p>
                 )}
               </div>
-              <div className="flex gap-4 items-center justify-center">
+              
+              <div className="flex gap-3 sm:gap-4 items-center justify-center">
                 <button
                   onClick={handleNextStep}
                   disabled={!videoCompleted && !videoError}
-                  className="group px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center gap-3"
+                  className="group px-8 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-lg sm:text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center gap-2 sm:gap-3"
                 >
                   {videoCompleted ? 'Continue' : videoError ? 'Continue Anyway' : 'Finish Video First'}
-                  <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform" />
+                  <ChevronRight size={24} className="sm:w-7 sm:h-7 group-hover:translate-x-2 transition-transform" />
                 </button>
               </div>
             </>
           ) : (
             <div className="text-center">
-              <p className="text-white text-xl mb-6">No content in library yet</p>
+              <p className="text-white text-lg sm:text-xl mb-6">No content in library yet</p>
               <button
                 onClick={onAddContentLibrary}
-                className="px-10 py-5 bg-yellow-500 text-black font-bold rounded-2xl hover:bg-yellow-600 transition-all"
+                className="px-8 sm:px-10 py-4 sm:py-5 bg-yellow-500 text-black font-bold rounded-2xl hover:bg-yellow-600 transition-all"
               >
                 Add Content
               </button>
@@ -734,82 +813,77 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 5: Life Goal Habit Cards
+  // Step 5: Life Goal Habit Cards - Single Select
   if (currentStep === 'habits') {
     return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-6">
+      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-y-auto p-4 sm:p-6">
         <div className={`max-w-5xl mx-auto w-full transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
-          <h3 className="text-4xl font-bold text-yellow-400 mb-10 text-center tracking-tight">Which habits will you do now?</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            {lifeGoals.map(habit => (
-              <button
-                key={habit.id}
-                onClick={() => {
-                  const newSet = new Set(selectedHabits);
-                  if (newSet.has(habit.id)) {
-                    newSet.delete(habit.id);
-                  } else {
-                    newSet.add(habit.id);
-                  }
-                  setSelectedHabits(newSet);
-                }}
-                className={`group relative text-left p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
-                  selectedHabits.has(habit.id)
-                    ? 'bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500 shadow-2xl'
-                    : 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-yellow-500/50'
-                }`}
-                style={{
-                  boxShadow: selectedHabits.has(habit.id) 
-                    ? '0 0 40px rgba(251, 191, 36, 0.4)' 
-                    : 'inset 0 2px 10px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                {/* Selection Indicator */}
-                <div className={`absolute top-4 right-4 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-                  selectedHabits.has(habit.id)
-                    ? 'bg-yellow-500 border-yellow-500 scale-110'
-                    : 'border-gray-600'
-                }`}>
-                  {selectedHabits.has(habit.id) && <span className="text-black font-black text-lg">✓</span>}
-                </div>
-                
-                <div className="mb-4">
-                  <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center text-2xl"
-                       style={{backgroundColor: habit.color}}>
-                    ⚡
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">Which habit will you do first??</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
+            {lifeGoals.map(habit => {
+              const isSelected = selectedHabits.has(habit.id);
+              return (
+                <button
+                  key={habit.id}
+                  onClick={() => {
+                    // Single-select behavior: replace selection with this habit
+                    setSelectedHabits(new Set([habit.id]));
+                  }}
+                  className={`group relative text-left p-5 sm:p-6 rounded-2xl border-2 transition-all duration-300 ${
+                    isSelected
+                      ? 'bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500 shadow-2xl scale-105 animate-popOut'
+                      : 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-yellow-500/50 hover:scale-105'
+                  }`}
+                  style={{
+                    boxShadow: isSelected 
+                      ? '0 0 40px rgba(251, 191, 36, 0.5)' 
+                      : 'inset 0 2px 10px rgba(0, 0, 0, 0.5)'
+                  }}
+                >
+                  {/* Radio Button Selection Indicator */}
+                  <div className={`absolute top-4 right-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                    isSelected
+                      ? 'bg-yellow-500 border-yellow-500 scale-125'
+                      : 'border-gray-600'
+                  }`}>
+                    {isSelected && (
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-black"></div>
+                    )}
                   </div>
-                  <p className="text-white font-bold text-lg mb-2">{habit.name}</p>
-                  <p className="text-gray-400 text-sm">{habit.description}</p>
-                </div>
-                
-                {/* Micro Wins - Always show if available */}
-                {habit.microWins && habit.microWins.length > 0 ? (
-                  <div className="mt-4 pt-4 border-t border-gray-700/50">
-                    <p className="text-yellow-400 font-semibold text-xs mb-2">Micro-Wins:</p>
-                    <div className="space-y-1">
-                      {habit.microWins.slice(0, 3).map((mw: any) => (
-                        <div key={mw.id} className="flex items-start gap-2">
-                          <Sparkles size={10} className="text-yellow-400 mt-0.5 flex-shrink-0" />
-                          <p className="text-xs text-gray-300">{mw.description}</p>
-                        </div>
-                      ))}
+                  
+                  <div className="mb-4">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full mb-3 flex items-center justify-center text-2xl sm:text-3xl"
+                         style={{backgroundColor: habit.color}}>
+                      ⚡
                     </div>
+                    <p className="text-white font-bold text-lg sm:text-xl">{habit.name}</p>
                   </div>
-                ) : habit.description && (
-                  <div className="mt-4 pt-4 border-t border-gray-700/50">
-                    <p className="text-gray-400 text-xs italic">Tap to build your momentum</p>
-                  </div>
-                )}
-              </button>
-            ))}
+                  
+                  {/* Micro Wins - Always show if available */}
+                  {habit.microWins && habit.microWins.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-700/50">
+                      <p className="text-yellow-400 font-semibold text-xs mb-2">Micro-Wins:</p>
+                      <div className="space-y-1">
+                        {habit.microWins.slice(0, 3).map((mw: any) => (
+                          <div key={mw.id} className="flex items-start gap-2">
+                            <Sparkles size={10} className="text-yellow-400 mt-0.5 flex-shrink-0" />
+                            <p className="text-xs text-gray-300">{mw.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
           <button
             onClick={handleNextStep}
             disabled={selectedHabits.size === 0}
-            className="group px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center mx-auto gap-3"
+            className="group px-10 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-lg sm:text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center mx-auto gap-2 sm:gap-3"
           >
             Lock In Selection
-            <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform" />
+            <ChevronRight size={24} className="sm:w-7 sm:h-7 group-hover:translate-x-2 transition-transform" />
           </button>
         </div>
       </div>
@@ -902,20 +976,20 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         )}
         
         {!launchActive ? (
-          <div className={`max-w-2xl mx-6 transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
-            <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl text-center"
+          <div className={`max-w-2xl mx-4 sm:mx-6 transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+            <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-10 md:p-12 shadow-2xl text-center"
                  style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
-              <div className="text-9xl mb-8 animate-bounce">🚀</div>
-              <h3 className="text-5xl font-black text-yellow-400 mb-8 tracking-tight uppercase" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.5)'}}>
-                Initiate Sequence
+              <div className="text-7xl sm:text-8xl md:text-9xl mb-6 sm:mb-8 animate-bounce">🚀</div>
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-yellow-400 mb-6 sm:mb-8 tracking-tight uppercase" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.5)'}}>
+                Get ready for an action
               </h3>
-              <p className="text-xl text-gray-300 mb-12 max-w-xl mx-auto leading-relaxed font-light">
+              <p className="text-lg sm:text-xl text-gray-300 mb-8 sm:mb-12 max-w-xl mx-auto leading-relaxed font-light">
                 You have 60 seconds to change your state.<br/>
                 Break the stasis. Bathroom. Water. Shoes. Move.
               </p>
               <button
                 onClick={() => setLaunchActive(true)}
-                className="px-16 py-8 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-black text-3xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 uppercase tracking-wider"
+                className="px-10 sm:px-14 md:px-16 py-6 sm:py-7 md:py-8 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-black text-2xl sm:text-3xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 uppercase tracking-wider"
               >
                 Start Countdown
               </button>
