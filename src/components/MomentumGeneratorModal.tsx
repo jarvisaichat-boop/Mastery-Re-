@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, Sparkles, Target, Zap } from 'lucide-react';
+import { ChevronRight, Sparkles, Target } from 'lucide-react';
 import { Habit, ContentLibraryItem } from '../types';
 import { formatDate } from '../utils';
 
