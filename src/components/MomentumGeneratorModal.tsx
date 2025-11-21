@@ -140,20 +140,20 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setConfetti([]); // Reset confetti
       setYoutubeMetadata(null); // Reset YouTube metadata
       if (player) {
-        // Stop video first, then clear container after a delay
         try {
-          if (player.stopVideo) {
-            player.stopVideo();
+          // Destroy player and remove placeholder child
+          if (player.destroy) {
+            player.destroy();
+          }
+          // Remove all child nodes from container
+          if (playerContainerRef.current) {
+            while (playerContainerRef.current.firstChild) {
+              playerContainerRef.current.removeChild(playerContainerRef.current.firstChild);
+            }
           }
         } catch (e) {
-          console.log('Error stopping video on close:', e);
+          console.log('Error cleaning up player on close:', e);
         }
-        
-        setTimeout(() => {
-          if (playerContainerRef.current) {
-            playerContainerRef.current.innerHTML = '';
-          }
-        }, 100);
         
         setPlayer(null);
       }
@@ -216,20 +216,20 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
     // Cleanup old player if navigating away from content step
     if (currentStep !== 'content' && player) {
-      // Stop video first, then clear container after a delay to avoid React DOM conflicts
       try {
-        if (player.stopVideo) {
-          player.stopVideo();
+        // Destroy player and remove placeholder child
+        if (player.destroy) {
+          player.destroy();
+        }
+        // Remove all child nodes from container
+        if (playerContainerRef.current) {
+          while (playerContainerRef.current.firstChild) {
+            playerContainerRef.current.removeChild(playerContainerRef.current.firstChild);
+          }
         }
       } catch (e) {
-        console.log('Error stopping video:', e);
+        console.log('Error cleaning up player:', e);
       }
-      
-      setTimeout(() => {
-        if (playerContainerRef.current) {
-          playerContainerRef.current.innerHTML = '';
-        }
-      }, 100);
       
       setPlayer(null);
       return;
@@ -282,13 +282,20 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         };
 
         try {
-          // Use ref instead of getElementById to avoid React DOM conflicts
           if (!playerContainerRef.current) {
             console.error('Player container ref not available');
             return;
           }
           
-          const newPlayer = new window.YT.Player(playerContainerRef.current, {
+          // Create placeholder child element for YouTube player
+          // This prevents YouTube API from replacing the React-managed container
+          const placeholder = document.createElement('div');
+          placeholder.style.width = '100%';
+          placeholder.style.height = '100%';
+          playerContainerRef.current.appendChild(placeholder);
+          
+          // Mount YouTube player on the placeholder, not the React container
+          const newPlayer = new window.YT.Player(placeholder, {
             videoId: videoId,
             playerVars: {
               autoplay: 1,
@@ -524,7 +531,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 2: Goal and Grand Vision
   if (currentStep === 'vision') {
     return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center">
+      <div 
+        className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center cursor-pointer"
+        onClick={handleNextStep}
+      >
         <div className={`max-w-4xl mx-auto px-6 transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
@@ -562,16 +572,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               <div className="text-2xl text-gray-300 mt-12 font-light italic">
                 This is where today takes you.
               </div>
+              <div className="text-sm text-gray-500 mt-6 italic">Click anywhere to continue</div>
             </div>
           </div>
-          
-          <button
-            onClick={handleNextStep}
-            className="group mt-8 px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center mx-auto gap-3"
-          >
-            Continue
-            <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform" />
-          </button>
         </div>
       </div>
     );
@@ -584,6 +587,22 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         <div className={`max-w-5xl mx-auto w-full transition-all duration-1200 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           {content ? (
             <>
+              {/* Floating Overlay - Why This Video */}
+              <div className="mb-6 p-6 bg-gradient-to-r from-yellow-500/20 via-orange-500/15 to-yellow-500/20 border-2 border-yellow-400/40 rounded-2xl backdrop-blur-sm">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-yellow-400/30 flex items-center justify-center">
+                    <Target size={24} className="text-yellow-300" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-lg font-bold text-yellow-300 mb-2">Why This Video Matters for Your Goal</h4>
+                    <p className="text-gray-300 leading-relaxed">
+                      This carefully selected lesson strengthens your mindset and strategy toward <span className="text-yellow-400 font-semibold">{goal}</span>. 
+                      Each insight builds the mental foundation needed for lasting transformation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
               <div className="aspect-video bg-black rounded-3xl overflow-hidden mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
                 <div ref={playerContainerRef} style={{width: '100%', height: '100%'}}></div>
               </div>
