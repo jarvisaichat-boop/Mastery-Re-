@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Sparkles, Target, Zap } from 'lucide-react';
 import { Habit, ContentLibraryItem } from '../types';
 import { formatDate } from '../utils';
 
@@ -31,10 +31,30 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [launchCountdown, setLaunchCountdown] = useState(60);
   const [launchActive, setLaunchActive] = useState(false);
   const [shakeScreen, setShakeScreen] = useState(false);
+  const [stepVisible, setStepVisible] = useState(false);
+  const [selectedContent, setSelectedContent] = useState<ContentLibraryItem | null>(null);
 
   const lifeGoals = habits.filter(h => h.type === 'Life Goal Habit');
   const currentStreak = calculateStreak();
-  const content = contentLibrary.length > 0 ? contentLibrary[Math.floor(Math.random() * contentLibrary.length)] : null;
+  
+  // Lock in content selection when modal opens
+  useEffect(() => {
+    if (isOpen && contentLibrary.length > 0 && !selectedContent) {
+      const randomContent = contentLibrary[Math.floor(Math.random() * contentLibrary.length)];
+      setSelectedContent(randomContent);
+    } else if (!isOpen) {
+      // Reset when modal closes
+      setSelectedContent(null);
+      setCurrentStep('streak');
+      setUserQuestion('');
+      setSelectedHabits(new Set());
+      setPledgeProgress(0);
+      setLaunchCountdown(60);
+      setLaunchActive(false);
+    }
+  }, [isOpen, contentLibrary, selectedContent]);
+  
+  const content = selectedContent;
 
   function calculateStreak(): number {
     if (habits.length === 0) return 0;
@@ -59,6 +79,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return streak;
   }
 
+  // Fade in animation on step change
+  useEffect(() => {
+    setStepVisible(false);
+    const timer = setTimeout(() => setStepVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, [currentStep]);
+
   // Pledge interaction handler
   useEffect(() => {
     if (currentStep !== 'pledge') return;
@@ -73,7 +100,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
         if (progress >= 100) {
           clearInterval(interval);
-          // Vibration + screen flash
           if (navigator.vibrate) {
             navigator.vibrate([50, 30, 100, 30, 200]);
           }
@@ -110,7 +136,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setLaunchCountdown(prev => {
         if (prev <= 1) {
           clearInterval(interval);
-          // Auto-close after countdown
           setTimeout(() => {
             onClose();
           }, 1000);
@@ -123,7 +148,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return () => clearInterval(interval);
   }, [currentStep, launchActive, onClose]);
 
-  // Auto-advance through steps
   const handleNextStep = () => {
     const steps: Step[] = ['streak', 'vision', 'content', 'question', 'habits', 'pledge', 'launch'];
     const currentIndex = steps.indexOf(currentStep);
@@ -134,23 +158,57 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   if (!isOpen) return null;
 
+  // "Come back tomorrow" screen
+  if (isCompletedToday) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black/98 backdrop-blur-sm flex items-center justify-center animate-fadeIn">
+        <div className="text-center max-w-lg mx-auto px-6">
+          <div className="mb-8 animate-scaleIn">
+            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/50">
+              <Sparkles size={64} className="text-white" />
+            </div>
+          </div>
+          <h3 className="text-4xl font-black text-white mb-4 tracking-tight" style={{textShadow: '0 0 30px rgba(16, 185, 129, 0.5)'}}>
+            Mission Complete
+          </h3>
+          <p className="text-xl text-gray-400 mb-12 leading-relaxed">
+            You've already ignited today. <br/>
+            Consistency is sacred. Return tomorrow to launch again.
+          </p>
+          <button
+            onClick={onClose}
+            className="px-8 py-4 bg-gray-800/50 border border-gray-700 text-white font-semibold rounded-xl hover:bg-gray-700/50 transition-all duration-300 hover:scale-105"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Step 1: Streak Card
   if (currentStep === 'streak') {
     return (
-      <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center">
-        <div className="text-center max-w-2xl mx-auto px-4">
-          <div className="mb-8">
-            <div className="text-8xl font-black text-yellow-400 mb-4">
+      <div className="fixed inset-0 z-50 bg-gradient-to-b from-black via-gray-900 to-black flex items-center justify-center">
+        <div className={`text-center max-w-3xl mx-auto px-6 transition-all duration-1000 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+          <div className="mb-12">
+            <div className="text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 mb-6 animate-pulse" 
+                 style={{textShadow: '0 0 80px rgba(251, 191, 36, 0.6)'}}>
               {currentStreak}
             </div>
-            <div className="text-4xl font-bold text-white mb-4">DAYS</div>
-            <div className="text-2xl text-gray-300 mb-8">The chain is unbroken.</div>
+            <div className="text-5xl font-bold text-white mb-6 tracking-wider" style={{textShadow: '0 0 20px rgba(255, 255, 255, 0.3)'}}>
+              DAYS
+            </div>
+            <div className="text-2xl text-gray-400 font-light tracking-wide">
+              The chain is unbroken
+            </div>
           </div>
           <button
             onClick={handleNextStep}
-            className="px-8 py-4 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 flex items-center justify-center mx-auto gap-2"
+            className="group px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center mx-auto gap-3"
           >
-            Continue <ChevronRight size={24} />
+            Continue
+            <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </div>
@@ -160,18 +218,26 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 2: Grand Vision
   if (currentStep === 'vision') {
     return (
-      <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center">
-        <div className="text-center max-w-2xl mx-auto px-4">
-          <div className="mb-8">
-            <div className="text-3xl font-bold text-white mb-4">Your North Star</div>
-            <div className="text-5xl font-black text-blue-400">{goal}</div>
-            <div className="text-lg text-gray-300 mt-6">This is where today takes you.</div>
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-black via-blue-950 to-black flex items-center justify-center">
+        <div className={`text-center max-w-4xl mx-auto px-6 transition-all duration-1000 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+          <div className="mb-12">
+            <div className="mb-8 flex justify-center">
+              <Target size={64} className="text-blue-400 animate-pulse" style={{filter: 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.6))'}} />
+            </div>
+            <h3 className="text-3xl font-bold text-blue-400 mb-8 tracking-wide uppercase">Your North Star</h3>
+            <div className="text-6xl font-black text-white leading-tight tracking-tight" style={{textShadow: '0 0 40px rgba(59, 130, 246, 0.4)'}}>
+              {goal}
+            </div>
+            <div className="text-xl text-gray-400 mt-10 font-light">
+              This is where today takes you.
+            </div>
           </div>
           <button
             onClick={handleNextStep}
-            className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 flex items-center justify-center mx-auto gap-2"
+            className="group px-10 py-5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-lg rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 hover:scale-105 shadow-2xl shadow-blue-500/50 flex items-center justify-center mx-auto gap-3"
           >
-            Continue <ChevronRight size={24} />
+            Continue
+            <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </div>
@@ -181,38 +247,39 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 3: Motivational Content
   if (currentStep === 'content') {
     return (
-      <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center">
-        <div className="max-w-3xl mx-auto px-4 w-full">
+      <div className="fixed inset-0 z-50 bg-gradient-to-b from-black via-purple-950 to-black flex items-center justify-center p-6">
+        <div className={`max-w-5xl mx-auto w-full transition-all duration-1000 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
           {content ? (
             <>
-              <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden mb-6">
+              <div className="aspect-video bg-black rounded-3xl overflow-hidden mb-8 shadow-2xl shadow-purple-500/30 border border-gray-800" style={{boxShadow: '0 0 80px rgba(168, 85, 247, 0.3)'}}>
                 <iframe
                   width="100%"
                   height="100%"
-                  src={`${content.youtubeUrl}?autoplay=1`}
+                  src={`${content.youtubeUrl}?autoplay=1&controls=1&modestbranding=1`}
                   title={content.title}
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
               </div>
-              <div className="text-white mb-6">
-                <h3 className="text-2xl font-bold mb-2">{content.title}</h3>
-                <p className="text-gray-400">{content.duration} min watch</p>
+              <div className="text-center mb-8">
+                <h3 className="text-3xl font-bold text-white mb-3">{content.title}</h3>
+                <p className="text-gray-400 text-lg">{content.duration} min • Daily Intel</p>
               </div>
               <button
                 onClick={handleNextStep}
-                className="px-8 py-4 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600 flex items-center justify-center gap-2"
+                className="group px-10 py-5 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-lg rounded-2xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-2xl shadow-purple-500/50 flex items-center justify-center mx-auto gap-3"
               >
-                Continue <ChevronRight size={24} />
+                Continue
+                <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </>
           ) : (
             <div className="text-center">
-              <p className="text-white mb-4">No content in library yet</p>
+              <p className="text-white text-xl mb-6">No content in library yet</p>
               <button
                 onClick={onAddContentLibrary}
-                className="px-8 py-4 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600"
+                className="px-10 py-5 bg-purple-600 text-white font-bold rounded-2xl hover:bg-purple-700 transition-all"
               >
                 Add Content
               </button>
@@ -226,26 +293,28 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 4: Question
   if (currentStep === 'question') {
     return (
-      <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center">
-        <div className="max-w-2xl mx-auto px-4 w-full">
-          <div className="mb-8">
-            <h3 className="text-2xl font-bold text-white mb-4">
+      <div className="fixed inset-0 z-50 bg-gradient-to-b from-black via-gray-900 to-black flex items-center justify-center p-6">
+        <div className={`max-w-3xl mx-auto w-full transition-all duration-1000 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+          <div className="mb-10">
+            <h3 className="text-3xl font-bold text-white mb-8 text-center leading-relaxed">
               {content?.question || 'How will you apply this lesson today?'}
             </h3>
             <textarea
               value={userQuestion}
               onChange={(e) => setUserQuestion(e.target.value)}
-              placeholder="Your answer..."
-              className="w-full h-32 bg-gray-800 text-white rounded-lg p-4 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Type your answer..."
+              className="w-full h-48 bg-gray-900/50 border-2 border-gray-700 focus:border-green-500 text-white text-lg rounded-2xl p-6 placeholder-gray-500 focus:outline-none transition-all duration-300 resize-none"
+              style={{boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.5)'}}
             />
-            <p className="text-gray-400 text-sm mt-2">Minimum 1 sentence</p>
+            <p className="text-gray-500 text-sm mt-3 text-center">Minimum 1 sentence required</p>
           </div>
           <button
             onClick={handleNextStep}
             disabled={userQuestion.trim().length === 0}
-            className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="group px-10 py-5 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold text-lg rounded-2xl hover:from-green-600 hover:to-green-700 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-green-500/50 flex items-center justify-center mx-auto gap-3"
           >
-            Continue <ChevronRight size={24} />
+            Continue
+            <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </div>
@@ -255,58 +324,61 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 5: Habit Selection
   if (currentStep === 'habits') {
     return (
-      <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center p-4">
-        <div className="max-w-3xl mx-auto w-full">
-          <h3 className="text-2xl font-bold text-white mb-6">Select Your Habits</h3>
-          <div className="space-y-4 max-h-96 overflow-y-auto mb-6">
+      <div className="fixed inset-0 z-50 bg-gradient-to-b from-black via-cyan-950 to-black flex items-center justify-center p-6">
+        <div className={`max-w-4xl mx-auto w-full transition-all duration-1000 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+          <h3 className="text-4xl font-bold text-white mb-10 text-center tracking-tight">Choose Your Path</h3>
+          <div className="space-y-4 max-h-96 overflow-y-auto mb-10 pr-2 scrollbar-thin scrollbar-thumb-cyan-700 scrollbar-track-gray-900">
             {lifeGoals.map(habit => (
-              <div key={habit.id} className="bg-gray-800 rounded-lg p-4">
-                <button
-                  onClick={() => {
-                    const newSet = new Set(selectedHabits);
-                    if (newSet.has(habit.id)) {
-                      newSet.delete(habit.id);
-                    } else {
-                      newSet.add(habit.id);
-                    }
-                    setSelectedHabits(newSet);
-                  }}
-                  className="w-full text-left"
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                        selectedHabits.has(habit.id)
-                          ? 'bg-blue-500 border-blue-500'
-                          : 'border-gray-600'
-                      }`}
-                    >
-                      {selectedHabits.has(habit.id) && <span className="text-white">✓</span>}
-                    </div>
-                    <div>
-                      <p className="text-white font-semibold">{habit.name}</p>
-                      <p className="text-gray-400 text-sm">{habit.description}</p>
-                      {habit.microWins && habit.microWins.length > 0 && (
-                        <div className="mt-2 space-y-1">
-                          {habit.microWins.slice(0, 2).map(mw => (
-                            <p key={mw.id} className="text-xs text-gray-500">
-                              • {mw.description}
-                            </p>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+              <button
+                key={habit.id}
+                onClick={() => {
+                  const newSet = new Set(selectedHabits);
+                  if (newSet.has(habit.id)) {
+                    newSet.delete(habit.id);
+                  } else {
+                    newSet.add(habit.id);
+                  }
+                  setSelectedHabits(newSet);
+                }}
+                className={`w-full text-left p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-102 ${
+                  selectedHabits.has(habit.id)
+                    ? 'bg-cyan-900/30 border-cyan-500 shadow-xl shadow-cyan-500/30'
+                    : 'bg-gray-900/50 border-gray-700 hover:border-gray-600'
+                }`}
+              >
+                <div className="flex items-start gap-5">
+                  <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center mt-1 transition-all ${
+                    selectedHabits.has(habit.id)
+                      ? 'bg-cyan-500 border-cyan-500'
+                      : 'border-gray-600'
+                  }`}>
+                    {selectedHabits.has(habit.id) && <span className="text-white font-bold">✓</span>}
                   </div>
-                </button>
-              </div>
+                  <div className="flex-1">
+                    <p className="text-white font-bold text-xl mb-2">{habit.name}</p>
+                    <p className="text-gray-400 text-sm mb-3">{habit.description}</p>
+                    {habit.microWins && habit.microWins.length > 0 && (
+                      <div className="mt-3 space-y-1">
+                        {habit.microWins.slice(0, 2).map(mw => (
+                          <p key={mw.id} className="text-xs text-cyan-400 flex items-center gap-2">
+                            <Zap size={12} />
+                            {mw.description}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </button>
             ))}
           </div>
           <button
             onClick={handleNextStep}
             disabled={selectedHabits.size === 0}
-            className="px-8 py-4 bg-cyan-500 text-white font-bold rounded-lg hover:bg-cyan-600 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="group px-10 py-5 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white font-bold text-lg rounded-2xl hover:from-cyan-600 hover:to-cyan-700 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-cyan-500/50 flex items-center justify-center mx-auto gap-3"
           >
-            Continue <ChevronRight size={24} />
+            Lock In Selection
+            <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </div>
@@ -316,25 +388,53 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 6: Pledge
   if (currentStep === 'pledge') {
     return (
-      <div
-        className={`fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center transition-transform ${
-          shakeScreen ? 'animate-pulse' : ''
-        }`}
-      >
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-white mb-8">The Pledge</h3>
-          <div className="text-6xl mb-12 cursor-pointer select-none">👇</div>
-          <p className="text-white mb-4">Hold down for 3 seconds to lock in</p>
-          <div className="w-64 h-2 bg-gray-700 rounded-full mx-auto overflow-hidden mb-8">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
-              style={{ width: `${pledgeProgress}%` }}
-            />
+      <div className={`fixed inset-0 z-50 bg-black flex items-center justify-center transition-all duration-300 ${shakeScreen ? 'animate-pulse' : ''}`}>
+        <div className={`text-center transition-all duration-1000 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+          <h3 className="text-4xl font-black text-white mb-16 tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(255, 255, 255, 0.3)'}}>
+            The Pledge
+          </h3>
+          <div className="mb-16 cursor-pointer select-none">
+            <div className="w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center relative shadow-2xl"
+                 style={{boxShadow: `0 0 ${pledgeProgress}px rgba(168, 85, 247, 0.8)`}}>
+              <div className="text-8xl animate-pulse">👇</div>
+              <svg className="absolute inset-0 w-full h-full -rotate-90">
+                <circle
+                  cx="96"
+                  cy="96"
+                  r="88"
+                  stroke="rgba(255,255,255,0.1)"
+                  strokeWidth="8"
+                  fill="none"
+                />
+                <circle
+                  cx="96"
+                  cy="96"
+                  r="88"
+                  stroke="url(#progressGradient)"
+                  strokeWidth="8"
+                  fill="none"
+                  strokeDasharray={`${2 * Math.PI * 88}`}
+                  strokeDashoffset={`${2 * Math.PI * 88 * (1 - pledgeProgress / 100)}`}
+                  className="transition-all duration-100"
+                  strokeLinecap="round"
+                />
+                <defs>
+                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#a855f7" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
           </div>
-          {pledgeProgress < 100 && (
-            <p className="text-gray-400 text-sm">{Math.round(pledgeProgress)}%</p>
-          )}
-          {pledgeProgress === 100 && <p className="text-green-400 text-lg font-bold">LOCKED ✓</p>}
+          <p className="text-white text-xl mb-6 font-light">Hold down for 3 seconds to lock in</p>
+          <div className="text-3xl font-bold">
+            {pledgeProgress < 100 ? (
+              <span className="text-gray-400">{Math.round(pledgeProgress)}%</span>
+            ) : (
+              <span className="text-green-400 animate-pulse" style={{textShadow: '0 0 20px rgba(34, 197, 94, 0.8)'}}>LOCKED ✓</span>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -345,46 +445,36 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return (
       <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
         {!launchActive ? (
-          <div className="text-center px-4">
-            <div className="text-8xl mb-8">🚀</div>
-            <h3 className="text-4xl font-black text-white mb-8">INITIATE SEQUENCE</h3>
-            <p className="text-xl text-gray-400 mb-12 max-w-md mx-auto">
-              You have 60 seconds to change your state. Break the stasis. Bathroom. Water. Shoes. Move...
+          <div className={`text-center px-6 transition-all duration-1000 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+            <div className="text-9xl mb-12 animate-bounce">🚀</div>
+            <h3 className="text-6xl font-black text-white mb-10 tracking-tight uppercase" style={{textShadow: '0 0 40px rgba(255, 255, 255, 0.4)'}}>
+              Initiate Sequence
+            </h3>
+            <p className="text-2xl text-gray-400 mb-16 max-w-2xl mx-auto leading-relaxed font-light">
+              You have 60 seconds to change your state.<br/>
+              Break the stasis. Bathroom. Water. Shoes. Move.
             </p>
             <button
               onClick={() => setLaunchActive(true)}
-              className="px-12 py-6 bg-red-600 text-white font-black text-2xl rounded-lg hover:bg-red-700"
+              className="px-16 py-8 bg-gradient-to-r from-red-600 to-red-700 text-white font-black text-3xl rounded-2xl hover:from-red-700 hover:to-red-800 transition-all duration-300 hover:scale-105 shadow-2xl shadow-red-600/50 uppercase tracking-wider"
             >
-              START COUNTDOWN
+              Start Countdown
             </button>
           </div>
         ) : (
-          <div className="text-center">
-            <div className="text-9xl font-black text-red-500 font-mono mb-12">
+          <div className="text-center animate-pulse">
+            <div className={`text-[12rem] font-black font-mono mb-16 transition-all duration-300 ${
+              launchCountdown <= 10 ? 'text-red-500' : 'text-red-400'
+            }`} style={{textShadow: `0 0 ${launchCountdown <= 10 ? '100px' : '60px'} rgba(239, 68, 68, 0.8)`}}>
               {launchCountdown}
             </div>
-            <p className="text-2xl text-white">GET READY...</p>
+            <p className={`text-3xl font-bold transition-all ${
+              launchCountdown <= 10 ? 'text-white animate-bounce' : 'text-gray-400'
+            }`}>
+              {launchCountdown <= 10 ? 'GO NOW!' : 'GET READY...'}
+            </p>
           </div>
         )}
-      </div>
-    );
-  }
-
-  // Come back tomorrow modal
-  if (isCompletedToday) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="text-6xl mb-4">✓</div>
-          <h3 className="text-3xl font-bold text-white mb-4">Already Launched Today</h3>
-          <p className="text-gray-400 mb-8">Consistency is sacred. Come back tomorrow to ignite again.</p>
-          <button
-            onClick={onClose}
-            className="px-8 py-4 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600"
-          >
-            Close
-          </button>
-        </div>
       </div>
     );
   }
