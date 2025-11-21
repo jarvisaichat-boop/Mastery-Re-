@@ -30,7 +30,7 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
     title: 'The 2-Minute Rule: Start Small, Build Big',
     youtubeUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     duration: 3,
-    question: 'What's the smallest version of your goal you can commit to?',
+    question: 'What is the smallest version of your goal you can commit to?',
     category: 'strategy',
   },
   {

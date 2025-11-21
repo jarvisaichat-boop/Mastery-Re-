@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronRight, Zap } from 'lucide-react';
-import { Habit, ContentLibraryItem, MicroWin } from '../types';
+import { ChevronRight } from 'lucide-react';
+import { Habit, ContentLibraryItem } from '../types';
 import { formatDate } from '../utils';
 
 interface MomentumGeneratorModalProps {
