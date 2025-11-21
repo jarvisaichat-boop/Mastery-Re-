@@ -226,16 +226,17 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return streak;
   }
 
-  // Smooth fade in animation on step change - immediate visibility to prevent flash
+  // Smooth fade in animation on step change
   useEffect(() => {
     if (!isOpen) return;
     
-    // Immediate visibility for first step, slower transition for subsequent steps
+    // Immediate visibility for first step
     if (currentStep === 'streak') {
       setStepVisible(true);
     } else {
+      // For other steps, brief delay before showing to allow clean fade in
       setStepVisible(false);
-      const timer = setTimeout(() => setStepVisible(true), 400); // Slower fade in
+      const timer = setTimeout(() => setStepVisible(true), 100);
       return () => clearTimeout(timer);
     }
   }, [currentStep, isOpen]);
@@ -452,8 +453,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       const nextStep = steps[currentIndex + 1];
-      // Slower, more deliberate transitions for premium feel
-      const transitionDelay = 900;
+      // Smooth transition: fade out, change step, fade in
+      const transitionDelay = 600; // Match card animation duration
       
       requestAnimationFrame(() => {
         setStepVisible(false);
@@ -574,7 +575,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         </div>
         
         {/* Premium 3D Card */}
-        <div className={`relative transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`} style={{zIndex: 55}}>
+        <div className={`relative transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`} style={{zIndex: 55}}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl max-w-2xl mx-4 sm:mx-6"
                style={{
                  boxShadow: '0 0 60px rgba(251, 191, 36, 0.4), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
@@ -619,7 +620,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center cursor-pointer overflow-y-auto"
         onClick={handleNextStep}
       >
-        <div className={`max-w-4xl mx-auto px-4 sm:px-6 py-6 transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`max-w-4xl mx-auto px-4 sm:px-6 py-6 transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <div className="text-center">
@@ -662,7 +663,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     if (showVideoIntro && content) {
       return (
         <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-y-auto p-4 sm:p-6">
-          <div className={`max-w-3xl mx-auto w-full transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+          <div className={`max-w-3xl mx-auto w-full transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
             <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-8 sm:p-12 shadow-2xl text-center" style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.4), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
               <div className="mb-10 sm:mb-12 flex justify-center">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-yellow-400/30 flex items-center justify-center">
@@ -698,7 +699,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     // Then show the actual video with question overlay
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-4 sm:p-6">
-        <div className={`max-w-5xl mx-auto w-full transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`max-w-5xl mx-auto w-full transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           {content ? (
             <>
               <div className="aspect-video bg-black rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
@@ -777,7 +778,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (currentStep === 'habits') {
     return (
       <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-y-auto p-4 sm:p-6">
-        <div className={`max-w-5xl mx-auto w-full transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`max-w-5xl mx-auto w-full transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">Which habit will you do first??</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
             {lifeGoals.map(habit => {
@@ -854,7 +855,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (currentStep === 'pledge') {
     return (
       <div className={`fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center transition-all duration-300 ${shakeScreen ? 'animate-pulse' : ''}`}>
-        <div className={`max-w-2xl mx-6 transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+        <div className={`max-w-2xl mx-6 transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <h3 className="text-4xl font-black text-yellow-400 mb-12 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
@@ -938,7 +939,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         
         {!launchActive ? (
           <div className="flex flex-col items-center justify-center h-full">
-            <div className={`transition-all duration-[1600ms] ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+            <div className={`transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
               <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-yellow-400 mb-8 sm:mb-12 text-center tracking-tight uppercase px-4" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.5)'}}>
                 Get ready for an action
               </h3>
