@@ -18,7 +18,7 @@ interface MomentumGeneratorModalProps {
   habits: Habit[];
   goal: string;
   aspirations: string;
-  contentLibrary: ContentLibraryItem[];
+  todaysContent: ContentLibraryItem;
   onAddContentLibrary?: () => void;
   isCompletedToday: boolean;
 }
@@ -32,7 +32,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   habits,
   goal,
   aspirations,
-  contentLibrary,
+  todaysContent,
   onAddContentLibrary,
   isCompletedToday,
 }) => {
@@ -124,9 +124,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   // Lock in content selection when modal opens
   useEffect(() => {
-    if (isOpen && contentLibrary.length > 0 && !selectedContent) {
-      const randomContent = contentLibrary[Math.floor(Math.random() * contentLibrary.length)];
-      setSelectedContent(randomContent);
+    if (isOpen && todaysContent && !selectedContent) {
+      // Use pre-selected today's content (already filtered <5 min by getTodayContent)
+      setSelectedContent(todaysContent);
       setVideoCompleted(false); // Reset video completion
       setVideoStarted(false); // Reset video started state for new session
       setVideoError(false); // Reset error state
@@ -170,7 +170,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         setPlayer(null);
       }
     }
-  }, [isOpen, contentLibrary, selectedContent, player]);
+  }, [isOpen, todaysContent, selectedContent, player]);
 
   // Initialize confetti when streak step is active - stagger delays for continuous falling
   useEffect(() => {
