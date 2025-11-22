@@ -27,7 +27,15 @@
         2. getTodayContent - filters out videos >= 5 minutes before selection
         3. Save blocking in Content Library Manager - prevents saving videos >= 5 minutes
         4. Input validation - duration field max value set to 4 minutes with red warning
--   **CRITICAL FIX - "Seize the Day" Popup Flash**: Fixed bug where completion popup would flash briefly and disappear, showing "Mission Complete" instead. Root cause: `onComplete()` set `isCompletedToday=true`, immediately switching modal to completion screen. Fix: (1) Used ref (`countdownCompletedRef`) to persist popup state across re-renders, (2) Prevented "Mission Complete" screen from rendering while popup is visible.
+-   **CRITICAL FIX - "Seize the Day" Popup Flash (FINAL)**: Fixed bug where completion popup would flash briefly and disappear after countdown finished. 
+    - **Root Cause**: When `onComplete()` was called, it triggered parent re-render which caused popup to flash and disappear due to state update timing issues.
+    - **The Solution**: Multi-layered fix to ensure popup persists cleanly across re-renders:
+        1. **Guard against infinite loop**: Added `countdownCompletedRef` check in useEffect to prevent re-triggering `onComplete()` after first completion
+        2. **Ref-based visibility**: Popup now renders when EITHER `showSeizeTheDayPopup` state OR `countdownCompletedRef` is true, ensuring persistence across re-renders
+        3. **Guaranteed single completion**: `onComplete()` is called exactly once when countdown hits zero (line 468 in MomentumGeneratorModal.tsx)
+        4. **Clean reset on dismiss**: Popup dismiss handler resets both state and ref, then delays modal close by 50ms to ensure state updates process
+        5. **Session cleanup**: Modal close always resets both popup state and ref for fresh sessions
+    - **Result**: Popup appears immediately when countdown finishes, stays visible until user dismisses, and Ignite habit is marked complete exactly once
 -   **CRITICAL FIX - Ignite Habit Scheduling**: Fixed root cause where Ignite habit with `frequencyType: 'daily'` wasn't recognized by `isHabitScheduledOnDay` (which only checked for 'Everyday'). This single fix resolved THREE user-reported issues:
     1. ✅ Ignite checkmarks now display when auto-completed after Momentum Generator
     2. ✅ Week circles show proper dimming (current week stays bright, only past weeks dim if incomplete)
