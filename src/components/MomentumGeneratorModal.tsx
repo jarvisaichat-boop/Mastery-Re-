@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronRight, Sparkles, Target } from 'lucide-react';
 import { Habit, ContentLibraryItem } from '../types';
 import { formatDate } from '../utils';
@@ -58,6 +58,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const videoTimeoutRef = useRef<number | null>(null);
   const countdownCompletedRef = useRef(false); // Persist popup state across re-renders
+  const launchIntervalRef = useRef<number | null>(null); // Store interval ID for manual clearing
 
   // Always include these 3 pre-generated life goal habits
   const starterHabits = [
@@ -106,6 +107,22 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const uniqueUserHabits = userLifeGoals.filter(h => !starterIds.has(h.id));
   const lifeGoals = [...starterHabits, ...uniqueUserHabits].slice(0, 3);
   const currentStreak = calculateStreak();
+  
+  // Shared launch completion logic - called by both natural countdown and skip button
+  const triggerLaunchCompletion = useCallback(() => {
+    // Clear interval immediately to prevent duplicate execution
+    if (launchIntervalRef.current !== null) {
+      clearInterval(launchIntervalRef.current);
+      launchIntervalRef.current = null;
+    }
+    
+    // Mark completion exactly once
+    if (!countdownCompletedRef.current) {
+      onComplete();
+      countdownCompletedRef.current = true;
+      setShowSeizeTheDayPopup(true);
+    }
+  }, [onComplete]);
   
   // Load YouTube iframe API
   useEffect(() => {
@@ -447,6 +464,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
     const interval = setInterval(() => {
       setLaunchCountdown(prev => {
+        // Bail out immediately if already completed (prevents duplicate execution)
+        if (countdownCompletedRef.current) return 0;
+        
         // Fast-paced vibration every second (only if countdown is active, check API availability)
         if (prev > 1) {
           try {
@@ -459,20 +479,22 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         }
         
         if (prev <= 1) {
-          clearInterval(interval);
-          // Mark completion immediately to guarantee Ignite habit is marked
-          onComplete();
-          // Show popup - ref persists across re-renders to prevent flash
-          countdownCompletedRef.current = true;
-          setShowSeizeTheDayPopup(true);
+          // Use shared completion helper to mark complete and show popup
+          triggerLaunchCompletion();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
+    
+    // Store interval ID in ref for manual clearing
+    launchIntervalRef.current = interval;
 
-    return () => clearInterval(interval);
-  }, [currentStep, launchActive, preCountdown, onClose, onComplete]);
+    return () => {
+      clearInterval(interval);
+      launchIntervalRef.current = null;
+    };
+  }, [currentStep, launchActive, preCountdown, triggerLaunchCompletion]);
 
   const handleNextStep = () => {
     const steps: Step[] = ['streak', 'vision', 'content', 'habits', 'pledge', 'launch'];
@@ -1064,8 +1086,11 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 } catch (e) {
                   // Ignore vibration errors
                 }
-                onComplete();
-                setTimeout(onClose, 500);
+                // Stop countdown state
+                setLaunchActive(false);
+                setLaunchCountdown(0);
+                // Use shared completion helper - clears interval and triggers popup
+                triggerLaunchCompletion();
               }}
               className="absolute bottom-12 px-8 py-3 bg-gray-800/80 border border-gray-700 text-gray-300 font-semibold rounded-xl hover:bg-gray-700/80 hover:text-white transition-all duration-300 text-sm z-20"
             >
