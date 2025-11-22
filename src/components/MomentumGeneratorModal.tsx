@@ -754,22 +754,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 )}
               </div>
               
-              {/* Always-visible skip option - placed above question for maximum visibility */}
-              {!videoCompleted && (
-                <div className="text-center mb-4 bg-gray-800/50 border border-yellow-500/30 rounded-xl p-4">
-                  <p className="text-gray-300 text-sm mb-2">Video not loading or want to skip?</p>
-                  <button
-                    onClick={() => {
-                      setVideoError(true);
-                      setVideoCompleted(true);
-                    }}
-                    className="px-6 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-400 font-semibold text-sm rounded-lg transition-colors"
-                  >
-                    Skip to Reflection Question
-                  </button>
-                </div>
-              )}
-              
               {/* Question Overlay - Always visible */}
               <div className="mb-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 text-center leading-relaxed">
@@ -792,6 +776,21 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                     : 'Please answer the question to continue'
                   }
                 </p>
+                
+                {/* Subtle skip option - bottom of textarea area */}
+                {!videoCompleted && (
+                  <p className="text-center mt-3">
+                    <button
+                      onClick={() => {
+                        setVideoError(true);
+                        setVideoCompleted(true);
+                      }}
+                      className="text-gray-600 hover:text-gray-400 text-xs underline transition-colors"
+                    >
+                      Video not loading? Skip
+                    </button>
+                  </p>
+                )}
               </div>
               
               <div className="flex gap-3 sm:gap-4 items-center justify-center">
