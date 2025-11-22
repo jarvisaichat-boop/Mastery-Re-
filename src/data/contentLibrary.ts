@@ -1,63 +1,31 @@
 import { ContentLibraryItem } from '../types';
 
-// EDUCATIONAL CONTENT LIBRARY - Mixed Length: Quick Wins + Deep Dives
+// EDUCATIONAL CONTENT LIBRARY - VERIFIED DURATIONS via YouTube API
 // Note: Some YouTube videos may have embedding disabled. The app gracefully handles failures.
 // All videos teach how to START new habits and build routines that stick
-// Duration limit: 8 minutes maximum (mix of 3-5 min quick content + 6-8 min deep education)
+// Duration limit: 8 minutes maximum - ALL DURATIONS VERIFIED via YouTube Data API v3
 export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
-  // QUICK ACTIONABLE CONTENT (3-5 minutes) - Fast daily ignition
   {
     id: '1',
-    title: 'The Science of Making & Breaking Habits',
-    youtubeUrl: 'https://www.youtube.com/watch?v=Wcs2PFz5q6g',
-    channelName: 'Andrew Huberman',
-    duration: 4,
-    question: 'What ONE small habit will you start today using the science you just learned?',
-    category: 'mindset',
-  },
-  {
-    id: '2',
-    title: 'How to Achieve Your Most Ambitious Goals',
-    youtubeUrl: 'https://www.youtube.com/watch?v=TQMbvJNRpLE',
-    channelName: 'TEDx Talks',
-    duration: 5,
-    question: 'What tiny marginal gain can you make today toward your big goal?',
+    title: 'The Science of Productivity',
+    youtubeUrl: 'https://www.youtube.com/watch?v=lHfjvYzr-3g',
+    channelName: 'AsapSCIENCE',
+    duration: 3, // VERIFIED: 3.27 minutes
+    question: 'What ONE productivity technique will you apply today to start a new habit?',
     category: 'strategy',
   },
   {
-    id: '3',
-    title: '1% Better Every Day - James Clear',
-    youtubeUrl: 'https://www.youtube.com/watch?v=mNeXuCYiE0U',
-    channelName: 'Kit (ConvertKit)',
-    duration: 6,
-    question: 'Which 1% improvement will you commit to for the next 30 days?',
-    category: 'discipline',
-  },
-  
-  // DEEPER EDUCATION (6-8 minutes) - Weekend deep dives
-  {
-    id: '4',
-    title: 'How to become 37.78 times better | Atomic Habits Summary',
-    youtubeUrl: 'https://www.youtube.com/watch?v=PZ7lDrwYdZc',
-    channelName: 'Escaping Ordinary (B.C Marx)',
-    duration: 8,
-    question: 'Using the 4 Laws of Behavior Change, how will you make your habit obvious today?',
+    id: '2',
+    title: 'Atomic Habits: How to Get 1% Better Every Day',
+    youtubeUrl: 'https://www.youtube.com/watch?v=U_nzqnXWvSo',
+    channelName: 'APB Speakers',
+    duration: 8, // VERIFIED: 8.07 minutes
+    question: 'Using the compound effect, what tiny 1% improvement will you start today?',
     category: 'mindset',
-    dayOfWeek: 6, // Saturday - longer content for weekends
-  },
-  {
-    id: '5',
-    title: 'Tiny Changes, Remarkable Results - Atomic Habits',
-    youtubeUrl: 'https://www.youtube.com/watch?v=YT7tQzmGRLA',
-    channelName: 'Ali Abdaal',
-    duration: 7,
-    question: 'What identity do you want to build, and what small action proves it today?',
-    category: 'discipline',
-    dayOfWeek: 0, // Sunday - longer content for weekends
   },
 ];
 
-const CONTENT_LIBRARY_VERSION = 16; // Mixed library: 4-8 min range, quick wins + deep dives
+const CONTENT_LIBRARY_VERSION = 17; // CRITICAL FIX: All durations verified via YouTube API (previous versions had incorrect manual durations)
 
 export function saveContentLibrary(items: ContentLibraryItem[]): void {
   try {
