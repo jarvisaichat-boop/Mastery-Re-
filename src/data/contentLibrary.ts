@@ -1,40 +1,40 @@
 import { ContentLibraryItem } from '../types';
 
-// EDUCATIONAL CONTENT LIBRARY - Habit Formation Focus
+// EDUCATIONAL CONTENT LIBRARY - Starting Habits & Atomic Habits Focus
 // Note: Some YouTube videos may have embedding disabled. The app gracefully handles failures.
-// All videos teach concepts about habit formation, not just motivation
+// All videos teach how to START new habits and build routines that stick
 // Duration limit: 10 minutes maximum
 export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
   {
     id: '1',
-    title: 'Change Your Life – One Tiny Step at a Time',
-    youtubeUrl: 'https://www.youtube.com/watch?v=75d_29QWELk',
-    channelName: 'Kurzgesagt – In a Nutshell',
-    duration: 7,
-    question: 'What tiny habit will you start today to change your life?',
+    title: 'How to become 37.78 times better | Atomic Habits Summary',
+    youtubeUrl: 'https://www.youtube.com/watch?v=PZ7lDrwYdZc',
+    channelName: 'Escaping Ordinary (B.C Marx)',
+    duration: 8,
+    question: 'Which 1% improvement will you start with today to compound your growth?',
     category: 'mindset',
   },
   {
     id: '2',
-    title: 'A Simple Way to Break a Bad Habit',
-    youtubeUrl: 'https://www.youtube.com/watch?v=-moW9jvvMr4',
-    channelName: 'TED',
+    title: 'TINY HABITS by BJ Fogg | Core Message',
+    youtubeUrl: 'https://www.youtube.com/watch?v=S_8e-6ZHKLs',
+    channelName: 'Productivity Game',
     duration: 9,
-    question: 'What bad habit will you observe with curiosity instead of judgment?',
+    question: 'What existing routine will you anchor your new tiny habit to today?',
     category: 'strategy',
   },
   {
     id: '3',
-    title: 'The Power of Habit',
-    youtubeUrl: 'https://www.youtube.com/watch?v=OMbsGBlpP30',
-    channelName: 'TEDx Talks',
+    title: 'Tiny Changes, Remarkable Results - Atomic Habits',
+    youtubeUrl: 'https://www.youtube.com/watch?v=YT7tQzmGRLA',
+    channelName: 'Ali Abdaal',
     duration: 10,
-    question: 'What is the cue that triggers your most important habit?',
+    question: 'What identity do you want to build, and what small action proves it today?',
     category: 'discipline',
   },
 ];
 
-const CONTENT_LIBRARY_VERSION = 14; // Extended to 10 min limit, added educational habit content
+const CONTENT_LIBRARY_VERSION = 15; // Updated to starter-focused content: Atomic Habits & Tiny Habits methodology
 
 export function saveContentLibrary(items: ContentLibraryItem[]): void {
   try {
