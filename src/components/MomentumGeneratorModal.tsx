@@ -731,8 +731,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     
     // Then show the actual video with question overlay
     return (
-      <div className="w-full h-full flex items-center justify-center p-4 sm:p-6">
-        <div className="max-w-5xl mx-auto w-full">
+      <div className="w-full h-full overflow-y-auto p-4 sm:p-6">
+        <div className="max-w-5xl mx-auto w-full py-4">
           {content ? (
             <>
               <div className="aspect-video bg-black rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
