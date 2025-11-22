@@ -767,12 +767,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 <textarea
                   value={userQuestion}
                   onChange={(e) => setUserQuestion(e.target.value)}
-                  placeholder="Type your answer while watching..."
+                  placeholder={videoError ? "Question is optional since video didn't load..." : "Type your answer while watching..."}
                   className="w-full h-32 sm:h-40 bg-gray-900/50 border-2 border-gray-700 focus:border-yellow-500 text-white text-base sm:text-lg rounded-2xl p-4 sm:p-6 placeholder-gray-500 focus:outline-none transition-all duration-300 resize-none"
                   style={{boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.5)'}}
                 />
                 <p className="text-gray-500 text-xs sm:text-sm mt-2 text-center">
-                  {videoCompleted && userQuestion.trim().length > 0 
+                  {videoError
+                    ? 'Video skipped - question is optional, continue when ready'
+                    : videoCompleted && userQuestion.trim().length > 0 
                     ? '✓ Video completed and answer provided - ready to continue!' 
                     : !videoCompleted && userQuestion.trim().length > 0
                     ? 'Keep watching the video...'
@@ -801,10 +803,16 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               <div className="flex gap-3 sm:gap-4 items-center justify-center">
                 <button
                   onClick={handleNextStep}
-                  disabled={(!videoCompleted && !videoError) || userQuestion.trim().length === 0}
+                  disabled={(!videoCompleted && !videoError) || (!videoError && userQuestion.trim().length === 0)}
                   className="group px-8 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-lg sm:text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center gap-2 sm:gap-3"
                 >
-                  {!videoCompleted && !videoError ? 'Finish Video First' : userQuestion.trim().length === 0 ? 'Answer Question' : videoError ? 'Continue Anyway' : 'Continue'}
+                  {!videoCompleted && !videoError 
+                    ? 'Finish Video First' 
+                    : videoError 
+                    ? 'Continue' 
+                    : userQuestion.trim().length === 0 
+                    ? 'Answer Question' 
+                    : 'Continue'}
                   <ChevronRight size={24} className="sm:w-7 sm:h-7 group-hover:translate-x-2 transition-transform" />
                 </button>
               </div>
