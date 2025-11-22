@@ -10,11 +10,17 @@ I want to enable the AI to make changes to my codebase. I prefer detailed explan
 The application is a single-page application (SPA) built with React 18 and TypeScript, using Vite 5 as the build tool. Tailwind CSS is used for styling, and Lucide React for icons. State management is handled via React Hooks with data persistence managed through localStorage.
 
 **Backend API Server:**
--   Express server on port 3001 for YouTube metadata validation
--   YouTube Data API v3 integration for fetching real video metadata (title, channel, duration)
+-   Express server on port 3001 for YouTube metadata validation and search
+-   YouTube Data API v3 integration for:
+    * Fetching real video metadata (title, channel, duration)
+    * Searching for habit-formation videos with automatic filtering
 -   Strict 480-second (8-minute) enforcement at API level to prevent incorrect durations
 -   API key stored securely in Replit Secrets (never exposed to browser)
 -   Vite proxy configuration routes `/api/*` to backend in dev mode
+-   Endpoints:
+    * `/api/youtube/metadata` - Verify single video by URL
+    * `/api/youtube/search` - Search YouTube and filter results ≤8 minutes
+    * `/api/health` - Health check
 
 The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly Plan, The "Do" Week, Weekly Progress, Accountability, and The Loop.
 
