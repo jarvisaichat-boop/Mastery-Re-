@@ -1,57 +1,7 @@
 # Mastery Dashboard
 
 ## Overview
-**Path - Self Mastery** is a gamified, AI-powered habit coaching program designed to guide users through a 7-phase coaching cycle: Intake, Goal Contract, Plan, Do, Review, Accountability, and Loop. The application aims to provide an engaging and effective platform for habit formation, leveraging a "Duolingo for Habit Forming" model with a dark mode "Focus Dojo" aesthetic.
-
-## Recent Changes (November 22, 2025)
--   **CRITICAL FIX - Video Embedding Issue**: Replaced ALL default videos with verified embeddable ones after discovering YouTube Error 150 (embedding disabled by creators):
-    - **Root Cause**: Original default videos had embedding disabled by creators, causing "Video unavailable" errors for users
-    - **The Solution**: Searched for and verified 4 embeddable motivational videos using YouTube's oEmbed API:
-        1. Kid President - A Pep Talk (3:28) - SoulPancake
-        2. Shia LaBeouf - Just Do It (1:04) - MotivaShian
-        3. Why Do We Fall - Batman (1:42) - Mateusz M
-        4. Rocky Balboa - Keep Moving Forward (2:11) - Vimal Kumar
-    - **Verification**: All videos tested with `https://www.youtube.com/oembed?url=...` to confirm embedding is allowed
-    - **Version 12 Migration**: Bumped content library version to 12 to force reset and clear broken videos from localStorage
-    - **Result**: Users now see working motivational videos in the Momentum Generator
--   **TESTING IMPROVEMENT - Screenshot Bypass**: Added AUTO_SKIP_ONBOARDING flag for development testing:
-    - Automatically completes onboarding when flag is set to `true` in App.tsx
-    - Enables quick access to dashboard for screenshots and testing without manual onboarding flow
-    - TODO: Remove before production deployment (currently set to `true` for testing)
--   **CRITICAL FIX - Video Duration Enforcement (FINAL)**: Completely redesigned video selection architecture to guarantee ONLY videos under 5 minutes can appear:
-    - **Root Cause**: MomentumGeneratorModal was randomly selecting from the full library array BEFORE purge filters could run, allowing stale long videos to slip through
-    - **The Fix**: App.tsx now pre-selects today's video using `getTodayContent()` (which filters <5 min) via `useMemo`, then passes ONLY that single video to the modal
-    - **Result**: Modal can no longer access or randomly select from the full library - it only receives pre-validated short videos
-    - **Quadruple Protection**:
-        1. App mount purge - filters and removes any videos >= 5 minutes from localStorage
-        2. getTodayContent - filters out videos >= 5 minutes before selection
-        3. Save blocking in Content Library Manager - prevents saving videos >= 5 minutes
-        4. Input validation - duration field max value set to 4 minutes with red warning
--   **CRITICAL FIX - "Seize the Day" Popup Flash (FINAL)**: Fixed bug where completion popup would flash briefly and disappear after countdown finished. 
-    - **Root Cause**: When `onComplete()` was called, it triggered parent re-render which caused popup to flash and disappear due to state update timing issues.
-    - **The Solution**: Multi-layered fix to ensure popup persists cleanly across re-renders:
-        1. **Guard against infinite loop**: Added `countdownCompletedRef` check in useEffect to prevent re-triggering `onComplete()` after first completion
-        2. **Ref-based visibility**: Popup now renders when EITHER `showSeizeTheDayPopup` state OR `countdownCompletedRef` is true, ensuring persistence across re-renders
-        3. **Guaranteed single completion**: `onComplete()` is called exactly once when countdown hits zero (line 486 in MomentumGeneratorModal.tsx)
-        4. **Clean reset on dismiss**: Popup dismiss handler resets both state and ref, then delays modal close by 50ms to ensure state updates process
-        5. **Session cleanup**: Modal close always resets both popup state and ref for fresh sessions
-        6. **Skip button fix**: "Skip / I'm Ready Now" button now triggers the same popup flow as natural countdown completion using a shared `triggerLaunchCompletion()` helper that clears the interval ref, stops countdown state, and shows the popup
-    - **Result**: Popup appears immediately when countdown finishes (whether natural or skipped), stays visible until user dismisses, and Ignite habit is marked complete exactly once
--   **CRITICAL FIX - Ignite Habit Scheduling**: Fixed root cause where Ignite habit with `frequencyType: 'daily'` wasn't recognized by `isHabitScheduledOnDay` (which only checked for 'Everyday'). This single fix resolved THREE user-reported issues:
-    1. ✅ Ignite checkmarks now display when auto-completed after Momentum Generator
-    2. ✅ Week circles show proper dimming (current week stays bright, only past weeks dim if incomplete)
-    3. ✅ Discipline Engine properly recognizes Ignite as scheduled for all strictness rules
--   **Subtle Video Skip UI**: Moved skip button to bottom with small gray text to discourage skipping while maintaining failsafe for genuine loading errors.
--   **Optional Reflection Question**: When video is skipped or fails to load, the reflection question becomes optional - users can continue without answering since there's no content to reflect on.
--   **Momentum Generator Video Library**: Reduced to 4 verified TED talks (all exactly 3 minutes) from official "TED in 3 Minutes" playlist to ensure all videos are under 5 minutes and embeddable.
--   **Ignite Habit Persistence**: Fixed critical bug where momentum completion wasn't persisting to localStorage - now includes immediate localStorage write for both momentum timestamp and Ignite habit completion.
--   **Vision Card Sizing**: Fixed visual glitch where vision card would jump from empty to full size by generating random content synchronously before step transition.
--   **YouTube Error Handling**: Complete failsafe system to prevent users from getting blocked:
-    -   Always-visible skip button with prominent styling in highlighted yellow box
-    -   Smart 15-second timeout that only triggers if playback never starts (not during normal viewing)
-    -   Proper state resets on every modal open/close to ensure failsafe works on every session
-    -   Manual skip and automatic timeout both enable Continue button after answering reflection question
--   **Content Library Migration**: Version 9 with improved function ordering (saveContentLibrary before loadContentLibrary) to prevent runtime hoisting errors.
+**Path - Self Mastery** is a gamified, AI-powered habit coaching program designed to guide users through a 7-phase coaching cycle: Intake, Goal Contract, Plan, Do, Review, Accountability, and Loop. The application aims to provide an engaging and effective platform for habit formation, leveraging a "Duolingo for Habit Forming" model with a dark mode "Focus Dojo" aesthetic. It emphasizes positive reinforcement and a comprehensive onboarding process to combat common pitfalls in habit formation.
 
 ## User Preferences
 I want to enable the AI to make changes to my codebase. I prefer detailed explanations. I want iterative development. I prefer simple language. I prefer that you ask me before making major changes. I like functional programming.
@@ -63,57 +13,34 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 
 **UI/UX Decisions:**
 -   **Aesthetic**: Dark mode "Focus Dojo" theme with improved readability.
--   **Interaction**: Intuitive habit tracking, drag-and-drop reordering, multiple calendar views.
+-   **Interaction**: Intuitive habit tracking, drag-and-drop reordering, multiple calendar views, floating "Now GO!" completion popup.
 -   **Gamification**: AI Coach reactions, streak celebrations, unified daily check-ins with reflection and AI chat.
--   **Positive Reinforcement**: Emphasis on celebrating wins and supportive language.
--   **Onboarding**: Comprehensive multi-phase onboarding with conversational AI for goal understanding, a logic tree builder ("The Architect" phase), interstitial wisdom screens, and coach feedback.
--   **Daily Check-in**: Unified daily check-in within a chat interface, with AI motivational responses.
--   **Vision Check**: Users visualize the complete pathway (action → milestone → goal) before proceeding.
--   **Micro-Win Protocol**: A mandatory 60-second action immediately after onboarding to combat "Planning Trap".
--   **App Tour**: Interactive overlay system with spotlights and tooltips guiding users through key dashboard features.
--   **Discipline Engine Visuals**: Subtle, path-focused UI with past dates at 15% opacity, current and future dates at normal brightness. Information toasts provide friendly explanations for unloggable habits.
+-   **Onboarding**: Multi-phase onboarding with conversational AI, a logic tree builder ("The Architect"), interstitial wisdom screens, and coach feedback. Includes a mandatory 60-second "Micro-Win Protocol" and an interactive app tour.
+-   **Daily Check-in**: Unified within a chat interface with AI motivational responses.
+-   **Vision Check**: Users visualize the complete pathway (action → milestone → goal).
+-   **Discipline Engine Visuals**: Path-focused UI with past dates dimmed, and information toasts for unloggable habits.
 
 **Technical Implementations:**
--   **Default Starter Habits**: 4 pre-configured habits for all users: Morning Movement, Deep Work Session, Evening Reflection (Life Goal Habits), and **Ignite** (Anchor Habit - auto-completes when Momentum Generator finishes).
+-   **Default Starter Habits**: 4 pre-configured habits including an "Ignite" anchor habit that auto-completes with the Momentum Generator.
 -   **Habit Tracking**: Supports daily, weekly, and custom frequency habits.
--   **AI Integration**: Simulated AI for goal validation, habit generation, real-time motivational reactions, tailored responses, and conversational goal understanding, with persona calibration (Drill Sergeant, Hype Man, Wise Mentor).
--   **Conversational Logic Tree**: A chat interface for building milestone and daily action pathways, with AI tone adapting to selected persona.
--   **Discipline Engine - Urgency System**:
-    -   **Anchor Habit**: Same-day logging only (24-hour window).
-    -   **Life Goal Habit**: 2-day logging window (scheduled day + next day).
-    -   **Regular Habit**: Backfill anytime.
--   **Emergency Latch**: An "I'm Overwhelmed" toggle to shrink strict habits to 60-second micro-wins, triggered by a button in the dashboard header.
--   **Streak Repair**: Auto-detection of broken streaks with an instant redemption flow (60-second action) respecting the three-tier urgency system.
--   **Enhanced Dark Timer**: Blind execution mode for countdown timers with a black background and minimal UI to encourage focus on action. Includes an "I'm Doing It!" button for immediate commitment.
--   **Smart Notification System**:
-    -   Optional per-habit notification time picker.
-    -   Browser notification management with escalation logic (Gentle, Urgent, Buzzing).
-    -   "Hold-to-Ignite" modal for direct-to-action flow triggered by notification clicks.
-    -   Clean architecture for potential React Native migration.
--   **Engine A Mini-Apps (Mental Exercise System)**: Habits can be linked to immersive full-screen mini-app experiences.
-    -   **BreathPacer**: Immersive 4-second box breathing with animation, audio, and vocal cues.
-    -   **JournalModule**: Typewriter-style gratitude journaling with prompts and word count tracking.
-    -   Mini-app selection integrated into the Add Habit Modal.
--   **Program Library**: Pre-packaged habit programs for instant habit creation.
-    -   **Browse Button**: "Browse Program Library" CTA in Add Habit Modal opens full-screen program browser.
-    -   **Program Grid**: Visual cards showing program name, description, difficulty, category, and habit count.
-    -   **Program Detail**: Clicking program reveals all included habits with descriptions and mini-app badges.
-    -   **Multi-Select**: Users can select all habits or cherry-pick specific ones via checkboxes.
-    -   **Batch Creation**: Selected habits instantly added to dashboard with mini-apps pre-configured.
-    -   **Initial Programs**: Morning Starter, Deep Morning, Quick Reset, Gratitude Practice (4 programs with 1-2 habits each).
-    -   **Habit Tracking**: sourceProgramId field tracks which program habits came from for future analytics.
-    -   **Success Feedback**: Toast notification confirms habit additions ("Added 2 habits from program!").
--   **YouTube Embed Validation**: Content Library Manager now validates videos before saving using YouTube's oEmbed API to ensure they can be embedded. Shows clear success/error messages and prevents adding non-embeddable videos.
--   **Momentum Generator**: 7-step daily ritual transforming passive tracking into active execution.
-    -   **Streak**: Radial firework burst celebration effect (30 particles bursting outward in all directions).
-    -   **Vision**: Goal display with "Your Everyday Reminder" section showing grand vision/aspirations.
-    -   **Video**: "Today's Lesson" with YouTube iframe API integration, channel name display, completion tracking, 10-second timeout with manual "Continue Anyway" override.
-    -   **Reflection**: Daily question with text input.
-    -   **Habits**: 3 pre-generated starter habits (Morning Movement, Deep Work, Evening Reflection) with micro-wins + user's life goal habits merged.
-    -   **Pledge**: Hold-to-commit interactive button with mouse and touch support, progress ring animation, haptic feedback.
-    -   **Launch**: 60-second countdown with dark timer mode, 3-2-1 pre-countdown.
-    -   **Transitions**: Smooth 700ms synchronized transitions between all steps.
-    -   **Auto-Tracking**: Completing the Launch Pad automatically marks the "Ignite" anchor habit as complete for the day.
+-   **AI Integration**: Simulated AI for goal validation, habit generation, real-time motivational reactions, tailored responses, and conversational goal understanding with customizable persona calibration (Drill Sergeant, Hype Man, Wise Mentor).
+-   **Conversational Logic Tree**: Chat interface for building milestone and daily action pathways.
+-   **Discipline Engine - Urgency System**: Implements tiered logging windows for Anchor (same-day), Life Goal (2-day), and Regular habits (backfill anytime).
+-   **Emergency Latch**: "I'm Overwhelmed" toggle to reduce strict habits to 60-second micro-wins.
+-   **Streak Repair**: Auto-detection of broken streaks with an instant redemption flow.
+-   **Enhanced Dark Timer**: Blind execution mode for countdown timers with minimal UI for focus.
+-   **Smart Notification System**: Per-habit time picker, browser notifications with escalation logic, and "Hold-to-Ignite" modal for direct-to-action.
+-   **Engine A Mini-Apps (Mental Exercise System)**: Immersive full-screen mini-app experiences like BreathPacer and JournalModule, linkable to habits.
+-   **Program Library**: Pre-packaged habit programs for batch creation, browsable via a dedicated interface, with initial programs like Morning Starter, Deep Morning, Quick Reset, and Gratitude Practice.
+-   **Momentum Generator**: A 7-step daily ritual including:
+    -   **Streak**: Radial firework celebration.
+    -   **Vision**: Goal display.
+    -   **Video**: Educational content on habit formation (max 10 minutes) with YouTube iframe API integration and failsafe error handling.
+    -   **Reflection**: Daily question.
+    -   **Habits**: Pre-generated and user's life goal habits.
+    -   **Pledge**: Interactive hold-to-commit button.
+    -   **Launch**: 60-second countdown in dark timer mode.
+    -   Automatically marks the "Ignite" anchor habit as complete.
 -   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules, mini-app types, journal entries, program library selections, momentum generator content) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp.
 -   **Quick Navigation**: Home and Target icons for quick access to key phases.
@@ -124,3 +51,4 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 -   **Styling**: Tailwind CSS
 -   **Icons**: Lucide React
 -   **Deployment**: Replit environment
+-   **Video Embedding**: YouTube oEmbed API / YouTube iframe API
