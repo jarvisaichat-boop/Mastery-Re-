@@ -1,49 +1,13 @@
 import { ContentLibraryItem } from '../types';
 
-// MOTIVATIONAL CONTENT LIBRARY
+// EDUCATIONAL CONTENT LIBRARY - Habit Formation Focus
 // Note: Some YouTube videos may have embedding disabled. The app gracefully handles failures.
-// Using direct video IDs for compatibility
+// All videos teach concepts about habit formation, not just motivation
 export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
-  {
-    id: '1',
-    title: 'A Pep Talk from Kid President',
-    youtubeUrl: 'https://www.youtube.com/watch?v=l-gQLqv9f4o',
-    channelName: 'SoulPancake',
-    duration: 3,
-    question: 'What will you do today to be more awesome and stop being boring?',
-    category: 'mindset',
-  },
-  {
-    id: '2',
-    title: 'Just Do It - Shia LaBeouf',
-    youtubeUrl: 'https://www.youtube.com/watch?v=ZXsQAXx_ao0',
-    channelName: 'MotivaShian',
-    duration: 1,
-    question: 'What excuse are you ready to stop making today?',
-    category: 'discipline',
-  },
-  {
-    id: '3',
-    title: 'Why Do We Fall',
-    youtubeUrl: 'https://www.youtube.com/watch?v=mgmVOuLgFB0',
-    channelName: 'Mateusz M',
-    duration: 1,
-    question: 'What will you do to get back up after your last setback?',
-    category: 'strategy',
-  },
-  {
-    id: '4',
-    title: 'Rocky Balboa - Keep Moving Forward',
-    youtubeUrl: 'https://www.youtube.com/watch?v=D_Vg4uyYwEk',
-    channelName: 'Vimal Kumar',
-    duration: 2,
-    question: 'What impossible odds will you face today?',
-    category: 'discipline',
-    dayOfWeek: 1,
-  },
+  // Library currently empty - to be populated with educational habit content
 ];
 
-const CONTENT_LIBRARY_VERSION = 12; // All videos verified embeddable via oEmbed API
+const CONTENT_LIBRARY_VERSION = 13; // Removed motivational videos, preparing for educational content
 
 export function saveContentLibrary(items: ContentLibraryItem[]): void {
   try {
