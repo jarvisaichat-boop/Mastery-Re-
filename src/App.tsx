@@ -92,6 +92,20 @@ function loadHabitsFromStorage(): Habit[] {
         habits = [igniteHabit, ...habits];
       }
       
+      // Always normalize order values: Ignite gets -1, everything else gets sequential numbers
+      let nextOrder = 0;
+      habits = habits.map((h: any) => {
+        if (h.id === 9999994) {
+          return { ...h, order: -1 };
+        }
+        if (h.order === undefined || h.order === null || typeof h.order !== 'number') {
+          const currentOrder = nextOrder;
+          nextOrder++;
+          return { ...h, order: currentOrder };
+        }
+        return h;
+      });
+      
       return habits.map((h: any) => {
         if (h.createdAt) {
           return { ...h, createdAt: typeof h.createdAt === 'number' ? h.createdAt : Date.now() };
