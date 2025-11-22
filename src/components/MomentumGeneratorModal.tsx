@@ -833,8 +833,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 5: Life Goal Habit Cards - Single Select
   if (currentStep === 'habits') {
     return (
-      <div className="w-full h-full flex items-center justify-center overflow-y-auto p-4 sm:p-6">
-        <div className="max-w-5xl mx-auto w-full">
+      <div className="w-full h-full overflow-y-auto p-4 sm:p-6">
+        <div className="max-w-5xl mx-auto w-full py-4">
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">Which habit will you do first??</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
             {lifeGoals.map(habit => {
