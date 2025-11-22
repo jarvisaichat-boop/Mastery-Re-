@@ -1016,6 +1016,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             </h3>
             <button
               onClick={() => {
+                // Slow-paced vibration for Start Countdown button (slower than 3,2,1 countdown)
+                try {
+                  if ('vibrate' in navigator && navigator.vibrate) {
+                    navigator.vibrate(500);
+                  }
+                } catch (e) {
+                  // Ignore vibration errors
+                }
                 setLaunchActive(true);
                 setPreCountdown(3);
               }}
