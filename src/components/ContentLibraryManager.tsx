@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { X, Plus, Trash2, Search, PlayCircle } from 'lucide-react';
 import { ContentLibraryItem } from '../types';
 
 interface ContentLibraryManagerProps {
@@ -7,6 +7,17 @@ interface ContentLibraryManagerProps {
   onClose: () => void;
   contentLibrary: ContentLibraryItem[];
   onSave: (items: ContentLibraryItem[]) => void;
+}
+
+interface SearchResult {
+  videoId: string;
+  title: string;
+  channelName: string;
+  duration: number;
+  durationSeconds: number;
+  thumbnail: string;
+  description: string;
+  youtubeUrl: string;
 }
 
 export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
@@ -29,6 +40,70 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
   const [validationStatus, setValidationStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
   const [validationMessage, setValidationMessage] = useState<string>('');
   const [metadataFetched, setMetadataFetched] = useState<boolean>(false);
+  
+  // Search functionality
+  const [activeTab, setActiveTab] = useState<'library' | 'search'>('library');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState<boolean>(false);
+  const [searchMessage, setSearchMessage] = useState<string>('');
+
+  const predefinedSearches = [
+    'atomic habits how to start',
+    'tiny habits BJ Fogg',
+    'habit stacking',
+    '2 minute rule habits',
+    'how to build new habits',
+    'habit formation science'
+  ];
+
+  const handleSearch = async (query: string) => {
+    setSearching(true);
+    setSearchMessage('🔍 Searching YouTube for habit videos...');
+    setSearchResults([]);
+    
+    try {
+      const response = await fetch(`/api/youtube/search?query=${encodeURIComponent(query)}&maxResults=12`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setSearchMessage('✗ ' + (data.error || 'Search failed'));
+        setSearching(false);
+        return;
+      }
+      
+      setSearchResults(data.videos || []);
+      setSearchMessage(`✓ Found ${data.videos?.length || 0} videos under 8 minutes`);
+      setSearching(false);
+    } catch (error) {
+      setSearchMessage('✗ Network error. Make sure backend server is running.');
+      setSearching(false);
+    }
+  };
+
+  const handleQuickSearch = (query: string) => {
+    setSearchQuery(query);
+    handleSearch(query);
+  };
+
+  const handleAddFromSearch = (result: SearchResult) => {
+    const newItem: ContentLibraryItem = {
+      id: Date.now().toString(),
+      title: result.title,
+      youtubeUrl: result.youtubeUrl,
+      channelName: result.channelName,
+      duration: result.duration,
+      question: 'What ONE action will you take today based on this video?',
+      category: 'strategy',
+    };
+    
+    setEditingId(newItem.id);
+    setFormData(newItem);
+    setValidationStatus('valid');
+    setValidationMessage(`✓ Verified: ${result.duration.toFixed(1)} minutes | ${result.title}`);
+    setMetadataFetched(true);
+    setActiveTab('library');
+  };
 
   const handleAddNew = () => {
     setEditingId('new');
@@ -53,13 +128,11 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
     setMetadataFetched(false);
   };
 
-  // Fetch YouTube metadata from backend API
   const fetchYouTubeMetadata = async (url: string): Promise<boolean> => {
     try {
       setValidationStatus('checking');
       setValidationMessage('🔍 Fetching real video data from YouTube...');
 
-      // Use relative path - Vite dev server will proxy to backend, production uses same origin
       const response = await fetch(`/api/youtube/metadata?url=${encodeURIComponent(url)}`);
       const data = await response.json();
 
@@ -73,19 +146,17 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
         return false;
       }
 
-      // Check if duration exceeds 8 minutes
       if (data.duration > 8) {
         setValidationStatus('invalid');
         setValidationMessage(`❌ Video is ${data.duration.toFixed(1)} minutes (max 8 minutes). Please choose a shorter video.`);
         return false;
       }
 
-      // Auto-populate form with verified data
       setFormData(prev => ({
         ...prev,
         title: data.title,
         channelName: data.channelName,
-        duration: Math.ceil(data.duration), // Round up to nearest minute
+        duration: Math.ceil(data.duration),
       }));
 
       setValidationStatus('valid');
@@ -102,43 +173,21 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
 
   const validateYouTubeEmbed = async (url: string): Promise<boolean> => {
     try {
-      setValidationStatus('checking');
-      setValidationMessage('Checking if video can be embedded...');
-
-      // Extract video ID from URL
       const videoIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
       if (!videoIdMatch) {
-        setValidationStatus('invalid');
-        setValidationMessage('Invalid YouTube URL format');
         return false;
       }
 
       const videoId = videoIdMatch[1];
-
-      // Check embed permissions using YouTube oEmbed API
       const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
       
       try {
         const response = await fetch(oEmbedUrl);
-        
-        if (response.ok) {
-          setValidationStatus('valid');
-          setValidationMessage('✓ Video can be embedded successfully!');
-          return true;
-        } else {
-          setValidationStatus('invalid');
-          setValidationMessage('✗ Video embedding is disabled by the owner. Please choose a different video.');
-          return false;
-        }
+        return response.ok;
       } catch (error) {
-        // If oEmbed fails, it usually means embedding is restricted
-        setValidationStatus('invalid');
-        setValidationMessage('✗ Video embedding is disabled by the owner. Please choose a different video.');
         return false;
       }
     } catch (error) {
-      setValidationStatus('invalid');
-      setValidationMessage('Error checking video. Please verify the URL.');
       return false;
     }
   };
@@ -149,27 +198,25 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
       return;
     }
 
-    // STRICT DURATION CHECK: Must be 8 minutes or less
     if (formData.duration > 8) {
       alert('⚠️ Video must be 8 minutes or less. Please choose a shorter video or adjust the duration.');
       return;
     }
 
-    // REQUIRE metadata verification for new videos
     if (!metadataFetched) {
       alert('⚠️ Please verify the video using "Fetch & Verify Video" button first to ensure accurate duration and metadata.');
       return;
     }
 
-    // Additional embedding check (fallback)
-    if (validationStatus !== 'valid') {
-      const isValid = await validateYouTubeEmbed(formData.youtubeUrl);
-      if (!isValid) {
-        return; // Don't save if validation fails
+    // Additional embedding check
+    const canEmbed = await validateYouTubeEmbed(formData.youtubeUrl);
+    if (!canEmbed) {
+      if (!confirm('⚠️ Video embedding may be disabled. The video might not play in the app. Add anyway?')) {
+        return;
       }
     }
 
-    if (editingId === 'new') {
+    if (editingId === 'new' || !items.find(item => item.id === editingId)) {
       setItems([...items, formData]);
     } else {
       setItems(items.map(item => (item.id === editingId ? formData : item)));
@@ -193,8 +240,8 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4">
-      <div className="bg-gray-900 rounded-lg max-w-3xl w-full max-h-screen overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-700 sticky top-0 bg-gray-900">
+      <div className="bg-gray-900 rounded-lg max-w-6xl w-full max-h-screen overflow-hidden flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <h2 className="text-2xl font-bold text-white">Content Library Manager</h2>
           <button
             onClick={onClose}
@@ -204,205 +251,344 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
           </button>
         </div>
 
-        <div className="p-6">
-          {editingId ? (
-            <div className="bg-gray-800 rounded-lg p-6 mb-6">
-              <h3 className="text-xl font-bold text-white mb-4">
-                {editingId === 'new' ? 'Add New Content' : 'Edit Content'}
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Title *
-                  </label>
+        {/* Tabs */}
+        <div className="flex border-b border-gray-700">
+          <button
+            onClick={() => setActiveTab('library')}
+            className={`flex-1 px-6 py-3 font-semibold transition-colors ${
+              activeTab === 'library'
+                ? 'bg-gray-800 text-yellow-400 border-b-2 border-yellow-400'
+                : 'bg-gray-900 text-gray-400 hover:text-white'
+            }`}
+          >
+            Library ({items.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('search')}
+            className={`flex-1 px-6 py-3 font-semibold transition-colors ${
+              activeTab === 'search'
+                ? 'bg-gray-800 text-yellow-400 border-b-2 border-yellow-400'
+                : 'bg-gray-900 text-gray-400 hover:text-white'
+            }`}
+          >
+            <Search className="inline mr-2" size={18} />
+            Search YouTube
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          {activeTab === 'search' ? (
+            <div>
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                  Search YouTube for habit formation videos
+                </label>
+                <div className="flex gap-2">
                   <input
                     type="text"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., The Power of Consistency"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
+                    className="flex-1 bg-gray-800 text-white rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    placeholder="e.g., atomic habits, tiny habits, habit stacking..."
                   />
+                  <button
+                    onClick={() => handleSearch(searchQuery)}
+                    disabled={!searchQuery || searching}
+                    className="px-6 py-3 bg-yellow-600 text-white font-semibold rounded hover:bg-yellow-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  >
+                    {searching ? 'Searching...' : 'Search'}
+                  </button>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    YouTube URL *
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={formData.youtubeUrl}
-                      onChange={(e) => {
-                        setFormData({ ...formData, youtubeUrl: e.target.value });
-                        setValidationStatus('idle'); // Reset validation when URL changes
-                        setValidationMessage('');
-                        setMetadataFetched(false); // Reset metadata flag
-                      }}
-                      className="flex-1 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="https://www.youtube.com/watch?v=..."
-                    />
+                
+                {/* Quick search buttons */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="text-xs text-gray-400 mr-2">Quick searches:</span>
+                  {predefinedSearches.map((query) => (
                     <button
-                      type="button"
-                      onClick={() => fetchYouTubeMetadata(formData.youtubeUrl)}
-                      disabled={!formData.youtubeUrl || validationStatus === 'checking'}
-                      className="px-4 py-2 bg-yellow-600 text-white font-semibold rounded hover:bg-yellow-700 disabled:bg-gray-600 disabled:cursor-not-allowed whitespace-nowrap"
+                      key={query}
+                      onClick={() => handleQuickSearch(query)}
+                      className="px-3 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600"
                     >
-                      {validationStatus === 'checking' ? 'Verifying...' : 'Fetch & Verify'}
+                      {query}
                     </button>
+                  ))}
+                </div>
+
+                {searchMessage && (
+                  <div className={`mt-3 p-3 rounded text-sm ${
+                    searchMessage.startsWith('✓')
+                      ? 'bg-green-900/30 border border-green-600 text-green-400'
+                      : searchMessage.startsWith('✗')
+                      ? 'bg-red-900/30 border border-red-600 text-red-400'
+                      : 'bg-blue-900/30 border border-blue-600 text-blue-400'
+                  }`}>
+                    {searchMessage}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Paste any YouTube URL - we'll automatically fetch real title, channel & duration
-                  </p>
-                  {validationMessage && (
-                    <div className={`mt-2 p-3 rounded text-sm ${
-                      validationStatus === 'valid' 
-                        ? 'bg-green-900/30 border border-green-600 text-green-400' 
-                        : validationStatus === 'invalid'
-                        ? 'bg-red-900/30 border border-red-600 text-red-400'
-                        : 'bg-blue-900/30 border border-blue-600 text-blue-400'
-                    }`}>
-                      {validationMessage}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Duration (minutes) *
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.duration}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        duration: parseInt(e.target.value) || 3,
-                      })
-                    }
-                    className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min="1"
-                    max="8"
-                  />
-                  <p className="text-xs text-yellow-400 mt-1 font-semibold">
-                    ℹ️ Maximum 8 minutes
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Question *
-                  </label>
-                  <textarea
-                    value={formData.question}
-                    onChange={(e) =>
-                      setFormData({ ...formData, question: e.target.value })
-                    }
-                    className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., How will you apply this lesson today?"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Category
-                  </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        category: e.target.value as any,
-                      })
-                    }
-                    className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="discipline">Discipline</option>
-                    <option value="psychology">Psychology</option>
-                    <option value="strategy">Strategy</option>
-                    <option value="mindset">Mindset</option>
-                  </select>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={handleSaveItem}
-                    disabled={validationStatus === 'checking'}
-                    className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                  >
-                    {validationStatus === 'checking' ? 'Validating...' : 'Save Item'}
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="px-4 py-2 bg-gray-700 text-white font-semibold rounded hover:bg-gray-600"
-                  >
-                    Cancel
-                  </button>
-                </div>
+                )}
               </div>
+
+              {/* Search Results Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {searchResults.map((result) => (
+                  <div
+                    key={result.videoId}
+                    className="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-yellow-400 transition-all"
+                  >
+                    <div className="relative">
+                      <img
+                        src={result.thumbnail}
+                        alt={result.title}
+                        className="w-full h-32 object-cover"
+                      />
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-80 px-2 py-1 rounded text-xs text-white font-semibold">
+                        {result.duration.toFixed(1)} min
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <h4 className="text-white font-semibold text-sm line-clamp-2 mb-1">
+                        {result.title}
+                      </h4>
+                      <p className="text-gray-400 text-xs mb-2">{result.channelName}</p>
+                      <button
+                        onClick={() => handleAddFromSearch(result)}
+                        className="w-full px-3 py-2 bg-yellow-600 text-white text-sm font-semibold rounded hover:bg-yellow-700 flex items-center justify-center gap-1"
+                      >
+                        <Plus size={16} />
+                        Add to Library
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {searchResults.length === 0 && !searching && (
+                <div className="text-center text-gray-400 py-12">
+                  <Search size={48} className="mx-auto mb-4 opacity-50" />
+                  <p>Search for videos to add to your library</p>
+                  <p className="text-sm mt-2">Try: "atomic habits", "tiny habits", or "habit stacking"</p>
+                </div>
+              )}
             </div>
           ) : (
-            <button
-              onClick={handleAddNew}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 mb-6"
-            >
-              <Plus size={20} /> Add Content
-            </button>
-          )}
+            <div>
+              {editingId ? (
+                <div className="bg-gray-800 rounded-lg p-6 mb-6">
+                  <h3 className="text-xl font-bold text-white mb-4">
+                    {editingId === 'new' ? 'Add New Content' : 'Edit Content'}
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Title *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
+                        className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                        placeholder="e.g., The Power of Consistency"
+                      />
+                    </div>
 
-          <div className="space-y-3">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="bg-gray-800 rounded-lg p-4 flex items-start justify-between"
-              >
-                <div className="flex-1">
-                  <h4 className="text-white font-semibold">{item.title}</h4>
-                  <p className="text-gray-400 text-sm">{item.question}</p>
-                  <p className="text-gray-500 text-xs mt-1">
-                    {item.duration} min • {item.category}
-                  </p>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        YouTube URL *
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={formData.youtubeUrl}
+                          onChange={(e) => {
+                            setFormData({ ...formData, youtubeUrl: e.target.value });
+                            setValidationStatus('idle');
+                            setValidationMessage('');
+                            setMetadataFetched(false);
+                          }}
+                          className="flex-1 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          placeholder="https://www.youtube.com/watch?v=..."
+                        />
+                        <button
+                          type="button"
+                          onClick={() => fetchYouTubeMetadata(formData.youtubeUrl)}
+                          disabled={!formData.youtubeUrl || validationStatus === 'checking'}
+                          className="px-4 py-2 bg-yellow-600 text-white font-semibold rounded hover:bg-yellow-700 disabled:bg-gray-600 disabled:cursor-not-allowed whitespace-nowrap"
+                        >
+                          {validationStatus === 'checking' ? 'Verifying...' : 'Fetch & Verify'}
+                        </button>
+                      </div>
+                      {validationMessage && (
+                        <div className={`mt-2 p-3 rounded text-sm ${
+                          validationStatus === 'valid' 
+                            ? 'bg-green-900/30 border border-green-600 text-green-400' 
+                            : validationStatus === 'invalid'
+                            ? 'bg-red-900/30 border border-red-600 text-red-400'
+                            : 'bg-blue-900/30 border border-blue-600 text-blue-400'
+                        }`}>
+                          {validationMessage}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">
+                          Channel Name
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.channelName}
+                          onChange={(e) =>
+                            setFormData({ ...formData, channelName: e.target.value })
+                          }
+                          className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          placeholder="Auto-filled from YouTube"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">
+                          Duration (minutes) *
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.duration}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              duration: parseInt(e.target.value) || 3,
+                            })
+                          }
+                          className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                          min="1"
+                          max="8"
+                        />
+                        <p className="text-xs text-yellow-400 mt-1 font-semibold">
+                          Max 8 minutes
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Reflection Question *
+                      </label>
+                      <textarea
+                        value={formData.question}
+                        onChange={(e) =>
+                          setFormData({ ...formData, question: e.target.value })
+                        }
+                        className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                        placeholder="e.g., What ONE action will you take today based on this video?"
+                        rows={3}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Category
+                      </label>
+                      <select
+                        value={formData.category}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            category: e.target.value as any,
+                          })
+                        }
+                        className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      >
+                        <option value="discipline">Discipline</option>
+                        <option value="psychology">Psychology</option>
+                        <option value="strategy">Strategy</option>
+                        <option value="mindset">Mindset</option>
+                      </select>
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                      <button
+                        onClick={handleSaveItem}
+                        disabled={validationStatus === 'checking'}
+                        className="px-6 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                      >
+                        {validationStatus === 'checking' ? 'Validating...' : 'Save Item'}
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="px-6 py-2 bg-gray-700 text-white font-semibold rounded hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="px-3 py-1 bg-gray-700 text-white text-sm rounded hover:bg-gray-600"
+              ) : (
+                <button
+                  onClick={handleAddNew}
+                  className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white font-semibold rounded hover:bg-yellow-700 mb-6"
+                >
+                  <Plus size={20} /> Add Content Manually
+                </button>
+              )}
+
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-gray-800 rounded-lg p-4 flex items-start justify-between hover:bg-gray-750"
                   >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                    <div className="flex-1">
+                      <h4 className="text-white font-semibold">{item.title}</h4>
+                      <p className="text-gray-400 text-sm mt-1">{item.channelName}</p>
+                      <p className="text-gray-400 text-sm italic mt-1">"{item.question}"</p>
+                      <p className="text-gray-500 text-xs mt-2">
+                        {item.duration} min • {item.category}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="px-3 py-1 bg-gray-700 text-white text-sm rounded hover:bg-gray-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {items.length === 0 && !editingId && (
-            <p className="text-center text-gray-400 py-8">
-              No content yet. Add your first video!
-            </p>
+              {items.length === 0 && !editingId && (
+                <div className="text-center text-gray-400 py-12">
+                  <PlayCircle size={48} className="mx-auto mb-4 opacity-50" />
+                  <p className="mb-2">No videos in your library yet</p>
+                  <p className="text-sm">Search for videos or add them manually</p>
+                </div>
+              )}
+            </div>
           )}
+        </div>
 
-          <div className="flex gap-3 mt-8 sticky bottom-0 bg-gray-900 pt-4 border-t border-gray-700">
-            <button
-              onClick={handleSaveAll}
-              className="px-6 py-3 bg-green-600 text-white font-semibold rounded hover:bg-green-700"
-            >
-              Save All Changes
-            </button>
-            <button
-              onClick={onClose}
-              className="px-6 py-3 bg-gray-700 text-white font-semibold rounded hover:bg-gray-600"
-            >
-              Cancel
-            </button>
-          </div>
+        <div className="flex gap-3 p-6 border-t border-gray-700 bg-gray-900">
+          <button
+            onClick={handleSaveAll}
+            className="px-6 py-3 bg-green-600 text-white font-semibold rounded hover:bg-green-700"
+          >
+            Save All Changes
+          </button>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 bg-gray-700 text-white font-semibold rounded hover:bg-gray-600"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>

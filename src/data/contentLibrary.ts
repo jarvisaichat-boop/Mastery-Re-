@@ -10,13 +10,58 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
     title: 'The Science of Productivity',
     youtubeUrl: 'https://www.youtube.com/watch?v=lHfjvYzr-3g',
     channelName: 'AsapSCIENCE',
-    duration: 3.27, // VERIFIED: 3 minutes 16 seconds
+    duration: 3,
     question: 'What ONE productivity technique will you apply today to start a new habit?',
+    category: 'strategy',
+  },
+  {
+    id: '2',
+    title: 'How to Create a Habit: The 2 Minute Rule',
+    youtubeUrl: 'https://www.youtube.com/watch?v=ueXdK1wI0tA',
+    channelName: 'Peter Attia MD',
+    duration: 6,
+    question: 'What is the 2-minute version of the habit you want to build?',
+    category: 'discipline',
+  },
+  {
+    id: '3',
+    title: 'Habit Stacking - Create Your Perfect Routine',
+    youtubeUrl: 'https://www.youtube.com/watch?v=zjBhC4C-9KU',
+    channelName: 'Better Than Yesterday',
+    duration: 8,
+    question: 'Which existing daily habit will you stack your new habit onto?',
+    category: 'strategy',
+  },
+  {
+    id: '4',
+    title: 'Emotions Create Habits BJ Fogg',
+    youtubeUrl: 'https://www.youtube.com/watch?v=iCt8Ngdsu2g',
+    channelName: 'Bariatric Advantage',
+    duration: 5,
+    question: 'How will you celebrate and feel positive emotions after doing your tiny habit?',
+    category: 'psychology',
+  },
+  {
+    id: '5',
+    title: 'How to Develop a Habit in 7 Steps',
+    youtubeUrl: 'https://www.youtube.com/watch?v=FJ8f73e10l8',
+    channelName: 'Brian Tracy',
+    duration: 7,
+    question: 'Which of the 7 steps will you focus on first to build your new habit?',
+    category: 'discipline',
+  },
+  {
+    id: '6',
+    title: 'How to Build Good Habits: Atomic Habits Author James Clear Explains',
+    youtubeUrl: 'https://www.youtube.com/watch?v=B9j6hcv7Cvs',
+    channelName: 'Tim Ferriss',
+    duration: 5,
+    question: 'What environment change will you make today to support your new habit?',
     category: 'strategy',
   },
 ];
 
-const CONTENT_LIBRARY_VERSION = 18; // STRICT enforcement: Only videos ≤8.00 minutes (removed 8.07-min video that exceeded limit)
+const CONTENT_LIBRARY_VERSION = 20; // Curated action-oriented videos only: Removed book summaries, kept HOW-TO tutorials (6 videos, 3-8 min)
 
 export function saveContentLibrary(items: ContentLibraryItem[]): void {
   try {

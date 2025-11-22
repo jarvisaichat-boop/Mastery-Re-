@@ -133,8 +133,9 @@ app.get('/api/youtube/search', async (req, res) => {
     }
     
     // Call YouTube Data API v3 search endpoint
-    // videoDuration: short (0-4 min), medium (4-20 min)
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoDuration=medium&maxResults=${maxResults}&key=${apiKey}`;
+    // Using videoDuration=medium (4-20 min) then filtering to <=8min
+    // Note: We filter more strictly client-side after fetching full metadata
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoDuration=medium&maxResults=${maxResults * 2}&key=${apiKey}`;
     
     const response = await fetch(searchUrl);
     const data = await response.json();
