@@ -508,8 +508,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   // Render step content based on current step (persistent backdrop pattern)
   const renderStepContent = () => {
-    // "Come back tomorrow" screen
-    if (isCompletedToday) {
+    // "Come back tomorrow" screen (but not if popup is showing)
+    if (isCompletedToday && !showSeizeTheDayPopup) {
       return (
         <div className="text-center max-w-lg mx-auto px-6">
           <div className="mb-8 animate-scaleIn">

@@ -4,7 +4,7 @@
 **Path - Self Mastery** is a gamified, AI-powered habit coaching program designed to guide users through a 7-phase coaching cycle: Intake, Goal Contract, Plan, Do, Review, Accountability, and Loop. The application aims to provide an engaging and effective platform for habit formation, leveraging a "Duolingo for Habit Forming" model with a dark mode "Focus Dojo" aesthetic.
 
 ## Recent Changes (November 22, 2025)
--   **CRITICAL FIX - "Seize the Day" Popup Flash**: Fixed bug where completion popup would flash briefly and disappear without user interaction. Used ref (`countdownCompletedRef`) to persist popup state across parent re-renders triggered by `onComplete()` state updates.
+-   **CRITICAL FIX - "Seize the Day" Popup Flash**: Fixed bug where completion popup would flash briefly and disappear, showing "Mission Complete" instead. Root cause: `onComplete()` set `isCompletedToday=true`, immediately switching modal to completion screen. Fix: (1) Used ref (`countdownCompletedRef`) to persist popup state across re-renders, (2) Prevented "Mission Complete" screen from rendering while popup is visible.
 -   **CRITICAL FIX - Ignite Habit Scheduling**: Fixed root cause where Ignite habit with `frequencyType: 'daily'` wasn't recognized by `isHabitScheduledOnDay` (which only checked for 'Everyday'). This single fix resolved THREE user-reported issues:
     1. ✅ Ignite checkmarks now display when auto-completed after Momentum Generator
     2. ✅ Week circles show proper dimming (current week stays bright, only past weeks dim if incomplete)
