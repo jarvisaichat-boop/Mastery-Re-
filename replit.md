@@ -10,6 +10,7 @@
     2. ✅ Week circles show proper dimming (current week stays bright, only past weeks dim if incomplete)
     3. ✅ Discipline Engine properly recognizes Ignite as scheduled for all strictness rules
 -   **Subtle Video Skip UI**: Moved skip button to bottom with small gray text to discourage skipping while maintaining failsafe for genuine loading errors.
+-   **Optional Reflection Question**: When video is skipped or fails to load, the reflection question becomes optional - users can continue without answering since there's no content to reflect on.
 -   **Momentum Generator Video Library**: Reduced to 4 verified TED talks (all exactly 3 minutes) from official "TED in 3 Minutes" playlist to ensure all videos are under 5 minutes and embeddable.
 -   **Ignite Habit Persistence**: Fixed critical bug where momentum completion wasn't persisting to localStorage - now includes immediate localStorage write for both momentum timestamp and Ignite habit completion.
 -   **Vision Card Sizing**: Fixed visual glitch where vision card would jump from empty to full size by generating random content synchronously before step transition.
