@@ -4,6 +4,11 @@
 **Path - Self Mastery** is a gamified, AI-powered habit coaching program designed to guide users through a 7-phase coaching cycle: Intake, Goal Contract, Plan, Do, Review, Accountability, and Loop. The application aims to provide an engaging and effective platform for habit formation, leveraging a "Duolingo for Habit Forming" model with a dark mode "Focus Dojo" aesthetic.
 
 ## Recent Changes (November 22, 2025)
+-   **CRITICAL FIX - Video Duration Enforcement**: Added triple-layer protection to ensure ONLY videos under 5 minutes are used:
+    1. Immediate purge on app mount - filters and removes any videos >= 5 minutes from localStorage
+    2. Save blocking in Content Library Manager - prevents saving videos >= 5 minutes
+    3. Input validation - duration field max value set to 4 minutes with red warning
+    4. Version 11 migration - forces reset to verified short videos (2-4 min)
 -   **CRITICAL FIX - "Seize the Day" Popup Flash**: Fixed bug where completion popup would flash briefly and disappear, showing "Mission Complete" instead. Root cause: `onComplete()` set `isCompletedToday=true`, immediately switching modal to completion screen. Fix: (1) Used ref (`countdownCompletedRef`) to persist popup state across re-renders, (2) Prevented "Mission Complete" screen from rendering while popup is visible.
 -   **CRITICAL FIX - Ignite Habit Scheduling**: Fixed root cause where Ignite habit with `frequencyType: 'daily'` wasn't recognized by `isHabitScheduledOnDay` (which only checked for 'Everyday'). This single fix resolved THREE user-reported issues:
     1. ✅ Ignite checkmarks now display when auto-completed after Momentum Generator

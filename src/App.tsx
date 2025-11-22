@@ -288,6 +288,16 @@ function App() {
             return localStorage.getItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY);
         } catch { return null; }
     });
+
+    // CRITICAL: Immediately purge any videos >= 5 minutes on mount
+    useEffect(() => {
+        const validVideos = contentLibrary.filter(item => item.duration < 5);
+        if (validVideos.length !== contentLibrary.length) {
+            console.warn(`🧹 Purging ${contentLibrary.length - validVideos.length} videos that are >= 5 minutes`);
+            setContentLibrary(validVideos);
+            saveContentLibrary(validVideos);
+        }
+    }, []); // Run once on mount
     
     const isMomentumCompletedToday = momentumLastCompleted === formatDate(new Date(), 'yyyy-MM-dd');
 
