@@ -1123,8 +1123,25 @@ function App() {
                         {isMomentumCompletedToday && (
                             <button
                                 onClick={() => {
+                                    const today = formatDate(new Date(), 'yyyy-MM-dd');
+                                    
+                                    // Clear momentum completion timestamp
                                     setMomentumLastCompleted(null);
                                     localStorage.removeItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY);
+                                    
+                                    // Clear Ignite habit completion for today
+                                    setHabits(prevHabits => {
+                                        return prevHabits.map(h => {
+                                            if (h.id === 9999994) {
+                                                const updatedCompleted = { ...h.completed };
+                                                delete updatedCompleted[today];
+                                                return { ...h, completed: updatedCompleted };
+                                            }
+                                            return h;
+                                        });
+                                    });
+                                    
+                                    console.log('🔄 Reset: Cleared momentum completion and Ignite habit for', today);
                                 }}
                                 className="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded-lg border border-gray-500 transition-all duration-200"
                                 title="Reset for testing"
