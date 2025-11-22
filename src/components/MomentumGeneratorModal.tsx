@@ -226,19 +226,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return streak;
   }
 
-  // Smooth fade in animation on step change
+  // Keep content always visible since we have a persistent backdrop
   useEffect(() => {
     if (!isOpen) return;
-    
-    // Immediate visibility for first step
-    if (currentStep === 'streak') {
-      setStepVisible(true);
-    } else {
-      // Keep visible during transition, then fade in new content
-      // This prevents background from showing through during step changes
-      const timer = setTimeout(() => setStepVisible(true), 50);
-      return () => clearTimeout(timer);
-    }
+    setStepVisible(true);
   }, [currentStep, isOpen]);
 
   // Initialize YouTube player when content step loads
@@ -445,15 +436,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       const nextStep = steps[currentIndex + 1];
-      // Smooth transition: fade out, change step, fade in
-      const transitionDelay = 600; // Match card animation duration
-      
-      requestAnimationFrame(() => {
-        setStepVisible(false);
-        setTimeout(() => {
-          setCurrentStep(nextStep);
-        }, transitionDelay);
-      });
+      // Instant step change - persistent backdrop prevents flashing
+      setCurrentStep(nextStep);
     }
   };
 
@@ -487,29 +471,26 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
     // Step 1: Streak Card with Side Fireworks
     if (currentStep === 'streak') {
-    // Generate left firework particles bursting outward from left side
-    const leftFireworkParticles = [...Array(15)].map((_, i) => {
-      const angle = -60 + (i / 15) * 120; // Spread from left side
-      const distance = 150 + Math.random() * 100;
-      const tx = Math.cos(angle * Math.PI / 180) * distance;
-      const ty = Math.sin(angle * Math.PI / 180) * distance;
-      return { tx, ty, delay: Math.random() * 0.3 };
-    });
-    
-    // Generate right firework particles bursting outward from right side
-    const rightFireworkParticles = [...Array(15)].map((_, i) => {
-      const angle = 60 + (i / 15) * 120; // Spread from right side
-      const distance = 150 + Math.random() * 100;
-      const tx = Math.cos(angle * Math.PI / 180) * distance;
-      const ty = Math.sin(angle * Math.PI / 180) * distance;
-      return { tx, ty, delay: Math.random() * 0.3 };
-    });
+      // Generate left firework particles bursting outward from left side
+      const leftFireworkParticles = [...Array(15)].map((_, i) => {
+        const angle = -60 + (i / 15) * 120; // Spread from left side
+        const distance = 150 + Math.random() * 100;
+        const tx = Math.cos(angle * Math.PI / 180) * distance;
+        const ty = Math.sin(angle * Math.PI / 180) * distance;
+        return { tx, ty, delay: Math.random() * 0.3 };
+      });
+      
+      // Generate right firework particles bursting outward from right side
+      const rightFireworkParticles = [...Array(15)].map((_, i) => {
+        const angle = 60 + (i / 15) * 120; // Spread from right side
+        const distance = 150 + Math.random() * 100;
+        const tx = Math.cos(angle * Math.PI / 180) * distance;
+        const ty = Math.sin(angle * Math.PI / 180) * distance;
+        return { tx, ty, delay: Math.random() * 0.3 };
+      });
 
-    return (
-      <div 
-        className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-hidden cursor-pointer"
-        onClick={handleNextStep}
-      >
+      return (
+        <div className="w-full h-full flex items-center justify-center overflow-hidden cursor-pointer" onClick={handleNextStep}>
         {/* Falling Confetti Animation - Infinite Loop */}
         {confetti.map((piece) => (
           <div
@@ -606,10 +587,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     const displayVision = aspirations || randomVisionContent;
     
     return (
-      <div 
-        className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center cursor-pointer overflow-y-auto"
-        onClick={handleNextStep}
-      >
+      <div className="w-full h-full flex items-center justify-center cursor-pointer overflow-y-auto" onClick={handleNextStep}>
         <div className={`max-w-4xl mx-auto px-4 sm:px-6 py-6 transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
@@ -652,7 +630,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     // Show full-screen intro first
     if (showVideoIntro && content) {
       return (
-        <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-y-auto p-4 sm:p-6">
+        <div className="w-full h-full flex items-center justify-center overflow-y-auto p-4 sm:p-6">
           <div className={`max-w-3xl mx-auto w-full transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
             <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-8 sm:p-12 shadow-2xl text-center" style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.4), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
               <div className="mb-10 sm:mb-12 flex justify-center">
@@ -688,7 +666,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     
     // Then show the actual video with question overlay
     return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full h-full flex items-center justify-center p-4 sm:p-6">
         <div className={`max-w-5xl mx-auto w-full transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           {content ? (
             <>
@@ -767,7 +745,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 5: Life Goal Habit Cards - Single Select
   if (currentStep === 'habits') {
     return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-y-auto p-4 sm:p-6">
+      <div className="w-full h-full flex items-center justify-center overflow-y-auto p-4 sm:p-6">
         <div className={`max-w-5xl mx-auto w-full transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">Which habit will you do first??</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
@@ -844,7 +822,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 6: Mission Briefing Card
   if (currentStep === 'pledge') {
     return (
-      <div className={`fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center transition-all duration-300 ${shakeScreen ? 'animate-pulse' : ''}`}>
+      <div className="w-full h-full flex items-center justify-center">
         <div className={`max-w-2xl mx-6 transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
@@ -913,28 +891,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     const rocketProgress = launchActive && preCountdown === null ? ((60 - launchCountdown) / 60) * 100 : 0;
     
     return (
-      <div className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center overflow-hidden">
-        {/* Black overlay always visible - prevents dashboard flash */}
-        {/* "Go seize the day!" popup overlay - appears on top when countdown completes */}
-        {showSeizeTheDayPopup && (
-          <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn">
-            <div className="text-center px-6 animate-scaleIn">
-              <div className="mb-8">
-                <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse" 
-                     style={{textShadow: '0 0 100px rgba(251, 191, 36, 0.9)'}}>
-                  🔥
-                </div>
-              </div>
-              <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{textShadow: '0 0 60px rgba(251, 191, 36, 0.7)'}}>
-                Go Seize the Day!
-              </h2>
-              <p className="text-3xl text-yellow-400 font-light">
-                Your momentum starts NOW
-              </p>
-            </div>
-          </div>
-        )}
-        
+      <div className="w-full h-full flex items-center justify-center overflow-hidden">
         {!launchActive ? (
           <div className="flex flex-col items-center justify-center h-full">
             <div className={`transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
@@ -1031,4 +988,32 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   }
 
   return null;
+};
+
+  if (!isOpen) return null;
+
+  return (
+    <div className={`fixed inset-0 z-50 ${isCompletedToday ? 'bg-black/98 backdrop-blur-sm' : 'bg-gradient-to-b from-gray-900 via-black to-gray-900'} flex items-center justify-center ${shakeScreen ? 'animate-pulse' : ''}`}>
+      {renderStepContent()}
+      {/* Go seize the day popup */}
+      {showSeizeTheDayPopup && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn">
+          <div className="text-center px-6 animate-scaleIn">
+            <div className="mb-8">
+              <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse" 
+                   style={{textShadow: '0 0 100px rgba(251, 191, 36, 0.9)'}}>
+                🔥
+              </div>
+            </div>
+            <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{textShadow: '0 0 60px rgba(251, 191, 36, 0.7)'}}>
+              Go Seize the Day!
+            </h2>
+            <p className="text-3xl text-yellow-400 font-light">
+              Your momentum starts NOW
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
