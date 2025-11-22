@@ -48,7 +48,7 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 -   **Momentum Generator**: A 7-step daily ritual including:
     -   **Streak**: Radial firework celebration.
     -   **Vision**: Goal display.
-    -   **Video**: Mixed-length educational content library (4-8 minutes max) teaching how to START habits using Atomic Habits and Tiny Habits methodology. Smart weekend scheduling: shorter clips (4-6 min) Monday-Friday for quick wins, longer deep dives (7-8 min) Saturday-Sunday for comprehensive learning. YouTube iframe API integration with failsafe error handling.
+    -   **Video**: Smart recommendation engine selects personalized educational content (4-8 minutes max) teaching how to START habits using Atomic Habits and Tiny Habits methodology. Algorithm considers user's habit categories, journey stage (beginner/intermediate/advanced based on total habits and completion rate), watch history (30-day repetition avoidance), time of week (shorter videos weekdays, longer on weekends), and content preferences. All videos include comprehensive tags (contentType, lifeDomain, difficulty, emotion, techniques) for intelligent matching. YouTube iframe API integration with failsafe error handling. Clickable YouTube links in Content Library Manager for both library and search tabs.
     -   **Reflection**: Daily question tailored to each video's content.
     -   **Habits**: Pre-generated and user's life goal habits.
     -   **Pledge**: Interactive hold-to-commit button.
