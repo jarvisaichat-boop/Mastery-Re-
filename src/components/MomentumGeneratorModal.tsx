@@ -42,7 +42,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [pledgeProgress, setPledgeProgress] = useState(0);
   const [launchCountdown, setLaunchCountdown] = useState(60);
   const [launchActive, setLaunchActive] = useState(false);
-  const [shakeScreen, setShakeScreen] = useState(false);
   const [selectedContent, setSelectedContent] = useState<ContentLibraryItem | null>(null);
   const [videoCompleted, setVideoCompleted] = useState(false);
   const [player, setPlayer] = useState<any>(null);
@@ -393,14 +392,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         } catch (e) {
           // Ignore vibration errors - continue flow regardless
         }
-        setShakeScreen(true);
-        setTimeout(() => {
-          setShakeScreen(false);
-        }, 1000);
-        // Let the automatic useEffect handle the fade transition
+        // Direct transition without intermediate state changes to prevent fade-out glitch
         setTimeout(() => {
           setCurrentStep('launch');
-        }, 1200); // Transition after shake completes
+        }, 300); // Brief pause to show "LOCKED ✓" state
       }
     }, 10);
   };
@@ -1089,7 +1084,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   return (
     <div className={`fixed inset-0 z-50 ${isCompletedToday ? 'bg-black/98 backdrop-blur-sm' : 'bg-gradient-to-b from-gray-900 via-black to-gray-900'} flex items-center justify-center`}>
-      <div className={shakeScreen ? 'animate-pulse w-full h-full flex items-center justify-center' : 'w-full h-full flex items-center justify-center'}>
+      <div className="w-full h-full flex items-center justify-center">
         {renderStepContent()}
       </div>
       {/* Go seize the day popup - click to dismiss */}
