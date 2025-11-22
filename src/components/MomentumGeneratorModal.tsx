@@ -47,6 +47,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [videoCompleted, setVideoCompleted] = useState(false);
   const [player, setPlayer] = useState<any>(null);
   const [videoError, setVideoError] = useState(false);
+  const [videoStarted, setVideoStarted] = useState(false);
   const [confetti, setConfetti] = useState<{ id: number; left: number; delay: number }[]>([]);
   const [youtubeMetadata, setYoutubeMetadata] = useState<{ title: string; author: string } | null>(null);
   const [showSeizeTheDayPopup, setShowSeizeTheDayPopup] = useState(false);
@@ -54,8 +55,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [preCountdown, setPreCountdown] = useState<number | null>(null);
   const [randomVisionContent, setRandomVisionContent] = useState<string>('');
   
-  // Ref for YouTube player container to isolate from React's DOM management
+  // Refs for YouTube player and timeout management
   const playerContainerRef = useRef<HTMLDivElement>(null);
+  const videoTimeoutRef = useRef<number | null>(null);
 
   // Always include these 3 pre-generated life goal habits
   const starterHabits = [
@@ -126,6 +128,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       const randomContent = contentLibrary[Math.floor(Math.random() * contentLibrary.length)];
       setSelectedContent(randomContent);
       setVideoCompleted(false); // Reset video completion
+      setVideoStarted(false); // Reset video started state for new session
+      setVideoError(false); // Reset error state
     } else if (!isOpen) {
       // Reset when modal closes
       setSelectedContent(null);
@@ -136,6 +140,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setLaunchCountdown(60);
       setLaunchActive(false);
       setVideoCompleted(false);
+      setVideoStarted(false);
       setVideoError(false);
       setConfetti([]); // Reset confetti
       setYoutubeMetadata(null); // Reset YouTube metadata
@@ -271,9 +276,21 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         };
 
         const onPlayerStateChange = (event: any) => {
-          // YT.PlayerState.ENDED === 0
-          if (event.data === 0) {
+          // YT.PlayerState: PLAYING === 1, ENDED === 0
+          if (event.data === 1) {
+            // Video started playing - clear the failsafe timeout
+            setVideoStarted(true);
+            if (videoTimeoutRef.current) {
+              clearTimeout(videoTimeoutRef.current);
+              videoTimeoutRef.current = null;
+            }
+          } else if (event.data === 0) {
+            // Video ended
             setVideoCompleted(true);
+            if (videoTimeoutRef.current) {
+              clearTimeout(videoTimeoutRef.current);
+              videoTimeoutRef.current = null;
+            }
           }
         };
         
@@ -281,6 +298,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           // YouTube error codes: 150/101 = embedding not allowed, 2 = invalid ID
           console.error('YouTube player error:', event.data);
           setVideoError(true); // Enable "Continue Anyway" button
+          if (videoTimeoutRef.current) {
+            clearTimeout(videoTimeoutRef.current);
+            videoTimeoutRef.current = null;
+          }
         };
 
         try {
@@ -313,14 +334,37 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           });
           
           setPlayer(newPlayer);
+          
+          // Fallback timeout: if video doesn't START playing within 15 seconds, enable skip
+          // This only fires if playback never begins (onStateChange never fires with PLAYING)
+          videoTimeoutRef.current = window.setTimeout(() => {
+            if (!videoStarted && !videoError) {
+              console.log('Video timeout: playback never started after 15 seconds');
+              setVideoError(true);
+            }
+            videoTimeoutRef.current = null;
+          }, 15000);
         } catch (e) {
           console.error('Error creating YouTube player:', e);
+          setVideoError(true);
+          if (videoTimeoutRef.current) {
+            clearTimeout(videoTimeoutRef.current);
+            videoTimeoutRef.current = null;
+          }
         }
       };
 
       initPlayer();
     }
-  }, [currentStep, content, player, showVideoIntro]);
+    
+    // Cleanup timeout when component unmounts or step changes
+    return () => {
+      if (videoTimeoutRef.current) {
+        clearTimeout(videoTimeoutRef.current);
+        videoTimeoutRef.current = null;
+      }
+    };
+  }, [currentStep, content, player, showVideoIntro, videoStarted, videoError]);
 
   // Pledge interaction handler - stores interval in ref to work with both mouse and touch
   const pledgeIntervalRef = useRef<number | null>(null);
@@ -709,6 +753,18 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   <p className="text-yellow-400/80 text-sm mt-3 italic">Watch the video and answer the question below</p>
                 )}
               </div>
+              
+              {/* Always-visible skip option - placed above question for visibility */}
+              {!videoCompleted && (
+                <div className="text-center mb-4">
+                  <button
+                    onClick={() => setVideoError(true)}
+                    className="text-gray-400 hover:text-yellow-400 text-sm underline transition-colors"
+                  >
+                    Video not loading? Click here to skip
+                  </button>
+                </div>
+              )}
               
               {/* Question Overlay - Always visible */}
               <div className="mb-6">
