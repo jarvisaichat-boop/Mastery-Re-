@@ -43,7 +43,7 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
   },
 ];
 
-const CONTENT_LIBRARY_VERSION = 10; // Updated with alternative embeddable videos
+const CONTENT_LIBRARY_VERSION = 11; // Force reset to remove any 5+ minute videos
 
 export function saveContentLibrary(items: ContentLibraryItem[]): void {
   try {

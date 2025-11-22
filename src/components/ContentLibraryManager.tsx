@@ -100,6 +100,12 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
       return;
     }
 
+    // STRICT DURATION CHECK: Must be under 5 minutes
+    if (formData.duration >= 5) {
+      alert('⚠️ Video must be under 5 minutes. Please choose a shorter video or adjust the duration.');
+      return;
+    }
+
     // Validate embedding if not already validated
     if (validationStatus !== 'valid') {
       const isValid = await validateYouTubeEmbed(formData.youtubeUrl);
@@ -207,7 +213,7 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Duration (minutes)
+                    Duration (minutes) *
                   </label>
                   <input
                     type="number"
@@ -220,8 +226,11 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                     }
                     className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     min="1"
-                    max="10"
+                    max="4"
                   />
+                  <p className="text-xs text-red-400 mt-1 font-semibold">
+                    ⚠️ Must be under 5 minutes (max: 4)
+                  </p>
                 </div>
 
                 <div>
