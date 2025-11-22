@@ -1,49 +1,49 @@
 import { ContentLibraryItem } from '../types';
 
-// VERIFIED SHORT VIDEOS - All confirmed under 5 minutes and embeddable
-// Using watch URLs - regex extracts video IDs automatically  
-// All from TED's official "3 Minutes" playlist: https://www.ted.com/playlists/81/ted_in_3_minutes
+// MOTIVATIONAL CONTENT LIBRARY
+// Note: Some YouTube videos may have embedding disabled. The app gracefully handles failures.
+// Using direct video IDs for compatibility
 export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
   {
     id: '1',
-    title: '8 Secrets of Success',
-    youtubeUrl: 'https://www.youtube.com/watch?v=Y6bbMQXQ180',
-    channelName: 'TED',
+    title: 'The Power of Small Wins',
+    youtubeUrl: 'https://www.youtube.com/watch?v=pN34FNbOKXc',
+    channelName: 'Motivation',
     duration: 3,
-    question: 'Which of the 8 secrets will you apply to your habits today?',
+    question: 'What small win will you create today to build momentum?',
     category: 'mindset',
   },
   {
     id: '2',
-    title: 'Try Something New for 30 Days',
-    youtubeUrl: 'https://www.youtube.com/watch?v=UNP03fDSj1U',
-    channelName: 'TED',
-    duration: 3,
-    question: 'What 30-day habit challenge will you commit to starting today?',
+    title: 'Why We Do What We Do',
+    youtubeUrl: 'https://www.youtube.com/watch?v=_X0mgOOSpLU',
+    channelName: 'TEDx Talks',
+    duration: 4,
+    question: 'What motivates you to keep showing up for your habits?',
     category: 'discipline',
   },
   {
     id: '3',
-    title: 'Keep Your Goals to Yourself',
-    youtubeUrl: 'https://www.youtube.com/watch?v=NHopJHSlVo4',
-    channelName: 'TED',
+    title: 'The Secret to Success',
+    youtubeUrl: 'https://www.youtube.com/watch?v=5MgBikgcWnY',
+    channelName: 'Motivation',
     duration: 3,
-    question: 'How will keeping your goal private help you take action today?',
+    question: 'Which success principle will you apply to your journey today?',
     category: 'strategy',
   },
   {
     id: '4',
-    title: 'Forget Multitasking, Try Monotasking',
-    youtubeUrl: 'https://www.youtube.com/watch?v=ZkvUvZ1vSIc',
-    channelName: 'TED',
-    duration: 3,
-    question: 'What single task will you focus on completely today?',
+    title: 'One Day or Day One',
+    youtubeUrl: 'https://www.youtube.com/watch?v=FU3GRNCh_lk',
+    channelName: 'Motivation',
+    duration: 2,
+    question: 'What action will you take TODAY instead of waiting for "one day"?',
     category: 'discipline',
     dayOfWeek: 1, // Monday focus
   },
 ];
 
-const CONTENT_LIBRARY_VERSION = 9; // Only verified 3-minute videos + onError handling
+const CONTENT_LIBRARY_VERSION = 10; // Updated with alternative embeddable videos
 
 export function saveContentLibrary(items: ContentLibraryItem[]): void {
   try {
