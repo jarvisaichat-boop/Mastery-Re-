@@ -234,9 +234,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     if (currentStep === 'streak') {
       setStepVisible(true);
     } else {
-      // For other steps, brief delay before showing to allow clean fade in
-      setStepVisible(false);
-      const timer = setTimeout(() => setStepVisible(true), 100);
+      // Keep visible during transition, then fade in new content
+      // This prevents background from showing through during step changes
+      const timer = setTimeout(() => setStepVisible(true), 50);
       return () => clearTimeout(timer);
     }
   }, [currentStep, isOpen]);
@@ -375,13 +375,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         setTimeout(() => {
           setShakeScreen(false);
         }, 1000);
-        // Smooth transition with fade out/in (matching other step transitions)
+        // Let the automatic useEffect handle the fade transition
         setTimeout(() => {
-          setStepVisible(false);
-          setTimeout(() => {
-            setCurrentStep('launch');
-          }, 600); // Match transition delay
-        }, 1200); // Start fade after shake completes
+          setCurrentStep('launch');
+        }, 1200); // Transition after shake completes
       }
     }, 10);
   };
@@ -460,12 +457,11 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
-  // "Come back tomorrow" screen
-  if (isCompletedToday) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/98 backdrop-blur-sm flex items-center justify-center animate-fadeIn">
+  // Render step content based on current step (persistent backdrop pattern)
+  const renderStepContent = () => {
+    // "Come back tomorrow" screen
+    if (isCompletedToday) {
+      return (
         <div className="text-center max-w-lg mx-auto px-6">
           <div className="mb-8 animate-scaleIn">
             <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/50">
@@ -486,12 +482,11 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             Close
           </button>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // Step 1: Streak Card with Side Fireworks
-  if (currentStep === 'streak') {
+    // Step 1: Streak Card with Side Fireworks
+    if (currentStep === 'streak') {
     // Generate left firework particles bursting outward from left side
     const leftFireworkParticles = [...Array(15)].map((_, i) => {
       const angle = -60 + (i / 15) * 120; // Spread from left side
