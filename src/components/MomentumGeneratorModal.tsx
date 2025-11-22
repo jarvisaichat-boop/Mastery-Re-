@@ -754,14 +754,18 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 )}
               </div>
               
-              {/* Always-visible skip option - placed above question for visibility */}
+              {/* Always-visible skip option - placed above question for maximum visibility */}
               {!videoCompleted && (
-                <div className="text-center mb-4">
+                <div className="text-center mb-4 bg-gray-800/50 border border-yellow-500/30 rounded-xl p-4">
+                  <p className="text-gray-300 text-sm mb-2">Video not loading or want to skip?</p>
                   <button
-                    onClick={() => setVideoError(true)}
-                    className="text-gray-400 hover:text-yellow-400 text-sm underline transition-colors"
+                    onClick={() => {
+                      setVideoError(true);
+                      setVideoCompleted(true);
+                    }}
+                    className="px-6 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-400 font-semibold text-sm rounded-lg transition-colors"
                   >
-                    Video not loading? Click here to skip
+                    Skip to Reflection Question
                   </button>
                 </div>
               )}

@@ -44,6 +44,8 @@ const getDaysDifference = (date1: Date, date2: Date): number => {
 export const isHabitScheduledOnDay = (habit: Habit, date: Date): boolean => {
     switch (habit.frequencyType) {
         case 'Everyday':
+        case 'daily':  // Support lowercase 'daily' for Ignite habit
+        case 'Daily':  // Support capitalized 'Daily'
             return true;
         
         // FIX: 'Anytime' and 'Numbers of times per period' return false for GLOBAL HARD STREAK checks.
