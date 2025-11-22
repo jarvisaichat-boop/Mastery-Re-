@@ -6,44 +6,44 @@ import { ContentLibraryItem } from '../types';
 export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
   {
     id: '1',
-    title: 'The Power of Small Wins',
-    youtubeUrl: 'https://www.youtube.com/watch?v=pN34FNbOKXc',
-    channelName: 'Motivation',
+    title: 'A Pep Talk from Kid President',
+    youtubeUrl: 'https://www.youtube.com/watch?v=l-gQLqv9f4o',
+    channelName: 'SoulPancake',
     duration: 3,
-    question: 'What small win will you create today to build momentum?',
+    question: 'What will you do today to be more awesome and stop being boring?',
     category: 'mindset',
   },
   {
     id: '2',
-    title: 'Why We Do What We Do',
-    youtubeUrl: 'https://www.youtube.com/watch?v=_X0mgOOSpLU',
-    channelName: 'TEDx Talks',
-    duration: 4,
-    question: 'What motivates you to keep showing up for your habits?',
+    title: 'Just Do It - Shia LaBeouf',
+    youtubeUrl: 'https://www.youtube.com/watch?v=ZXsQAXx_ao0',
+    channelName: 'MotivaShian',
+    duration: 1,
+    question: 'What excuse are you ready to stop making today?',
     category: 'discipline',
   },
   {
     id: '3',
-    title: 'The Secret to Success',
-    youtubeUrl: 'https://www.youtube.com/watch?v=5MgBikgcWnY',
-    channelName: 'Motivation',
-    duration: 3,
-    question: 'Which success principle will you apply to your journey today?',
+    title: 'Why Do We Fall',
+    youtubeUrl: 'https://www.youtube.com/watch?v=mgmVOuLgFB0',
+    channelName: 'Mateusz M',
+    duration: 1,
+    question: 'What will you do to get back up after your last setback?',
     category: 'strategy',
   },
   {
     id: '4',
-    title: 'One Day or Day One',
-    youtubeUrl: 'https://www.youtube.com/watch?v=FU3GRNCh_lk',
-    channelName: 'Motivation',
+    title: 'Rocky Balboa - Keep Moving Forward',
+    youtubeUrl: 'https://www.youtube.com/watch?v=D_Vg4uyYwEk',
+    channelName: 'Vimal Kumar',
     duration: 2,
-    question: 'What action will you take TODAY instead of waiting for "one day"?',
+    question: 'What impossible odds will you face today?',
     category: 'discipline',
-    dayOfWeek: 1, // Monday focus
+    dayOfWeek: 1,
   },
 ];
 
-const CONTENT_LIBRARY_VERSION = 11; // Force reset to remove any 5+ minute videos
+const CONTENT_LIBRARY_VERSION = 12; // All videos verified embeddable via oEmbed API
 
 export function saveContentLibrary(items: ContentLibraryItem[]): void {
   try {

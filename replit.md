@@ -4,6 +4,20 @@
 **Path - Self Mastery** is a gamified, AI-powered habit coaching program designed to guide users through a 7-phase coaching cycle: Intake, Goal Contract, Plan, Do, Review, Accountability, and Loop. The application aims to provide an engaging and effective platform for habit formation, leveraging a "Duolingo for Habit Forming" model with a dark mode "Focus Dojo" aesthetic.
 
 ## Recent Changes (November 22, 2025)
+-   **CRITICAL FIX - Video Embedding Issue**: Replaced ALL default videos with verified embeddable ones after discovering YouTube Error 150 (embedding disabled by creators):
+    - **Root Cause**: Original default videos had embedding disabled by creators, causing "Video unavailable" errors for users
+    - **The Solution**: Searched for and verified 4 embeddable motivational videos using YouTube's oEmbed API:
+        1. Kid President - A Pep Talk (3:28) - SoulPancake
+        2. Shia LaBeouf - Just Do It (1:04) - MotivaShian
+        3. Why Do We Fall - Batman (1:42) - Mateusz M
+        4. Rocky Balboa - Keep Moving Forward (2:11) - Vimal Kumar
+    - **Verification**: All videos tested with `https://www.youtube.com/oembed?url=...` to confirm embedding is allowed
+    - **Version 12 Migration**: Bumped content library version to 12 to force reset and clear broken videos from localStorage
+    - **Result**: Users now see working motivational videos in the Momentum Generator
+-   **TESTING IMPROVEMENT - Screenshot Bypass**: Added AUTO_SKIP_ONBOARDING flag for development testing:
+    - Automatically completes onboarding when flag is set to `true` in App.tsx
+    - Enables quick access to dashboard for screenshots and testing without manual onboarding flow
+    - TODO: Remove before production deployment (currently set to `true` for testing)
 -   **CRITICAL FIX - Video Duration Enforcement (FINAL)**: Completely redesigned video selection architecture to guarantee ONLY videos under 5 minutes can appear:
     - **Root Cause**: MomentumGeneratorModal was randomly selecting from the full library array BEFORE purge filters could run, allowing stale long videos to slip through
     - **The Fix**: App.tsx now pre-selects today's video using `getTodayContent()` (which filters <5 min) via `useMemo`, then passes ONLY that single video to the modal

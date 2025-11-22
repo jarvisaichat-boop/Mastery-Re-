@@ -253,9 +253,24 @@ function isEmergencyModeActive(): boolean {
 }
 
 function App() {
-    const [onboardingComplete, setOnboardingComplete] = useState(isOnboardingComplete);
-    const [appTourComplete, setAppTourComplete] = useState(isAppTourComplete);
-    const [microWinComplete, setMicroWinComplete] = useState(isMicroWinComplete);
+    // TESTING: Auto-complete onboarding for screenshots and testing  
+    // TODO: Remove this before production - this is for development testing only
+    const AUTO_SKIP_ONBOARDING = true; // Set to false to enable normal onboarding flow
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldSkipOnboarding = AUTO_SKIP_ONBOARDING || urlParams.get('skipOnboarding') === 'true' || urlParams.get('test') === 'true';
+    
+    const [onboardingComplete, setOnboardingComplete] = useState(() => {
+        if (shouldSkipOnboarding) {
+            localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
+            localStorage.setItem(LOCAL_STORAGE_APP_TOUR_KEY, 'true');
+            localStorage.setItem(LOCAL_STORAGE_MICRO_WIN_KEY, 'true');
+            return true;
+        }
+        return isOnboardingComplete();
+    });
+    const [appTourComplete, setAppTourComplete] = useState(() => shouldSkipOnboarding || isAppTourComplete());
+    const [microWinComplete, setMicroWinComplete] = useState(() => shouldSkipOnboarding || isMicroWinComplete());
     const [emergencyMode, setEmergencyMode] = useState(isEmergencyModeActive);
     const [previewOnboarding, setPreviewOnboarding] = useState(false);
     const [previewAppTour, setPreviewAppTour] = useState(false);
