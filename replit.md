@@ -24,8 +24,8 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 -   **Discipline Engine Visuals**: Subtle, path-focused UI with past dates at 15% opacity, current and future dates at normal brightness. Information toasts provide friendly explanations for unloggable habits.
 
 **Technical Implementations:**
+-   **Default Starter Habits**: 4 pre-configured habits for all users: Morning Movement, Deep Work Session, Evening Reflection (Life Goal Habits), and **Ignite** (Anchor Habit - auto-completes when Momentum Generator finishes).
 -   **Habit Tracking**: Supports daily, weekly, and custom frequency habits.
--   **Stats Dashboard**: Provides comprehensive weekly analysis, completion rates, streak breakdowns, and heatmaps.
 -   **AI Integration**: Simulated AI for goal validation, habit generation, real-time motivational reactions, tailored responses, and conversational goal understanding, with persona calibration (Drill Sergeant, Hype Man, Wise Mentor).
 -   **Conversational Logic Tree**: A chat interface for building milestone and daily action pathways, with AI tone adapting to selected persona.
 -   **Discipline Engine - Urgency System**:
@@ -59,9 +59,10 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
     -   **Video**: "Today's Lesson" with YouTube iframe API integration, channel name display, completion tracking, 10-second timeout with manual "Continue Anyway" override.
     -   **Reflection**: Daily question with text input.
     -   **Habits**: 3 pre-generated starter habits (Morning Movement, Deep Work, Evening Reflection) with micro-wins + user's life goal habits merged.
-    -   **Pledge**: Interactive pledge visualization with progress animation.
-    -   **Launch**: 60-second countdown with dark timer mode.
-    -   **Transitions**: Smooth 1200ms weighted transitions (200ms for video→question), flash bug eliminated.
+    -   **Pledge**: Hold-to-commit interactive button with mouse and touch support, progress ring animation, haptic feedback.
+    -   **Launch**: 60-second countdown with dark timer mode, 3-2-1 pre-countdown.
+    -   **Transitions**: Smooth 700ms synchronized transitions between all steps.
+    -   **Auto-Tracking**: Completing the Launch Pad automatically marks the "Ignite" anchor habit as complete for the day.
 -   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules, mini-app types, journal entries, program library selections, momentum generator content) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp.
 -   **Quick Navigation**: Home and Target icons for quick access to key phases.
