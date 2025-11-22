@@ -76,10 +76,18 @@ export function saveContentLibrary(items: ContentLibraryItem[]): void {
 }
 
 export function getTodayContent(contentLibrary: ContentLibraryItem[]): ContentLibraryItem {
+  // STRICT FILTER: Only videos under 5 minutes
+  const shortVideos = contentLibrary.filter(item => item.duration < 5);
+  
+  // If no short videos available, use first default video (all defaults are <5min)
+  if (shortVideos.length === 0) {
+    return DEFAULT_CONTENT_LIBRARY[0];
+  }
+  
   const today = new Date().getDay();
-  const todayContent = contentLibrary.find(item => item.dayOfWeek === today);
+  const todayContent = shortVideos.find(item => item.dayOfWeek === today);
   if (todayContent) return todayContent;
   
-  // Fallback to random if no specific content for this day
-  return contentLibrary[Math.floor(Math.random() * contentLibrary.length)];
+  // Random selection from short videos only
+  return shortVideos[Math.floor(Math.random() * shortVideos.length)];
 }
