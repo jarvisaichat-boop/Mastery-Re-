@@ -297,6 +297,7 @@ function App() {
     const [showMomentumConfirmation, setShowMomentumConfirmation] = useState(false);
     const [showMomentumGenerator, setShowMomentumGenerator] = useState(false);
     const [showContentLibraryManager, setShowContentLibraryManager] = useState(false);
+    const [showFloatingGoPopup, setShowFloatingGoPopup] = useState(false);
     const [contentLibrary, setContentLibrary] = useState<ContentLibraryItem[]>(() => loadContentLibrary());
     const [momentumLastCompleted, setMomentumLastCompleted] = useState<string | null>(() => {
         try {
@@ -1348,6 +1349,10 @@ function App() {
                 isOpen={showMomentumGenerator}
                 onClose={() => setShowMomentumGenerator(false)}
                 onComplete={handleMomentumComplete}
+                onShowFloatingGo={() => {
+                    setShowMomentumGenerator(false);
+                    setShowFloatingGoPopup(true);
+                }}
                 habits={habits}
                 goal={goal}
                 aspirations={aspirations}
@@ -1355,6 +1360,34 @@ function App() {
                 onAddContentLibrary={() => setShowContentLibraryManager(true)}
                 isCompletedToday={isMomentumCompletedToday}
             />
+            
+            {/* Floating "Now GO!" Popup - Appears over dashboard after countdown */}
+            {showFloatingGoPopup && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fadeIn"
+                    onClick={() => setShowFloatingGoPopup(false)}
+                >
+                    <div className="relative bg-gradient-to-b from-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 max-w-lg shadow-2xl shadow-yellow-500/30 animate-scaleIn cursor-pointer">
+                        <div className="text-center">
+                            <div className="mb-6">
+                                <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse" 
+                                     style={{textShadow: '0 0 100px rgba(251, 191, 36, 0.9)'}}>
+                                    🔥
+                                </div>
+                            </div>
+                            <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{textShadow: '0 0 60px rgba(251, 191, 36, 0.7)'}}>
+                                Now GO!
+                            </h2>
+                            <p className="text-3xl text-yellow-400 font-light mb-4">
+                                Your first action awaits
+                            </p>
+                            <p className="text-lg text-gray-400 italic">
+                                Click to start your journey
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
             
             {/* Content Library Manager - Admin Panel */}
             <ContentLibraryManager

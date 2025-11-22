@@ -15,6 +15,7 @@ interface MomentumGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
+  onShowFloatingGo: () => void;
   habits: Habit[];
   goal: string;
   aspirations: string;
@@ -29,6 +30,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   isOpen,
   onClose,
   onComplete,
+  onShowFloatingGo,
   habits,
   goal,
   aspirations,
@@ -49,7 +51,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [videoStarted, setVideoStarted] = useState(false);
   const [confetti, setConfetti] = useState<{ id: number; left: number; delay: number }[]>([]);
   const [youtubeMetadata, setYoutubeMetadata] = useState<{ title: string; author: string } | null>(null);
-  const [showSeizeTheDayPopup, setShowSeizeTheDayPopup] = useState(false);
   const [showVideoIntro, setShowVideoIntro] = useState(true);
   const [preCountdown, setPreCountdown] = useState<number | null>(null);
   const [randomVisionContent, setRandomVisionContent] = useState<string>('');
@@ -120,9 +121,11 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     if (!countdownCompletedRef.current) {
       onComplete();
       countdownCompletedRef.current = true;
-      setShowSeizeTheDayPopup(true);
+      // Close modal immediately, then show floating popup on dashboard
+      onClose();
+      onShowFloatingGo();
     }
-  }, [onComplete]);
+  }, [onComplete, onClose, onShowFloatingGo]);
   
   // Load YouTube iframe API
   useEffect(() => {
@@ -161,7 +164,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setVideoError(false);
       setConfetti([]); // Reset confetti
       setYoutubeMetadata(null); // Reset YouTube metadata
-      setShowSeizeTheDayPopup(false); // Always reset popup state
       countdownCompletedRef.current = false; // Always reset ref for new session
       setShowVideoIntro(true); // Reset video intro
       setPreCountdown(null); // Reset pre-countdown
@@ -1115,37 +1117,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       <div className="w-full h-full flex items-center justify-center">
         {shouldShowContent ? renderStepContent() : null}
       </div>
-      {/* Go seize the day popup - click to dismiss (ref-based visibility prevents flash) */}
-      {(showSeizeTheDayPopup || countdownCompletedRef.current) && (
-        <div 
-          className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn cursor-pointer"
-          onClick={() => {
-            // Reset state and ref immediately
-            setShowSeizeTheDayPopup(false);
-            countdownCompletedRef.current = false;
-            // Small delay ensures state update processes before modal close
-            setTimeout(() => onClose(), 50);
-          }}
-        >
-          <div className="text-center px-6 animate-scaleIn">
-            <div className="mb-8">
-              <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse" 
-                   style={{textShadow: '0 0 100px rgba(251, 191, 36, 0.9)'}}>
-                🔥
-              </div>
-            </div>
-            <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{textShadow: '0 0 60px rgba(251, 191, 36, 0.7)'}}>
-              Now GO!
-            </h2>
-            <p className="text-3xl text-yellow-400 font-light mb-4">
-              Your first action awaits
-            </p>
-            <p className="text-lg text-gray-400 italic">
-              Click to start your journey
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
