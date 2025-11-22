@@ -375,9 +375,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         setTimeout(() => {
           setShakeScreen(false);
         }, 1000);
+        // Smooth transition with fade out/in (matching other step transitions)
         setTimeout(() => {
-          setCurrentStep('launch');
-        }, 1800);
+          setStepVisible(false);
+          setTimeout(() => {
+            setCurrentStep('launch');
+          }, 600); // Match transition delay
+        }, 1200); // Start fade after shake completes
       }
     }, 10);
   };
