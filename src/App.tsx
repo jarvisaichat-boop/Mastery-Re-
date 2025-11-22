@@ -305,17 +305,17 @@ function App() {
         } catch { return null; }
     });
 
-    // CRITICAL: Immediately purge any videos >= 5 minutes on mount
+    // CRITICAL: Immediately purge any videos > 10 minutes on mount
     useEffect(() => {
-        const validVideos = contentLibrary.filter(item => item.duration < 5);
+        const validVideos = contentLibrary.filter(item => item.duration <= 10);
         if (validVideos.length !== contentLibrary.length) {
-            console.warn(`🧹 Purging ${contentLibrary.length - validVideos.length} videos that are >= 5 minutes`);
+            console.warn(`🧹 Purging ${contentLibrary.length - validVideos.length} videos that are > 10 minutes`);
             setContentLibrary(validVideos);
             saveContentLibrary(validVideos);
         }
     }, []); // Run once on mount
     
-    // Pre-select today's video using getTodayContent (guarantees <5 min)
+    // Pre-select today's video using getTodayContent (guarantees <= 10 min)
     const todaysContent = useMemo(() => getTodayContent(contentLibrary), [contentLibrary]);
     
     const isMomentumCompletedToday = momentumLastCompleted === formatDate(new Date(), 'yyyy-MM-dd');

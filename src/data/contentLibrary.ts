@@ -3,11 +3,38 @@ import { ContentLibraryItem } from '../types';
 // EDUCATIONAL CONTENT LIBRARY - Habit Formation Focus
 // Note: Some YouTube videos may have embedding disabled. The app gracefully handles failures.
 // All videos teach concepts about habit formation, not just motivation
+// Duration limit: 10 minutes maximum
 export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
-  // Library currently empty - to be populated with educational habit content
+  {
+    id: '1',
+    title: 'Change Your Life – One Tiny Step at a Time',
+    youtubeUrl: 'https://www.youtube.com/watch?v=75d_29QWELk',
+    channelName: 'Kurzgesagt – In a Nutshell',
+    duration: 7,
+    question: 'What tiny habit will you start today to change your life?',
+    category: 'mindset',
+  },
+  {
+    id: '2',
+    title: 'A Simple Way to Break a Bad Habit',
+    youtubeUrl: 'https://www.youtube.com/watch?v=-moW9jvvMr4',
+    channelName: 'TED',
+    duration: 9,
+    question: 'What bad habit will you observe with curiosity instead of judgment?',
+    category: 'strategy',
+  },
+  {
+    id: '3',
+    title: 'The Power of Habit',
+    youtubeUrl: 'https://www.youtube.com/watch?v=OMbsGBlpP30',
+    channelName: 'TEDx Talks',
+    duration: 10,
+    question: 'What is the cue that triggers your most important habit?',
+    category: 'discipline',
+  },
 ];
 
-const CONTENT_LIBRARY_VERSION = 13; // Removed motivational videos, preparing for educational content
+const CONTENT_LIBRARY_VERSION = 14; // Extended to 10 min limit, added educational habit content
 
 export function saveContentLibrary(items: ContentLibraryItem[]): void {
   try {
@@ -32,8 +59,8 @@ export function loadContentLibrary(): ContentLibraryItem[] {
     const stored = localStorage.getItem('mastery-content-library');
     if (stored) {
       const parsedLibrary = JSON.parse(stored);
-      // Additional safety: filter out any videos >= 5 minutes
-      const validVideos = parsedLibrary.filter((item: ContentLibraryItem) => item.duration < 5);
+      // Additional safety: filter out any videos > 10 minutes
+      const validVideos = parsedLibrary.filter((item: ContentLibraryItem) => item.duration <= 10);
       
       // If we filtered out videos, save the cleaned library
       if (validVideos.length !== parsedLibrary.length) {
@@ -50,18 +77,18 @@ export function loadContentLibrary(): ContentLibraryItem[] {
 }
 
 export function getTodayContent(contentLibrary: ContentLibraryItem[]): ContentLibraryItem {
-  // STRICT FILTER: Only videos under 5 minutes
-  const shortVideos = contentLibrary.filter(item => item.duration < 5);
+  // STRICT FILTER: Only videos 10 minutes or less
+  const validVideos = contentLibrary.filter(item => item.duration <= 10);
   
-  // If no short videos available, use first default video (all defaults are <5min)
-  if (shortVideos.length === 0) {
+  // If no valid videos available, use first default video (all defaults are <=10min)
+  if (validVideos.length === 0) {
     return DEFAULT_CONTENT_LIBRARY[0];
   }
   
   const today = new Date().getDay();
-  const todayContent = shortVideos.find(item => item.dayOfWeek === today);
+  const todayContent = validVideos.find(item => item.dayOfWeek === today);
   if (todayContent) return todayContent;
   
-  // Random selection from short videos only
-  return shortVideos[Math.floor(Math.random() * shortVideos.length)];
+  // Random selection from valid videos only
+  return validVideos[Math.floor(Math.random() * validVideos.length)];
 }
