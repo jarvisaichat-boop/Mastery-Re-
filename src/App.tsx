@@ -512,6 +512,7 @@ function App() {
     const handleMomentumComplete = () => {
         const today = formatDate(new Date(), 'yyyy-MM-dd');
         setMomentumLastCompleted(today);
+        localStorage.setItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY, today);
         
         console.log('🚀 [Momentum] handleMomentumComplete called');
         console.log('📅 [Momentum] Today date:', today);

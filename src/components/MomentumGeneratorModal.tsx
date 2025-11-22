@@ -176,29 +176,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }
   }, [currentStep, confetti.length]);
 
-  // Generate random vision content once when entering vision step
-  useEffect(() => {
-    if (currentStep === 'vision' && !randomVisionContent) {
-      const randomWhys = [
-        "To create the life you've always imagined, one day at a time",
-        "To prove to yourself that you're capable of anything you commit to",
-        "To build unshakeable discipline that transforms your entire life",
-        "To become the person your future self will thank you for being",
-        "To break free from limitation and step into your full potential"
-      ];
-      
-      const randomRoutines = [
-        "Morning: Mindful movement, focused work, energized action",
-        "Ideal Day: Deep focus, intentional breaks, powerful completion",
-        "Daily Flow: Present in the moment, building unstoppable momentum",
-        "Your Rhythm: Wake with purpose, execute with precision, rest with gratitude",
-        "Perfect Day: Aligned actions, consistent progress, compound results"
-      ];
-      
-      const newVision = `${randomWhys[Math.floor(Math.random() * randomWhys.length)]}\n\n${randomRoutines[Math.floor(Math.random() * randomRoutines.length)]}`;
-      setRandomVisionContent(newVision);
-    }
-  }, [currentStep, randomVisionContent]);
+  // Random vision content now generated synchronously in handleNextStep to prevent card size glitch
   
   const content = selectedContent;
 
@@ -298,6 +276,12 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             setVideoCompleted(true);
           }
         };
+        
+        const onPlayerError = (event: any) => {
+          // YouTube error codes: 150/101 = embedding not allowed, 2 = invalid ID
+          console.error('YouTube player error:', event.data);
+          setVideoError(true); // Enable "Continue Anyway" button
+        };
 
         try {
           if (!playerContainerRef.current) {
@@ -324,6 +308,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             events: {
               onReady: onPlayerReady,
               onStateChange: onPlayerStateChange,
+              onError: onPlayerError,
             },
           });
           
@@ -450,6 +435,28 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       const nextStep = steps[currentIndex + 1];
+      
+      // Generate random vision content BEFORE rendering vision step to prevent card size glitch
+      if (nextStep === 'vision' && !randomVisionContent) {
+        const randomWhys = [
+          "To prove to yourself that you're capable of anything you commit to",
+          "To build unshakeable discipline that transforms your entire life",
+          "To become the person your future self will thank you for being",
+          "To break free from limitation and step into your full potential"
+        ];
+        
+        const randomRoutines = [
+          "Morning: Mindful movement, focused work, energized action",
+          "Ideal Day: Deep focus, intentional breaks, powerful completion",
+          "Daily Flow: Present in the moment, building unstoppable momentum",
+          "Your Rhythm: Wake with purpose, execute with precision, rest with gratitude",
+          "Perfect Day: Aligned actions, consistent progress, compound results"
+        ];
+        
+        const newVision = `${randomWhys[Math.floor(Math.random() * randomWhys.length)]}\n\n${randomRoutines[Math.floor(Math.random() * randomRoutines.length)]}`;
+        setRandomVisionContent(newVision);
+      }
+      
       // Instant step change - persistent backdrop prevents flashing
       setCurrentStep(nextStep);
     }
