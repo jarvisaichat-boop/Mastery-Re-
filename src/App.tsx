@@ -516,7 +516,7 @@ function App() {
         console.log('🚀 [Momentum] handleMomentumComplete called');
         console.log('📅 [Momentum] Today date:', today);
         
-        // Auto-complete the "Ignite" habit (ID 9999994) using functional state update
+        // Auto-complete the "Ignite" habit (ID 9999994) and persist immediately
         setHabits(prevHabits => {
             const igniteHabit = prevHabits.find(h => h.id === 9999994);
             console.log('🔍 [Momentum] Found Ignite habit:', igniteHabit ? `Yes (${igniteHabit.name})` : 'NO - NOT FOUND!');
@@ -532,12 +532,18 @@ function App() {
                     ? { ...h, completed: { ...h.completed, [today]: true } }
                     : h
             );
+            
+            // Immediately persist to localStorage to ensure data is saved before modal closes
+            try {
+                localStorage.setItem(LOCAL_STORAGE_HABITS_KEY, JSON.stringify(updatedHabits));
+                console.log('💾 [Momentum] Ignite habit persisted to localStorage for', today);
+            } catch (e) {
+                console.error('❌ [Momentum] Failed to persist habits:', e);
+            }
+            
             console.log('✅ [Momentum] Ignite habit marked complete for', today);
             return updatedHabits;
         });
-        
-        // Don't close modal immediately - let the "Go seize the day" popup show first
-        // The popup will auto-close the modal after 2 seconds
     };
     
     const handleSaveContentLibrary = (items: ContentLibraryItem[]) => {

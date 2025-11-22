@@ -148,7 +148,8 @@ const DayCircle: React.FC<{
     dateToCheck.setHours(0, 0, 0, 0);
     const isPastExpired = !isLoggable && dateToCheck < today && strictness !== 'anytime';
     
-    // Only dim past expired dates from PREVIOUS weeks (not current week)
+    // NEVER dim current week - only dim past weeks that have expired
+    // This keeps all circles in current week at full brightness for visibility
     const shouldDim = isPastExpired && !isInCurrentWeek;
     
     let circleClasses = `w-9 h-9 rounded-full border transition-colors flex items-center justify-center text-sm font-medium `;
