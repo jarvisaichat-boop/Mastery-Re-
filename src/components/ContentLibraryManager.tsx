@@ -28,6 +28,7 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
   });
   const [validationStatus, setValidationStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
   const [validationMessage, setValidationMessage] = useState<string>('');
+  const [metadataFetched, setMetadataFetched] = useState<boolean>(false);
 
   const handleAddNew = () => {
     setEditingId('new');
@@ -49,6 +50,53 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
     setFormData(item);
     setValidationStatus('idle');
     setValidationMessage('');
+    setMetadataFetched(false);
+  };
+
+  // Fetch YouTube metadata from backend API
+  const fetchYouTubeMetadata = async (url: string): Promise<boolean> => {
+    try {
+      setValidationStatus('checking');
+      setValidationMessage('🔍 Fetching real video data from YouTube...');
+
+      const response = await fetch(`http://localhost:3001/api/youtube/metadata?url=${encodeURIComponent(url)}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setValidationStatus('invalid');
+        if (response.status === 503) {
+          setValidationMessage('⚠️ ' + data.hint || 'YouTube API not configured');
+        } else {
+          setValidationMessage('✗ ' + (data.error || 'Failed to fetch video data'));
+        }
+        return false;
+      }
+
+      // Check if duration exceeds 8 minutes
+      if (data.duration > 8) {
+        setValidationStatus('invalid');
+        setValidationMessage(`❌ Video is ${data.duration.toFixed(1)} minutes (max 8 minutes). Please choose a shorter video.`);
+        return false;
+      }
+
+      // Auto-populate form with verified data
+      setFormData(prev => ({
+        ...prev,
+        title: data.title,
+        channelName: data.channelName,
+        duration: Math.ceil(data.duration), // Round up to nearest minute
+      }));
+
+      setValidationStatus('valid');
+      setValidationMessage(`✓ Verified: ${data.duration.toFixed(1)} minutes | ${data.title}`);
+      setMetadataFetched(true);
+      return true;
+
+    } catch (error) {
+      setValidationStatus('invalid');
+      setValidationMessage('✗ Network error. Make sure the backend server is running.');
+      return false;
+    }
   };
 
   const validateYouTubeEmbed = async (url: string): Promise<boolean> => {
@@ -106,7 +154,13 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
       return;
     }
 
-    // Validate embedding if not already validated
+    // REQUIRE metadata verification for new videos
+    if (!metadataFetched) {
+      alert('⚠️ Please verify the video using "Fetch & Verify Video" button first to ensure accurate duration and metadata.');
+      return;
+    }
+
+    // Additional embedding check (fallback)
     if (validationStatus !== 'valid') {
       const isValid = await validateYouTubeEmbed(formData.youtubeUrl);
       if (!isValid) {
@@ -122,6 +176,7 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
     setEditingId(null);
     setValidationStatus('idle');
     setValidationMessage('');
+    setMetadataFetched(false);
   };
 
   const handleDelete = (id: string) => {
@@ -182,21 +237,22 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                         setFormData({ ...formData, youtubeUrl: e.target.value });
                         setValidationStatus('idle'); // Reset validation when URL changes
                         setValidationMessage('');
+                        setMetadataFetched(false); // Reset metadata flag
                       }}
                       className="flex-1 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="https://www.youtube.com/watch?v=..."
                     />
                     <button
                       type="button"
-                      onClick={() => validateYouTubeEmbed(formData.youtubeUrl)}
+                      onClick={() => fetchYouTubeMetadata(formData.youtubeUrl)}
                       disabled={!formData.youtubeUrl || validationStatus === 'checking'}
                       className="px-4 py-2 bg-yellow-600 text-white font-semibold rounded hover:bg-yellow-700 disabled:bg-gray-600 disabled:cursor-not-allowed whitespace-nowrap"
                     >
-                      {validationStatus === 'checking' ? 'Testing...' : 'Test Video'}
+                      {validationStatus === 'checking' ? 'Verifying...' : 'Fetch & Verify'}
                     </button>
                   </div>
                   <p className="text-xs text-gray-400 mt-1">
-                    Any YouTube URL format works (watch, embed, or short link)
+                    Paste any YouTube URL - we'll automatically fetch real title, channel & duration
                   </p>
                   {validationMessage && (
                     <div className={`mt-2 p-3 rounded text-sm ${
