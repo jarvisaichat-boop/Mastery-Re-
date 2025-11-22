@@ -60,21 +60,37 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 
 ## Future Planned Features
 
-### Context-Aware Video Recommendation System
-**Goal**: Evolve the Momentum Generator video recommendation engine to match content to the user's **specific goals, current struggles, and chosen habits** rather than just general habit categories.
+### Duolingo-Style Habit Formation Curriculum
+**Goal**: Transform the Momentum Generator from a random video library into a **structured learning path** that progressively teaches habit formation, like Duolingo teaches languages. Instead of customizable recommendations (too chaotic) or infinite choice (paralysis), provide a **curated curriculum** that guides users from beginner to mastery.
 
-**Planned Behavior**:
--   **Goal-based matching**: If user's goal is "lose weight", recommend weight loss strategy videos; if "build business", recommend entrepreneurship content
--   **Struggle-based targeting**: If user is currently struggling with a specific aspect (e.g., "can't wake up in the morning"), recommend videos addressing that exact pain point (morning routines, alarm strategies)
--   **Habit-specific content**: If user chose "running" as their morning habit, recommend running-specific motivation and technique videos
--   **Failure pattern analysis**: Depending on the reason for habit failure (no time, lack of motivation, environment issues), recommend videos tackling that specific obstacle
+**Core Philosophy**: "Too random is not helpful; too customizable means they can just use YouTube. This should be a curriculum - like a class teaching the discipline of the Path."
+
+**Daily Lesson Flow**:
+1. **Watch**: 4-8 minute micro-lesson on a specific habit formation technique (e.g., "The 2-Minute Rule")
+2. **Reflect**: Answer a personalized question: "How will YOU use this technique TODAY to achieve your goal?"
+3. **Apply**: User writes their specific implementation plan for that day
+4. **Track**: Did they actually apply it? Builds curriculum completion streak
+
+**Progressive Curriculum Structure**:
+-   **Week 1-2: Foundations** - Habit loops, environment design, 2-minute rule, making habits obvious
+-   **Week 2-3: Identity & Momentum** - Identity-based habits, habit stacking, celebration techniques
+-   **Week 4-5: Advanced Techniques** - Temptation bundling, breaking bad habits, social accountability
+-   **Week 6+: Mastery & Specialization** - Track-based paths (fitness, productivity, mental health, relationships)
+
+**Key Features**:
+-   **Sequential unlocking**: Cannot skip ahead; must complete each day's lesson
+-   **Forced application**: Reflection questions require users to apply TODAY's teaching to THEIR specific goal
+-   **Curriculum tracks**: Different learning paths based on user's primary goal (weight loss, business, relationships)
+-   **Visual progress**: Duolingo-style streak tracking and course completion percentage
+-   **Spaced repetition**: Key concepts resurface at optimal intervals for retention
 
 **Implementation Notes**:
--   Requires capturing user's stated goals during onboarding/intake phase
--   Track which habits user struggles with most (missed completions, broken streaks)
--   Add failure reason tracking when users miss habits
--   Expand video tagging system to include goal categories and problem-solving themes
--   Update recommendation algorithm to prioritize contextual relevance over general matching
+-   Build curriculum database with ~60-90 days of sequential lessons
+-   Store user's curriculum progress in localStorage (current day, completion status, reflection answers)
+-   Lock Momentum Generator to "today's lesson" (no random selection)
+-   Create curriculum tracks aligned to common goal categories
+-   Design reflection question templates that force specific, actionable daily plans
+-   Track curriculum streak separately from habit completion streak
 
 ## External Dependencies
 -   **Frontend Framework**: React 18
