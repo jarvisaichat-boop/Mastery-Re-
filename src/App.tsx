@@ -81,15 +81,15 @@ function loadHabitsFromStorage(): Habit[] {
           periodUnit: 'day',
           repeatDays: 1,
           completed: {},
-          order: 3,
-          createdAt: 1700000000003,
+          order: -1,
+          createdAt: 1700000000000,
           microWins: [
             { id: 'mw10', level: 1, description: 'Open Launch Pad', effortLevel: 'minimal' },
             { id: 'mw11', level: 2, description: 'Watch today\'s lesson', effortLevel: 'low' },
             { id: 'mw12', level: 3, description: 'Complete the countdown', effortLevel: 'medium' }
           ]
         };
-        habits = [...habits, igniteHabit];
+        habits = [igniteHabit, ...habits];
       }
       
       return habits.map((h: any) => {
@@ -195,8 +195,8 @@ function loadHabitsFromStorage(): Habit[] {
       periodUnit: 'day',
       repeatDays: 1,
       completed: {},
-      order: 3,
-      createdAt: 1700000000003,
+      order: -1,
+      createdAt: 1700000000000,
       microWins: [
         { id: 'mw10', level: 1, description: 'Open Launch Pad', effortLevel: 'minimal' },
         { id: 'mw11', level: 2, description: 'Watch today\'s lesson', effortLevel: 'low' },
@@ -499,18 +499,31 @@ function App() {
         const today = formatDate(new Date(), 'yyyy-MM-dd');
         setMomentumLastCompleted(today);
         
-        // Auto-complete the "Ignite" habit (ID 9999994)
-        const igniteHabit = habits.find(h => h.id === 9999994);
-        if (igniteHabit) {
-            const updatedHabits = habits.map(h => 
+        console.log('🚀 [Momentum] handleMomentumComplete called');
+        console.log('📅 [Momentum] Today date:', today);
+        
+        // Auto-complete the "Ignite" habit (ID 9999994) using functional state update
+        setHabits(prevHabits => {
+            const igniteHabit = prevHabits.find(h => h.id === 9999994);
+            console.log('🔍 [Momentum] Found Ignite habit:', igniteHabit ? `Yes (${igniteHabit.name})` : 'NO - NOT FOUND!');
+            console.log('📋 [Momentum] Current habits:', prevHabits.map(h => ({ id: h.id, name: h.name })));
+            
+            if (!igniteHabit) {
+                console.error('❌ [Momentum] Could not find Ignite habit (ID 9999994)!');
+                return prevHabits;
+            }
+            
+            const updatedHabits = prevHabits.map(h => 
                 h.id === 9999994 
                     ? { ...h, completed: { ...h.completed, [today]: true } }
                     : h
             );
-            setHabits(updatedHabits);
-        }
+            console.log('✅ [Momentum] Ignite habit marked complete for', today);
+            return updatedHabits;
+        });
         
-        setShowMomentumGenerator(false);
+        // Don't close modal immediately - let the "Go seize the day" popup show first
+        // The popup will auto-close the modal after 2 seconds
     };
     
     const handleSaveContentLibrary = (items: ContentLibraryItem[]) => {
@@ -1020,7 +1033,7 @@ function App() {
 
                 {/* Habit rows only show in week view (calendar mode) or simple list mode */}
                 {!showStatsView && (viewMode === 'week' || !showDailyTrackingView) && (
-                    <div className="habit-tracker-area space-y-2">
+                    <div className="habit-tracker-area space-y-2 pb-28">
                         {sortedHabits.map(habit => (
                             <HabitRow 
                                 key={habit.id} 
