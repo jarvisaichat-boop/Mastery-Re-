@@ -350,13 +350,24 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                         {result.title}
                       </h4>
                       <p className="text-gray-400 text-xs mb-2">{result.channelName}</p>
-                      <button
-                        onClick={() => handleAddFromSearch(result)}
-                        className="w-full px-3 py-2 bg-yellow-600 text-white text-sm font-semibold rounded hover:bg-yellow-700 flex items-center justify-center gap-1"
-                      >
-                        <Plus size={16} />
-                        Add to Library
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleAddFromSearch(result)}
+                          className="flex-1 px-3 py-2 bg-yellow-600 text-white text-sm font-semibold rounded hover:bg-yellow-700 flex items-center justify-center gap-1"
+                        >
+                          <Plus size={16} />
+                          Add to Library
+                        </button>
+                        <a
+                          href={result.youtubeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-2 bg-red-600 text-white text-sm font-semibold rounded hover:bg-red-700 flex items-center justify-center gap-1"
+                          title="Watch on YouTube"
+                        >
+                          <PlayCircle size={16} />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -507,6 +518,127 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                       </select>
                     </div>
 
+                    {/* Multi-tag selection system */}
+                    <div className="border-t border-gray-700 pt-4">
+                      <h4 className="text-white font-semibold mb-3">Video Tags (for personalized recommendations)</h4>
+                      
+                      {/* Content Type */}
+                      <div className="mb-3">
+                        <label className="block text-sm font-semibold text-gray-400 mb-2">Content Type</label>
+                        <div className="flex flex-wrap gap-2">
+                          {['motivation', 'education', 'tutorial', 'inspiration'].map((type) => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => {
+                                const currentTypes = formData.tags?.contentType || [];
+                                const newTypes = currentTypes.includes(type as any)
+                                  ? currentTypes.filter(t => t !== type)
+                                  : [...currentTypes, type as any];
+                                setFormData({
+                                  ...formData,
+                                  tags: { ...formData.tags, contentType: newTypes }
+                                });
+                              }}
+                              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                formData.tags?.contentType?.includes(type as any)
+                                  ? 'bg-yellow-600 text-white'
+                                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                              }`}
+                            >
+                              {type}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Life Domain */}
+                      <div className="mb-3">
+                        <label className="block text-sm font-semibold text-gray-400 mb-2">Life Domain</label>
+                        <div className="flex flex-wrap gap-2">
+                          {['physical', 'mental', 'productivity', 'business', 'relationships', 'finance', 'creativity'].map((domain) => (
+                            <button
+                              key={domain}
+                              type="button"
+                              onClick={() => {
+                                const currentDomains = formData.tags?.lifeDomain || [];
+                                const newDomains = currentDomains.includes(domain as any)
+                                  ? currentDomains.filter(d => d !== domain)
+                                  : [...currentDomains, domain as any];
+                                setFormData({
+                                  ...formData,
+                                  tags: { ...formData.tags, lifeDomain: newDomains }
+                                });
+                              }}
+                              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                formData.tags?.lifeDomain?.includes(domain as any)
+                                  ? 'bg-blue-600 text-white'
+                                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                              }`}
+                            >
+                              {domain}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Difficulty */}
+                      <div className="mb-3">
+                        <label className="block text-sm font-semibold text-gray-400 mb-2">Difficulty</label>
+                        <div className="flex gap-2">
+                          {['beginner', 'intermediate', 'advanced'].map((level) => (
+                            <button
+                              key={level}
+                              type="button"
+                              onClick={() => {
+                                setFormData({
+                                  ...formData,
+                                  tags: { ...formData.tags, difficulty: level as any }
+                                });
+                              }}
+                              className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+                                formData.tags?.difficulty === level
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                              }`}
+                            >
+                              {level}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Emotion */}
+                      <div className="mb-3">
+                        <label className="block text-sm font-semibold text-gray-400 mb-2">Emotional Tone</label>
+                        <div className="flex flex-wrap gap-2">
+                          {['energizing', 'calming', 'empowering', 'reflective'].map((emotion) => (
+                            <button
+                              key={emotion}
+                              type="button"
+                              onClick={() => {
+                                const currentEmotions = formData.tags?.emotion || [];
+                                const newEmotions = currentEmotions.includes(emotion as any)
+                                  ? currentEmotions.filter(e => e !== emotion)
+                                  : [...currentEmotions, emotion as any];
+                                setFormData({
+                                  ...formData,
+                                  tags: { ...formData.tags, emotion: newEmotions }
+                                });
+                              }}
+                              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                formData.tags?.emotion?.includes(emotion as any)
+                                  ? 'bg-purple-600 text-white'
+                                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                              }`}
+                            >
+                              {emotion}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="flex gap-3 pt-4">
                       <button
                         onClick={handleSaveItem}
@@ -540,7 +672,18 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                     className="bg-gray-800 rounded-lg p-4 flex items-start justify-between hover:bg-gray-750"
                   >
                     <div className="flex-1">
-                      <h4 className="text-white font-semibold">{item.title}</h4>
+                      <div className="flex items-start gap-2">
+                        <h4 className="text-white font-semibold flex-1">{item.title}</h4>
+                        <a
+                          href={item.youtubeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-red-500 hover:text-red-400 transition-colors"
+                          title="Watch on YouTube"
+                        >
+                          <PlayCircle size={20} />
+                        </a>
+                      </div>
                       <p className="text-gray-400 text-sm mt-1">{item.channelName}</p>
                       <p className="text-gray-400 text-sm italic mt-1">"{item.question}"</p>
                       <p className="text-gray-500 text-xs mt-2">

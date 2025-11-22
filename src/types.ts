@@ -117,6 +117,14 @@ export interface ContentLibraryItem {
   question: string;
   category: 'discipline' | 'psychology' | 'strategy' | 'mindset';
   dayOfWeek?: number; // 0-6, for specific day scheduling (0 = Sunday)
+  // Multi-tag categorization system for personalized recommendations
+  tags?: {
+    contentType?: ('motivation' | 'education' | 'tutorial' | 'inspiration')[]; // What kind of content
+    lifeDomain?: ('physical' | 'mental' | 'productivity' | 'business' | 'relationships' | 'finance' | 'creativity')[]; // Life areas
+    difficulty?: 'beginner' | 'intermediate' | 'advanced'; // Complexity level
+    emotion?: ('energizing' | 'calming' | 'empowering' | 'reflective')[]; // Emotional tone
+    technique?: string[]; // Specific techniques mentioned (e.g., "habit stacking", "2-minute rule")
+  };
 }
 
 export interface MomentumGeneratorState {

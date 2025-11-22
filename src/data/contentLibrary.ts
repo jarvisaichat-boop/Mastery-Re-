@@ -13,6 +13,13 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
     duration: 3,
     question: 'What ONE productivity technique will you apply today to start a new habit?',
     category: 'strategy',
+    tags: {
+      contentType: ['education', 'tutorial'],
+      lifeDomain: ['productivity', 'mental'],
+      difficulty: 'beginner',
+      emotion: ['energizing'],
+      technique: ['science-based', 'time management'],
+    },
   },
   {
     id: '2',
@@ -22,6 +29,13 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
     duration: 6,
     question: 'What is the 2-minute version of the habit you want to build?',
     category: 'discipline',
+    tags: {
+      contentType: ['tutorial', 'education'],
+      lifeDomain: ['physical', 'productivity'],
+      difficulty: 'beginner',
+      emotion: ['empowering'],
+      technique: ['2-minute rule', 'atomic habits'],
+    },
   },
   {
     id: '3',
@@ -31,6 +45,13 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
     duration: 8,
     question: 'Which existing daily habit will you stack your new habit onto?',
     category: 'strategy',
+    tags: {
+      contentType: ['tutorial', 'education'],
+      lifeDomain: ['productivity', 'mental'],
+      difficulty: 'intermediate',
+      emotion: ['empowering'],
+      technique: ['habit stacking', 'routine building'],
+    },
   },
   {
     id: '4',
@@ -40,6 +61,13 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
     duration: 5,
     question: 'How will you celebrate and feel positive emotions after doing your tiny habit?',
     category: 'psychology',
+    tags: {
+      contentType: ['education', 'tutorial'],
+      lifeDomain: ['mental', 'productivity'],
+      difficulty: 'beginner',
+      emotion: ['empowering', 'energizing'],
+      technique: ['tiny habits', 'celebration', 'positive reinforcement'],
+    },
   },
   {
     id: '5',
@@ -49,6 +77,13 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
     duration: 7,
     question: 'Which of the 7 steps will you focus on first to build your new habit?',
     category: 'discipline',
+    tags: {
+      contentType: ['education', 'tutorial'],
+      lifeDomain: ['productivity', 'business', 'mental'],
+      difficulty: 'beginner',
+      emotion: ['empowering', 'energizing'],
+      technique: ['step-by-step system', 'discipline'],
+    },
   },
   {
     id: '6',
@@ -58,6 +93,13 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
     duration: 5,
     question: 'What environment change will you make today to support your new habit?',
     category: 'strategy',
+    tags: {
+      contentType: ['education', 'tutorial'],
+      lifeDomain: ['productivity', 'mental', 'physical'],
+      difficulty: 'beginner',
+      emotion: ['empowering'],
+      technique: ['atomic habits', 'environment design', 'identity-based habits'],
+    },
   },
 ];
 
@@ -104,6 +146,9 @@ export function loadContentLibrary(): ContentLibraryItem[] {
 }
 
 export function getTodayContent(contentLibrary: ContentLibraryItem[]): ContentLibraryItem {
+  // LEGACY FUNCTION: Use recommendVideo() from videoRecommendation.ts for intelligent selection
+  // This function kept for backward compatibility but should be deprecated
+  
   // STRICT FILTER: Only videos 8 minutes or less
   const validVideos = contentLibrary.filter(item => item.duration <= 8);
   

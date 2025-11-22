@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronRight, Sparkles, Target } from 'lucide-react';
 import { Habit, ContentLibraryItem } from '../types';
 import { formatDate } from '../utils';
+import { addToWatchHistory } from '../utils/videoRecommendation';
 
 // YouTube Player TypeScript declaration
 declare global {
@@ -305,8 +306,12 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               videoTimeoutRef.current = null;
             }
           } else if (event.data === 0) {
-            // Video ended
+            // Video ended - track watch history for recommendation engine
             setVideoCompleted(true);
+            if (selectedContent) {
+              addToWatchHistory(selectedContent.id);
+              console.log('📹 Added video to watch history:', selectedContent.title);
+            }
             if (videoTimeoutRef.current) {
               clearTimeout(videoTimeoutRef.current);
               videoTimeoutRef.current = null;

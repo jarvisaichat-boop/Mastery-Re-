@@ -21,6 +21,7 @@ import { Habit, HabitTemplate, ContentLibraryItem } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay, isHabitLoggable, getHabitStrictness } from './utils';
 import { NotificationService } from './services/NotificationService';
 import { loadContentLibrary, saveContentLibrary, getTodayContent } from './data/contentLibrary';
+import { recommendVideo } from './utils/videoRecommendation';
 import { WeekHeader, MonthView, YearView, CalendarHeader, HabitRow } from './components/DashboardComponents';
 
 const LOCAL_STORAGE_HABITS_KEY = 'mastery-dashboard-habits-v1';
@@ -315,8 +316,15 @@ function App() {
         }
     }, []); // Run once on mount
     
-    // Pre-select today's video using getTodayContent (guarantees <= 8 min)
-    const todaysContent = useMemo(() => getTodayContent(contentLibrary), [contentLibrary]);
+    // Pre-select today's video using smart recommendation engine (guarantees <= 8 min)
+    const todaysContent = useMemo(() => {
+        try {
+            return recommendVideo(contentLibrary, habits);
+        } catch (error) {
+            console.warn('Recommendation engine failed, falling back to getTodayContent:', error);
+            return getTodayContent(contentLibrary);
+        }
+    }, [contentLibrary, habits]);
     
     const isMomentumCompletedToday = momentumLastCompleted === formatDate(new Date(), 'yyyy-MM-dd');
 
