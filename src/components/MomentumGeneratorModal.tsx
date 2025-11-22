@@ -735,32 +735,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         <div className="max-w-5xl mx-auto w-full py-4">
           {content ? (
             <>
-              <div className="aspect-video rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
-                {videoError ? (
-                  <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-8">
-                    <div className="text-center max-w-2xl">
-                      <div className="mb-6">
-                        <div className="text-6xl mb-4">🎯</div>
-                        <h3 className="text-2xl font-bold text-yellow-400 mb-4">Today's Wisdom</h3>
-                      </div>
-                      <blockquote className="text-xl text-white leading-relaxed mb-4 italic">
-                        "Success is the sum of small efforts repeated day in and day out."
-                      </blockquote>
-                      <p className="text-gray-400 text-sm">
-                        — Robert Collier
-                      </p>
-                      <div className="mt-8 pt-6 border-t border-gray-700">
-                        <p className="text-yellow-400/80 text-sm">
-                          The habits you build today shape the person you become tomorrow
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="w-full h-full bg-black">
-                    <div ref={playerContainerRef} style={{width: '100%', height: '100%'}}></div>
-                  </div>
-                )}
+              <div className="aspect-video bg-black rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-8 shadow-2xl border-2 border-yellow-500/30" style={{boxShadow: '0 0 80px rgba(251, 191, 36, 0.2)'}}>
+                <div ref={playerContainerRef} style={{width: '100%', height: '100%'}}></div>
               </div>
               
               <div className="text-center mb-6 sm:mb-8">
