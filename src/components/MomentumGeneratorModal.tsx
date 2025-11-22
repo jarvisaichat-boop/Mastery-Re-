@@ -353,60 +353,51 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }
   }, [currentStep, content, player, showVideoIntro]);
 
-  // Pledge interaction handler
+  // Pledge interaction handler - stores interval in ref to work with both mouse and touch
+  const pledgeIntervalRef = useRef<number | null>(null);
+
+  const handlePledgeStart = () => {
+    setPledgeProgress(0);
+    const startTime = Date.now();
+    
+    pledgeIntervalRef.current = window.setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / 3000) * 100, 100);
+      setPledgeProgress(progress);
+
+      if (progress >= 100 && pledgeIntervalRef.current) {
+        clearInterval(pledgeIntervalRef.current);
+        pledgeIntervalRef.current = null;
+        if (navigator.vibrate) {
+          navigator.vibrate([50, 30, 100, 30, 200]);
+        }
+        setShakeScreen(true);
+        setTimeout(() => {
+          setShakeScreen(false);
+        }, 1000);
+        setTimeout(() => {
+          setCurrentStep('launch');
+        }, 1800);
+      }
+    }, 10);
+  };
+
+  const handlePledgeEnd = () => {
+    if (pledgeIntervalRef.current) {
+      clearInterval(pledgeIntervalRef.current);
+      pledgeIntervalRef.current = null;
+    }
+  };
+
+  // Cleanup pledge interval when leaving pledge step
   useEffect(() => {
     if (currentStep !== 'pledge') {
       setPledgeProgress(0);
-      return;
+      if (pledgeIntervalRef.current) {
+        clearInterval(pledgeIntervalRef.current);
+        pledgeIntervalRef.current = null;
+      }
     }
-
-    let interval: number | null = null;
-
-    const handleMouseDown = () => {
-      setPledgeProgress(0);
-      const startTime = Date.now();
-      
-      interval = window.setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min((elapsed / 3000) * 100, 100);
-        setPledgeProgress(progress);
-
-        if (progress >= 100 && interval) {
-          clearInterval(interval);
-          interval = null;
-          if (navigator.vibrate) {
-            navigator.vibrate([50, 30, 100, 30, 200]);
-          }
-          setShakeScreen(true);
-          setTimeout(() => {
-            setShakeScreen(false);
-          }, 1000); // Longer shake animation
-          setTimeout(() => {
-            setCurrentStep('launch');
-          }, 1800); // Longer transition to launch
-        }
-      }, 10);
-    };
-
-    const handleMouseUp = () => {
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
-      }
-      // Don't reset progress here - let it show LOCKED ✓ before transitioning
-    };
-
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
-    
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
-      }
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
   }, [currentStep]);
 
   // 3-2-1 Pre-countdown
@@ -862,8 +853,16 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               Make a commitment
             </h3>
             <div className="mb-12 cursor-pointer select-none">
-              <div className="w-52 h-52 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative shadow-2xl"
-                   style={{boxShadow: `0 0 ${Math.max(40, pledgeProgress)}px rgba(251, 191, 36, ${0.4 + pledgeProgress / 200})`}}>
+              <div 
+                className="w-52 h-52 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative shadow-2xl"
+                style={{boxShadow: `0 0 ${Math.max(40, pledgeProgress)}px rgba(251, 191, 36, ${0.4 + pledgeProgress / 200})`}}
+                onMouseDown={handlePledgeStart}
+                onMouseUp={handlePledgeEnd}
+                onMouseLeave={handlePledgeEnd}
+                onTouchStart={handlePledgeStart}
+                onTouchEnd={handlePledgeEnd}
+                onTouchCancel={handlePledgeEnd}
+              >
                 <div className="text-9xl animate-pulse">👇</div>
                 <svg className="absolute inset-0 w-full h-full -rotate-90">
                   <circle
