@@ -144,10 +144,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setVideoError(false);
       setConfetti([]); // Reset confetti
       setYoutubeMetadata(null); // Reset YouTube metadata
-      // Only reset popup if countdown hasn't completed (prevents flash bug)
-      if (!countdownCompletedRef.current) {
-        setShowSeizeTheDayPopup(false);
-      }
+      setShowSeizeTheDayPopup(false); // Always reset popup state
+      countdownCompletedRef.current = false; // Always reset ref for new session
       setShowVideoIntro(true); // Reset video intro
       setPreCountdown(null); // Reset pre-countdown
       setRandomVisionContent(''); // Reset random vision content
@@ -445,6 +443,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // 60-second Launch countdown with fast vibration
   useEffect(() => {
     if (currentStep !== 'launch' || !launchActive || preCountdown !== null) return;
+    if (countdownCompletedRef.current) return; // Prevent re-triggering onComplete after first completion
 
     const interval = setInterval(() => {
       setLaunchCountdown(prev => {
@@ -461,8 +460,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         
         if (prev <= 1) {
           clearInterval(interval);
-          onComplete(); // This marks Ignite habit complete
-          // Show popup - user must click to dismiss (persist across re-renders)
+          // Mark completion immediately to guarantee Ignite habit is marked
+          onComplete();
+          // Show popup - ref persists across re-renders to prevent flash
           countdownCompletedRef.current = true;
           setShowSeizeTheDayPopup(true);
           return 0;
@@ -1090,14 +1090,16 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       <div className="w-full h-full flex items-center justify-center">
         {shouldShowContent ? renderStepContent() : null}
       </div>
-      {/* Go seize the day popup - click to dismiss */}
-      {showSeizeTheDayPopup && (
+      {/* Go seize the day popup - click to dismiss (ref-based visibility prevents flash) */}
+      {(showSeizeTheDayPopup || countdownCompletedRef.current) && (
         <div 
           className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn cursor-pointer"
           onClick={() => {
+            // Reset state and ref immediately
             setShowSeizeTheDayPopup(false);
-            countdownCompletedRef.current = false; // Reset ref when user dismisses
-            onClose();
+            countdownCompletedRef.current = false;
+            // Small delay ensures state update processes before modal close
+            setTimeout(() => onClose(), 50);
           }}
         >
           <div className="text-center px-6 animate-scaleIn">
