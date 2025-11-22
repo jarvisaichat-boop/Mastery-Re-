@@ -352,8 +352,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       if (progress >= 100 && pledgeIntervalRef.current) {
         clearInterval(pledgeIntervalRef.current);
         pledgeIntervalRef.current = null;
-        if (navigator.vibrate) {
-          navigator.vibrate([50, 30, 100, 30, 200]);
+        // Haptic feedback on completion (check API availability first)
+        try {
+          if ('vibrate' in navigator && navigator.vibrate) {
+            navigator.vibrate([50, 30, 100, 30, 200]);
+          }
+        } catch (e) {
+          // Ignore vibration errors - continue flow regardless
         }
         setShakeScreen(true);
         setTimeout(() => {
@@ -385,11 +390,20 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }
   }, [currentStep]);
 
-  // 3-2-1 Pre-countdown
+  // 3-2-1 Pre-countdown with slow vibration
   useEffect(() => {
     if (preCountdown === null || preCountdown <= 0) return;
 
     const timer = setTimeout(() => {
+      // Slow-paced vibration on each countdown tick (check API availability first)
+      try {
+        if ('vibrate' in navigator && navigator.vibrate) {
+          navigator.vibrate(300);
+        }
+      } catch (e) {
+        // Ignore vibration errors - continue countdown regardless
+      }
+      
       if (preCountdown === 1) {
         setPreCountdown(null); // Trigger 60-second countdown
       } else {
@@ -400,21 +414,28 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return () => clearTimeout(timer);
   }, [preCountdown]);
 
-  // 60-second Launch countdown
+  // 60-second Launch countdown with fast vibration
   useEffect(() => {
     if (currentStep !== 'launch' || !launchActive || preCountdown !== null) return;
 
     const interval = setInterval(() => {
       setLaunchCountdown(prev => {
+        // Fast-paced vibration every second (only if countdown is active, check API availability)
+        if (prev > 1) {
+          try {
+            if ('vibrate' in navigator && navigator.vibrate) {
+              navigator.vibrate(100);
+            }
+          } catch (e) {
+            // Ignore vibration errors - continue countdown regardless
+          }
+        }
+        
         if (prev <= 1) {
           clearInterval(interval);
-          onComplete();
-          // Show "Go seize the day!" popup
+          onComplete(); // This marks Ignite habit complete
+          // Show popup - user must click to dismiss
           setShowSeizeTheDayPopup(true);
-          setTimeout(() => {
-            setShowSeizeTheDayPopup(false);
-            onClose();
-          }, 2000);
           return 0;
         }
         return prev - 1;
@@ -582,7 +603,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return (
       <div className="w-full h-full flex items-center justify-center cursor-pointer overflow-y-auto" onClick={handleNextStep}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl"
+          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl transition-all duration-300"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <div className="text-center">
               <div className="mb-6 sm:mb-8 flex justify-center">
@@ -816,7 +837,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (currentStep === 'pledge') {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="max-w-2xl mx-6">
+        <div className="max-w-2xl mx-6 transition-all duration-300">
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <h3 className="text-4xl font-black text-yellow-400 mb-12 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
@@ -962,8 +983,12 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             
             <button
               onClick={() => {
-                if (navigator.vibrate) {
-                  navigator.vibrate(200);
+                try {
+                  if ('vibrate' in navigator && navigator.vibrate) {
+                    navigator.vibrate(200);
+                  }
+                } catch (e) {
+                  // Ignore vibration errors
                 }
                 onComplete();
                 setTimeout(onClose, 500);
@@ -988,9 +1013,15 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       <div className={shakeScreen ? 'animate-pulse w-full h-full flex items-center justify-center' : 'w-full h-full flex items-center justify-center'}>
         {renderStepContent()}
       </div>
-      {/* Go seize the day popup */}
+      {/* Go seize the day popup - click to dismiss */}
       {showSeizeTheDayPopup && (
-        <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn">
+        <div 
+          className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn cursor-pointer"
+          onClick={() => {
+            setShowSeizeTheDayPopup(false);
+            onClose();
+          }}
+        >
           <div className="text-center px-6 animate-scaleIn">
             <div className="mb-8">
               <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse" 
@@ -999,10 +1030,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               </div>
             </div>
             <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{textShadow: '0 0 60px rgba(251, 191, 36, 0.7)'}}>
-              Go Seize the Day!
+              Now GO!
             </h2>
-            <p className="text-3xl text-yellow-400 font-light">
-              Your momentum starts NOW
+            <p className="text-3xl text-yellow-400 font-light mb-4">
+              Your first action awaits
+            </p>
+            <p className="text-lg text-gray-400 italic">
+              Click to start your journey
             </p>
           </div>
         </div>

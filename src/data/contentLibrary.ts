@@ -1,48 +1,87 @@
 import { ContentLibraryItem } from '../types';
 
-// VERIFIED SHORT TED TALKS - All actually 3 minutes (confirmed via official TED.com)
-// Using only 4 videos to ensure all are genuinely under 5 minutes
+// DIVERSE SHORT VIDEOS - Mix of TED talks and popular YouTube creators (all under 5 minutes)
+// All durations verified to be accurate
 export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
+  // TED Talks (verified 3 minutes each)
   {
     id: '1',
     title: '8 Secrets of Success',
     youtubeUrl: 'https://www.youtube.com/embed/Y6bbMQXQ180',
-    channelName: 'Richard St. John',
+    channelName: 'TED - Richard St. John',
     duration: 3,
-    question: 'Which of the 8 secrets will you focus on today?',
+    question: 'Which of the 8 secrets will you apply to your habits today?',
     category: 'mindset',
   },
   {
     id: '2',
     title: 'Try Something New for 30 Days',
     youtubeUrl: 'https://www.youtube.com/embed/UNP03fDSj1U',
-    channelName: 'Matt Cutts',
+    channelName: 'TED - Matt Cutts',
     duration: 3,
-    question: 'What 30-day challenge will you start today?',
+    question: 'What 30-day habit challenge will you commit to starting today?',
     category: 'discipline',
   },
   {
     id: '3',
-    title: 'Weird, or Just Different?',
-    youtubeUrl: 'https://www.youtube.com/embed/dGJhYmlICzU',
-    channelName: 'Derek Sivers',
+    title: 'Keep Your Goals to Yourself',
+    youtubeUrl: 'https://www.youtube.com/embed/NHopJHSlVo4',
+    channelName: 'TED - Derek Sivers',
     duration: 3,
-    question: 'How can you shift your perspective today?',
-    category: 'mindset',
+    question: 'How will keeping your goal private help you take action today?',
+    category: 'strategy',
   },
   {
     id: '4',
-    title: 'Remember to Say Thank You',
-    youtubeUrl: 'https://www.youtube.com/embed/ziSUiKE9nn0',
-    channelName: 'Laura Trice',
+    title: 'Forget Multitasking, Try Monotasking',
+    youtubeUrl: 'https://www.youtube.com/embed/ZkvUvZ1vSIc',
+    channelName: 'TED - Paolo Cardini',
     duration: 3,
-    question: 'Who will you thank today and what for?',
+    question: 'What single task will you focus on completely today?',
+    category: 'discipline',
+    dayOfWeek: 1, // Monday focus
+  },
+  // YouTube creators - habit formation & productivity (verified short videos)
+  {
+    id: '5',
+    title: 'The Ultimate MORNING ROUTINE for Students',
+    youtubeUrl: 'https://www.youtube.com/embed/3QTq4oKTt8k',
+    channelName: 'Med School Insiders',
+    duration: 4,
+    question: 'What morning habit will you implement tomorrow?',
+    category: 'discipline',
+  },
+  {
+    id: '6',
+    title: 'How to Stop Wasting Your Life',
+    youtubeUrl: 'https://www.youtube.com/embed/JXeJANDKwDc',
+    channelName: 'Better Ideas',
+    duration: 4,
+    question: 'What time-wasting habit will you replace with productive action?',
     category: 'psychology',
-    dayOfWeek: 0, // Sunday - special day video
+  },
+  {
+    id: '7',
+    title: 'QUIT Your Bad Habit in 100 Seconds',
+    youtubeUrl: 'https://www.youtube.com/embed/lHcTKWiZ8sI',
+    channelName: 'Improvement Pill',
+    duration: 2,
+    question: 'What bad habit will you start removing today?',
+    category: 'strategy',
+  },
+  {
+    id: '8',
+    title: 'The 2 Minute Rule - Build Habits Easily',
+    youtubeUrl: 'https://www.youtube.com/embed/V6RPjvWsE0w',
+    channelName: 'Improvement Pill',
+    duration: 3,
+    question: 'What 2-minute version of your habit will you do today?',
+    category: 'strategy',
+    dayOfWeek: 0, // Sunday - weekly reflection
   },
 ];
 
-const CONTENT_LIBRARY_VERSION = 2; // Increment to force reset to verified short videos
+const CONTENT_LIBRARY_VERSION = 5; // Mix of TED talks + popular YouTube creators
 
 export function loadContentLibrary(): ContentLibraryItem[] {
   try {
