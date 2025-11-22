@@ -893,26 +893,24 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return (
       <div className="w-full h-full flex items-center justify-center overflow-hidden">
         {!launchActive ? (
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className={`transition-all duration-700 ${stepVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-yellow-400 mb-8 sm:mb-12 text-center tracking-tight uppercase px-4" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.5)'}}>
-                Get ready for an action
-              </h3>
-              <button
-                onClick={() => {
-                  setLaunchActive(true);
-                  setPreCountdown(3);
-                }}
-                className="px-12 sm:px-16 md:px-20 py-6 sm:py-8 md:py-10 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-black text-2xl sm:text-3xl md:text-4xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 uppercase tracking-wider"
-              >
-                Start Countdown
-              </button>
-              <p className="text-base sm:text-lg md:text-xl text-gray-300 mt-8 sm:mt-12 max-w-2xl mx-auto leading-relaxed font-light text-center px-4">
-                You got 60 seconds to sprint into motion.<br/>
-                Do whatever you need to do to get to your habit as soon as possible -<br/>
-                get out of bed, get your shoes on, turn on your laptop, just gooo!
-              </p>
-            </div>
+          <div className="flex flex-col items-center justify-center h-full px-4">
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-yellow-400 mb-8 sm:mb-12 text-center tracking-tight uppercase" style={{textShadow: '0 0 40px rgba(251, 191, 36, 0.5)'}}>
+              Get ready for an action
+            </h3>
+            <button
+              onClick={() => {
+                setLaunchActive(true);
+                setPreCountdown(3);
+              }}
+              className="mx-auto px-12 sm:px-16 md:px-20 py-6 sm:py-8 md:py-10 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-black text-2xl sm:text-3xl md:text-4xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 uppercase tracking-wider"
+            >
+              Start Countdown
+            </button>
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 mt-8 sm:mt-12 max-w-2xl mx-auto leading-relaxed font-light text-center">
+              You got 60 seconds to sprint into motion.<br/>
+              Do whatever you need to do to get to your habit as soon as possible -<br/>
+              get out of bed, get your shoes on, turn on your laptop, just gooo!
+            </p>
           </div>
         ) : preCountdown !== null && preCountdown > 0 ? (
           <div className="flex items-center justify-center h-full">
@@ -993,8 +991,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 ${isCompletedToday ? 'bg-black/98 backdrop-blur-sm' : 'bg-gradient-to-b from-gray-900 via-black to-gray-900'} flex items-center justify-center ${shakeScreen ? 'animate-pulse' : ''}`}>
-      {renderStepContent()}
+    <div className={`fixed inset-0 z-50 ${isCompletedToday ? 'bg-black/98 backdrop-blur-sm' : 'bg-gradient-to-b from-gray-900 via-black to-gray-900'} flex items-center justify-center`}>
+      <div className={shakeScreen ? 'animate-pulse w-full h-full flex items-center justify-center' : 'w-full h-full flex items-center justify-center'}>
+        {renderStepContent()}
+      </div>
       {/* Go seize the day popup */}
       {showSeizeTheDayPopup && (
         <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn">
