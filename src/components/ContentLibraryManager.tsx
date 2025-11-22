@@ -25,6 +25,8 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
     question: '',
     category: 'discipline',
   });
+  const [validationStatus, setValidationStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+  const [validationMessage, setValidationMessage] = useState<string>('');
 
   const handleAddNew = () => {
     setEditingId('new');
@@ -36,17 +38,72 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
       question: '',
       category: 'discipline',
     });
+    setValidationStatus('idle');
+    setValidationMessage('');
   };
 
   const handleEdit = (item: ContentLibraryItem) => {
     setEditingId(item.id);
     setFormData(item);
+    setValidationStatus('idle');
+    setValidationMessage('');
   };
 
-  const handleSaveItem = () => {
+  const validateYouTubeEmbed = async (url: string): Promise<boolean> => {
+    try {
+      setValidationStatus('checking');
+      setValidationMessage('Checking if video can be embedded...');
+
+      // Extract video ID from URL
+      const videoIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+      if (!videoIdMatch) {
+        setValidationStatus('invalid');
+        setValidationMessage('Invalid YouTube URL format');
+        return false;
+      }
+
+      const videoId = videoIdMatch[1];
+
+      // Check embed permissions using YouTube oEmbed API
+      const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+      
+      try {
+        const response = await fetch(oEmbedUrl);
+        
+        if (response.ok) {
+          setValidationStatus('valid');
+          setValidationMessage('✓ Video can be embedded successfully!');
+          return true;
+        } else {
+          setValidationStatus('invalid');
+          setValidationMessage('✗ Video embedding is disabled by the owner. Please choose a different video.');
+          return false;
+        }
+      } catch (error) {
+        // If oEmbed fails, it usually means embedding is restricted
+        setValidationStatus('invalid');
+        setValidationMessage('✗ Video embedding is disabled by the owner. Please choose a different video.');
+        return false;
+      }
+    } catch (error) {
+      setValidationStatus('invalid');
+      setValidationMessage('Error checking video. Please verify the URL.');
+      return false;
+    }
+  };
+
+  const handleSaveItem = async () => {
     if (!formData.title || !formData.youtubeUrl || !formData.question) {
       alert('Please fill in all required fields');
       return;
+    }
+
+    // Validate embedding if not already validated
+    if (validationStatus !== 'valid') {
+      const isValid = await validateYouTubeEmbed(formData.youtubeUrl);
+      if (!isValid) {
+        return; // Don't save if validation fails
+      }
     }
 
     if (editingId === 'new') {
@@ -55,6 +112,8 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
       setItems(items.map(item => (item.id === editingId ? formData : item)));
     }
     setEditingId(null);
+    setValidationStatus('idle');
+    setValidationMessage('');
   };
 
   const handleDelete = (id: string) => {
@@ -107,18 +166,41 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
                     YouTube URL *
                   </label>
-                  <input
-                    type="text"
-                    value={formData.youtubeUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, youtubeUrl: e.target.value })
-                    }
-                    className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://www.youtube.com/embed/..."
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={formData.youtubeUrl}
+                      onChange={(e) => {
+                        setFormData({ ...formData, youtubeUrl: e.target.value });
+                        setValidationStatus('idle'); // Reset validation when URL changes
+                        setValidationMessage('');
+                      }}
+                      className="flex-1 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                    <button
+                      type="button"
+                      onClick={() => validateYouTubeEmbed(formData.youtubeUrl)}
+                      disabled={!formData.youtubeUrl || validationStatus === 'checking'}
+                      className="px-4 py-2 bg-yellow-600 text-white font-semibold rounded hover:bg-yellow-700 disabled:bg-gray-600 disabled:cursor-not-allowed whitespace-nowrap"
+                    >
+                      {validationStatus === 'checking' ? 'Testing...' : 'Test Video'}
+                    </button>
+                  </div>
                   <p className="text-xs text-gray-400 mt-1">
-                    Use the embed URL (youtube.com/embed/VIDEO_ID)
+                    Any YouTube URL format works (watch, embed, or short link)
                   </p>
+                  {validationMessage && (
+                    <div className={`mt-2 p-3 rounded text-sm ${
+                      validationStatus === 'valid' 
+                        ? 'bg-green-900/30 border border-green-600 text-green-400' 
+                        : validationStatus === 'invalid'
+                        ? 'bg-red-900/30 border border-red-600 text-red-400'
+                        : 'bg-blue-900/30 border border-blue-600 text-blue-400'
+                    }`}>
+                      {validationMessage}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -179,9 +261,10 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleSaveItem}
-                    className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700"
+                    disabled={validationStatus === 'checking'}
+                    className="px-4 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
                   >
-                    Save Item
+                    {validationStatus === 'checking' ? 'Validating...' : 'Save Item'}
                   </button>
                   <button
                     onClick={() => setEditingId(null)}

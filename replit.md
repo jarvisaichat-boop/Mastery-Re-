@@ -71,6 +71,7 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
     -   **Initial Programs**: Morning Starter, Deep Morning, Quick Reset, Gratitude Practice (4 programs with 1-2 habits each).
     -   **Habit Tracking**: sourceProgramId field tracks which program habits came from for future analytics.
     -   **Success Feedback**: Toast notification confirms habit additions ("Added 2 habits from program!").
+-   **YouTube Embed Validation**: Content Library Manager now validates videos before saving using YouTube's oEmbed API to ensure they can be embedded. Shows clear success/error messages and prevents adding non-embeddable videos.
 -   **Momentum Generator**: 7-step daily ritual transforming passive tracking into active execution.
     -   **Streak**: Radial firework burst celebration effect (30 particles bursting outward in all directions).
     -   **Vision**: Goal display with "Your Everyday Reminder" section showing grand vision/aspirations.
