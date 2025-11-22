@@ -114,6 +114,98 @@ app.get('/api/youtube/metadata', async (req, res) => {
   }
 });
 
+// YouTube search endpoint - find videos about habit formation
+app.get('/api/youtube/search', async (req, res) => {
+  try {
+    const { query, maxResults = 10 } = req.query;
+    
+    if (!query) {
+      return res.status(400).json({ error: 'Query parameter is required' });
+    }
+    
+    // Get YouTube API key from environment
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({ 
+        error: 'YouTube API key not configured',
+        hint: 'Please add YOUTUBE_API_KEY to Replit Secrets'
+      });
+    }
+    
+    // Call YouTube Data API v3 search endpoint
+    // videoDuration: short (0-4 min), medium (4-20 min)
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoDuration=medium&maxResults=${maxResults}&key=${apiKey}`;
+    
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    
+    // Handle API errors
+    if (!response.ok) {
+      return res.status(response.status).json({ 
+        error: 'YouTube API error',
+        details: data.error?.message || 'Unknown error'
+      });
+    }
+    
+    // Extract video IDs from search results
+    const videoIds = data.items?.map(item => item.id.videoId).filter(Boolean) || [];
+    
+    if (videoIds.length === 0) {
+      return res.json({ videos: [] });
+    }
+    
+    // Fetch detailed metadata for all videos (including duration)
+    const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoIds.join(',')}&key=${apiKey}`;
+    
+    const detailsResponse = await fetch(videoDetailsUrl);
+    const detailsData = await detailsResponse.json();
+    
+    if (!detailsResponse.ok) {
+      return res.status(detailsResponse.status).json({ 
+        error: 'YouTube API error fetching video details',
+        details: detailsData.error?.message || 'Unknown error'
+      });
+    }
+    
+    // Filter and format videos that are 8 minutes or less
+    const videos = detailsData.items
+      ?.map(video => {
+        const durationMinutes = parseISO8601Duration(video.contentDetails.duration);
+        const durationSeconds = Math.round(durationMinutes * 60);
+        
+        // Only include videos ≤ 480 seconds (8 minutes)
+        if (durationSeconds > 480) {
+          return null;
+        }
+        
+        return {
+          videoId: video.id,
+          title: video.snippet.title,
+          channelName: video.snippet.channelTitle,
+          duration: Math.round(durationMinutes * 100) / 100,
+          durationSeconds,
+          thumbnail: video.snippet.thumbnails.medium.url,
+          description: video.snippet.description,
+          youtubeUrl: `https://www.youtube.com/watch?v=${video.id}`
+        };
+      })
+      .filter(Boolean) || [];
+    
+    res.json({ 
+      query,
+      totalResults: videos.length,
+      videos 
+    });
+    
+  } catch (error) {
+    console.error('YouTube search error:', error);
+    res.status(500).json({ 
+      error: 'Failed to search YouTube',
+      details: error.message 
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'youtube-metadata-api' });
