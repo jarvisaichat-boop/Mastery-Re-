@@ -7,7 +7,11 @@
 -   **Momentum Generator Video Library**: Reduced to 4 verified TED talks (all exactly 3 minutes) from official "TED in 3 Minutes" playlist to ensure all videos are under 5 minutes and embeddable.
 -   **Ignite Habit Persistence**: Fixed critical bug where momentum completion wasn't persisting to localStorage - now includes immediate localStorage write for both momentum timestamp and Ignite habit completion.
 -   **Vision Card Sizing**: Fixed visual glitch where vision card would jump from empty to full size by generating random content synchronously before step transition.
--   **YouTube Error Handling**: Added onError handler to enable "Continue Anyway" button when videos fail to embed, preventing users from getting blocked.
+-   **YouTube Error Handling**: Complete failsafe system to prevent users from getting blocked:
+    -   Always-visible "Video not loading? Click here to skip" button above question textarea
+    -   Smart 15-second timeout that only triggers if playback never starts (not during normal viewing)
+    -   Proper state resets on every modal open/close to ensure failsafe works on every session
+    -   Manual skip and automatic timeout both enable Continue button after answering reflection question
 -   **Content Library Migration**: Version 9 with improved function ordering (saveContentLibrary before loadContentLibrary) to prevent runtime hoisting errors.
 
 ## User Preferences
