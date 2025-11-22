@@ -41,47 +41,47 @@ export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
     category: 'discipline',
     dayOfWeek: 1, // Monday focus
   },
-  // YouTube creators - habit formation & productivity (verified short videos)
+  // More verified TED talks (all 3-4 minutes, embed-friendly)
   {
     id: '5',
-    title: 'The Ultimate MORNING ROUTINE for Students',
-    youtubeUrl: 'https://www.youtube.com/embed/3QTq4oKTt8k',
-    channelName: 'Med School Insiders',
-    duration: 4,
-    question: 'What morning habit will you implement tomorrow?',
-    category: 'discipline',
+    title: 'Weird, or Just Different?',
+    youtubeUrl: 'https://www.youtube.com/embed/dGJhYmlICzU',
+    channelName: 'TED - Derek Sivers',
+    duration: 3,
+    question: 'How can changing your perspective help your habits today?',
+    category: 'mindset',
   },
   {
     id: '6',
-    title: 'How to Stop Wasting Your Life',
-    youtubeUrl: 'https://www.youtube.com/embed/JXeJANDKwDc',
-    channelName: 'Better Ideas',
-    duration: 4,
-    question: 'What time-wasting habit will you replace with productive action?',
+    title: 'Remember to Say Thank You',
+    youtubeUrl: 'https://www.youtube.com/embed/ziSUiKE9nn0',
+    channelName: 'TED - Laura Trice',
+    duration: 3,
+    question: 'What habit will you build around expressing gratitude?',
     category: 'psychology',
   },
   {
     id: '7',
-    title: 'QUIT Your Bad Habit in 100 Seconds',
-    youtubeUrl: 'https://www.youtube.com/embed/lHcTKWiZ8sI',
-    channelName: 'Improvement Pill',
-    duration: 2,
-    question: 'What bad habit will you start removing today?',
-    category: 'strategy',
+    title: 'Got a Meeting? Take a Walk',
+    youtubeUrl: 'https://www.youtube.com/embed/iE9HMudybyc',
+    channelName: 'TED - Nilofer Merchant',
+    duration: 3,
+    question: 'How can you add movement to your daily routine?',
+    category: 'psychology',
   },
   {
     id: '8',
-    title: 'The 2 Minute Rule - Build Habits Easily',
-    youtubeUrl: 'https://www.youtube.com/embed/V6RPjvWsE0w',
-    channelName: 'Improvement Pill',
-    duration: 3,
-    question: 'What 2-minute version of your habit will you do today?',
+    title: 'The Secret to Self-Control',
+    youtubeUrl: 'https://www.youtube.com/embed/aX7jnVXXG5o',
+    channelName: 'TED - Jonathan Bricker',
+    duration: 4,
+    question: 'What urge will you observe instead of act on today?',
     category: 'strategy',
     dayOfWeek: 0, // Sunday - weekly reflection
   },
 ];
 
-const CONTENT_LIBRARY_VERSION = 5; // Mix of TED talks + popular YouTube creators
+const CONTENT_LIBRARY_VERSION = 6; // All verified TED talks (embed-friendly)
 
 export function loadContentLibrary(): ContentLibraryItem[] {
   try {

@@ -603,7 +603,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return (
       <div className="w-full h-full flex items-center justify-center cursor-pointer overflow-y-auto" onClick={handleNextStep}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl transition-all duration-300"
+          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <div className="text-center">
               <div className="mb-6 sm:mb-8 flex justify-center">
@@ -837,7 +837,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   if (currentStep === 'pledge') {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="max-w-2xl mx-6 transition-all duration-300">
+        <div className="max-w-2xl mx-6">
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <h3 className="text-4xl font-black text-yellow-400 mb-12 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
