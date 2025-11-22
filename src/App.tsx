@@ -63,7 +63,35 @@ function loadHabitsFromStorage(): Habit[] {
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_HABITS_KEY);
     if (stored) {
-      const habits = JSON.parse(stored);
+      let habits = JSON.parse(stored);
+      
+      // Migration: Add "Ignite" habit if it doesn't exist (for existing users)
+      const hasIgnite = habits.some((h: any) => h.id === 9999994);
+      if (!hasIgnite) {
+        const igniteHabit = {
+          id: 9999994,
+          name: 'Ignite',
+          description: 'Complete the daily Momentum Generator ritual',
+          color: '#f59e0b',
+          type: 'Anchor Habit',
+          categories: [{ main: 'Mindset', sub: 'Daily Ritual' }],
+          frequencyType: 'daily',
+          selectedDays: [],
+          timesPerPeriod: 1,
+          periodUnit: 'day',
+          repeatDays: 1,
+          completed: {},
+          order: 3,
+          createdAt: 1700000000003,
+          microWins: [
+            { id: 'mw10', level: 1, description: 'Open Launch Pad', effortLevel: 'minimal' },
+            { id: 'mw11', level: 2, description: 'Watch today\'s lesson', effortLevel: 'low' },
+            { id: 'mw12', level: 3, description: 'Complete the countdown', effortLevel: 'medium' }
+          ]
+        };
+        habits = [...habits, igniteHabit];
+      }
+      
       return habits.map((h: any) => {
         if (h.createdAt) {
           return { ...h, createdAt: typeof h.createdAt === 'number' ? h.createdAt : Date.now() };
@@ -152,6 +180,27 @@ function loadHabitsFromStorage(): Habit[] {
         { id: 'mw7', level: 2, description: 'Take 3 deep breaths', effortLevel: 'minimal' },
         { id: 'mw8', level: 3, description: 'Write 1 gratitude', effortLevel: 'low' },
         { id: 'mw9', level: 4, description: 'Close eyes for 60 seconds', effortLevel: 'minimal' }
+      ]
+    },
+    {
+      id: 9999994,
+      name: 'Ignite',
+      description: 'Complete the daily Momentum Generator ritual',
+      color: '#f59e0b',
+      type: 'Anchor Habit',
+      categories: [{ main: 'Mindset', sub: 'Daily Ritual' }],
+      frequencyType: 'daily',
+      selectedDays: [],
+      timesPerPeriod: 1,
+      periodUnit: 'day',
+      repeatDays: 1,
+      completed: {},
+      order: 3,
+      createdAt: 1700000000003,
+      microWins: [
+        { id: 'mw10', level: 1, description: 'Open Launch Pad', effortLevel: 'minimal' },
+        { id: 'mw11', level: 2, description: 'Watch today\'s lesson', effortLevel: 'low' },
+        { id: 'mw12', level: 3, description: 'Complete the countdown', effortLevel: 'medium' }
       ]
     }
   ];
@@ -263,17 +312,19 @@ function App() {
         
         try {
             const now = Date.now();
+            
+            // Preserve starter habits (IDs 9999991-9999994) and merge with new habits
+            const starterHabits = habits.filter(h => h.id >= 9999990 && h.id <= 9999999);
+            
             const habitsWithIds = newHabits.map((h, index) => ({
                 ...h,
                 id: now + index,
                 createdAt: now,
-                order: index + 3,
+                order: starterHabits.length + index, // Dynamic order based on number of starters
             }));
             
             console.log('✅ Habits with IDs:', habitsWithIds);
             
-            // Preserve starter habits (IDs 9999991-9999993) and merge with new habits
-            const starterHabits = habits.filter(h => h.id >= 9999990 && h.id <= 9999999);
             const mergedHabits = [...starterHabits, ...habitsWithIds];
             
             setHabits(mergedHabits);
@@ -447,6 +498,18 @@ function App() {
     const handleMomentumComplete = () => {
         const today = formatDate(new Date(), 'yyyy-MM-dd');
         setMomentumLastCompleted(today);
+        
+        // Auto-complete the "Ignite" habit (ID 9999994)
+        const igniteHabit = habits.find(h => h.id === 9999994);
+        if (igniteHabit) {
+            const updatedHabits = habits.map(h => 
+                h.id === 9999994 
+                    ? { ...h, completed: { ...h.completed, [today]: true } }
+                    : h
+            );
+            setHabits(updatedHabits);
+        }
+        
         setShowMomentumGenerator(false);
     };
     
