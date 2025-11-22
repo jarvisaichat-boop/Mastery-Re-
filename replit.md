@@ -32,10 +32,11 @@
     - **The Solution**: Multi-layered fix to ensure popup persists cleanly across re-renders:
         1. **Guard against infinite loop**: Added `countdownCompletedRef` check in useEffect to prevent re-triggering `onComplete()` after first completion
         2. **Ref-based visibility**: Popup now renders when EITHER `showSeizeTheDayPopup` state OR `countdownCompletedRef` is true, ensuring persistence across re-renders
-        3. **Guaranteed single completion**: `onComplete()` is called exactly once when countdown hits zero (line 468 in MomentumGeneratorModal.tsx)
+        3. **Guaranteed single completion**: `onComplete()` is called exactly once when countdown hits zero (line 486 in MomentumGeneratorModal.tsx)
         4. **Clean reset on dismiss**: Popup dismiss handler resets both state and ref, then delays modal close by 50ms to ensure state updates process
         5. **Session cleanup**: Modal close always resets both popup state and ref for fresh sessions
-    - **Result**: Popup appears immediately when countdown finishes, stays visible until user dismisses, and Ignite habit is marked complete exactly once
+        6. **Skip button fix**: "Skip / I'm Ready Now" button now triggers the same popup flow as natural countdown completion using a shared `triggerLaunchCompletion()` helper that clears the interval ref, stops countdown state, and shows the popup
+    - **Result**: Popup appears immediately when countdown finishes (whether natural or skipped), stays visible until user dismisses, and Ignite habit is marked complete exactly once
 -   **CRITICAL FIX - Ignite Habit Scheduling**: Fixed root cause where Ignite habit with `frequencyType: 'daily'` wasn't recognized by `isHabitScheduledOnDay` (which only checked for 'Everyday'). This single fix resolved THREE user-reported issues:
     1. ✅ Ignite checkmarks now display when auto-completed after Momentum Generator
     2. ✅ Week circles show proper dimming (current week stays bright, only past weeks dim if incomplete)
