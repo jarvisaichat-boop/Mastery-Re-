@@ -100,9 +100,9 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
       return;
     }
 
-    // STRICT DURATION CHECK: Must be 10 minutes or less
-    if (formData.duration > 10) {
-      alert('⚠️ Video must be 10 minutes or less. Please choose a shorter video or adjust the duration.');
+    // STRICT DURATION CHECK: Must be 8 minutes or less
+    if (formData.duration > 8) {
+      alert('⚠️ Video must be 8 minutes or less. Please choose a shorter video or adjust the duration.');
       return;
     }
 
@@ -226,10 +226,10 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                     }
                     className="w-full bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     min="1"
-                    max="10"
+                    max="8"
                   />
                   <p className="text-xs text-yellow-400 mt-1 font-semibold">
-                    ℹ️ Maximum 10 minutes
+                    ℹ️ Maximum 8 minutes
                   </p>
                 </div>
 
