@@ -43,7 +43,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [launchCountdown, setLaunchCountdown] = useState(60);
   const [launchActive, setLaunchActive] = useState(false);
   const [shakeScreen, setShakeScreen] = useState(false);
-  const [stepVisible, setStepVisible] = useState(false);
   const [selectedContent, setSelectedContent] = useState<ContentLibraryItem | null>(null);
   const [videoCompleted, setVideoCompleted] = useState(false);
   const [player, setPlayer] = useState<any>(null);
@@ -225,12 +224,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     
     return streak;
   }
-
-  // Keep content always visible since we have a persistent backdrop
-  useEffect(() => {
-    if (!isOpen) return;
-    setStepVisible(true);
-  }, [currentStep, isOpen]);
 
   // Initialize YouTube player when content step loads
   useEffect(() => {

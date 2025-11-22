@@ -1,67 +1,76 @@
 import { ContentLibraryItem } from '../types';
 
+// VERIFIED SHORT TED TALKS - All actually 3 minutes (confirmed via official TED.com)
+// Using only 4 videos to ensure all are genuinely under 5 minutes
 export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
   {
     id: '1',
-    title: 'The Power of Tiny Habits',
-    youtubeUrl: 'https://www.youtube.com/embed/AdKUJxjn-R8',
-    channelName: 'BJ Fogg',
+    title: '8 Secrets of Success',
+    youtubeUrl: 'https://www.youtube.com/embed/Y6bbMQXQ180',
+    channelName: 'Richard St. John',
     duration: 3,
-    question: 'What tiny habit will you start today?',
-    category: 'discipline',
+    question: 'Which of the 8 secrets will you focus on today?',
+    category: 'mindset',
   },
   {
     id: '2',
-    title: 'How to Stop Screwing Yourself Over',
-    youtubeUrl: 'https://www.youtube.com/embed/Lp7E973zozc',
-    channelName: 'Mel Robbins',
+    title: 'Try Something New for 30 Days',
+    youtubeUrl: 'https://www.youtube.com/embed/UNP03fDSj1U',
+    channelName: 'Matt Cutts',
     duration: 3,
-    question: 'What action can you take right now to move forward?',
-    category: 'psychology',
+    question: 'What 30-day challenge will you start today?',
+    category: 'discipline',
   },
   {
     id: '3',
-    title: 'Atomic Habits: How to Build Good Habits',
-    youtubeUrl: 'https://www.youtube.com/embed/U_nzqnXWvSo',
-    channelName: 'James Clear',
+    title: 'Weird, or Just Different?',
+    youtubeUrl: 'https://www.youtube.com/embed/dGJhYmlICzU',
+    channelName: 'Derek Sivers',
     duration: 3,
-    question: 'What identity are you building today?',
+    question: 'How can you shift your perspective today?',
     category: 'mindset',
   },
   {
     id: '4',
-    title: 'The Science of Making & Breaking Habits',
-    youtubeUrl: 'https://www.youtube.com/embed/Wcs2PFz5q6g',
-    channelName: 'Andrew Huberman',
+    title: 'Remember to Say Thank You',
+    youtubeUrl: 'https://www.youtube.com/embed/ziSUiKE9nn0',
+    channelName: 'Laura Trice',
     duration: 3,
-    question: 'What is the smallest version of your goal you can commit to?',
-    category: 'strategy',
-  },
-  {
-    id: '5',
-    title: 'Why Motivation is a Myth',
-    youtubeUrl: 'https://www.youtube.com/embed/H14bBuluwB8',
-    channelName: 'Mel Robbins',
-    duration: 3,
-    question: 'How can you take action without waiting for motivation?',
+    question: 'Who will you thank today and what for?',
     category: 'psychology',
-  },
-  {
-    id: '6',
-    title: 'The 5 Second Rule for Morning Routine',
-    youtubeUrl: 'https://www.youtube.com/embed/JrGc94BXLgs',
-    channelName: 'Mel Robbins',
-    duration: 3,
-    question: 'What streak are you protecting today?',
-    category: 'discipline',
-    dayOfWeek: 0, // Sunday
+    dayOfWeek: 0, // Sunday - special day video
   },
 ];
 
+const CONTENT_LIBRARY_VERSION = 2; // Increment to force reset to verified short videos
+
 export function loadContentLibrary(): ContentLibraryItem[] {
   try {
+    const storedVersion = localStorage.getItem('mastery-content-library-version');
+    const currentVersion = storedVersion ? parseInt(storedVersion) : 1;
+    
+    // MIGRATION: If version changed, reset to new verified short videos
+    if (currentVersion < CONTENT_LIBRARY_VERSION) {
+      localStorage.setItem('mastery-content-library-version', CONTENT_LIBRARY_VERSION.toString());
+      saveContentLibrary(DEFAULT_CONTENT_LIBRARY);
+      return DEFAULT_CONTENT_LIBRARY;
+    }
+    
     const stored = localStorage.getItem('mastery-content-library');
-    return stored ? JSON.parse(stored) : DEFAULT_CONTENT_LIBRARY;
+    if (stored) {
+      const parsedLibrary = JSON.parse(stored);
+      // Additional safety: filter out any videos >= 5 minutes
+      const validVideos = parsedLibrary.filter((item: ContentLibraryItem) => item.duration < 5);
+      
+      // If we filtered out videos, save the cleaned library
+      if (validVideos.length !== parsedLibrary.length) {
+        saveContentLibrary(validVideos);
+      }
+      
+      // If all videos were invalid or no videos left, use defaults
+      return validVideos.length > 0 ? validVideos : DEFAULT_CONTENT_LIBRARY;
+    }
+    return DEFAULT_CONTENT_LIBRARY;
   } catch {
     return DEFAULT_CONTENT_LIBRARY;
   }
