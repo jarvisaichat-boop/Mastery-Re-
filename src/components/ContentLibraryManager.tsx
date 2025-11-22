@@ -1,6 +1,35 @@
 import React, { useState } from 'react';
-import { X, Plus, Trash2, Search, PlayCircle } from 'lucide-react';
+import { X, Plus, Trash2, Search, PlayCircle, Eye, ThumbsUp, Calendar } from 'lucide-react';
 import { ContentLibraryItem } from '../types';
+import { analyzeTranscript, AnalyzedTags } from '../utils/transcriptAnalyzer';
+
+function formatViewCount(count?: number): string {
+  if (!count) return '0 views';
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M views`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K views`;
+  return `${count} views`;
+}
+
+function formatLikeCount(count?: number): string {
+  if (!count) return '0';
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+  return `${count}`;
+}
+
+function formatPublishedDate(dateString?: string): string {
+  if (!dateString) return 'Unknown date';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 1) return 'Today';
+  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
+  return `${Math.floor(diffDays / 365)} year${Math.floor(diffDays / 365) > 1 ? 's' : ''} ago`;
+}
 
 interface ContentLibraryManagerProps {
   isOpen: boolean;
@@ -18,6 +47,9 @@ interface SearchResult {
   thumbnail: string;
   description: string;
   youtubeUrl: string;
+  viewCount?: number;
+  likeCount?: number;
+  publishedAt?: string;
 }
 
 export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
@@ -86,7 +118,7 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
     handleSearch(query);
   };
 
-  const handleAddFromSearch = (result: SearchResult) => {
+  const handleAddFromSearch = async (result: SearchResult) => {
     const newItem: ContentLibraryItem = {
       id: Date.now().toString(),
       title: result.title,
@@ -95,14 +127,16 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
       duration: result.duration,
       question: 'What ONE action will you take today based on this video?',
       category: 'strategy',
+      viewCount: result.viewCount,
+      likeCount: result.likeCount,
+      publishedAt: result.publishedAt,
     };
     
     setEditingId(newItem.id);
     setFormData(newItem);
-    setValidationStatus('valid');
-    setValidationMessage(`✓ Verified: ${result.duration.toFixed(1)} minutes | ${result.title}`);
-    setMetadataFetched(true);
     setActiveTab('library');
+    
+    await fetchYouTubeMetadata(result.youtubeUrl);
   };
 
   const handleAddNew = () => {
@@ -113,7 +147,7 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
       youtubeUrl: '',
       channelName: '',
       duration: 3,
-      question: '',
+      question: 'What ONE action will you take today based on this video?',
       category: 'discipline',
     });
     setValidationStatus('idle');
@@ -122,7 +156,10 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
 
   const handleEdit = (item: ContentLibraryItem) => {
     setEditingId(item.id);
-    setFormData(item);
+    setFormData({
+      ...item,
+      question: item.question || 'What ONE action will you take today based on this video?'
+    });
     setValidationStatus('idle');
     setValidationMessage('');
     setMetadataFetched(false);
@@ -152,15 +189,58 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
         return false;
       }
 
+      setValidationMessage('🎬 Fetching transcript for intelligent tag analysis...');
+      
+      let analyzedTags: AnalyzedTags | null = null;
+      let transcriptFetched = false;
+      try {
+        const transcriptResponse = await fetch(`/api/youtube/transcript?url=${encodeURIComponent(url)}`);
+        if (transcriptResponse.ok) {
+          const transcriptData = await transcriptResponse.json();
+          analyzedTags = analyzeTranscript(transcriptData.transcript, data.title, data.description || '');
+          transcriptFetched = true;
+          console.log('📊 Auto-analyzed tags from transcript:', analyzedTags);
+        } else if (transcriptResponse.status === 404) {
+          console.log('📝 No transcript available (captions disabled), using title/description for tag analysis');
+          analyzedTags = analyzeTranscript('', data.title, data.description || '');
+        } else {
+          console.warn('Transcript fetch failed with status:', transcriptResponse.status);
+        }
+      } catch (transcriptError) {
+        console.warn('Could not fetch transcript for tag analysis:', transcriptError);
+      }
+
       setFormData(prev => ({
         ...prev,
         title: data.title,
         channelName: data.channelName,
         duration: Math.ceil(data.duration),
+        viewCount: data.viewCount,
+        likeCount: data.likeCount,
+        publishedAt: data.publishedAt,
+        question: prev.question || 'What ONE action will you take today based on this video?',
+        tags: analyzedTags ? {
+          contentType: analyzedTags.contentType,
+          lifeDomain: analyzedTags.lifeDomain,
+          difficulty: analyzedTags.difficulty,
+          emotion: analyzedTags.emotion,
+          technique: analyzedTags.technique
+        } : {
+          contentType: ['education', 'tutorial'],
+          lifeDomain: ['productivity', 'mental'],
+          difficulty: 'beginner',
+          emotion: ['empowering'],
+          technique: []
+        }
       }));
 
       setValidationStatus('valid');
-      setValidationMessage(`✓ Verified: ${data.duration.toFixed(1)} minutes | ${data.title}`);
+      const tagMessage = transcriptFetched 
+        ? 'Tags analyzed from transcript' 
+        : analyzedTags 
+        ? 'Tags analyzed from title/description' 
+        : 'Default tags applied';
+      setValidationMessage(`✓ Verified: ${data.duration.toFixed(1)} minutes | ${tagMessage}`);
       setMetadataFetched(true);
       return true;
 
@@ -350,6 +430,22 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                         {result.title}
                       </h4>
                       <p className="text-gray-400 text-xs mb-2">{result.channelName}</p>
+                      
+                      <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                        <div className="flex items-center gap-1" title="View count">
+                          <Eye size={12} />
+                          <span>{formatViewCount(result.viewCount)}</span>
+                        </div>
+                        <div className="flex items-center gap-1" title="Like count">
+                          <ThumbsUp size={12} />
+                          <span>{formatLikeCount(result.likeCount)}</span>
+                        </div>
+                        <div className="flex items-center gap-1" title="Published date">
+                          <Calendar size={12} />
+                          <span>{formatPublishedDate(result.publishedAt)}</span>
+                        </div>
+                      </div>
+                      
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAddFromSearch(result)}
@@ -360,7 +456,6 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                         </button>
                         <a
                           href={result.youtubeUrl}
-                          target="_blank"
                           rel="noopener noreferrer"
                           className="px-3 py-2 bg-red-600 text-white text-sm font-semibold rounded hover:bg-red-700 flex items-center justify-center gap-1"
                           title="Watch on YouTube"
@@ -676,7 +771,6 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                         <h4 className="text-white font-semibold flex-1">{item.title}</h4>
                         <a
                           href={item.youtubeUrl}
-                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-red-500 hover:text-red-400 transition-colors"
                           title="Watch on YouTube"
@@ -686,9 +780,28 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                       </div>
                       <p className="text-gray-400 text-sm mt-1">{item.channelName}</p>
                       <p className="text-gray-400 text-sm italic mt-1">"{item.question}"</p>
-                      <p className="text-gray-500 text-xs mt-2">
-                        {item.duration} min • {item.category}
-                      </p>
+                      
+                      <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                        <span>{item.duration} min • {item.category}</span>
+                        {item.viewCount && (
+                          <div className="flex items-center gap-1" title="View count">
+                            <Eye size={12} />
+                            <span>{formatViewCount(item.viewCount)}</span>
+                          </div>
+                        )}
+                        {item.likeCount && (
+                          <div className="flex items-center gap-1" title="Like count">
+                            <ThumbsUp size={12} />
+                            <span>{formatLikeCount(item.likeCount)}</span>
+                          </div>
+                        )}
+                        {item.publishedAt && (
+                          <div className="flex items-center gap-1" title="Published date">
+                            <Calendar size={12} />
+                            <span>{formatPublishedDate(item.publishedAt)}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <button

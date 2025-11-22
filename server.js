@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { YoutubeTranscript } from 'youtube-transcript';
 
 const app = express();
 const PORT = 3001;
@@ -60,8 +61,8 @@ app.get('/api/youtube/metadata', async (req, res) => {
       });
     }
     
-    // Call YouTube Data API v3
-    const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=${apiKey}`;
+    // Call YouTube Data API v3 with statistics
+    const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoId}&key=${apiKey}`;
     
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -93,7 +94,7 @@ app.get('/api/youtube/metadata', async (req, res) => {
       });
     }
     
-    // Return metadata
+    // Return metadata with statistics
     res.json({
       videoId,
       title: video.snippet.title,
@@ -102,6 +103,10 @@ app.get('/api/youtube/metadata', async (req, res) => {
       durationSeconds, // Exact seconds for strict validation
       durationRaw: video.contentDetails.duration,
       thumbnail: video.snippet.thumbnails.default.url,
+      description: video.snippet.description,
+      viewCount: parseInt(video.statistics?.viewCount || '0'),
+      likeCount: parseInt(video.statistics?.likeCount || '0'),
+      publishedAt: video.snippet.publishedAt,
       verified: true
     });
     
@@ -155,8 +160,8 @@ app.get('/api/youtube/search', async (req, res) => {
       return res.json({ videos: [] });
     }
     
-    // Fetch detailed metadata for all videos (including duration)
-    const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoIds.join(',')}&key=${apiKey}`;
+    // Fetch detailed metadata for all videos (including duration and statistics)
+    const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds.join(',')}&key=${apiKey}`;
     
     const detailsResponse = await fetch(videoDetailsUrl);
     const detailsData = await detailsResponse.json();
@@ -187,7 +192,10 @@ app.get('/api/youtube/search', async (req, res) => {
           durationSeconds,
           thumbnail: video.snippet.thumbnails.medium.url,
           description: video.snippet.description,
-          youtubeUrl: `https://www.youtube.com/watch?v=${video.id}`
+          youtubeUrl: `https://www.youtube.com/watch?v=${video.id}`,
+          viewCount: parseInt(video.statistics?.viewCount || '0'),
+          likeCount: parseInt(video.statistics?.likeCount || '0'),
+          publishedAt: video.snippet.publishedAt
         };
       })
       .filter(Boolean) || [];
@@ -202,6 +210,59 @@ app.get('/api/youtube/search', async (req, res) => {
     console.error('YouTube search error:', error);
     res.status(500).json({ 
       error: 'Failed to search YouTube',
+      details: error.message 
+    });
+  }
+});
+
+// YouTube transcript endpoint - fetch video transcript/captions
+app.get('/api/youtube/transcript', async (req, res) => {
+  try {
+    const { url } = req.query;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'URL parameter is required' });
+    }
+    
+    // Extract video ID
+    const videoId = extractVideoId(url);
+    if (!videoId) {
+      return res.status(400).json({ error: 'Invalid YouTube URL or video ID' });
+    }
+    
+    // Fetch transcript using youtube-transcript library
+    const transcript = await YoutubeTranscript.fetchTranscript(videoId);
+    
+    if (!transcript || transcript.length === 0) {
+      return res.status(404).json({ 
+        error: 'No transcript available',
+        hint: 'This video may not have captions/subtitles enabled'
+      });
+    }
+    
+    // Combine all transcript segments into full text
+    const fullText = transcript.map(segment => segment.text).join(' ');
+    
+    res.json({
+      videoId,
+      transcript: fullText,
+      segments: transcript,
+      segmentCount: transcript.length
+    });
+    
+  } catch (error) {
+    console.error('YouTube transcript error:', error);
+    
+    // Handle specific transcript errors
+    if (error.message?.includes('Could not find transcript')) {
+      return res.status(404).json({ 
+        error: 'No transcript available',
+        hint: 'This video may not have captions/subtitles enabled'
+      });
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to fetch transcript',
       details: error.message 
     });
   }

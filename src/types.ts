@@ -125,6 +125,10 @@ export interface ContentLibraryItem {
     emotion?: ('energizing' | 'calming' | 'empowering' | 'reflective')[]; // Emotional tone
     technique?: string[]; // Specific techniques mentioned (e.g., "habit stacking", "2-minute rule")
   };
+  // Video metadata
+  viewCount?: number;
+  likeCount?: number;
+  publishedAt?: string; // ISO 8601 date
 }
 
 export interface MomentumGeneratorState {
