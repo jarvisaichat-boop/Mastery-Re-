@@ -13,5 +13,12 @@ export default defineConfig({
     hmr: {
       clientPort: 443,
     },
+    proxy: {
+      // Proxy API requests to backend server
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
   },
 });

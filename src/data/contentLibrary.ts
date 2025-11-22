@@ -3,29 +3,20 @@ import { ContentLibraryItem } from '../types';
 // EDUCATIONAL CONTENT LIBRARY - VERIFIED DURATIONS via YouTube API
 // Note: Some YouTube videos may have embedding disabled. The app gracefully handles failures.
 // All videos teach how to START new habits and build routines that stick
-// Duration limit: 8 minutes maximum - ALL DURATIONS VERIFIED via YouTube Data API v3
+// STRICT: Maximum 8.00 minutes (480 seconds) - ALL DURATIONS VERIFIED via YouTube Data API v3
 export const DEFAULT_CONTENT_LIBRARY: ContentLibraryItem[] = [
   {
     id: '1',
     title: 'The Science of Productivity',
     youtubeUrl: 'https://www.youtube.com/watch?v=lHfjvYzr-3g',
     channelName: 'AsapSCIENCE',
-    duration: 3, // VERIFIED: 3.27 minutes
+    duration: 3.27, // VERIFIED: 3 minutes 16 seconds
     question: 'What ONE productivity technique will you apply today to start a new habit?',
     category: 'strategy',
   },
-  {
-    id: '2',
-    title: 'Atomic Habits: How to Get 1% Better Every Day',
-    youtubeUrl: 'https://www.youtube.com/watch?v=U_nzqnXWvSo',
-    channelName: 'APB Speakers',
-    duration: 8, // VERIFIED: 8.07 minutes
-    question: 'Using the compound effect, what tiny 1% improvement will you start today?',
-    category: 'mindset',
-  },
 ];
 
-const CONTENT_LIBRARY_VERSION = 17; // CRITICAL FIX: All durations verified via YouTube API (previous versions had incorrect manual durations)
+const CONTENT_LIBRARY_VERSION = 18; // STRICT enforcement: Only videos ≤8.00 minutes (removed 8.07-min video that exceeded limit)
 
 export function saveContentLibrary(items: ContentLibraryItem[]): void {
   try {

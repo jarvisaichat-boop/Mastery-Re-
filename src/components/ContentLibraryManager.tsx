@@ -59,7 +59,8 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
       setValidationStatus('checking');
       setValidationMessage('🔍 Fetching real video data from YouTube...');
 
-      const response = await fetch(`http://localhost:3001/api/youtube/metadata?url=${encodeURIComponent(url)}`);
+      // Use relative path - Vite dev server will proxy to backend, production uses same origin
+      const response = await fetch(`/api/youtube/metadata?url=${encodeURIComponent(url)}`);
       const data = await response.json();
 
       if (!response.ok) {

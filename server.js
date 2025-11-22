@@ -81,13 +81,25 @@ app.get('/api/youtube/metadata', async (req, res) => {
     
     const video = data.items[0];
     const durationMinutes = parseISO8601Duration(video.contentDetails.duration);
+    const durationSeconds = Math.round(durationMinutes * 60);
+    
+    // STRICT ENFORCEMENT: Block videos >8 minutes (480 seconds)
+    if (durationSeconds > 480) {
+      return res.status(400).json({ 
+        error: 'Video exceeds 8-minute limit',
+        duration: Math.round(durationMinutes * 100) / 100,
+        durationSeconds,
+        maxSeconds: 480
+      });
+    }
     
     // Return metadata
     res.json({
       videoId,
       title: video.snippet.title,
       channelName: video.snippet.channelTitle,
-      duration: Math.round(durationMinutes * 100) / 100, // Round to 2 decimal places
+      duration: Math.round(durationMinutes * 100) / 100, // Minutes (rounded for display)
+      durationSeconds, // Exact seconds for strict validation
       durationRaw: video.contentDetails.duration,
       thumbnail: video.snippet.thumbnails.default.url,
       verified: true
