@@ -58,6 +58,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Refs for YouTube player and timeout management
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const videoTimeoutRef = useRef<number | null>(null);
+  const countdownCompletedRef = useRef(false); // Persist popup state across re-renders
 
   // Always include these 3 pre-generated life goal habits
   const starterHabits = [
@@ -144,7 +145,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setVideoError(false);
       setConfetti([]); // Reset confetti
       setYoutubeMetadata(null); // Reset YouTube metadata
-      setShowSeizeTheDayPopup(false); // Reset popup
+      // Only reset popup if countdown hasn't completed (prevents flash bug)
+      if (!countdownCompletedRef.current) {
+        setShowSeizeTheDayPopup(false);
+      }
       setShowVideoIntro(true); // Reset video intro
       setPreCountdown(null); // Reset pre-countdown
       setRandomVisionContent(''); // Reset random vision content
@@ -463,7 +467,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
         if (prev <= 1) {
           clearInterval(interval);
           onComplete(); // This marks Ignite habit complete
-          // Show popup - user must click to dismiss
+          // Show popup - user must click to dismiss (persist across re-renders)
+          countdownCompletedRef.current = true;
           setShowSeizeTheDayPopup(true);
           return 0;
         }
@@ -1085,6 +1090,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn cursor-pointer"
           onClick={() => {
             setShowSeizeTheDayPopup(false);
+            countdownCompletedRef.current = false; // Reset ref when user dismisses
             onClose();
           }}
         >
