@@ -508,8 +508,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   // Render step content based on current step (persistent backdrop pattern)
   const renderStepContent = () => {
-    // "Come back tomorrow" screen (but not if popup is showing)
-    if (isCompletedToday && !showSeizeTheDayPopup) {
+    // "Come back tomorrow" screen (but not if popup is showing OR countdown just completed)
+    if (isCompletedToday && !showSeizeTheDayPopup && !countdownCompletedRef.current) {
       return (
         <div className="text-center max-w-lg mx-auto px-6">
           <div className="mb-8 animate-scaleIn">
@@ -1082,10 +1082,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Force show launch countdown if countdown completed (even if isCompletedToday is true)
+  const shouldShowContent = !isCompletedToday || countdownCompletedRef.current;
+
   return (
-    <div className={`fixed inset-0 z-50 ${isCompletedToday ? 'bg-black/98 backdrop-blur-sm' : 'bg-gradient-to-b from-gray-900 via-black to-gray-900'} flex items-center justify-center`}>
+    <div className={`fixed inset-0 z-50 ${isCompletedToday && !countdownCompletedRef.current ? 'bg-black/98 backdrop-blur-sm' : 'bg-gradient-to-b from-gray-900 via-black to-gray-900'} flex items-center justify-center`}>
       <div className="w-full h-full flex items-center justify-center">
-        {renderStepContent()}
+        {shouldShowContent ? renderStepContent() : null}
       </div>
       {/* Go seize the day popup - click to dismiss */}
       {showSeizeTheDayPopup && (
