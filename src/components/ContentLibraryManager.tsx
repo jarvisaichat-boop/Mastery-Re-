@@ -456,6 +456,7 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                         </button>
                         <a
                           href={result.youtubeUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="px-3 py-2 bg-red-600 text-white text-sm font-semibold rounded hover:bg-red-700 flex items-center justify-center gap-1"
                           title="Watch on YouTube"
@@ -771,6 +772,7 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
                         <h4 className="text-white font-semibold flex-1">{item.title}</h4>
                         <a
                           href={item.youtubeUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-red-500 hover:text-red-400 transition-colors"
                           title="Watch on YouTube"

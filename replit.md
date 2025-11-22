@@ -58,6 +58,24 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp.
 -   **Quick Navigation**: Home and Target icons for quick access to key phases.
 
+## Future Planned Features
+
+### Context-Aware Video Recommendation System
+**Goal**: Evolve the Momentum Generator video recommendation engine to match content to the user's **specific goals, current struggles, and chosen habits** rather than just general habit categories.
+
+**Planned Behavior**:
+-   **Goal-based matching**: If user's goal is "lose weight", recommend weight loss strategy videos; if "build business", recommend entrepreneurship content
+-   **Struggle-based targeting**: If user is currently struggling with a specific aspect (e.g., "can't wake up in the morning"), recommend videos addressing that exact pain point (morning routines, alarm strategies)
+-   **Habit-specific content**: If user chose "running" as their morning habit, recommend running-specific motivation and technique videos
+-   **Failure pattern analysis**: Depending on the reason for habit failure (no time, lack of motivation, environment issues), recommend videos tackling that specific obstacle
+
+**Implementation Notes**:
+-   Requires capturing user's stated goals during onboarding/intake phase
+-   Track which habits user struggles with most (missed completions, broken streaks)
+-   Add failure reason tracking when users miss habits
+-   Expand video tagging system to include goal categories and problem-solving themes
+-   Update recommendation algorithm to prioritize contextual relevance over general matching
+
 ## External Dependencies
 -   **Frontend Framework**: React 18
 -   **Build Tool**: Vite 5
@@ -65,3 +83,4 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 -   **Icons**: Lucide React
 -   **Deployment**: Replit environment
 -   **Video Embedding**: YouTube oEmbed API / YouTube iframe API
+-   **Transcript Analysis**: youtube-transcript npm package
