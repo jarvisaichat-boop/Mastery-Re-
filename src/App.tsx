@@ -19,6 +19,7 @@ import { ContentLibraryManager } from './components/ContentLibraryManager';
 import { Toast } from './components/Toast';
 import { Habit, HabitTemplate, ContentLibraryItem } from './types';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay, isHabitLoggable, getHabitStrictness } from './utils';
+import { logger } from './utils/logger';
 import { NotificationService } from './services/NotificationService';
 import { loadContentLibrary, saveContentLibrary, getTodayContent } from './data/contentLibrary';
 import { recommendVideo } from './utils/videoRecommendation';
@@ -128,7 +129,7 @@ function loadHabitsFromStorage(): Habit[] {
                 return { ...h, createdAt: Date.now() };
             });
         }
-    } catch (e) { console.error("Failed to load habits", e); }
+    } catch (e) { logger.error("Failed to load habits", e); }
 
     return [
         {
@@ -357,9 +358,9 @@ function App() {
     const [activeMiniApp, setActiveMiniApp] = useState<{ habit: Habit; date: string; type: 'breath' | 'journal' | 'vision' } | null>(null);
 
     const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string, profile?: any) => {
-        console.log('🎊 App.tsx handleOnboardingComplete called');
-        console.log('📦 Received habits:', newHabits);
-        console.log('🎯 Received goal:', userGoal);
+        logger.log('🎊 App.tsx handleOnboardingComplete called');
+        logger.log('📦 Received habits:', newHabits);
+        logger.log('🎯 Received goal:', userGoal);
 
         try {
             const now = Date.now();
@@ -374,45 +375,45 @@ function App() {
                 order: starterHabits.length + index, // Dynamic order based on number of starters
             }));
 
-            console.log('✅ Habits with IDs:', habitsWithIds);
+            logger.log('✅ Habits with IDs:', habitsWithIds);
 
             const mergedHabits = [...starterHabits, ...habitsWithIds];
 
             setHabits(mergedHabits);
-            console.log('✅ setHabits called with merged habits (starters + new)');
+            logger.log('✅ setHabits called with merged habits (starters + new)');
 
             setGoal(userGoal);
-            console.log('✅ setGoal called');
+            logger.log('✅ setGoal called');
 
             setAspirations(userAspirations);
-            console.log('✅ setAspirations called');
+            logger.log('✅ setAspirations called');
 
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
             localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, userGoal);
             localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, userAspirations);
-            console.log('✅ localStorage flags set');
+            logger.log('✅ localStorage flags set');
 
             // Clear onboarding-specific storage
             localStorage.removeItem('mastery-onboarding-profile');
             localStorage.removeItem('mastery-onboarding-phase');
-            console.log('🧹 Cleared onboarding localStorage');
+            logger.log('🧹 Cleared onboarding localStorage');
 
             // Reset App Tour and Micro-Win flags to ensure proper flow
             localStorage.removeItem(LOCAL_STORAGE_APP_TOUR_KEY);
             localStorage.removeItem(LOCAL_STORAGE_MICRO_WIN_KEY);
             setAppTourComplete(false);
             setMicroWinComplete(false);
-            console.log('🔄 Reset App Tour and Micro-Win flags for fresh flow');
+            logger.log('🔄 Reset App Tour and Micro-Win flags for fresh flow');
 
             setOnboardingComplete(true);
-            console.log('✅ setOnboardingComplete(true) called - should trigger dashboard render');
+            logger.log('✅ setOnboardingComplete(true) called - should trigger dashboard render');
 
             // Reset preview mode to ensure dashboard actually shows
             setPreviewOnboarding(false);
             setJumpToPhase(null);
-            console.log('✅ Reset preview states');
+            logger.log('✅ Reset preview states');
 
-            console.log('🎉 App.tsx handleOnboardingComplete finished successfully!');
+            logger.log('🎉 App.tsx handleOnboardingComplete finished successfully!');
         } catch (error) {
             console.error('❌ Error in App.tsx handleOnboardingComplete:', error);
             alert(`Error completing onboarding in App: ${error instanceof Error ? error.message : String(error)}`);
@@ -429,7 +430,7 @@ function App() {
             localStorage.setItem(LOCAL_STORAGE_EMERGENCY_MODE_KEY, String(emergencyMode));
             localStorage.setItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY, momentumLastCompleted || '');
         }
-        catch (e) { console.error("Failed to save habits", e); }
+        catch (e) { logger.error("Failed to save habits", e); }
     }, [habits, weeklyRateMode, streakMode, goal, aspirations, emergencyMode, momentumLastCompleted]);
 
     useEffect(() => {
@@ -437,7 +438,7 @@ function App() {
             localStorage.setItem(LOCAL_STORAGE_CELEBRATED_STREAKS_KEY, JSON.stringify(Array.from(celebratedStreaks)));
             localStorage.setItem(LOCAL_STORAGE_DAILY_REASONS_KEY, JSON.stringify(dailyReasons));
             localStorage.setItem(LOCAL_STORAGE_CHAT_ENTRIES_KEY, JSON.stringify(chatEntries));
-        } catch (e) { console.error("Failed to save motivation data", e); }
+        } catch (e) { logger.error("Failed to save motivation data", e); }
     }, [celebratedStreaks, dailyReasons, chatEntries]);
 
     // Initialize Notification Service
@@ -451,10 +452,10 @@ function App() {
         });
 
         // Schedule notifications for all habits with scheduledTime
-        console.log('📱 [App] Scheduling notifications on mount...');
+        logger.log('📱 [App] Scheduling notifications on mount...');
         habits.forEach(habit => {
             if (habit.scheduledTime) {
-                console.log(`📅 [App] Found habit "${habit.name}" with scheduled time: ${habit.scheduledTime}`);
+                logger.log(`📅 [App] Found habit "${habit.name}" with scheduled time: ${habit.scheduledTime}`);
                 NotificationService.scheduleHabit(habit.id, habit.name, habit.scheduledTime);
             }
         });
@@ -551,17 +552,17 @@ function App() {
         setMomentumLastCompleted(today);
         localStorage.setItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY, today);
 
-        console.log('🚀 [Momentum] handleMomentumComplete called');
-        console.log('📅 [Momentum] Today date:', today);
+        logger.log('🚀 [Momentum] handleMomentumComplete called');
+        logger.log('📅 [Momentum] Today date:', today);
 
         // Auto-complete the "Ignite" habit (ID 9999994) and persist immediately
         setHabits(prevHabits => {
             const igniteHabit = prevHabits.find(h => h.id === 9999994);
-            console.log('🔍 [Momentum] Found Ignite habit:', igniteHabit ? `Yes (${igniteHabit.name})` : 'NO - NOT FOUND!');
-            console.log('📋 [Momentum] Current habits:', prevHabits.map(h => ({ id: h.id, name: h.name })));
+            logger.log('🔍 [Momentum] Found Ignite habit:', igniteHabit ? `Yes (${igniteHabit.name})` : 'NO - NOT FOUND!');
+            logger.log('📋 [Momentum] Current habits:', prevHabits.map(h => ({ id: h.id, name: h.name })));
 
             if (!igniteHabit) {
-                console.error('❌ [Momentum] Could not find Ignite habit (ID 9999994)!');
+                logger.error('❌ [Momentum] Could not find Ignite habit (ID 9999994)!');
                 return prevHabits;
             }
 
@@ -574,12 +575,12 @@ function App() {
             // Immediately persist to localStorage to ensure data is saved before modal closes
             try {
                 localStorage.setItem(LOCAL_STORAGE_HABITS_KEY, JSON.stringify(updatedHabits));
-                console.log('💾 [Momentum] Ignite habit persisted to localStorage for', today);
+                logger.log('💾 [Momentum] Ignite habit persisted to localStorage for', today);
             } catch (e) {
-                console.error('❌ [Momentum] Failed to persist habits:', e);
+                logger.error('❌ [Momentum] Failed to persist habits:', e);
             }
 
-            console.log('✅ [Momentum] Ignite habit marked complete for', today);
+            logger.log('✅ [Momentum] Ignite habit marked complete for', today);
             return updatedHabits;
         });
     };
@@ -856,7 +857,7 @@ function App() {
 
 
     const handleMicroWinComplete = () => {
-        console.log('🎯 Micro-Win Protocol completed');
+        logger.log('🎯 Micro-Win Protocol completed');
         setMicroWinComplete(true);
         setPreviewMicroWin(false);
         localStorage.setItem(LOCAL_STORAGE_MICRO_WIN_KEY, 'true');
@@ -867,7 +868,7 @@ function App() {
         if (onboardingComplete && appTourComplete && !microWinComplete && !previewMicroWin && habits.length > 0) {
             const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
             if (!coreHabit) {
-                console.log('⚠️ No Life Goal habit found, skipping Micro-Win Protocol');
+                logger.log('⚠️ No Life Goal habit found, skipping Micro-Win Protocol');
                 handleMicroWinComplete();
             }
         }

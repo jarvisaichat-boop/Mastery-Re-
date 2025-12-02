@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger";
 import React, { useState } from 'react';
 import { X, Plus, Trash2, Search, PlayCircle, Eye, ThumbsUp, Calendar } from 'lucide-react';
 import { ContentLibraryItem } from '../types';
@@ -199,9 +200,9 @@ export const ContentLibraryManager: React.FC<ContentLibraryManagerProps> = ({
           const transcriptData = await transcriptResponse.json();
           analyzedTags = analyzeTranscript(transcriptData.transcript, data.title, data.description || '');
           transcriptFetched = true;
-          console.log('📊 Auto-analyzed tags from transcript:', analyzedTags);
+          logger.log('📊 Auto-analyzed tags from transcript:', analyzedTags);
         } else if (transcriptResponse.status === 404) {
-          console.log('📝 No transcript available (captions disabled), using title/description for tag analysis');
+          logger.log('📝 No transcript available (captions disabled), using title/description for tag analysis');
           analyzedTags = analyzeTranscript('', data.title, data.description || '');
         } else {
           console.warn('Transcript fetch failed with status:', transcriptResponse.status);

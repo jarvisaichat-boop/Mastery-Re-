@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
+import { logger } from '../../utils/logger';
 
 interface Phase6ContractProps {
   onComplete: () => void;
@@ -10,8 +11,8 @@ export default function Phase6Contract({ onComplete }: Phase6ContractProps) {
 
   const handleComplete = () => {
     if (isCompleting) return; // Prevent multiple clicks
-    
-    console.log('🔵 Sign & Enter Dojo button clicked');
+
+    logger.log('🔵 Sign & Enter Dojo button clicked');
     setIsCompleting(true);
     onComplete();
   };
@@ -58,11 +59,10 @@ export default function Phase6Contract({ onComplete }: Phase6ContractProps) {
             <button
               onClick={handleComplete}
               disabled={isCompleting}
-              className={`px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xl font-bold rounded-xl transition-all shadow-lg ${
-                isCompleting 
-                  ? 'opacity-50 cursor-not-allowed' 
+              className={`px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xl font-bold rounded-xl transition-all shadow-lg ${isCompleting
+                  ? 'opacity-50 cursor-not-allowed'
                   : 'hover:from-blue-500 hover:to-purple-500 transform hover:scale-105'
-              }`}
+                }`}
             >
               {isCompleting ? 'Entering Dojo...' : 'Sign & Enter Dojo'}
             </button>

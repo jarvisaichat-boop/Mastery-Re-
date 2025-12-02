@@ -1,3 +1,4 @@
+import { logger } from "./logger";
 import { ContentLibraryItem, Habit } from '../types';
 
 interface WatchHistory {
@@ -214,7 +215,7 @@ export function recommendVideo(
     videosWithTimestamps.sort((a, b) => a.watchedAt - b.watchedAt);
     
     const oldestWatched = videosWithTimestamps[0];
-    console.log('⚠️ All videos watched within 30 days - selecting least recent:', oldestWatched.video.title);
+    logger.log('⚠️ All videos watched within 30 days - selecting least recent:', oldestWatched.video.title);
     return oldestWatched.video;
   }
   

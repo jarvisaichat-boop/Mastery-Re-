@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronRight, Sparkles, Target } from 'lucide-react';
 import { Habit, ContentLibraryItem } from '../types';
@@ -138,7 +139,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       
       // Set up callback for when API is ready
       window.onYouTubeIframeAPIReady = () => {
-        console.log('YouTube iframe API ready');
+        logger.log('YouTube iframe API ready');
       };
     }
   }, []);
@@ -182,7 +183,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             }
           }
         } catch (e) {
-          console.log('Error cleaning up player on close:', e);
+          logger.log('Error cleaning up player on close:', e);
         }
         
         setPlayer(null);
@@ -250,7 +251,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           }
         }
       } catch (e) {
-        console.log('Error cleaning up player:', e);
+        logger.log('Error cleaning up player:', e);
       }
       
       setPlayer(null);
@@ -292,7 +293,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               });
             }
           } catch (e) {
-            console.log('Could not fetch video metadata:', e);
+            logger.log('Could not fetch video metadata:', e);
           }
         };
 
@@ -310,7 +311,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             setVideoCompleted(true);
             if (selectedContent) {
               addToWatchHistory(selectedContent.id);
-              console.log('📹 Added video to watch history:', selectedContent.title);
+              logger.log('📹 Added video to watch history:', selectedContent.title);
             }
             if (videoTimeoutRef.current) {
               clearTimeout(videoTimeoutRef.current);
@@ -364,7 +365,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           // This only fires if playback never begins (onStateChange never fires with PLAYING)
           videoTimeoutRef.current = window.setTimeout(() => {
             if (!videoStarted && !videoError) {
-              console.log('Video timeout: playback never started after 15 seconds');
+              logger.log('Video timeout: playback never started after 15 seconds');
               setVideoError(true);
             }
             videoTimeoutRef.current = null;

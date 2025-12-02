@@ -1,6 +1,8 @@
 // Notification Service - Browser notification management with escalation
 // Built for easy migration to Expo notifications later
 
+import { logger } from '../utils/logger';
+
 export interface NotificationSchedule {
   habitId: number;
   habitName: string;
@@ -31,7 +33,7 @@ class NotificationServiceClass {
 
   async requestPermission(): Promise<boolean> {
     if (!('Notification' in window)) {
-      console.warn('Browser does not support notifications');
+      logger.warn('Browser does not support notifications');
       return false;
     }
 
@@ -59,11 +61,11 @@ class NotificationServiceClass {
     type: 'gentle' | 'urgent' | 'buzzing'
   ) {
     if (!this.permissionGranted) {
-      console.warn(`❌ [Notification] Cannot show ${type} notification for "${habitName}" - permission not granted`);
+      logger.warn(`❌ [Notification] Cannot show ${type} notification for "${habitName}" - permission not granted`);
       return;
     }
-    
-    console.log(`📣 [Notification] Showing ${type} notification for "${habitName}"`);
+
+    logger.log(`📣 [Notification] Showing ${type} notification for "${habitName}"`);
 
     const messages = {
       gentle: {
@@ -116,7 +118,7 @@ class NotificationServiceClass {
     // If scheduled time is in the past today, schedule for tomorrow
     if (scheduledDate <= now) {
       scheduledDate.setDate(scheduledDate.getDate() + 1);
-      console.log(`📅 [Notification] "${habitName}" scheduled time (${scheduledTime}) already passed today, scheduling for tomorrow`);
+      logger.log(`📅 [Notification] "${habitName}" scheduled time (${scheduledTime}) already passed today, scheduling for tomorrow`);
     }
 
     // Calculate trigger times
@@ -124,7 +126,7 @@ class NotificationServiceClass {
     const urgentTime = new Date(scheduledDate.getTime()); // T-0
     const buzzingTime = new Date(scheduledDate.getTime() + 5 * 60 * 1000); // T+5 minutes
 
-    console.log(`🔔 [Notification] Scheduling notifications for "${habitName}":
+    logger.log(`🔔 [Notification] Scheduling notifications for "${habitName}":
   - Gentle reminder (T-5): ${gentleTime.toLocaleTimeString()}
   - Urgent (T-0): ${urgentTime.toLocaleTimeString()}
   - Buzzing (T+5): ${buzzingTime.toLocaleTimeString()}
@@ -138,7 +140,7 @@ class NotificationServiceClass {
       const delay = triggerTime.getTime() - now.getTime();
       if (delay > 0) {
         const timeoutId = window.setTimeout(() => {
-          console.log(`🔥 [Notification] Firing ${type} notification for "${habitName}"`);
+          logger.log(`🔥 [Notification] Firing ${type} notification for "${habitName}"`);
           this.showNotification(habitId, habitName, type);
         }, delay);
 
@@ -149,10 +151,10 @@ class NotificationServiceClass {
           type,
           triggerTime,
         });
-        
-        console.log(`✅ [Notification] ${type} scheduled in ${Math.round(delay / 1000)}s (${triggerTime.toLocaleTimeString()})`);
+
+        logger.log(`✅ [Notification] ${type} scheduled in ${Math.round(delay / 1000)}s (${triggerTime.toLocaleTimeString()})`);
       } else {
-        console.log(`⏭️ [Notification] ${type} time already passed, skipping`);
+        logger.log(`⏭️ [Notification] ${type} time already passed, skipping`);
       }
     };
 
@@ -234,9 +236,9 @@ class NotificationServiceClass {
 
   // Testing & Debugging Methods
   testNotification(habitName: string = 'Test Habit') {
-    console.log(`🧪 [Notification] Firing test notification for "${habitName}"`);
+    logger.log(`🧪 [Notification] Firing test notification for "${habitName}"`);
     if (!this.permissionGranted) {
-      console.warn('❌ [Notification] Test failed - permission not granted');
+      logger.warn('❌ [Notification] Test failed - permission not granted');
       alert('Notification permission not granted. Please enable notifications in your browser settings.');
       return;
     }
@@ -260,7 +262,7 @@ class NotificationServiceClass {
 
   logDebugInfo() {
     const info = this.getDebugInfo();
-    console.log('🔍 [Notification Debug Info]', info);
+    logger.log('🔍 [Notification Debug Info]', info);
     return info;
   }
 }

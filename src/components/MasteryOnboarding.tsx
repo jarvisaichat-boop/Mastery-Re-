@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger";
 import { useState, useEffect } from 'react';
 import { MasteryProfile, OnboardingPhase } from '../types/onboarding';
 import { Habit } from '../types';
@@ -114,8 +115,8 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
   };
 
   const handlePhase7Complete = () => {
-    console.log('🚀 Phase 7 Complete called');
-    console.log('📊 Current profile:', profile);
+    logger.log('🚀 Phase 7 Complete called');
+    logger.log('📊 Current profile:', profile);
     
     try {
       const completedProfile: MasteryProfile = {
@@ -124,7 +125,7 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
         completedAt: Date.now(),
       } as MasteryProfile;
 
-      console.log('✅ Completed profile:', completedProfile);
+      logger.log('✅ Completed profile:', completedProfile);
 
       // Create habits from the onboarding
       const habits: Omit<Habit, 'id' | 'createdAt'>[] = [];
@@ -145,11 +146,11 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
         order: 0,
       });
 
-      console.log('💧 Water habit added');
+      logger.log('💧 Water habit added');
 
       // Add the proposed/negotiated habit if accepted
       if (completedProfile.acceptedHabit && completedProfile.proposedHabit) {
-        console.log('🎯 Adding proposed habit:', completedProfile.proposedHabit);
+        logger.log('🎯 Adding proposed habit:', completedProfile.proposedHabit);
         habits.push({
           name: completedProfile.proposedHabit.name,
           description: completedProfile.proposedHabit.description,
@@ -165,13 +166,13 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
           order: 1,
         });
       } else {
-        console.log('⚠️ Proposed habit NOT added. acceptedHabit:', completedProfile.acceptedHabit, 'proposedHabit:', completedProfile.proposedHabit);
+        logger.log('⚠️ Proposed habit NOT added. acceptedHabit:', completedProfile.acceptedHabit, 'proposedHabit:', completedProfile.proposedHabit);
       }
 
-      console.log('📝 Total habits to create:', habits.length);
+      logger.log('📝 Total habits to create:', habits.length);
 
       // Pass data to parent FIRST before clearing storage
-      console.log('🎉 Calling onComplete with:', {
+      logger.log('🎉 Calling onComplete with:', {
         habitsCount: habits.length,
         goal: completedProfile.northStar || 'My Mastery Journey',
         deepDive: completedProfile.deepDive || '',
@@ -184,7 +185,7 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
         completedProfile
       );
       
-      console.log('✨ onComplete called successfully');
+      logger.log('✨ onComplete called successfully');
 
       // NOTE: Don't clear localStorage here - let App.tsx handle cleanup
       // Clearing here causes React re-render issues
