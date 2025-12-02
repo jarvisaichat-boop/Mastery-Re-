@@ -41,226 +41,226 @@ const LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY = 'mastery-dashboard-last-streak-rep
 const LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY = 'mastery-momentum-last-completed';
 
 function loadRateMode(): 'basic' | 'hard' {
-  try {
-    const stored = localStorage.getItem(LOCAL_STORAGE_RATE_MODE_KEY);
-    // Default to 'basic' if not found
-    return stored === 'hard' ? 'hard' : 'basic'; 
-  } catch (e) {
-    return 'basic';
-  }
+    try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_RATE_MODE_KEY);
+        // Default to 'basic' if not found
+        return stored === 'hard' ? 'hard' : 'basic';
+    } catch (e) {
+        return 'basic';
+    }
 }
 
 function loadStreakMode(): 'easy' | 'hard' {
-  try {
-    const stored = localStorage.getItem(LOCAL_STORAGE_STREAK_MODE_KEY);
-    // Default to 'easy' (Basic Mode) if not found
-    return stored === 'hard' ? 'hard' : 'easy'; 
-  } catch (e) {
-    return 'easy';
-  }
+    try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_STREAK_MODE_KEY);
+        // Default to 'easy' (Basic Mode) if not found
+        return stored === 'hard' ? 'hard' : 'easy';
+    } catch (e) {
+        return 'easy';
+    }
 }
 
 function loadHabitsFromStorage(): Habit[] {
-  try {
-    const stored = localStorage.getItem(LOCAL_STORAGE_HABITS_KEY);
-    if (stored) {
-      let habits = JSON.parse(stored);
-      
-      // Migration: Add "Ignite" habit if it doesn't exist (for existing users)
-      const hasIgnite = habits.some((h: any) => h.id === 9999994);
-      if (!hasIgnite) {
-        const igniteHabit = {
-          id: 9999994,
-          name: 'Ignite',
-          description: 'Complete the daily Momentum Generator ritual',
-          color: '#f59e0b',
-          type: 'Anchor Habit',
-          categories: [{ main: 'Mindset', sub: 'Daily Ritual' }],
-          frequencyType: 'daily',
-          selectedDays: [],
-          timesPerPeriod: 1,
-          periodUnit: 'day',
-          repeatDays: 1,
-          completed: {},
-          order: -1,
-          createdAt: 1700000000000,
-          microWins: [
-            { id: 'mw10', level: 1, description: 'Open Launch Pad', effortLevel: 'minimal' },
-            { id: 'mw11', level: 2, description: 'Watch today\'s lesson', effortLevel: 'low' },
-            { id: 'mw12', level: 3, description: 'Complete the countdown', effortLevel: 'medium' }
-          ]
-        };
-        habits = [igniteHabit, ...habits];
-      }
-      
-      // Always normalize order values: Ignite gets -1, everything else gets sequential numbers
-      let nextOrder = 0;
-      habits = habits.map((h: any) => {
-        if (h.id === 9999994) {
-          return { ...h, order: -1 };
+    try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_HABITS_KEY);
+        if (stored) {
+            let habits = JSON.parse(stored);
+
+            // Migration: Add "Ignite" habit if it doesn't exist (for existing users)
+            const hasIgnite = habits.some((h: any) => h.id === 9999994);
+            if (!hasIgnite) {
+                const igniteHabit = {
+                    id: 9999994,
+                    name: 'Ignite',
+                    description: 'Complete the daily Momentum Generator ritual',
+                    color: '#f59e0b',
+                    type: 'Anchor Habit',
+                    categories: [{ main: 'Mindset', sub: 'Daily Ritual' }],
+                    frequencyType: 'daily',
+                    selectedDays: [],
+                    timesPerPeriod: 1,
+                    periodUnit: 'day',
+                    repeatDays: 1,
+                    completed: {},
+                    order: -1,
+                    createdAt: 1700000000000,
+                    microWins: [
+                        { id: 'mw10', level: 1, description: 'Open Launch Pad', effortLevel: 'minimal' },
+                        { id: 'mw11', level: 2, description: 'Watch today\'s lesson', effortLevel: 'low' },
+                        { id: 'mw12', level: 3, description: 'Complete the countdown', effortLevel: 'medium' }
+                    ]
+                };
+                habits = [igniteHabit, ...habits];
+            }
+
+            // Always normalize order values: Ignite gets -1, everything else gets sequential numbers
+            let nextOrder = 0;
+            habits = habits.map((h: any) => {
+                if (h.id === 9999994) {
+                    return { ...h, order: -1 };
+                }
+                if (h.order === undefined || h.order === null || typeof h.order !== 'number') {
+                    const currentOrder = nextOrder;
+                    nextOrder++;
+                    return { ...h, order: currentOrder };
+                }
+                return h;
+            });
+
+            return habits.map((h: any) => {
+                if (h.createdAt) {
+                    return { ...h, createdAt: typeof h.createdAt === 'number' ? h.createdAt : Date.now() };
+                }
+
+                if (typeof h.id === 'number' && h.id > 1000000000000) {
+                    return { ...h, createdAt: h.id };
+                }
+
+                const completionDates = Object.keys(h.completed || {})
+                    .filter(dateStr => h.completed[dateStr] === true)
+                    .map(dateStr => new Date(dateStr).getTime())
+                    .filter(ts => !isNaN(ts));
+
+                if (completionDates.length > 0) {
+                    return { ...h, createdAt: Math.min(...completionDates) };
+                }
+
+                return { ...h, createdAt: Date.now() };
+            });
         }
-        if (h.order === undefined || h.order === null || typeof h.order !== 'number') {
-          const currentOrder = nextOrder;
-          nextOrder++;
-          return { ...h, order: currentOrder };
+    } catch (e) { console.error("Failed to load habits", e); }
+
+    return [
+        {
+            id: 9999991,
+            name: 'Morning Movement',
+            description: 'Start your day with intentional motion',
+            color: '#3b82f6',
+            type: 'Life Goal Habit',
+            categories: [{ main: 'Health', sub: 'Movement' }],
+            frequencyType: 'daily',
+            selectedDays: [],
+            timesPerPeriod: 1,
+            periodUnit: 'day',
+            repeatDays: 1,
+            completed: {},
+            order: 0,
+            createdAt: 1700000000000,
+            scheduledTime: '07:00',
+            microWins: [
+                { id: 'mw1', level: 2, description: '5 jumping jacks', effortLevel: 'low' },
+                { id: 'mw2', level: 3, description: '2-minute walk outside', effortLevel: 'medium' },
+                { id: 'mw3', level: 4, description: 'Stretch arms overhead', effortLevel: 'minimal' }
+            ]
+        },
+        {
+            id: 9999992,
+            name: 'Deep Work Session',
+            description: 'Build focus muscle through deliberate practice',
+            color: '#8b5cf6',
+            type: 'Life Goal Habit',
+            categories: [{ main: 'Productivity', sub: 'Focus' }],
+            frequencyType: 'daily',
+            selectedDays: [],
+            timesPerPeriod: 1,
+            periodUnit: 'day',
+            repeatDays: 1,
+            completed: {},
+            order: 1,
+            createdAt: 1700000000001,
+            scheduledTime: '09:00',
+            microWins: [
+                { id: 'mw4', level: 2, description: 'Open work file', effortLevel: 'minimal' },
+                { id: 'mw5', level: 3, description: 'Write one sentence', effortLevel: 'low' },
+                { id: 'mw6', level: 4, description: 'Set 5-minute timer', effortLevel: 'low' }
+            ]
+        },
+        {
+            id: 9999993,
+            name: 'Evening Reflection',
+            description: 'Close the day with gratitude and presence',
+            color: '#10b981',
+            type: 'Life Goal Habit',
+            categories: [{ main: 'Mindfulness', sub: 'Gratitude' }],
+            frequencyType: 'daily',
+            selectedDays: [],
+            timesPerPeriod: 1,
+            periodUnit: 'day',
+            repeatDays: 1,
+            completed: {},
+            order: 2,
+            createdAt: 1700000000002,
+            scheduledTime: '21:00',
+            microWins: [
+                { id: 'mw7', level: 2, description: 'Take 3 deep breaths', effortLevel: 'minimal' },
+                { id: 'mw8', level: 3, description: 'Write 1 gratitude', effortLevel: 'low' },
+                { id: 'mw9', level: 4, description: 'Close eyes for 60 seconds', effortLevel: 'minimal' }
+            ]
+        },
+        {
+            id: 9999994,
+            name: 'Ignite',
+            description: 'Complete the daily Momentum Generator ritual',
+            color: '#f59e0b',
+            type: 'Anchor Habit',
+            categories: [{ main: 'Mindset', sub: 'Daily Ritual' }],
+            frequencyType: 'daily',
+            selectedDays: [],
+            timesPerPeriod: 1,
+            periodUnit: 'day',
+            repeatDays: 1,
+            completed: {},
+            order: -1,
+            createdAt: 1700000000000,
+            microWins: [
+                { id: 'mw10', level: 1, description: 'Open Launch Pad', effortLevel: 'minimal' },
+                { id: 'mw11', level: 2, description: 'Watch today\'s lesson', effortLevel: 'low' },
+                { id: 'mw12', level: 3, description: 'Complete the countdown', effortLevel: 'medium' }
+            ]
         }
-        return h;
-      });
-      
-      return habits.map((h: any) => {
-        if (h.createdAt) {
-          return { ...h, createdAt: typeof h.createdAt === 'number' ? h.createdAt : Date.now() };
-        }
-        
-        if (typeof h.id === 'number' && h.id > 1000000000000) {
-          return { ...h, createdAt: h.id };
-        }
-        
-        const completionDates = Object.keys(h.completed || {})
-          .filter(dateStr => h.completed[dateStr] === true)
-          .map(dateStr => new Date(dateStr).getTime())
-          .filter(ts => !isNaN(ts));
-        
-        if (completionDates.length > 0) {
-          return { ...h, createdAt: Math.min(...completionDates) };
-        }
-        
-        return { ...h, createdAt: Date.now() };
-      });
-    }
-  } catch (e) { console.error("Failed to load habits", e); }
-  
-  return [
-    {
-      id: 9999991,
-      name: 'Morning Movement',
-      description: 'Start your day with intentional motion',
-      color: '#3b82f6',
-      type: 'Life Goal Habit',
-      categories: [{ main: 'Health', sub: 'Movement' }],
-      frequencyType: 'daily',
-      selectedDays: [],
-      timesPerPeriod: 1,
-      periodUnit: 'day',
-      repeatDays: 1,
-      completed: {},
-      order: 0,
-      createdAt: 1700000000000,
-      scheduledTime: '07:00',
-      microWins: [
-        { id: 'mw1', level: 2, description: '5 jumping jacks', effortLevel: 'low' },
-        { id: 'mw2', level: 3, description: '2-minute walk outside', effortLevel: 'medium' },
-        { id: 'mw3', level: 4, description: 'Stretch arms overhead', effortLevel: 'minimal' }
-      ]
-    },
-    {
-      id: 9999992,
-      name: 'Deep Work Session',
-      description: 'Build focus muscle through deliberate practice',
-      color: '#8b5cf6',
-      type: 'Life Goal Habit',
-      categories: [{ main: 'Productivity', sub: 'Focus' }],
-      frequencyType: 'daily',
-      selectedDays: [],
-      timesPerPeriod: 1,
-      periodUnit: 'day',
-      repeatDays: 1,
-      completed: {},
-      order: 1,
-      createdAt: 1700000000001,
-      scheduledTime: '09:00',
-      microWins: [
-        { id: 'mw4', level: 2, description: 'Open work file', effortLevel: 'minimal' },
-        { id: 'mw5', level: 3, description: 'Write one sentence', effortLevel: 'low' },
-        { id: 'mw6', level: 4, description: 'Set 5-minute timer', effortLevel: 'low' }
-      ]
-    },
-    {
-      id: 9999993,
-      name: 'Evening Reflection',
-      description: 'Close the day with gratitude and presence',
-      color: '#10b981',
-      type: 'Life Goal Habit',
-      categories: [{ main: 'Mindfulness', sub: 'Gratitude' }],
-      frequencyType: 'daily',
-      selectedDays: [],
-      timesPerPeriod: 1,
-      periodUnit: 'day',
-      repeatDays: 1,
-      completed: {},
-      order: 2,
-      createdAt: 1700000000002,
-      scheduledTime: '21:00',
-      microWins: [
-        { id: 'mw7', level: 2, description: 'Take 3 deep breaths', effortLevel: 'minimal' },
-        { id: 'mw8', level: 3, description: 'Write 1 gratitude', effortLevel: 'low' },
-        { id: 'mw9', level: 4, description: 'Close eyes for 60 seconds', effortLevel: 'minimal' }
-      ]
-    },
-    {
-      id: 9999994,
-      name: 'Ignite',
-      description: 'Complete the daily Momentum Generator ritual',
-      color: '#f59e0b',
-      type: 'Anchor Habit',
-      categories: [{ main: 'Mindset', sub: 'Daily Ritual' }],
-      frequencyType: 'daily',
-      selectedDays: [],
-      timesPerPeriod: 1,
-      periodUnit: 'day',
-      repeatDays: 1,
-      completed: {},
-      order: -1,
-      createdAt: 1700000000000,
-      microWins: [
-        { id: 'mw10', level: 1, description: 'Open Launch Pad', effortLevel: 'minimal' },
-        { id: 'mw11', level: 2, description: 'Watch today\'s lesson', effortLevel: 'low' },
-        { id: 'mw12', level: 3, description: 'Complete the countdown', effortLevel: 'medium' }
-      ]
-    }
-  ];
+    ];
 }
 
 function isOnboardingComplete(): boolean {
-  try {
-    return localStorage.getItem(LOCAL_STORAGE_ONBOARDING_KEY) === 'true';
-  } catch (e) {
-    return false;
-  }
+    try {
+        return localStorage.getItem(LOCAL_STORAGE_ONBOARDING_KEY) === 'true';
+    } catch (e) {
+        return false;
+    }
 }
 
 function isAppTourComplete(): boolean {
-  try {
-    return localStorage.getItem(LOCAL_STORAGE_APP_TOUR_KEY) === 'true';
-  } catch (e) {
-    return false;
-  }
+    try {
+        return localStorage.getItem(LOCAL_STORAGE_APP_TOUR_KEY) === 'true';
+    } catch (e) {
+        return false;
+    }
 }
 
 function isMicroWinComplete(): boolean {
-  try {
-    return localStorage.getItem(LOCAL_STORAGE_MICRO_WIN_KEY) === 'true';
-  } catch (e) {
-    return false;
-  }
+    try {
+        return localStorage.getItem(LOCAL_STORAGE_MICRO_WIN_KEY) === 'true';
+    } catch (e) {
+        return false;
+    }
 }
 
 function isEmergencyModeActive(): boolean {
-  try {
-    return localStorage.getItem(LOCAL_STORAGE_EMERGENCY_MODE_KEY) === 'true';
-  } catch (e) {
-    return false;
-  }
+    try {
+        return localStorage.getItem(LOCAL_STORAGE_EMERGENCY_MODE_KEY) === 'true';
+    } catch (e) {
+        return false;
+    }
 }
 
 function App() {
     // TESTING: Auto-complete onboarding for screenshots and testing  
     // TODO: Remove this before production - this is for development testing only
     const AUTO_SKIP_ONBOARDING = true; // Set to false to enable normal onboarding flow
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const shouldSkipOnboarding = AUTO_SKIP_ONBOARDING || urlParams.get('skipOnboarding') === 'true' || urlParams.get('test') === 'true';
-    
+
     const [onboardingComplete, setOnboardingComplete] = useState(() => {
         if (shouldSkipOnboarding) {
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
@@ -279,10 +279,10 @@ function App() {
     const [jumpToPhase, setJumpToPhase] = useState<number | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
-    
+
     const [showDailyTrackingView, setShowDailyTrackingView] = useState(true);
     const [showStatsView, setShowStatsView] = useState(false);
-    
+
     const [weeklyRateMode, setWeeklyRateMode] = useState(loadRateMode);
     const [streakMode, setStreakMode] = useState(loadStreakMode);
 
@@ -293,7 +293,7 @@ function App() {
     const [showProgramLibrary, setShowProgramLibrary] = useState(false);
     const [selectedHabitToEdit, setSelectedHabitToEdit] = useState<Habit | null>(null);
     const [draggedHabitId, setDraggedHabitId] = useState<number | null>(null);
-    
+
     // Momentum Generator state
     const [showMomentumConfirmation, setShowMomentumConfirmation] = useState(false);
     const [showMomentumGenerator, setShowMomentumGenerator] = useState(false);
@@ -315,7 +315,7 @@ function App() {
             saveContentLibrary(validVideos);
         }
     }, []); // Run once on mount
-    
+
     // Pre-select today's video using smart recommendation engine (guarantees <= 8 min)
     const todaysContent = useMemo(() => {
         try {
@@ -325,7 +325,7 @@ function App() {
             return getTodayContent(contentLibrary);
         }
     }, [contentLibrary, habits]);
-    
+
     const isMomentumCompletedToday = momentumLastCompleted === formatDate(new Date(), 'yyyy-MM-dd');
 
     const [aiCoachMessage, setAiCoachMessage] = useState('');
@@ -360,58 +360,58 @@ function App() {
         console.log('🎊 App.tsx handleOnboardingComplete called');
         console.log('📦 Received habits:', newHabits);
         console.log('🎯 Received goal:', userGoal);
-        
+
         try {
             const now = Date.now();
-            
+
             // Preserve starter habits (IDs 9999991-9999994) and merge with new habits
             const starterHabits = habits.filter(h => h.id >= 9999990 && h.id <= 9999999);
-            
+
             const habitsWithIds = newHabits.map((h, index) => ({
                 ...h,
                 id: now + index,
                 createdAt: now,
                 order: starterHabits.length + index, // Dynamic order based on number of starters
             }));
-            
+
             console.log('✅ Habits with IDs:', habitsWithIds);
-            
+
             const mergedHabits = [...starterHabits, ...habitsWithIds];
-            
+
             setHabits(mergedHabits);
             console.log('✅ setHabits called with merged habits (starters + new)');
-            
+
             setGoal(userGoal);
             console.log('✅ setGoal called');
-            
+
             setAspirations(userAspirations);
             console.log('✅ setAspirations called');
-            
+
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
             localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, userGoal);
             localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, userAspirations);
             console.log('✅ localStorage flags set');
-            
+
             // Clear onboarding-specific storage
             localStorage.removeItem('mastery-onboarding-profile');
             localStorage.removeItem('mastery-onboarding-phase');
             console.log('🧹 Cleared onboarding localStorage');
-            
+
             // Reset App Tour and Micro-Win flags to ensure proper flow
             localStorage.removeItem(LOCAL_STORAGE_APP_TOUR_KEY);
             localStorage.removeItem(LOCAL_STORAGE_MICRO_WIN_KEY);
             setAppTourComplete(false);
             setMicroWinComplete(false);
             console.log('🔄 Reset App Tour and Micro-Win flags for fresh flow');
-            
+
             setOnboardingComplete(true);
             console.log('✅ setOnboardingComplete(true) called - should trigger dashboard render');
-            
+
             // Reset preview mode to ensure dashboard actually shows
             setPreviewOnboarding(false);
             setJumpToPhase(null);
             console.log('✅ Reset preview states');
-            
+
             console.log('🎉 App.tsx handleOnboardingComplete finished successfully!');
         } catch (error) {
             console.error('❌ Error in App.tsx handleOnboardingComplete:', error);
@@ -420,8 +420,8 @@ function App() {
     };
 
     useEffect(() => {
-        try { 
-            localStorage.setItem(LOCAL_STORAGE_HABITS_KEY, JSON.stringify(habits)); 
+        try {
+            localStorage.setItem(LOCAL_STORAGE_HABITS_KEY, JSON.stringify(habits));
             localStorage.setItem(LOCAL_STORAGE_RATE_MODE_KEY, weeklyRateMode);
             localStorage.setItem(LOCAL_STORAGE_STREAK_MODE_KEY, streakMode);
             localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, goal);
@@ -458,7 +458,7 @@ function App() {
                 NotificationService.scheduleHabit(habit.id, habit.name, habit.scheduledTime);
             }
         });
-        
+
         // Expose debug helper to window for testing
         (window as any).debugNotifications = () => NotificationService.logDebugInfo();
 
@@ -470,32 +470,32 @@ function App() {
     // Streak Repair: Detect broken streaks on app load (respects three-tier system)
     useEffect(() => {
         if (!onboardingComplete || habits.length === 0) return;
-        
+
         const today = formatDate(new Date(), 'yyyy-MM-dd');
         const lastCheck = localStorage.getItem(LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY);
-        
+
         // Only check once per day
         if (lastCheck === today) return;
-        
+
         const now = new Date();
         const broken: Array<{ habit: Habit; dateString: string }> = [];
-        
+
         habits.forEach(habit => {
             const strictness = getHabitStrictness(habit);
-            
+
             // Skip regular habits - they can backfill anytime
             if (strictness === 'anytime') return;
-            
+
             // Check if habit has at least one completion (has an active streak)
             const hasAnyCompletion = Object.values(habit.completed).some(v => v === true);
             if (!hasAnyCompletion) return;
-            
+
             if (strictness === 'same-day') {
                 // Anchor Habit: Check yesterday only
                 const yesterday = new Date(now);
                 yesterday.setDate(yesterday.getDate() - 1);
                 const yesterdayString = formatDate(yesterday, 'yyyy-MM-dd');
-                
+
                 if (isHabitScheduledOnDay(habit, yesterday) && !habit.completed[yesterdayString]) {
                     broken.push({ habit, dateString: yesterdayString });
                 }
@@ -506,8 +506,8 @@ function App() {
                     const checkDate = new Date(now);
                     checkDate.setDate(checkDate.getDate() - i);
                     const checkDateString = formatDate(checkDate, 'yyyy-MM-dd');
-                    
-                    if (isHabitScheduledOnDay(habit, checkDate) && 
+
+                    if (isHabitScheduledOnDay(habit, checkDate) &&
                         !habit.completed[checkDateString] &&
                         !isHabitLoggable(habit, checkDate, now)) {
                         broken.push({ habit, dateString: checkDateString });
@@ -516,11 +516,11 @@ function App() {
                 }
             }
         });
-        
+
         if (broken.length > 0) {
             setBrokenStreaks(broken);
         }
-        
+
         localStorage.setItem(LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY, today);
     }, [onboardingComplete, habits]);
 
@@ -540,37 +540,37 @@ function App() {
     const handleDateClick = (date: Date) => { setCurrentDate(date); setViewMode('week'); };
     const handleAddNewHabit = () => { setSelectedHabitToEdit(null); setShowAddHabitModal(true); };
     const handleEditHabit = (habit: Habit) => { setSelectedHabitToEdit(habit); setShowAddHabitModal(true); };
-    
+
     const handleOpenProgramLibrary = () => {
         setShowAddHabitModal(false);
         setShowProgramLibrary(true);
     };
-    
+
     const handleMomentumComplete = () => {
         const today = formatDate(new Date(), 'yyyy-MM-dd');
         setMomentumLastCompleted(today);
         localStorage.setItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY, today);
-        
+
         console.log('🚀 [Momentum] handleMomentumComplete called');
         console.log('📅 [Momentum] Today date:', today);
-        
+
         // Auto-complete the "Ignite" habit (ID 9999994) and persist immediately
         setHabits(prevHabits => {
             const igniteHabit = prevHabits.find(h => h.id === 9999994);
             console.log('🔍 [Momentum] Found Ignite habit:', igniteHabit ? `Yes (${igniteHabit.name})` : 'NO - NOT FOUND!');
             console.log('📋 [Momentum] Current habits:', prevHabits.map(h => ({ id: h.id, name: h.name })));
-            
+
             if (!igniteHabit) {
                 console.error('❌ [Momentum] Could not find Ignite habit (ID 9999994)!');
                 return prevHabits;
             }
-            
-            const updatedHabits = prevHabits.map(h => 
-                h.id === 9999994 
+
+            const updatedHabits = prevHabits.map(h =>
+                h.id === 9999994
                     ? { ...h, completed: { ...h.completed, [today]: true } }
                     : h
             );
-            
+
             // Immediately persist to localStorage to ensure data is saved before modal closes
             try {
                 localStorage.setItem(LOCAL_STORAGE_HABITS_KEY, JSON.stringify(updatedHabits));
@@ -578,22 +578,22 @@ function App() {
             } catch (e) {
                 console.error('❌ [Momentum] Failed to persist habits:', e);
             }
-            
+
             console.log('✅ [Momentum] Ignite habit marked complete for', today);
             return updatedHabits;
         });
     };
-    
+
     const handleSaveContentLibrary = (items: ContentLibraryItem[]) => {
         setContentLibrary(items);
         saveContentLibrary(items);
         setShowContentLibraryManager(false);
     };
-    
+
     const handleSelectProgramHabits = async (habitTemplates: HabitTemplate[], programId: string) => {
         const now = Date.now();
         const currentMaxOrder = Math.max(...habits.map(h => h.order), -1);
-        
+
         const newHabits: Habit[] = habitTemplates.map((template, index) => ({
             ...template,
             id: now + index,
@@ -602,7 +602,7 @@ function App() {
             createdAt: now,
             sourceProgramId: programId
         }));
-        
+
         // Request notification permission if any habit has scheduledTime
         const hasScheduledTime = newHabits.some(h => h.scheduledTime);
         if (hasScheduledTime) {
@@ -611,7 +611,7 @@ function App() {
                 alert('Notifications are blocked. Some habits have scheduled reminders that won\'t work until you enable notifications in your browser settings.');
             }
         }
-        
+
         setHabits(prev => [...prev, ...newHabits]);
         setToastMessage(`Added ${newHabits.length} habit${newHabits.length !== 1 ? 's' : ''} from program!`);
         setTimeout(() => setToastMessage(null), 3000);
@@ -629,8 +629,8 @@ function App() {
         setHabits(prev => {
             if (habitData.id) {
                 // Editing existing habit
-                return prev.map(h => h.id === habitData.id ? { 
-                    ...h, 
+                return prev.map(h => h.id === habitData.id ? {
+                    ...h,
                     ...habitData,
                     miniAppType: habitData.miniAppType !== undefined ? habitData.miniAppType : h.miniAppType
                 } : h);
@@ -653,22 +653,22 @@ function App() {
         NotificationService.unscheduleHabit(habitId);
         setHabits(p => p.filter(h => h.id !== habitId));
     };
-    
+
     const handleToggleHabit = useCallback((habitId: number, dateString: string) => {
         const habit = habits.find(h => h.id === habitId);
         if (!habit) return;
-        
+
         // Check if habit has a mini-app experience - open it instead of toggling
         if (habit.miniAppType && !habit.completed[dateString]) {
             setActiveMiniApp({ habit, date: dateString, type: habit.miniAppType });
             return;
         }
-        
+
         // Check if habit is loggable based on three-tier system
         const habitDate = new Date(dateString);
         const currentDate = new Date();
         const strictness = getHabitStrictness(habit);
-        
+
         // Only enforce loggability check for strict habits (Anchor/Life Goal)
         if (strictness !== 'anytime') {
             const loggable = isHabitLoggable(habit, habitDate, currentDate);
@@ -677,7 +677,7 @@ function App() {
                 return;
             }
         }
-        
+
         // Emergency Mode: Open micro-win action instead of direct toggle (only for Anchor/Life Goal)
         if (emergencyMode && strictness !== 'anytime') {
             if (habit && !habit.completed[dateString]) {
@@ -685,20 +685,20 @@ function App() {
                 return;
             }
         }
-        
+
         setHabits(p => {
             const updatedHabits = p.map(h => {
                 if (h.id === habitId) {
                     const currentValue = h.completed[dateString];
                     const newValue = currentValue === null || currentValue === undefined ? true : currentValue === true ? false : null;
-                    
+
                     if (newValue === true) {
                         const habit = p.find(hb => hb.id === habitId);
                         if (habit) {
                             let streak = 1;
                             let checkDate = new Date(dateString);
                             checkDate.setDate(checkDate.getDate() - 1);
-                            
+
                             while (streak < 30) {
                                 const checkDateStr = formatDate(checkDate, 'yyyy-MM-dd');
                                 if (habit.completed[checkDateStr] === true) {
@@ -708,13 +708,13 @@ function App() {
                                     break;
                                 }
                             }
-                            
+
                             const celebrationKey = `${habitId}-${streak}`;
                             if ([3, 7, 14, 30].includes(streak) && !celebratedStreaks.has(celebrationKey)) {
                                 setStreakCelebration({ habitName: habit.name, days: streak });
                                 setCelebratedStreaks(prev => new Set(prev).add(celebrationKey));
                             }
-                            
+
                             const messages = [
                                 "Hell yeah! 🔥",
                                 "Keep crushing it! 💪",
@@ -726,7 +726,7 @@ function App() {
                             setShowAiCoach(true);
                         }
                     }
-                    
+
                     return { ...h, completed: { ...h.completed, [dateString]: newValue } };
                 }
                 return h;
@@ -752,9 +752,9 @@ function App() {
 
     const handleEmergencyHabitComplete = () => {
         if (!emergencyHabitAction) return;
-        
+
         const { habit, date } = emergencyHabitAction;
-        
+
         // Directly mark habit as complete (bypass emergency mode check)
         setHabits(p => {
             const updatedHabits = p.map(h => {
@@ -762,13 +762,13 @@ function App() {
                     const streak = 1; // Calculate streak for celebration
                     let checkDate = new Date(date);
                     checkDate.setDate(checkDate.getDate() - 1);
-                    
+
                     const celebrationKey = `${habit.id}-${streak}`;
                     if ([3, 7, 14, 30].includes(streak) && !celebratedStreaks.has(celebrationKey)) {
                         setStreakCelebration({ habitName: habit.name, days: streak });
                         setCelebratedStreaks(prev => new Set(prev).add(celebrationKey));
                     }
-                    
+
                     const messages = [
                         "Hell yeah! 🔥",
                         "Keep crushing it! 💪",
@@ -778,14 +778,14 @@ function App() {
                     ];
                     setAiCoachMessage(messages[Math.floor(Math.random() * messages.length)]);
                     setShowAiCoach(true);
-                    
+
                     return { ...h, completed: { ...h.completed, [date]: true } };
                 }
                 return h;
             });
             return updatedHabits;
         });
-        
+
         setEmergencyHabitAction(null);
     };
 
@@ -795,8 +795,8 @@ function App() {
 
     const handleStreakRepairComplete = (habitId: number, dateString: string) => {
         // Mark the habit as complete for the given date (usually yesterday)
-        setHabits(p => p.map(h => 
-            h.id === habitId 
+        setHabits(p => p.map(h =>
+            h.id === habitId
                 ? { ...h, completed: { ...h.completed, [dateString]: true } }
                 : h
         ));
@@ -808,7 +808,7 @@ function App() {
 
     const handleIgniteComplete = () => {
         if (!igniteHabit) return;
-        
+
         // Mark habit as complete for today
         const today = formatDate(new Date(), 'yyyy-MM-dd');
         handleToggleHabit(igniteHabit.id, today);
@@ -825,7 +825,7 @@ function App() {
         e.preventDefault();
         if (draggedHabitId === null || draggedHabitId === targetHabitId) { setDraggedHabitId(null); return; }
         setHabits(prev => {
-            const sorted = [...prev].sort((a,b) => a.order - b.order);
+            const sorted = [...prev].sort((a, b) => a.order - b.order);
             const draggedIndex = sorted.findIndex(h => h.id === draggedHabitId);
             const targetIndex = sorted.findIndex(h => h.id === targetHabitId);
             const [draggedItem] = sorted.splice(draggedIndex, 1);
@@ -834,22 +834,22 @@ function App() {
         });
         setDraggedHabitId(null);
     };
-    
+
     const sortedHabits = [...habits].sort((a, b) => a.order - b.order);
     const habitMuscleCount = habits.filter(h => h.type === 'Anchor Habit').length;
     const lifeGoalsCount = habits.filter(h => h.type === 'Life Goal Habit').length;
-    
+
     // CRITICAL PERFORMANCE FIX: Memoized Dashboard Data Calculation 
     const dashboardData = useMemo(() => {
         // Pass both mode states for the full calculation
-        return calculateDashboardData(habits, weeklyRateMode, streakMode); 
-    }, [habits, weeklyRateMode, streakMode]); 
+        return calculateDashboardData(habits, weeklyRateMode, streakMode);
+    }, [habits, weeklyRateMode, streakMode]);
 
     // Setter function for rate mode
     const handleToggleRateMode = useCallback(() => {
         setWeeklyRateMode(p => p === 'basic' ? 'hard' : 'basic');
     }, []);
-    
+
     const handleToggleStreakMode = useCallback(() => {
         setStreakMode(p => p === 'hard' ? 'easy' : 'hard');
     }, []);
@@ -906,8 +906,8 @@ function App() {
             finalHabitDuration: 30
         } : undefined;
 
-        return <MasteryOnboarding 
-            onComplete={handleOnboardingComplete} 
+        return <MasteryOnboarding
+            onComplete={handleOnboardingComplete}
             isPreview={previewOnboarding}
             onExitPreview={() => {
                 setPreviewOnboarding(false);
@@ -975,11 +975,10 @@ function App() {
                     {/* Emergency Latch Toggle */}
                     <button
                         onClick={() => setEmergencyMode(!emergencyMode)}
-                        className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                            emergencyMode 
-                                ? 'bg-red-600 text-white hover:bg-red-500' 
+                        className={`px-4 py-2 rounded-lg font-semibold transition-all ${emergencyMode
+                                ? 'bg-red-600 text-white hover:bg-red-500'
                                 : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'
-                        }`}
+                            }`}
                         title={emergencyMode ? "Emergency Mode Active - All habits are 60-second micro-wins" : "Activate Emergency Mode - Shrink all habits to 60 seconds"}
                     >
                         <Shield className="w-4 h-4 inline-block mr-2" />
@@ -988,32 +987,32 @@ function App() {
                 </div>
                 <div className="flex items-center space-x-2">
                     {/* BUTTON 1: Daily Check-In (Reflection + Chat) */}
-                    <button 
-                        onClick={() => setShowChatCheckIn(true)} 
+                    <button
+                        onClick={() => setShowChatCheckIn(true)}
                         className="p-2 rounded-lg text-purple-400 hover:bg-gray-700 hover:text-purple-300"
                         title="Daily Check-In"
                     >
                         <Sparkles className="w-5 h-5" />
                     </button>
-                    
+
                     {/* BUTTON 2: Habit Tracker View - Always visible, highlighted when active */}
-                    <button 
-                        onClick={() => setShowStatsView(false)} 
+                    <button
+                        onClick={() => setShowStatsView(false)}
                         className={`p-2 rounded-lg hover:bg-gray-700 ${!showStatsView ? 'text-blue-400' : 'text-gray-400'}`}
                         title="Habit Tracker"
                     >
                         <List className="w-5 h-5" />
                     </button>
-                    
+
                     {/* BUTTON 3: Stats View Toggle */}
-                    <button 
-                        onClick={() => setShowStatsView(p => !p)} 
+                    <button
+                        onClick={() => setShowStatsView(p => !p)}
                         className={`p-2 rounded-lg hover:bg-gray-700 ${showStatsView ? 'text-blue-400' : 'text-gray-400'}`}
                         title="Stats Dashboard"
                     >
                         <BarChart3 className="w-5 h-5" />
                     </button>
-                    
+
                     {/* BUTTON 4: Add New Habit */}
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
                 </div>
@@ -1039,11 +1038,11 @@ function App() {
                         </div>
                     </div>
                 )}
-                
+
                 <div className="text-center mb-8 relative">
-                    <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
+                    <h1 className="text-4xl font-bold mb-2 text-red-600">Mastery Dashboard</h1>
                     <p className="text-gray-400 mb-4">Track your habits and build a better you, one day at a time.</p>
-                    
+
                     {/* Developer: Manage Videos Button - Top Right */}
                     <button
                         onClick={() => setShowContentLibraryManager(true)}
@@ -1055,20 +1054,20 @@ function App() {
                         </svg>
                         Manage Videos
                     </button>
-                    
+
                     {/* View Mode Toggle - Only show on Habit Tracker page */}
                     {!showStatsView && (
                         <div className="flex justify-center">
                             <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
-                                <button 
-                                    onClick={() => setShowDailyTrackingView(false)} 
+                                <button
+                                    onClick={() => setShowDailyTrackingView(false)}
                                     className={`p-2 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
                                     title="Simple View"
                                 >
                                     <List className="w-4 h-4" />
                                 </button>
-                                <button 
-                                    onClick={() => setShowDailyTrackingView(true)} 
+                                <button
+                                    onClick={() => setShowDailyTrackingView(true)}
                                     className={`p-2 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
                                     title="Weekly View"
                                 >
@@ -1082,7 +1081,7 @@ function App() {
                 {/* STATS OVERVIEW */}
                 {showStatsView && (
                     <div className="stats-dashboard-area">
-                        <StatsOverview 
+                        <StatsOverview
                             dashboardData={dashboardData}
                             onToggleRateMode={handleToggleRateMode}
                             onToggleStreakMode={handleToggleStreakMode}
@@ -1094,34 +1093,34 @@ function App() {
                 )}
 
                 {/* Calendar Header shown for all calendar views (week/month/year) when showDailyTrackingView is true */}
-                {!showStatsView && showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick}/>}
+                {!showStatsView && showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick} />}
                 {!showStatsView && viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
-                
+
                 {/* Month and Year Views are shown when showDailyTrackingView is true (calendar mode) */}
-                {!showStatsView && viewMode === 'month' && showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick}/>}
-                {!showStatsView && viewMode === 'year' && showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick}/>}
+                {!showStatsView && viewMode === 'month' && showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick} />}
+                {!showStatsView && viewMode === 'year' && showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick} />}
 
                 {/* Habit rows only show in week view (calendar mode) or simple list mode */}
                 {!showStatsView && (viewMode === 'week' || !showDailyTrackingView) && (
                     <div className="habit-tracker-area space-y-2 pb-28">
                         {sortedHabits.map(habit => (
-                            <HabitRow 
-                                key={habit.id} 
-                                habit={habit} 
-                                weekDates={weekDates} 
-                                onToggle={handleToggleHabit} 
-                                onEditHabit={handleEditHabit} 
-                                showCircles={viewMode === 'week' && showDailyTrackingView} 
-                                onDragStart={handleDragStart} 
-                                onDragOver={handleDragOver} 
-                                onDrop={handleDrop} 
+                            <HabitRow
+                                key={habit.id}
+                                habit={habit}
+                                weekDates={weekDates}
+                                onToggle={handleToggleHabit}
+                                onEditHabit={handleEditHabit}
+                                showCircles={viewMode === 'week' && showDailyTrackingView}
+                                onDragStart={handleDragStart}
+                                onDragOver={handleDragOver}
+                                onDrop={handleDrop}
                                 isDragging={draggedHabitId === habit.id}
                                 onUnloggableClick={handleUnloggableClick}
                             />
                         ))}
                     </div>
                 )}
-                
+
                 {/* Launch Pad Button - Premium Half-circle at bottom-center */}
                 {onboardingComplete && !showStatsView && (
                     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 group">
@@ -1130,7 +1129,7 @@ function App() {
                             disabled={isMomentumCompletedToday}
                             className="relative w-40 h-20 bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 rounded-t-full hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 transition-all duration-500 shadow-2xl flex flex-col items-center justify-center gap-1 font-bold text-black hover:scale-110 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0 animate-pulse"
                             style={{
-                              boxShadow: '0 -10px 40px rgba(251, 191, 36, 0.5), 0 -5px 20px rgba(251, 191, 36, 0.3)'
+                                boxShadow: '0 -10px 40px rgba(251, 191, 36, 0.5), 0 -5px 20px rgba(251, 191, 36, 0.3)'
                             }}
                             title={isMomentumCompletedToday ? "Come back tomorrow for the launch ritual" : "Launch the daily ignition sequence"}
                         >
@@ -1139,17 +1138,17 @@ function App() {
                                 Ignite
                             </span>
                         </button>
-                        
+
                         {/* Dev Reset Button - Only shows when completed */}
                         {isMomentumCompletedToday && (
                             <button
                                 onClick={() => {
                                     const today = formatDate(new Date(), 'yyyy-MM-dd');
-                                    
+
                                     // Clear momentum completion timestamp
                                     setMomentumLastCompleted(null);
                                     localStorage.removeItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY);
-                                    
+
                                     // Clear Ignite habit completion for today
                                     setHabits(prevHabits => {
                                         return prevHabits.map(h => {
@@ -1161,7 +1160,7 @@ function App() {
                                             return h;
                                         });
                                     });
-                                    
+
                                     console.log('🔄 Reset: Cleared momentum completion and Ignite habit for', today);
                                 }}
                                 className="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded-lg border border-gray-500 transition-all duration-200"
@@ -1174,28 +1173,28 @@ function App() {
                 )}
 
             </div>
-            
+
             {/* MOTIVATION COMPONENTS */}
-            <AICoachWidget 
-                message={aiCoachMessage} 
-                visible={showAiCoach} 
+            <AICoachWidget
+                message={aiCoachMessage}
+                visible={showAiCoach}
                 onDismiss={() => setShowAiCoach(false)}
             />
-            
+
             {streakCelebration && (
-                <StreakCelebration 
+                <StreakCelebration
                     habitName={streakCelebration.habitName}
                     streakDays={streakCelebration.days}
                     onClose={() => setStreakCelebration(null)}
                 />
             )}
-            
+
             {showChatCheckIn && (
-                <ChatDailyCheckIn 
+                <ChatDailyCheckIn
                     onDismiss={() => setShowChatCheckIn(false)}
                 />
             )}
-            
+
             {emergencyHabitAction && (
                 <EmergencyHabitAction
                     habitName={emergencyHabitAction.habit.name}
@@ -1203,7 +1202,7 @@ function App() {
                     onCancel={handleEmergencyHabitCancel}
                 />
             )}
-            
+
             {brokenStreaks.length > 0 && (
                 <StreakRepair
                     brokenHabits={brokenStreaks}
@@ -1228,16 +1227,16 @@ function App() {
                         // Mark habit as complete for the date
                         const habitId = activeMiniApp.habit.id;
                         const dateString = activeMiniApp.date;
-                        
+
                         setHabits(p => p.map(h => {
                             if (h.id === habitId) {
                                 return { ...h, completed: { ...h.completed, [dateString]: true } };
                             }
                             return h;
                         }));
-                        
+
                         setActiveMiniApp(null);
-                        
+
                         // Show AI coach message
                         const messages = [
                             "Beautiful practice! 🌟",
@@ -1260,16 +1259,16 @@ function App() {
                         // Mark habit as complete for the date
                         const habitId = activeMiniApp.habit.id;
                         const dateString = activeMiniApp.date;
-                        
+
                         setHabits(p => p.map(h => {
                             if (h.id === habitId) {
                                 return { ...h, completed: { ...h.completed, [dateString]: true } };
                             }
                             return h;
                         }));
-                        
+
                         setActiveMiniApp(null);
-                        
+
                         // Show AI coach message
                         const messages = [
                             "Gratitude unlocks abundance! ✨",
@@ -1283,9 +1282,9 @@ function App() {
                     onCancel={() => setActiveMiniApp(null)}
                 />
             )}
-            
+
             {shouldShowMicroWin && coreHabit && (
-                <MicroWinProtocol 
+                <MicroWinProtocol
                     habit={{
                         name: coreHabit.name,
                         description: coreHabit.description || ''
@@ -1295,7 +1294,7 @@ function App() {
                     onDismiss={() => setPreviewMicroWin(false)}
                 />
             )}
-            
+
             {shouldShowAppTour && (
                 <AppTour
                     onComplete={() => {
@@ -1305,43 +1304,43 @@ function App() {
                     onToggleStatsView={setShowStatsView}
                 />
             )}
-            
+
             {toastMessage && (
                 <Toast
                     message={toastMessage}
                     onClose={() => setToastMessage(null)}
                 />
             )}
-            
-            <AddHabitModal 
-                isOpen={showAddHabitModal} 
-                onClose={() => { setShowAddHabitModal(false); setSelectedHabitToEdit(null); }} 
-                onSaveHabit={handleSaveHabit} 
-                onDeleteHabit={handleDeleteHabit} 
-                habitToEdit={selectedHabitToEdit} 
-                habitMuscleCount={habitMuscleCount} 
+
+            <AddHabitModal
+                isOpen={showAddHabitModal}
+                onClose={() => { setShowAddHabitModal(false); setSelectedHabitToEdit(null); }}
+                onSaveHabit={handleSaveHabit}
+                onDeleteHabit={handleDeleteHabit}
+                habitToEdit={selectedHabitToEdit}
+                habitMuscleCount={habitMuscleCount}
                 lifeGoalsCount={lifeGoalsCount}
                 onOpenProgramLibrary={handleOpenProgramLibrary}
             />
-            
+
             <ProgramLibraryModal
                 isOpen={showProgramLibrary}
                 onClose={() => setShowProgramLibrary(false)}
                 onSelectHabits={handleSelectProgramHabits}
             />
-            
+
             {/* Momentum Generator - Daily Ignition Flow */}
             {/* Pre-Launch Confirmation Popup */}
             {showMomentumConfirmation && (
                 <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 animate-fadeIn">
                     <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-10 shadow-2xl max-w-lg mx-auto text-center animate-scaleIn"
-                         style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.4)'}}>
+                        style={{ boxShadow: '0 0 60px rgba(251, 191, 36, 0.4)' }}>
                         <div className="text-8xl mb-6 animate-bounce">🚀</div>
-                        <h3 className="text-3xl font-black text-yellow-400 mb-6" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
+                        <h3 className="text-3xl font-black text-yellow-400 mb-6" style={{ textShadow: '0 0 20px rgba(251, 191, 36, 0.5)' }}>
                             Ready to Launch?
                         </h3>
                         <p className="text-xl text-gray-300 mb-10 leading-relaxed">
-                            Are you ready to launch your rocket<br/>and kickstart your habits today?
+                            Are you ready to launch your rocket<br />and kickstart your habits today?
                         </p>
                         <div className="flex gap-4 justify-center">
                             <button
@@ -1363,7 +1362,7 @@ function App() {
                     </div>
                 </div>
             )}
-            
+
             {/* Momentum Generator - Daily Ignition Flow */}
             <MomentumGeneratorModal
                 isOpen={showMomentumGenerator}
@@ -1380,22 +1379,22 @@ function App() {
                 onAddContentLibrary={() => setShowContentLibraryManager(true)}
                 isCompletedToday={isMomentumCompletedToday}
             />
-            
+
             {/* Floating "Now GO!" Popup - Appears over dashboard after countdown */}
             {showFloatingGoPopup && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fadeIn"
                     onClick={() => setShowFloatingGoPopup(false)}
                 >
                     <div className="relative bg-gradient-to-b from-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 max-w-lg shadow-2xl shadow-yellow-500/30 animate-scaleIn cursor-pointer">
                         <div className="text-center">
                             <div className="mb-6">
-                                <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse" 
-                                     style={{textShadow: '0 0 100px rgba(251, 191, 36, 0.9)'}}>
+                                <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse"
+                                    style={{ textShadow: '0 0 100px rgba(251, 191, 36, 0.9)' }}>
                                     🔥
                                 </div>
                             </div>
-                            <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{textShadow: '0 0 60px rgba(251, 191, 36, 0.7)'}}>
+                            <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{ textShadow: '0 0 60px rgba(251, 191, 36, 0.7)' }}>
                                 Now GO!
                             </h2>
                             <p className="text-3xl text-yellow-400 font-light mb-4">
@@ -1408,7 +1407,7 @@ function App() {
                     </div>
                 </div>
             )}
-            
+
             {/* Content Library Manager - Admin Panel */}
             <ContentLibraryManager
                 isOpen={showContentLibraryManager}
