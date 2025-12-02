@@ -976,8 +976,8 @@ function App() {
                     <button
                         onClick={() => setEmergencyMode(!emergencyMode)}
                         className={`px-4 py-2 rounded-lg font-semibold transition-all ${emergencyMode
-                                ? 'bg-red-600 text-white hover:bg-red-500'
-                                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'
+                            ? 'bg-red-600 text-white hover:bg-red-500'
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'
                             }`}
                         title={emergencyMode ? "Emergency Mode Active - All habits are 60-second micro-wins" : "Activate Emergency Mode - Shrink all habits to 60 seconds"}
                     >
@@ -1040,7 +1040,7 @@ function App() {
                 )}
 
                 <div className="text-center mb-8 relative">
-                    <h1 className="text-4xl font-bold mb-2 text-red-600">Mastery Dashboard</h1>
+                    <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
                     <p className="text-gray-400 mb-4">Track your habits and build a better you, one day at a time.</p>
 
                     {/* Developer: Manage Videos Button - Top Right */}
