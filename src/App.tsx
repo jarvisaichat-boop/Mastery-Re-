@@ -1344,12 +1344,7 @@ function App() {
                     >
                         <div className="mb-6 animate-bounce">
                             <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 flex items-center justify-center" style={{ boxShadow: '0 0 40px rgba(251, 191, 36, 0.6)' }}>
-                                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M42 14C42 14 38 18 32 24C26 30 22 38 22 38L26 42C26 42 34 38 40 32C46 26 50 22 50 22C50 22 52 16 50 14C48 12 42 14 42 14Z" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <circle cx="40" cy="24" r="3" stroke="black" strokeWidth="2"/>
-                                    <path d="M22 38L18 42C18 42 14 46 18 50C22 54 26 50 26 50L30 46" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M14 50C14 50 10 54 14 58C18 62 22 58 22 58" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
+                                <Rocket size={56} className="text-black" />
                             </div>
                         </div>
                         <h3 className="text-3xl font-black text-yellow-400 mb-6" style={{ textShadow: '0 0 20px rgba(251, 191, 36, 0.5)' }}>
