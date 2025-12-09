@@ -238,9 +238,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
           if (prev <= 1) {
             clearInterval(timer);
             setCommitmentReady(true);
-            // Final longer vibration when ready
+            // Final vibration - same length as others
             if ('vibrate' in navigator) {
-              navigator.vibrate(200);
+              navigator.vibrate(100);
             }
             return 0;
           }
