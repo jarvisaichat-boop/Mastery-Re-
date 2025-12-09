@@ -1141,11 +1141,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 {/* Habit */}
                 <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
                   <div className="flex items-center gap-3 mb-2">
-                    <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold text-white"
-                      style={{ backgroundColor: selectedHabit?.color || '#f59e0b' }}
-                    >
-                      {selectedHabit?.name?.charAt(0).toUpperCase() || '✨'}
+                    <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-xl">
+                      🏋️
                     </div>
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Habit</span>
                   </div>
@@ -1166,9 +1163,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 </div>
               </div>
 
-              <p className="text-center text-gray-400 mt-8 text-sm animate-pulse">
-                Tap to flip and commit
-              </p>
+              <div className="flex justify-center mt-8">
+                <div 
+                  className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform animate-pulse"
+                  style={{ boxShadow: '0 0 30px rgba(251, 191, 36, 0.6)' }}
+                >
+                  <ChevronRight size={32} className="text-black" />
+                </div>
+              </div>
             </div>
 
             {/* Back of card - Commit button */}
