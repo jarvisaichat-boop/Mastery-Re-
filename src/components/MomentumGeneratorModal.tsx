@@ -899,14 +899,18 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               )}
             </button>
 
-            <button
-              onClick={handleNextStep}
-              disabled={!goalSelected}
-              className="mt-8 px-12 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-600 disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed disabled:shadow-none transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:hover:translate-y-0 flex items-center gap-3 mx-auto"
-            >
-              Continue
-              <ChevronRight size={20} />
-            </button>
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={handleNextStep}
+                disabled={!goalSelected}
+                className={`w-14 h-14 rounded-full transition-transform ${
+                  goalSelected 
+                    ? 'bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 animate-pulse'
+                    : 'bg-gray-700 cursor-not-allowed'
+                }`}
+                style={{ boxShadow: goalSelected ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
+              />
+            </div>
           </div>
         </div>
       );
@@ -976,14 +980,18 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               );
             })}
           </div>
-          <button
-            onClick={handleNextStep}
-            disabled={selectedHabits.size === 0}
-            className="group px-10 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-lg sm:text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50 flex items-center justify-center mx-auto gap-2 sm:gap-3"
-          >
-            Lock In Selection
-            <ChevronRight size={24} className="sm:w-7 sm:h-7 group-hover:translate-x-2 transition-transform" />
-          </button>
+          <div className="flex justify-center">
+            <button
+              onClick={handleNextStep}
+              disabled={selectedHabits.size === 0}
+              className={`w-14 h-14 rounded-full transition-transform ${
+                selectedHabits.size > 0 
+                  ? 'bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 animate-pulse'
+                  : 'bg-gray-700 cursor-not-allowed'
+              }`}
+              style={{ boxShadow: selectedHabits.size > 0 ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
+            />
+          </div>
         </div>
       </div>
     );
@@ -1074,13 +1082,18 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             ))}
           </div>
 
-          <button
-            onClick={handleNextStep}
-            disabled={!selectedStarterAction}
-            className="mt-8 px-12 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
-          >
-            Confirm Action
-          </button>
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleNextStep}
+              disabled={!selectedStarterAction}
+              className={`w-14 h-14 rounded-full transition-transform ${
+                selectedStarterAction 
+                  ? 'bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 animate-pulse'
+                  : 'bg-gray-700 cursor-not-allowed'
+              }`}
+              style={{ boxShadow: selectedStarterAction ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
+            />
+          </div>
         </div>
       );
     }
