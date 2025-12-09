@@ -693,24 +693,27 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               {/* Vision Board Title - Inside the card */}
               <div className="text-xl sm:text-2xl text-yellow-400/90 font-bold mb-6 sm:mb-8 uppercase tracking-wider">Vision Board</div>
               
-              {/* Goal Box - Contains goal label and user's goal */}
-              <div className="p-6 sm:p-10 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-3xl mb-8">
-                <div className="text-lg sm:text-xl text-yellow-300 font-black mb-3 sm:mb-4 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
-                  Goal
-                </div>
-                <div className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight" style={{textShadow: '0 0 50px rgba(251, 191, 36, 0.4)'}}>
-                  {goal}
-                </div>
-              </div>
-              
-              {/* Grand Vision Section */}
+              {/* Combined Box - Grander Vision on top, Goal below */}
               <div className="p-6 sm:p-10 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-3xl">
-                <div className="text-lg sm:text-xl text-yellow-300 font-black mb-3 sm:mb-4 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
-                  Your Grander Vision
+                {/* Grander Vision - On top */}
+                <div className="mb-8 pb-6 border-b border-yellow-400/20">
+                  <div className="text-lg sm:text-xl text-yellow-300 font-black mb-3 sm:mb-4 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
+                    Your Grander Vision
+                  </div>
+                  <p className="text-xl sm:text-2xl text-yellow-50 leading-relaxed font-light whitespace-pre-line">
+                    {displayVision}
+                  </p>
                 </div>
-                <p className="text-xl sm:text-2xl md:text-3xl text-yellow-50 leading-relaxed font-light whitespace-pre-line">
-                  {displayVision}
-                </p>
+                
+                {/* Goal - Below */}
+                <div>
+                  <div className="text-lg sm:text-xl text-yellow-300 font-black mb-3 sm:mb-4 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
+                    Goal
+                  </div>
+                  <div className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight" style={{textShadow: '0 0 50px rgba(251, 191, 36, 0.4)'}}>
+                    {goal}
+                  </div>
+                </div>
               </div>
               
               <div className="text-lg sm:text-xl md:text-2xl text-gray-300 mt-8 sm:mt-10 font-light italic">
