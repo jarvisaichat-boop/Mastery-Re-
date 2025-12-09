@@ -1110,13 +1110,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             className="relative w-full transition-transform duration-700 cursor-pointer"
             style={{ 
               transformStyle: 'preserve-3d',
-              transform: pledgeCardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+              transform: pledgeCardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+              minHeight: '580px'
             }}
             onClick={() => !pledgeCardFlipped && setPledgeCardFlipped(true)}
           >
             {/* Front of card - Summary */}
             <div 
-              className="w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-8 sm:p-12 shadow-2xl"
+              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl flex flex-col"
               style={{
                 boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
                 backfaceVisibility: 'hidden'
