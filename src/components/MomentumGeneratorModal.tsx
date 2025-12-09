@@ -218,9 +218,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }
   }, [currentStep, confetti.length]);
 
-  // 3-second countdown timer for commitment card
+  // 3-second countdown timer for commitment card - ref to track if timer already started
+  const commitmentTimerStartedRef = useRef(false);
+  
   useEffect(() => {
-    if (currentStep === 'pledge' && !pledgeCardFlipped && !commitmentReady) {
+    // Only start timer once when entering pledge step with front card visible
+    if (currentStep === 'pledge' && !pledgeCardFlipped && !commitmentTimerStartedRef.current) {
+      commitmentTimerStartedRef.current = true;
       setCommitmentReadyTimer(3);
       setCommitmentReady(false);
       
@@ -236,6 +240,11 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       }, 1000);
       
       return () => clearInterval(timer);
+    }
+    
+    // Reset ref when leaving pledge step
+    if (currentStep !== 'pledge') {
+      commitmentTimerStartedRef.current = false;
     }
   }, [currentStep, pledgeCardFlipped]);
 
