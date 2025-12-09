@@ -1359,8 +1359,8 @@ function App() {
                                     setShowMomentumConfirmation(false);
                                     setShowMomentumGenerator(true);
                                 }}
-                                className="px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-gray-900 font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50"
-                                style={{ textShadow: '0 0 10px rgba(255, 255, 255, 0.5)' }}
+                                className="px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-white font-black text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50"
+                                style={{ textShadow: '0 0 15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(251, 146, 60, 0.9)' }}
                             >
                                 Lift Off 🔥
                             </button>
