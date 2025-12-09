@@ -995,8 +995,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
       const tiers = [
         { id: 'trap', label: 'Trap for later', icon: '🕸️', title: 'Set a Trap', desc: 'Make it impossible to ignore later.' },
-        { id: 'prep', label: 'Prep for the Habit', icon: '🧂', title: 'Prepare Environment', desc: 'Reduce friction for when you start.' },
-        { id: 'direct', label: 'Direct steps', icon: '👟', title: 'Direct Action', desc: 'Take the very first physical step.' },
+        { id: 'prep', label: 'Prep for the Habit', icon: '🚶', title: 'Prepare Environment', desc: 'Reduce friction for when you start.' },
+        { id: 'direct', label: 'Direct steps', icon: '🏃', title: 'Direct Action', desc: 'Take the very first physical step.' },
         { id: 'micro', label: 'Micro Win', icon: '⚡', title: 'Micro Win', desc: 'A 60-second version of the habit.' },
         { id: 'start', label: 'Start the Habit', icon: '🔥', title: 'Start Now', desc: 'Just do the thing right now.' },
       ];
