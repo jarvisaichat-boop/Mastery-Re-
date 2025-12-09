@@ -1165,29 +1165,27 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
               <div className="flex justify-center mt-8">
                 <div 
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform animate-pulse"
+                  className="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 transition-transform animate-pulse"
                   style={{ boxShadow: '0 0 30px rgba(251, 191, 36, 0.6)' }}
-                >
-                  <ChevronRight size={32} className="text-black" />
-                </div>
+                />
               </div>
             </div>
 
             {/* Back of card - Commit button */}
             <div 
-              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-8 sm:p-12 shadow-2xl"
+              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col justify-center"
               style={{
                 boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
                 backfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)'
               }}
             >
-              <h3 className="text-3xl sm:text-4xl font-black text-yellow-400 mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
+              <h3 className="text-2xl sm:text-3xl font-black text-yellow-400 mb-6 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
                 Make a commitment
               </h3>
-              <div className="mb-8 cursor-pointer select-none">
+              <div className="mb-4 cursor-pointer select-none">
                 <div 
-                  className="w-44 h-44 sm:w-52 sm:h-52 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative shadow-2xl"
+                  className="w-36 h-36 sm:w-40 sm:h-40 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative shadow-2xl"
                   style={{boxShadow: `0 0 ${Math.max(40, pledgeProgress)}px rgba(251, 191, 36, ${0.4 + pledgeProgress / 200})`}}
                   onMouseDown={handlePledgeStart}
                   onMouseUp={handlePledgeEnd}
@@ -1197,14 +1195,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   onTouchCancel={handlePledgeEnd}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="text-7xl sm:text-9xl animate-pulse">👇</div>
+                  <div className="text-6xl sm:text-7xl animate-pulse">👇</div>
                   <svg className="absolute inset-0 w-full h-full -rotate-90">
                     <circle
                       cx="50%"
                       cy="50%"
                       r="45%"
                       stroke="rgba(0,0,0,0.3)"
-                      strokeWidth="8"
+                      strokeWidth="6"
                       fill="none"
                     />
                     <circle
@@ -1212,10 +1210,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                       cy="50%"
                       r="45%"
                       stroke="url(#pledgeGradient)"
-                      strokeWidth="8"
+                      strokeWidth="6"
                       fill="none"
-                      strokeDasharray={`${2 * Math.PI * 96}`}
-                      strokeDashoffset={`${2 * Math.PI * 96 * (1 - pledgeProgress / 100)}`}
+                      strokeDasharray={`${2 * Math.PI * 72}`}
+                      strokeDashoffset={`${2 * Math.PI * 72 * (1 - pledgeProgress / 100)}`}
                       className="transition-all duration-100"
                       strokeLinecap="round"
                     />
@@ -1228,9 +1226,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   </svg>
                 </div>
               </div>
-              <p className="text-white text-xl sm:text-2xl mb-3 font-light text-center">Hold down for 3 seconds</p>
-              <p className="text-yellow-400 text-base sm:text-lg mb-6 text-center italic">Lock in your commitment</p>
-              <div className="text-3xl sm:text-4xl font-bold text-center">
+              <p className="text-white text-lg sm:text-xl mb-2 font-light text-center">Hold down for 3 seconds</p>
+              <p className="text-yellow-400 text-sm sm:text-base mb-4 text-center italic">Lock in your commitment</p>
+              <div className="text-2xl sm:text-3xl font-bold text-center">
                 {pledgeProgress < 100 ? (
                   <span className="text-yellow-400">{Math.round(pledgeProgress)}%</span>
                 ) : (
