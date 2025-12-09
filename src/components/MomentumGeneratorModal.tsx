@@ -1129,16 +1129,16 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       };
 
       return (
-        <div className="w-full h-full flex flex-col p-4 sm:p-6 pb-24">
-          <div className="flex-1 flex flex-col items-center justify-start pt-8">
+        <div className="w-full h-full overflow-y-auto p-4 sm:p-6 pb-32">
+          <div className="max-w-4xl mx-auto w-full pt-8">
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-2 text-center tracking-tight">
             Select Your Starter Action
           </h3>
-          <p className="text-gray-400 mb-8 text-center max-w-xl">
+          <p className="text-gray-400 mb-8 text-center max-w-xl mx-auto">
             Choose your point of entry. How will you engage with <span className="text-yellow-400 font-bold">{habitName}</span> right now?
           </p>
 
-          <div className="w-full max-w-4xl grid gap-4">
+          <div className="w-full grid gap-4 mb-8">
             {tiers.map(tier => (
               <button
                 key={tier.id}
@@ -1214,7 +1214,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     };
 
     return (
-      <div className="w-full h-full flex items-center justify-center p-4 sm:p-6" style={{ perspective: '2000px' }}>
+      <div className="w-full h-full flex items-center justify-center p-4 sm:p-6 pb-24" style={{ perspective: '2000px' }}>
         <div className="max-w-md sm:max-w-lg md:max-w-xl w-full">
           <div 
             className="relative w-full transition-transform duration-700 cursor-pointer"
@@ -1222,7 +1222,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               transformStyle: 'preserve-3d',
               transform: pledgeCardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
               height: 'auto',
-              minHeight: '500px'
+              minHeight: '450px'
             }}
             onClick={() => !pledgeCardFlipped && commitmentReady && setPledgeCardFlipped(true)}
           >
@@ -1232,7 +1232,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               style={{
                 boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
                 backfaceVisibility: 'hidden',
-                minHeight: '500px'
+                minHeight: '450px'
               }}
             >
               <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-yellow-400 mb-4 sm:mb-6 md:mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
