@@ -60,6 +60,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [randomVisionContent, setRandomVisionContent] = useState<string>('');
   const [selectedStarterAction, setSelectedStarterAction] = useState<string | null>(null);
   const [goalSelected, setGoalSelected] = useState(false);
+  const [pledgeCardFlipped, setPledgeCardFlipped] = useState(false);
   
   // Refs for YouTube player and timeout management
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -163,6 +164,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setSelectedHabits(new Set());
       setSelectedStarterAction(null);
       setGoalSelected(false);
+      setPledgeCardFlipped(false);
       setPledgeProgress(0);
       setLaunchCountdown(60);
       setLaunchActive(false);
@@ -1083,66 +1085,156 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       );
     }
 
-    // Step 6: Pledge Card (Updated with selections)
+    // Step 6: Pledge Card (Updated with flip card showing selections)
   if (currentStep === 'pledge') {
+    const selectedHabit = habits.find(h => selectedHabits.has(h.id));
+    const starterActionLabels: Record<string, string> = {
+      'trap': 'Set a Trap',
+      'prep': 'Prepare Environment', 
+      'direct': 'Direct Action',
+      'micro': 'Micro Win',
+      'start': 'Start Now'
+    };
+    const starterActionIcons: Record<string, string> = {
+      'trap': '🕸️',
+      'prep': '🚶',
+      'direct': '🏃',
+      'micro': '⚡',
+      'start': '🔥'
+    };
+
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="max-w-2xl mx-6">
-          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
-               style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
-            <h3 className="text-4xl font-black text-yellow-400 mb-12 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
-              Make a commitment
-            </h3>
-            <div className="mb-12 cursor-pointer select-none">
-              <div 
-                className="w-52 h-52 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative shadow-2xl"
-                style={{boxShadow: `0 0 ${Math.max(40, pledgeProgress)}px rgba(251, 191, 36, ${0.4 + pledgeProgress / 200})`}}
-                onMouseDown={handlePledgeStart}
-                onMouseUp={handlePledgeEnd}
-                onMouseLeave={handlePledgeEnd}
-                onTouchStart={handlePledgeStart}
-                onTouchEnd={handlePledgeEnd}
-                onTouchCancel={handlePledgeEnd}
-              >
-                <div className="text-9xl animate-pulse">👇</div>
-                <svg className="absolute inset-0 w-full h-full -rotate-90">
-                  <circle
-                    cx="104"
-                    cy="104"
-                    r="96"
-                    stroke="rgba(0,0,0,0.3)"
-                    strokeWidth="8"
-                    fill="none"
-                  />
-                  <circle
-                    cx="104"
-                    cy="104"
-                    r="96"
-                    stroke="url(#pledgeGradient)"
-                    strokeWidth="8"
-                    fill="none"
-                    strokeDasharray={`${2 * Math.PI * 96}`}
-                    strokeDashoffset={`${2 * Math.PI * 96 * (1 - pledgeProgress / 100)}`}
-                    className="transition-all duration-100"
-                    strokeLinecap="round"
-                  />
-                  <defs>
-                    <linearGradient id="pledgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#fbbf24" />
-                      <stop offset="100%" stopColor="#f97316" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+      <div className="w-full h-full flex items-center justify-center" style={{ perspective: '1000px' }}>
+        <div className="max-w-2xl mx-6 w-full">
+          <div 
+            className="relative w-full transition-transform duration-700 cursor-pointer"
+            style={{ 
+              transformStyle: 'preserve-3d',
+              transform: pledgeCardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+            }}
+            onClick={() => !pledgeCardFlipped && setPledgeCardFlipped(true)}
+          >
+            {/* Front of card - Summary */}
+            <div 
+              className="w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-8 sm:p-12 shadow-2xl"
+              style={{
+                boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
+                backfaceVisibility: 'hidden'
+              }}
+            >
+              <h3 className="text-3xl sm:text-4xl font-black text-yellow-400 mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
+                Your Commitment
+              </h3>
+              
+              <div className="space-y-6">
+                {/* Goal */}
+                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                      <Target size={20} className="text-yellow-400" />
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Goal</span>
+                  </div>
+                  <p className="text-xl font-bold text-white pl-13">{goal || 'No Goal Set'}</p>
+                </div>
+
+                {/* Habit */}
+                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div 
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold text-white"
+                      style={{ backgroundColor: selectedHabit?.color || '#f59e0b' }}
+                    >
+                      {selectedHabit?.name?.charAt(0).toUpperCase() || '✨'}
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Habit</span>
+                  </div>
+                  <p className="text-xl font-bold text-white pl-13">{selectedHabit?.name || 'No Habit Selected'}</p>
+                </div>
+
+                {/* Starter Action */}
+                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-xl">
+                      {selectedStarterAction ? starterActionIcons[selectedStarterAction] : '🎯'}
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Starter Action</span>
+                  </div>
+                  <p className="text-xl font-bold text-white pl-13">
+                    {selectedStarterAction ? starterActionLabels[selectedStarterAction] : 'No Action Selected'}
+                  </p>
+                </div>
               </div>
+
+              <p className="text-center text-gray-400 mt-8 text-sm animate-pulse">
+                Tap to flip and commit
+              </p>
             </div>
-            <p className="text-white text-2xl mb-4 font-light text-center">Hold down for 3 seconds</p>
-            <p className="text-yellow-400 text-lg mb-8 text-center italic">Lock in your commitment</p>
-            <div className="text-4xl font-bold text-center">
-              {pledgeProgress < 100 ? (
-                <span className="text-yellow-400">{Math.round(pledgeProgress)}%</span>
-              ) : (
-                <span className="text-yellow-400 animate-pulse" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.8)'}}>LOCKED ✓</span>
-              )}
+
+            {/* Back of card - Commit button */}
+            <div 
+              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-8 sm:p-12 shadow-2xl"
+              style={{
+                boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)'
+              }}
+            >
+              <h3 className="text-3xl sm:text-4xl font-black text-yellow-400 mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
+                Make a commitment
+              </h3>
+              <div className="mb-8 cursor-pointer select-none">
+                <div 
+                  className="w-44 h-44 sm:w-52 sm:h-52 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative shadow-2xl"
+                  style={{boxShadow: `0 0 ${Math.max(40, pledgeProgress)}px rgba(251, 191, 36, ${0.4 + pledgeProgress / 200})`}}
+                  onMouseDown={handlePledgeStart}
+                  onMouseUp={handlePledgeEnd}
+                  onMouseLeave={handlePledgeEnd}
+                  onTouchStart={handlePledgeStart}
+                  onTouchEnd={handlePledgeEnd}
+                  onTouchCancel={handlePledgeEnd}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="text-7xl sm:text-9xl animate-pulse">👇</div>
+                  <svg className="absolute inset-0 w-full h-full -rotate-90">
+                    <circle
+                      cx="50%"
+                      cy="50%"
+                      r="45%"
+                      stroke="rgba(0,0,0,0.3)"
+                      strokeWidth="8"
+                      fill="none"
+                    />
+                    <circle
+                      cx="50%"
+                      cy="50%"
+                      r="45%"
+                      stroke="url(#pledgeGradient)"
+                      strokeWidth="8"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 96}`}
+                      strokeDashoffset={`${2 * Math.PI * 96 * (1 - pledgeProgress / 100)}`}
+                      className="transition-all duration-100"
+                      strokeLinecap="round"
+                    />
+                    <defs>
+                      <linearGradient id="pledgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#fbbf24" />
+                        <stop offset="100%" stopColor="#f97316" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </div>
+              <p className="text-white text-xl sm:text-2xl mb-3 font-light text-center">Hold down for 3 seconds</p>
+              <p className="text-yellow-400 text-base sm:text-lg mb-6 text-center italic">Lock in your commitment</p>
+              <div className="text-3xl sm:text-4xl font-bold text-center">
+                {pledgeProgress < 100 ? (
+                  <span className="text-yellow-400">{Math.round(pledgeProgress)}%</span>
+                ) : (
+                  <span className="text-yellow-400 animate-pulse" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.8)'}}>LOCKED ✓</span>
+                )}
+              </div>
             </div>
           </div>
         </div>
