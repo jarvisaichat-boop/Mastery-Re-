@@ -27,7 +27,7 @@ interface MomentumGeneratorModalProps {
   showSeizeTheDayPopup?: boolean;
 }
 
-type Step = 'streak' | 'vision' | 'content' | 'habits' | 'pledge' | 'launch';
+type Step = 'streak' | 'vision' | 'content' | 'goal-selection' | 'habits' | 'starter-action' | 'pledge' | 'launch';
 
 export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   isOpen,
@@ -58,6 +58,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [showVideoIntro, setShowVideoIntro] = useState(true);
   const [preCountdown, setPreCountdown] = useState<number | null>(null);
   const [randomVisionContent, setRandomVisionContent] = useState<string>('');
+  const [selectedStarterAction, setSelectedStarterAction] = useState<string | null>(null);
   
   // Refs for YouTube player and timeout management
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -156,10 +157,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setVideoError(false); // Reset error state
     } else if (!isOpen) {
       // Reset when modal closes
-      setSelectedContent(null);
       setCurrentStep('streak');
       setUserQuestion('');
       setSelectedHabits(new Set());
+      setSelectedStarterAction(null);
       setPledgeProgress(0);
       setLaunchCountdown(60);
       setLaunchActive(false);
@@ -507,7 +508,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   }, [currentStep, launchActive, preCountdown, triggerLaunchCompletion]);
 
   const handleNextStep = () => {
-    const steps: Step[] = ['streak', 'vision', 'content', 'habits', 'pledge', 'launch'];
+    const steps: Step[] = ['streak', 'vision', 'content', 'goal-selection', 'habits', 'starter-action', 'pledge', 'launch'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       const nextStep = steps[currentIndex + 1];
@@ -862,6 +863,50 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   // Step 4: Question step removed - now integrated into content step
 
+    // Step 4.5: Goal Focus (Confirming the User's #1 Priority)
+    if (currentStep === 'goal-selection') {
+      return (
+        <div className="w-full h-full flex flex-col items-center justify-center p-6">
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 text-center tracking-tight">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">Select Your Goal</span>
+          </h3>
+          <p className="text-gray-400 mb-10 text-center text-lg">
+            Align your actions with your ultimate target.
+          </p>
+
+          <div className="w-full max-w-2xl bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-yellow-500/30 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden group hover:border-yellow-500/50 transition-all duration-500">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+            <div className="flex flex-col items-center text-center relative z-10">
+              <div className="w-20 h-20 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center mb-6 shadow-lg shadow-yellow-500/10">
+                <Target size={40} />
+              </div>
+
+              <h4 className="text-2xl sm:text-3xl font-bold text-white mb-4 leading-tight">
+                {goal || "No Goal Set"}
+              </h4>
+
+              {aspirations && (
+                <div className="mt-4 pt-6 border-t border-gray-700/50 w-full">
+                  <p className="text-sm font-medium text-gray-400 uppercase tracking-widest mb-2">Aspirations</p>
+                  <p className="text-gray-300 italic">"{aspirations}"</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
+            onClick={handleNextStep}
+            className="mt-12 px-12 py-4 bg-white text-black font-bold text-lg rounded-2xl hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-3"
+          >
+            Align & Continue
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      );
+    }
+
   // Step 5: Life Goal Habit Cards - Single Select
   if (currentStep === 'habits') {
     return (
@@ -939,7 +984,103 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 6: Mission Briefing Card
+    // Step 5.5: Starter Action (New - 5 Tiers)
+    if (currentStep === 'starter-action') {
+      // Generate mock tiers based on selected habit name (if available)
+      // In a real app, these would come from the habit object in DB
+      const habitName = habits.find(h => selectedHabits.has(h.id))?.name || 'Habit';
+
+      const tiers = [
+        { id: 'trap', label: 'Trap for later', icon: '🕸️', title: 'Set a Trap', desc: 'Make it impossible to ignore later.' },
+        { id: 'prep', label: 'Prep for the Habit', icon: '🧂', title: 'Prepare Environment', desc: 'Reduce friction for when you start.' },
+        { id: 'direct', label: 'Direct steps', icon: '👟', title: 'Direct Action', desc: 'Take the very first physical step.' },
+        { id: 'start', label: 'Start the Habit', icon: '🔥', title: 'Start Now', desc: 'Just do the thing right now.' },
+        { id: 'micro', label: 'Micro Win', icon: '⚡', title: 'Micro Win', desc: 'A 60-second version of the habit.' },
+      ];
+
+      // Specific examples for demo purposes
+      const getExample = (tierId: string) => {
+        if (habitName.includes('Movement') || habitName.includes('Exercise')) {
+          if (tierId === 'trap') return 'Put running shoes by the front door';
+          if (tierId === 'prep') return 'Fill water bottle & set out clothes';
+          if (tierId === 'direct') return 'Put on your running shoes';
+          if (tierId === 'start') return 'Start jogging in place';
+          if (tierId === 'micro') return 'Do 10 jumping jacks';
+        }
+        if (habitName.includes('Work') || habitName.includes('Focus')) {
+          if (tierId === 'trap') return 'Leave notebook open on desk';
+          if (tierId === 'prep') return 'Clear desk & close tabs';
+          if (tierId === 'direct') return 'Open the specific document';
+          if (tierId === 'start') return 'Write the first sentence';
+          if (tierId === 'micro') return 'Write the title only';
+        }
+        // Generic fallbacks
+        if (tierId === 'trap') return 'Set a phone alarm for 5 mins';
+        if (tierId === 'prep') return 'Get materials ready';
+        if (tierId === 'direct') return 'Go to the location';
+        if (tierId === 'start') return 'Begin the activity';
+        if (tierId === 'micro') return 'Do it for 1 minute';
+        return '';
+      };
+
+      return (
+        <div className="w-full h-full overflow-y-auto p-4 sm:p-6 flex flex-col items-center">
+          <h3 className="text-3xl sm:text-4xl font-bold text-white mb-2 text-center">
+            Break the Inertia
+          </h3>
+          <p className="text-gray-400 mb-8 text-center max-w-xl">
+            Choose your point of entry. How will you engage with <span className="text-yellow-400 font-bold">{habitName}</span> right now?
+          </p>
+
+          <div className="w-full max-w-4xl grid gap-4">
+            {tiers.map(tier => (
+              <button
+                key={tier.id}
+                onClick={() => setSelectedStarterAction(tier.id)}
+                className={`w-full p-4 sm:p-5 rounded-xl border transition-all duration-200 flex items-center gap-4 group text-left ${selectedStarterAction === tier.id
+                  ? 'bg-yellow-500/10 border-yellow-500 shadow-lg shadow-yellow-500/10'
+                  : 'bg-gray-800/50 border-gray-700 hover:bg-gray-800 hover:border-gray-500'
+                  }`}
+              >
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl ${selectedStarterAction === tier.id ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-gray-300'
+                  }`}>
+                  {tier.icon}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded ${selectedStarterAction === tier.id ? 'bg-yellow-500/20 text-yellow-300' : 'bg-gray-700 text-gray-400'
+                      }`}>
+                      Level {tiers.indexOf(tier) + 1}
+                    </span>
+                    <h4 className={`font-bold ${selectedStarterAction === tier.id ? 'text-white' : 'text-gray-300'}`}>
+                      {tier.title}
+                    </h4>
+                  </div>
+                  <p className="text-sm text-gray-400 mb-1">{tier.desc}</p>
+                  <p className={`text-sm font-medium ${selectedStarterAction === tier.id ? 'text-yellow-400' : 'text-gray-500'}`}>
+                    Example: "{getExample(tier.id)}"
+                  </p>
+                </div>
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedStarterAction === tier.id ? 'border-yellow-500 bg-yellow-500' : 'border-gray-600'
+                  }`}>
+                  {selectedStarterAction === tier.id && <div className="w-2 h-2 rounded-full bg-black" />}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={handleNextStep}
+            disabled={!selectedStarterAction}
+            className="mt-8 px-12 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+          >
+            Confirm Action
+          </button>
+        </div>
+      );
+    }
+
+    // Step 6: Pledge Card (Updated with selections)
   if (currentStep === 'pledge') {
     return (
       <div className="w-full h-full flex items-center justify-center">
