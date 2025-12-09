@@ -687,25 +687,25 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return (
       <div className="w-full h-full flex items-center justify-center cursor-pointer overflow-y-auto" onClick={handleNextStep}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-          <h3 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-6 text-center tracking-tight">Vision Board</h3>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <div className="text-center">
-              <div className="mb-6 sm:mb-8 flex justify-center">
-                <Target size={48} className="sm:w-16 sm:h-16 text-yellow-400 animate-pulse" style={{filter: 'drop-shadow(0 0 30px rgba(251, 191, 36, 0.8))'}} />
-              </div>
+              {/* Vision Board Title - Inside the card */}
+              <div className="text-xl sm:text-2xl text-yellow-400/90 font-bold mb-6 sm:mb-8 uppercase tracking-wider">Vision Board</div>
               
-              {/* Goal */}
-              <div className="mb-8 sm:mb-10">
-                <div className="text-xl sm:text-2xl text-yellow-400/90 font-bold mb-3 sm:mb-4 uppercase tracking-wider">Goal</div>
-                <div className="text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight mb-4" style={{textShadow: '0 0 50px rgba(251, 191, 36, 0.4)'}}>
+              {/* Goal Box - Contains goal label and user's goal */}
+              <div className="p-6 sm:p-10 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-3xl mb-8">
+                <div className="text-lg sm:text-xl text-yellow-300 font-black mb-3 sm:mb-4 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
+                  Goal
+                </div>
+                <div className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight" style={{textShadow: '0 0 50px rgba(251, 191, 36, 0.4)'}}>
                   {goal}
                 </div>
               </div>
               
-              {/* Grand Vision Section - Always visible with random content */}
-              <div className="mt-8 sm:mt-12 p-6 sm:p-10 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-3xl min-h-[150px]">
-                <div className="text-xl sm:text-2xl text-yellow-300 font-black mb-4 sm:mb-6 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
+              {/* Grand Vision Section */}
+              <div className="p-6 sm:p-10 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-3xl">
+                <div className="text-lg sm:text-xl text-yellow-300 font-black mb-3 sm:mb-4 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
                   Your Grander Vision
                 </div>
                 <p className="text-xl sm:text-2xl md:text-3xl text-yellow-50 leading-relaxed font-light whitespace-pre-line">
@@ -713,10 +713,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 </p>
               </div>
               
-              <div className="text-lg sm:text-xl md:text-2xl text-gray-300 mt-8 sm:mt-12 font-light italic">
+              <div className="text-lg sm:text-xl md:text-2xl text-gray-300 mt-8 sm:mt-10 font-light italic">
                 This is where today takes you.
               </div>
-              <div className="text-xs sm:text-sm text-gray-500 mt-4 sm:mt-6 italic">Click anywhere to continue</div>
+              <div className="text-xs sm:text-sm text-gray-500 mt-4 italic">Click anywhere to continue</div>
             </div>
           </div>
         </div>
