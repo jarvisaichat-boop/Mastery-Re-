@@ -680,13 +680,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     );
   }
 
-  // Step 2: Goal and Grand Vision
+  // Step 2: Vision Board
   if (currentStep === 'vision') {
     const displayVision = aspirations || randomVisionContent;
     
     return (
       <div className="w-full h-full flex items-center justify-center cursor-pointer overflow-y-auto" onClick={handleNextStep}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+          <h3 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-6 text-center tracking-tight">Vision Board</h3>
           <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <div className="text-center">
@@ -866,43 +867,30 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     // Step 4.5: Goal Focus (Confirming the User's #1 Priority)
     if (currentStep === 'goal-selection') {
       return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-6">
-          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 text-center tracking-tight">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">Select Your Goal</span>
-          </h3>
-          <p className="text-gray-400 mb-10 text-center text-lg">
-            Align your actions with your ultimate target.
-          </p>
+        <div className="w-full h-full flex items-center justify-center cursor-pointer p-6" onClick={handleNextStep}>
+          <div className="max-w-xl mx-auto text-center">
+            <h3 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-8 tracking-tight">
+              Select Your Goal
+            </h3>
 
-          <div className="w-full max-w-2xl bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-yellow-500/30 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden group hover:border-yellow-500/50 transition-all duration-500">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-
-            <div className="flex flex-col items-center text-center relative z-10">
-              <div className="w-20 h-20 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center mb-6 shadow-lg shadow-yellow-500/10">
-                <Target size={40} />
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-yellow-500/40 rounded-2xl p-6 sm:p-8 shadow-xl hover:border-yellow-500 hover:shadow-yellow-500/20 transition-all duration-300">
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center">
+                  <Target size={24} />
+                </div>
               </div>
 
-              <h4 className="text-2xl sm:text-3xl font-bold text-white mb-4 leading-tight">
+              <h4 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
                 {goal || "No Goal Set"}
               </h4>
 
               {aspirations && (
-                <div className="mt-4 pt-6 border-t border-gray-700/50 w-full">
-                  <p className="text-sm font-medium text-gray-400 uppercase tracking-widest mb-2">Aspirations</p>
-                  <p className="text-gray-300 italic">"{aspirations}"</p>
-                </div>
+                <p className="text-gray-400 mt-4 text-sm italic">"{aspirations}"</p>
               )}
             </div>
-          </div>
 
-          <button
-            onClick={handleNextStep}
-            className="mt-12 px-12 py-4 bg-white text-black font-bold text-lg rounded-2xl hover:bg-gray-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-3"
-          >
-            Align & Continue
-            <ChevronRight size={20} />
-          </button>
+            <p className="text-gray-500 text-sm mt-6 italic">Tap to continue</p>
+          </div>
         </div>
       );
     }
@@ -912,7 +900,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return (
       <div className="w-full h-full overflow-y-auto p-4 sm:p-6">
         <div className="max-w-5xl mx-auto w-full py-4">
-          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">Which habit will you do first??</h3>
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">Select Your Habit</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
             {lifeGoals.map(habit => {
               const isSelected = selectedHabits.has(habit.id);
@@ -1025,8 +1013,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
       return (
         <div className="w-full h-full overflow-y-auto p-4 sm:p-6 flex flex-col items-center">
-          <h3 className="text-3xl sm:text-4xl font-bold text-white mb-2 text-center">
-            Break the Inertia
+          <h3 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-2 text-center">
+            Select Your Starter Action
           </h3>
           <p className="text-gray-400 mb-8 text-center max-w-xl">
             Choose your point of entry. How will you engage with <span className="text-yellow-400 font-bold">{habitName}</span> right now?
