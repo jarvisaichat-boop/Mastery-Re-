@@ -1333,9 +1333,15 @@ function App() {
             {/* Momentum Generator - Daily Ignition Flow */}
             {/* Pre-Launch Confirmation Popup */}
             {showMomentumConfirmation && (
-                <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 animate-fadeIn">
-                    <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-10 shadow-2xl max-w-lg mx-auto text-center animate-scaleIn"
-                        style={{ boxShadow: '0 0 60px rgba(251, 191, 36, 0.4)' }}>
+                <div 
+                    className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 animate-fadeIn"
+                    onClick={() => setShowMomentumConfirmation(false)}
+                >
+                    <div 
+                        className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-10 shadow-2xl max-w-lg mx-auto text-center animate-scaleIn"
+                        style={{ boxShadow: '0 0 60px rgba(251, 191, 36, 0.4)' }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <div className="text-8xl mb-6 animate-bounce">🚀</div>
                         <h3 className="text-3xl font-black text-yellow-400 mb-6" style={{ textShadow: '0 0 20px rgba(251, 191, 36, 0.5)' }}>
                             Ready to Launch?
@@ -1343,21 +1349,15 @@ function App() {
                         <p className="text-xl text-gray-300 mb-10 leading-relaxed">
                             Are you ready to launch your rocket<br />and kickstart your habits today?
                         </p>
-                        <div className="flex gap-4 justify-center">
+                        <div className="flex justify-center">
                             <button
                                 onClick={() => {
                                     setShowMomentumConfirmation(false);
                                     setShowMomentumGenerator(true);
                                 }}
-                                className="px-10 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50"
+                                className="px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50"
                             >
-                                Yes, Let's Go! 🔥
-                            </button>
-                            <button
-                                onClick={() => setShowMomentumConfirmation(false)}
-                                className="px-10 py-4 bg-gray-800 border border-gray-700 text-gray-300 font-semibold text-lg rounded-2xl hover:bg-gray-700 hover:text-white transition-all duration-300"
-                            >
-                                Not Yet
+                                Lift Off 🚀
                             </button>
                         </div>
                     </div>

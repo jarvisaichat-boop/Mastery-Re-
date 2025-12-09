@@ -1129,69 +1129,71 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     };
 
     return (
-      <div className="w-full h-full flex items-center justify-center" style={{ perspective: '2000px' }}>
-        <div className="max-w-[34rem] mx-6 w-full">
+      <div className="w-full h-full flex items-center justify-center p-4 sm:p-6" style={{ perspective: '2000px' }}>
+        <div className="max-w-[34rem] w-full">
           <div 
             className="relative w-full transition-transform duration-700 cursor-pointer"
             style={{ 
               transformStyle: 'preserve-3d',
               transform: pledgeCardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-              height: '588px'
+              height: 'auto',
+              minHeight: '500px'
             }}
             onClick={() => !pledgeCardFlipped && setPledgeCardFlipped(true)}
           >
             {/* Front of card - Summary */}
             <div 
-              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl flex flex-col justify-center"
+              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col justify-center"
               style={{
                 boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
-                backfaceVisibility: 'hidden'
+                backfaceVisibility: 'hidden',
+                minHeight: '500px'
               }}
             >
-              <h3 className="text-4xl font-black text-yellow-400 mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
+              <h3 className="text-2xl sm:text-4xl font-black text-yellow-400 mb-6 sm:mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
                 Your Commitment
               </h3>
               
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Goal */}
-                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                      <Target size={20} className="text-yellow-400" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                      <Target size={18} className="text-yellow-400 sm:w-5 sm:h-5" />
                     </div>
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Goal</span>
                   </div>
-                  <p className="text-xl font-bold text-white pl-13">{goal || 'No Goal Set'}</p>
+                  <p className="text-base sm:text-xl font-bold text-white pl-11 sm:pl-13">{goal || 'No Goal Set'}</p>
                 </div>
 
                 {/* Habit */}
-                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-xl">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-lg sm:text-xl">
                       🏋️
                     </div>
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Habit</span>
                   </div>
-                  <p className="text-xl font-bold text-white pl-13">{selectedHabit?.name || 'No Habit Selected'}</p>
+                  <p className="text-base sm:text-xl font-bold text-white pl-11 sm:pl-13">{selectedHabit?.name || 'No Habit Selected'}</p>
                 </div>
 
                 {/* Starter Action */}
-                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-xl">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-lg sm:text-xl">
                       {selectedStarterAction ? starterActionIcons[selectedStarterAction] : '🎯'}
                     </div>
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Starter Action</span>
                   </div>
-                  <p className="text-xl font-bold text-white pl-13">
+                  <p className="text-base sm:text-xl font-bold text-white pl-11 sm:pl-13">
                     {selectedStarterAction ? starterActionLabels[selectedStarterAction] : 'No Action Selected'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex justify-center mt-8">
+              <div className="flex justify-center mt-6 sm:mt-8">
                 <div 
-                  className="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 transition-transform animate-pulse"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 transition-transform animate-pulse"
                   style={{ boxShadow: '0 0 30px rgba(251, 191, 36, 0.6)' }}
                 />
               </div>
@@ -1199,19 +1201,20 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
             {/* Back of card - Commit button */}
             <div 
-              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl"
+              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col justify-center"
               style={{
                 boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
                 backfaceVisibility: 'hidden',
-                transform: 'rotateY(180deg)'
+                transform: 'rotateY(180deg)',
+                minHeight: '500px'
               }}
             >
-              <h3 className="text-4xl font-black text-yellow-400 mb-12 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
+              <h3 className="text-2xl sm:text-4xl font-black text-yellow-400 mb-6 sm:mb-10 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
                 Make a commitment
               </h3>
-              <div className="mb-12 cursor-pointer select-none">
+              <div className="mb-6 sm:mb-10 cursor-pointer select-none">
                 <div 
-                  className="w-52 h-52 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative shadow-2xl"
+                  className="w-40 h-40 sm:w-52 sm:h-52 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center relative shadow-2xl"
                   style={{boxShadow: `0 0 ${Math.max(40, pledgeProgress)}px rgba(251, 191, 36, ${0.4 + pledgeProgress / 200})`}}
                   onMouseDown={handlePledgeStart}
                   onMouseUp={handlePledgeEnd}
@@ -1221,8 +1224,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   onTouchCancel={handlePledgeEnd}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="text-9xl animate-pulse">👇</div>
-                  <svg className="absolute inset-0 w-full h-full -rotate-90">
+                  <div className="text-7xl sm:text-9xl animate-pulse">👇</div>
+                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 208 208">
                     <circle
                       cx="104"
                       cy="104"
@@ -1252,9 +1255,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   </svg>
                 </div>
               </div>
-              <p className="text-white text-2xl mb-4 font-light text-center">Hold down for 3 seconds</p>
-              <p className="text-yellow-400 text-lg mb-8 text-center italic">Lock in your commitment</p>
-              <div className="text-4xl font-bold text-center">
+              <p className="text-white text-lg sm:text-2xl mb-2 sm:mb-4 font-light text-center">Hold down for 3 seconds</p>
+              <p className="text-yellow-400 text-base sm:text-lg mb-4 sm:mb-6 text-center italic">Lock in your commitment</p>
+              <div className="text-2xl sm:text-4xl font-bold text-center">
                 {pledgeProgress < 100 ? (
                   <span className="text-yellow-400">{Math.round(pledgeProgress)}%</span>
                 ) : (
