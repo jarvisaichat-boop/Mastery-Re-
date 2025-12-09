@@ -92,7 +92,7 @@ export default function StatsOverview({ dashboardData, onToggleRateMode, onToggl
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-3">
                             <Target className="w-5 h-5 text-blue-400" />
-                            <h3 className="text-lg font-semibold text-blue-400">Your #1 Priority</h3>
+                            <h3 className="text-lg font-semibold text-blue-400">Goal</h3>
                         </div>
                         
                         {!isEditingGoal ? (
