@@ -1104,26 +1104,26 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     };
 
     return (
-      <div className="w-full h-full flex items-center justify-center" style={{ perspective: '1000px' }}>
-        <div className="max-w-2xl mx-6 w-full">
+      <div className="w-full h-full flex items-center justify-center" style={{ perspective: '2000px' }}>
+        <div className="max-w-[34rem] mx-6 w-full">
           <div 
             className="relative w-full transition-transform duration-700 cursor-pointer"
             style={{ 
               transformStyle: 'preserve-3d',
               transform: pledgeCardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-              minHeight: '580px'
+              height: '658px'
             }}
             onClick={() => !pledgeCardFlipped && setPledgeCardFlipped(true)}
           >
             {/* Front of card - Summary */}
             <div 
-              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl flex flex-col"
+              className="absolute inset-0 w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 shadow-2xl flex flex-col justify-center"
               style={{
                 boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)',
                 backfaceVisibility: 'hidden'
               }}
             >
-              <h3 className="text-3xl sm:text-4xl font-black text-yellow-400 mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
+              <h3 className="text-4xl font-black text-yellow-400 mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
                 Your Commitment
               </h3>
               
