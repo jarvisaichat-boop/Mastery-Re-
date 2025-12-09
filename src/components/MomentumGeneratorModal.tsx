@@ -865,7 +865,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     // Step 4.5: Goal Focus (Confirming the User's #1 Priority)
     if (currentStep === 'goal-selection') {
       return (
-        <div className="w-full h-full flex items-center justify-center cursor-pointer p-6" onClick={handleNextStep}>
+        <div className="w-full h-full flex items-center justify-center p-6">
           <div className="max-w-xl mx-auto text-center">
             <h3 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-8 tracking-tight">
               Select Your Goal
@@ -887,7 +887,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               )}
             </div>
 
-            <p className="text-gray-500 text-sm mt-6 italic">Tap to continue</p>
+            <button
+              onClick={handleNextStep}
+              className="mt-8 px-12 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-3 mx-auto"
+            >
+              Continue
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
       );
