@@ -1136,7 +1136,7 @@ function App() {
                         >
                             <Rocket size={32} className="group-hover:rotate-12 transition-transform duration-300" />
                             <span className="text-sm font-black uppercase tracking-wider opacity-90 group-hover:opacity-100 transition-opacity">
-                                Ignite
+                                Rocket Launch
                             </span>
                         </button>
 
@@ -1342,7 +1342,9 @@ function App() {
                         style={{ boxShadow: '0 0 60px rgba(251, 191, 36, 0.4)' }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="text-8xl mb-6 animate-bounce">🚀</div>
+                        <div className="mb-6 animate-bounce">
+                            <img src="/attached_assets/image_1765278115644.png" alt="Rocket Launch" className="w-32 h-32 mx-auto object-contain" />
+                        </div>
                         <h3 className="text-3xl font-black text-yellow-400 mb-6" style={{ textShadow: '0 0 20px rgba(251, 191, 36, 0.5)' }}>
                             Ready to Launch?
                         </h3>
@@ -1357,7 +1359,7 @@ function App() {
                                 }}
                                 className="px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-black font-bold text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50"
                             >
-                                Lift Off 🚀
+                                Lift Off 🔥
                             </button>
                         </div>
                     </div>
