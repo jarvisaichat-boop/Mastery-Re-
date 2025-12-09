@@ -58,9 +58,15 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [showVideoIntro, setShowVideoIntro] = useState(true);
   const [preCountdown, setPreCountdown] = useState<number | null>(null);
   const [randomVisionContent, setRandomVisionContent] = useState<string>('');
-  const [selectedStarterAction, setSelectedStarterAction] = useState<string | null>(null);
+  const [selectedStarterAction, setSelectedStarterAction] = useState<string | null>(() => {
+    // Load last selected starter action from localStorage
+    const saved = localStorage.getItem('lastStarterAction');
+    return saved || null;
+  });
   const [goalSelected, setGoalSelected] = useState(false);
   const [pledgeCardFlipped, setPledgeCardFlipped] = useState(false);
+  const [commitmentReadyTimer, setCommitmentReadyTimer] = useState(3);
+  const [commitmentReady, setCommitmentReady] = useState(false);
   
   // Refs for YouTube player and timeout management
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -162,10 +168,12 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setCurrentStep('streak');
       setUserQuestion('');
       setSelectedHabits(new Set());
-      setSelectedStarterAction(null);
+      // Keep starter action from localStorage - don't reset it
       setGoalSelected(false);
       setPledgeCardFlipped(false);
       setPledgeProgress(0);
+      setCommitmentReadyTimer(3);
+      setCommitmentReady(false);
       setLaunchCountdown(60);
       setLaunchActive(false);
       setVideoCompleted(false);
@@ -209,6 +217,27 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setConfetti(pieces);
     }
   }, [currentStep, confetti.length]);
+
+  // 3-second countdown timer for commitment card
+  useEffect(() => {
+    if (currentStep === 'pledge' && !pledgeCardFlipped && !commitmentReady) {
+      setCommitmentReadyTimer(3);
+      setCommitmentReady(false);
+      
+      const timer = setInterval(() => {
+        setCommitmentReadyTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setCommitmentReady(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [currentStep, pledgeCardFlipped]);
 
   // Random vision content now generated synchronously in handleNextStep to prevent card size glitch
   
@@ -1061,7 +1090,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             {tiers.map(tier => (
               <button
                 key={tier.id}
-                onClick={() => setSelectedStarterAction(tier.id)}
+                onClick={() => {
+                  setSelectedStarterAction(tier.id);
+                  localStorage.setItem('lastStarterAction', tier.id);
+                }}
                 className={`w-full p-4 sm:p-5 rounded-xl border transition-all duration-200 flex items-center gap-4 group text-left ${selectedStarterAction === tier.id
                   ? 'bg-yellow-500/10 border-yellow-500 shadow-lg shadow-yellow-500/10'
                   : 'bg-gray-800/50 border-gray-700 hover:bg-gray-800 hover:border-gray-500'
@@ -1139,7 +1171,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               height: 'auto',
               minHeight: '500px'
             }}
-            onClick={() => !pledgeCardFlipped && setPledgeCardFlipped(true)}
+            onClick={() => !pledgeCardFlipped && commitmentReady && setPledgeCardFlipped(true)}
           >
             {/* Front of card - Summary */}
             <div 
@@ -1161,7 +1193,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
                       <Target size={18} className="text-yellow-400 sm:w-5 sm:h-5" />
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Goal</span>
+                    <span className="text-sm sm:text-base font-bold uppercase tracking-wider text-yellow-500">Goal</span>
                   </div>
                   <p className="text-base sm:text-xl font-bold text-white pl-11 sm:pl-13">{goal || 'No Goal Set'}</p>
                 </div>
@@ -1172,7 +1204,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-lg sm:text-xl">
                       🏋️
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Habit</span>
+                    <span className="text-sm sm:text-base font-bold uppercase tracking-wider text-yellow-500">Habit</span>
                   </div>
                   <p className="text-base sm:text-xl font-bold text-white pl-11 sm:pl-13">{selectedHabit?.name || 'No Habit Selected'}</p>
                 </div>
@@ -1183,7 +1215,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-lg sm:text-xl">
                       {selectedStarterAction ? starterActionIcons[selectedStarterAction] : '🎯'}
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Starter Action</span>
+                    <span className="text-sm sm:text-base font-bold uppercase tracking-wider text-yellow-500">Starter Action</span>
                   </div>
                   <p className="text-base sm:text-xl font-bold text-white pl-11 sm:pl-13">
                     {selectedStarterAction ? starterActionLabels[selectedStarterAction] : 'No Action Selected'}
@@ -1193,9 +1225,19 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
               <div className="flex justify-center mt-4 sm:mt-6 md:mt-8">
                 <div 
-                  className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 transition-transform animate-pulse"
-                  style={{ boxShadow: '0 0 30px rgba(251, 191, 36, 0.6)' }}
-                />
+                  className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full transition-all duration-500 ${
+                    commitmentReady 
+                      ? 'bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 animate-pulse' 
+                      : 'bg-gray-600 cursor-not-allowed'
+                  }`}
+                  style={{ boxShadow: commitmentReady ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
+                >
+                  {!commitmentReady && (
+                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg">
+                      {commitmentReadyTimer}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
