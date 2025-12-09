@@ -600,15 +600,15 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     const steps: Step[] = ['streak', 'vision', 'content', 'goal-selection', 'habits', 'starter-action', 'pledge', 'launch'];
     const currentIndex = steps.indexOf(currentStep);
     
-    // Only allow going back from goal-selection, habits, or starter-action
-    const backableSteps: Step[] = ['goal-selection', 'habits', 'starter-action'];
+    // Only allow going back from habits or starter-action (not goal-selection - no going back to video)
+    const backableSteps: Step[] = ['habits', 'starter-action'];
     if (backableSteps.includes(currentStep) && currentIndex > 0) {
       setCurrentStep(steps[currentIndex - 1]);
     }
   };
 
-  // Check if current step allows back navigation
-  const canGoBack = ['goal-selection', 'habits', 'starter-action'].includes(currentStep);
+  // Check if current step allows back navigation (not goal-selection - no going back to video)
+  const canGoBack = ['habits', 'starter-action'].includes(currentStep);
 
   // Swipe handlers for mobile back navigation
   const swipeHandlers = useSwipeable({
