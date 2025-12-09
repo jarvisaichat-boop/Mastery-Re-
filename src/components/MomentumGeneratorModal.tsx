@@ -228,12 +228,25 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setCommitmentReadyTimer(3);
       setCommitmentReady(false);
       
+      // Vibrate phone immediately when entering
+      if ('vibrate' in navigator) {
+        navigator.vibrate(100);
+      }
+      
       const timer = setInterval(() => {
         setCommitmentReadyTimer(prev => {
           if (prev <= 1) {
             clearInterval(timer);
             setCommitmentReady(true);
+            // Final longer vibration when ready
+            if ('vibrate' in navigator) {
+              navigator.vibrate(200);
+            }
             return 0;
+          }
+          // Vibrate on each countdown tick
+          if ('vibrate' in navigator) {
+            navigator.vibrate(100);
           }
           return prev - 1;
         });
@@ -1240,13 +1253,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                       : 'bg-gray-600 cursor-not-allowed'
                   }`}
                   style={{ boxShadow: commitmentReady ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
-                >
-                  {!commitmentReady && (
-                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg">
-                      {commitmentReadyTimer}
-                    </div>
-                  )}
-                </div>
+                />
               </div>
             </div>
 
