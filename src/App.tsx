@@ -1135,8 +1135,9 @@ function App() {
                             title={isMomentumCompletedToday ? "Come back tomorrow for the launch ritual" : "Launch the daily ignition sequence"}
                         >
                             <Rocket size={32} className="group-hover:rotate-12 transition-transform duration-300" />
-                            <span className="text-xs font-black uppercase tracking-wider opacity-90 group-hover:opacity-100 transition-opacity leading-tight text-center">
-                                ROCKET<br/>LAUNCH
+                            <span className="font-black uppercase opacity-90 group-hover:opacity-100 transition-opacity leading-tight text-center flex flex-col">
+                                <span className="text-xs tracking-wider">ROCKET</span>
+                                <span className="text-sm tracking-widest">LAUNCH</span>
                             </span>
                         </button>
 
