@@ -867,7 +867,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     // Step 4.5: Goal Focus (Confirming the User's #1 Priority)
     if (currentStep === 'goal-selection') {
       return (
-        <div className="w-full h-full flex items-center justify-center p-6">
+        <div className="w-full h-full flex items-start justify-center pt-16 sm:pt-24 p-6">
           <div className="max-w-xl mx-auto text-center">
             <h3 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-8 tracking-tight">
               Select Your Goal
