@@ -1010,8 +1010,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 5: Life Goal Habit Cards - Single Select
   if (currentStep === 'habits') {
     return (
-      <div className="w-full h-full overflow-y-auto p-4 sm:p-6 pb-24">
-        <div className="max-w-5xl mx-auto w-full py-4">
+      <div className="w-full h-full flex flex-col p-4 sm:p-6 pb-24">
+        <div className="flex-1 flex flex-col items-center justify-start pt-8">
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">Select Your Habit</h3>
           <div className={`flex flex-wrap justify-center gap-4 sm:gap-6 mb-8 sm:mb-10 ${lifeGoals.length === 1 ? 'items-center min-h-[200px]' : ''}`}>
             {lifeGoals.map(habit => {
@@ -1129,8 +1129,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       };
 
       return (
-        <div className="w-full h-full overflow-y-auto p-4 sm:p-6 flex flex-col items-center">
-          <h3 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-2 text-center">
+        <div className="w-full h-full flex flex-col p-4 sm:p-6 pb-24">
+          <div className="flex-1 flex flex-col items-center justify-start pt-8">
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-2 text-center tracking-tight">
             Select Your Starter Action
           </h3>
           <p className="text-gray-400 mb-8 text-center max-w-xl">
@@ -1176,8 +1177,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               </button>
             ))}
           </div>
+        </div>
 
-          <div className="flex justify-center mt-8">
+          <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
             <button
               onClick={handleNextStep}
               disabled={!selectedStarterAction}
