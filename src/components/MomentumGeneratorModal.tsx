@@ -1023,7 +1023,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                     // Single-select behavior: replace selection with this habit
                     setSelectedHabits(new Set([habit.id]));
                   }}
-                  className={`group relative text-left p-5 sm:p-6 rounded-2xl border-2 transition-all duration-300 w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] max-w-[280px] ${
+                  className={`group relative text-left p-5 sm:p-6 rounded-2xl border-2 transition-all duration-300 w-full max-w-[280px] ${
                     isSelected
                       ? 'bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500 shadow-2xl scale-105 animate-popOut'
                       : 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-yellow-500/50 hover:scale-105'
