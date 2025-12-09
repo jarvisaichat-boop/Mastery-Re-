@@ -869,48 +869,59 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     // Step 4.5: Goal Focus (Confirming the User's #1 Priority)
     if (currentStep === 'goal-selection') {
       return (
-        <div className="w-full h-full flex items-start justify-center pt-16 sm:pt-24 p-6">
-          <div className="max-w-xl mx-auto text-center">
-            <h3 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-8 tracking-tight">
+        <div className="w-full h-full flex flex-col p-4 sm:p-6 pb-24">
+          <div className="flex-1 flex flex-col items-center justify-start pt-8">
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">
               Select Your Goal
             </h3>
 
-            <button
-              onClick={() => setGoalSelected(true)}
-              className={`w-full text-center rounded-2xl p-6 sm:p-8 border-2 transition-all duration-300 ${
-                goalSelected
-                  ? 'bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500 shadow-2xl'
-                  : 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-yellow-500/50'
-              }`}
-              style={{ boxShadow: goalSelected ? '0 0 40px rgba(251, 191, 36, 0.5)' : 'inset 0 2px 10px rgba(0, 0, 0, 0.5)' }}
-            >
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${goalSelected ? 'bg-yellow-500/30 text-yellow-400' : 'bg-yellow-500/20 text-yellow-500'}`}>
-                  <Target size={24} />
-                </div>
-              </div>
-
-              <h4 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
-                {goal || "No Goal Set"}
-              </h4>
-
-              {aspirations && (
-                <p className={`mt-4 text-sm italic ${goalSelected ? 'text-gray-300' : 'text-gray-400'}`}>"{aspirations}"</p>
-              )}
-            </button>
-
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center w-full">
               <button
-                onClick={handleNextStep}
-                disabled={!goalSelected}
-                className={`w-14 h-14 rounded-full transition-transform ${
-                  goalSelected 
-                    ? 'bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 animate-pulse'
-                    : 'bg-gray-700 cursor-not-allowed'
+                onClick={() => setGoalSelected(true)}
+                className={`relative text-left p-5 sm:p-6 rounded-2xl border-2 transition-all duration-300 w-full max-w-[280px] ${
+                  goalSelected
+                    ? 'bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500 shadow-2xl scale-105'
+                    : 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-yellow-500/50 hover:scale-105'
                 }`}
-                style={{ boxShadow: goalSelected ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
-              />
+                style={{ boxShadow: goalSelected ? '0 0 40px rgba(251, 191, 36, 0.5)' : 'inset 0 2px 10px rgba(0, 0, 0, 0.5)' }}
+              >
+                <div className={`absolute top-4 right-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                  goalSelected
+                    ? 'bg-yellow-500 border-yellow-500 scale-125'
+                    : 'border-gray-600'
+                }`}>
+                  {goalSelected && (
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-black"></div>
+                  )}
+                </div>
+                
+                <div className="mb-4">
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full mb-3 flex items-center justify-center ${goalSelected ? 'bg-yellow-500/30 text-yellow-400' : 'bg-yellow-500/20 text-yellow-500'}`}>
+                    <Target size={24} />
+                  </div>
+                  <p className="text-white font-bold text-lg sm:text-xl pr-8">
+                    {goal || "No Goal Set"}
+                  </p>
+                </div>
+
+                {aspirations && (
+                  <p className={`text-sm italic ${goalSelected ? 'text-gray-300' : 'text-gray-400'}`}>"{aspirations}"</p>
+                )}
+              </button>
             </div>
+          </div>
+
+          <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+            <button
+              onClick={handleNextStep}
+              disabled={!goalSelected}
+              className={`w-14 h-14 rounded-full transition-transform ${
+                goalSelected 
+                  ? 'bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 animate-pulse'
+                  : 'bg-gray-700 cursor-not-allowed'
+              }`}
+              style={{ boxShadow: goalSelected ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
+            />
           </div>
         </div>
       );
@@ -919,7 +930,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   // Step 5: Life Goal Habit Cards - Single Select
   if (currentStep === 'habits') {
     return (
-      <div className="w-full h-full overflow-y-auto p-4 sm:p-6">
+      <div className="w-full h-full overflow-y-auto p-4 sm:p-6 pb-24">
         <div className="max-w-5xl mx-auto w-full py-4">
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">Select Your Habit</h3>
           <div className={`flex flex-wrap justify-center gap-4 sm:gap-6 mb-8 sm:mb-10 ${lifeGoals.length === 1 ? 'items-center min-h-[200px]' : ''}`}>
@@ -980,18 +991,19 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               );
             })}
           </div>
-          <div className="flex justify-center">
-            <button
-              onClick={handleNextStep}
-              disabled={selectedHabits.size === 0}
-              className={`w-14 h-14 rounded-full transition-transform ${
-                selectedHabits.size > 0 
-                  ? 'bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 animate-pulse'
-                  : 'bg-gray-700 cursor-not-allowed'
-              }`}
-              style={{ boxShadow: selectedHabits.size > 0 ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
-            />
-          </div>
+        </div>
+        
+        <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+          <button
+            onClick={handleNextStep}
+            disabled={selectedHabits.size === 0}
+            className={`w-14 h-14 rounded-full transition-transform ${
+              selectedHabits.size > 0 
+                ? 'bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 animate-pulse'
+                : 'bg-gray-700 cursor-not-allowed'
+            }`}
+            style={{ boxShadow: selectedHabits.size > 0 ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
+          />
         </div>
       </div>
     );
@@ -1340,7 +1352,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   LAUNCH!!
                 </p>
                 <p className={`text-2xl font-semibold ${launchCountdown <= 10 ? 'text-yellow-400 animate-pulse' : 'text-gray-400'}`}>
-                  Break the stasis NOW!
+                  Break into Action NOW!!
                 </p>
               </div>
             </div>
