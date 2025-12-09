@@ -918,7 +918,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       <div className="w-full h-full overflow-y-auto p-4 sm:p-6">
         <div className="max-w-5xl mx-auto w-full py-4">
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-400 mb-8 sm:mb-10 text-center tracking-tight">Select Your Habit</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
+          <div className={`flex flex-wrap justify-center gap-4 sm:gap-6 mb-8 sm:mb-10 ${lifeGoals.length === 1 ? 'items-center min-h-[200px]' : ''}`}>
             {lifeGoals.map(habit => {
               const isSelected = selectedHabits.has(habit.id);
               return (
@@ -928,7 +928,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                     // Single-select behavior: replace selection with this habit
                     setSelectedHabits(new Set([habit.id]));
                   }}
-                  className={`group relative text-left p-5 sm:p-6 rounded-2xl border-2 transition-all duration-300 ${
+                  className={`group relative text-left p-5 sm:p-6 rounded-2xl border-2 transition-all duration-300 w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] max-w-[280px] ${
                     isSelected
                       ? 'bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500 shadow-2xl scale-105 animate-popOut'
                       : 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-yellow-500/50 hover:scale-105'
@@ -1111,7 +1111,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
             style={{ 
               transformStyle: 'preserve-3d',
               transform: pledgeCardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-              height: '658px'
+              height: '588px'
             }}
             onClick={() => !pledgeCardFlipped && setPledgeCardFlipped(true)}
           >
