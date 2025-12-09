@@ -1150,7 +1150,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 minHeight: '500px'
               }}
             >
-              <h3 className="text-2xl sm:text-4xl font-black text-yellow-400 mb-6 sm:mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
+              <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-yellow-400 mb-4 sm:mb-6 md:mb-8 text-center tracking-wide uppercase" style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5)'}}>
                 Your Commitment
               </h3>
               
@@ -1191,9 +1191,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 </div>
               </div>
 
-              <div className="flex justify-center mt-6 sm:mt-8">
+              <div className="flex justify-center mt-4 sm:mt-6 md:mt-8">
                 <div 
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 transition-transform animate-pulse"
+                  className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 cursor-pointer hover:scale-110 transition-transform animate-pulse"
                   style={{ boxShadow: '0 0 30px rgba(251, 191, 36, 0.6)' }}
                 />
               </div>
