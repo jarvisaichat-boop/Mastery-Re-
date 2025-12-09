@@ -687,14 +687,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     return (
       <div className="w-full h-full flex items-center justify-center cursor-pointer overflow-y-auto" onClick={handleNextStep}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl"
+          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-4 sm:p-5 shadow-2xl"
                style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
             <div className="text-center">
               {/* Vision Board Title - Inside the card */}
-              <div className="text-xl sm:text-2xl text-yellow-400/90 font-bold mb-6 sm:mb-8 uppercase tracking-wider">Vision Board</div>
+              <div className="text-xl sm:text-2xl text-yellow-400/90 font-bold mb-4 uppercase tracking-wider">Vision Board</div>
               
-              {/* Combined Box - Grander Vision on top, Goal below */}
-              <div className="p-6 sm:p-10 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-3xl">
+              {/* Combined Box - Grander Vision on top, Goal below - Expanded to fill outer box */}
+              <div className="p-6 sm:p-8 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-2xl">
                 {/* Grander Vision - On top */}
                 <div className="mb-8 pb-6 border-b border-yellow-400/20">
                   <div className="text-lg sm:text-xl text-yellow-300 font-black mb-3 sm:mb-4 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
@@ -715,11 +715,6 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   </div>
                 </div>
               </div>
-              
-              <div className="text-lg sm:text-xl md:text-2xl text-gray-300 mt-8 sm:mt-10 font-light italic">
-                This is where today takes you.
-              </div>
-              <div className="text-xs sm:text-sm text-gray-500 mt-4 italic">Click anywhere to continue</div>
             </div>
           </div>
         </div>
