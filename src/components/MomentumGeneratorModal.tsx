@@ -59,6 +59,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [preCountdown, setPreCountdown] = useState<number | null>(null);
   const [randomVisionContent, setRandomVisionContent] = useState<string>('');
   const [selectedStarterAction, setSelectedStarterAction] = useState<string | null>(null);
+  const [goalSelected, setGoalSelected] = useState(false);
   
   // Refs for YouTube player and timeout management
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -161,6 +162,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setUserQuestion('');
       setSelectedHabits(new Set());
       setSelectedStarterAction(null);
+      setGoalSelected(false);
       setPledgeProgress(0);
       setLaunchCountdown(60);
       setLaunchActive(false);
@@ -871,12 +873,17 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               Select Your Goal
             </h3>
 
-            <div 
-              className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-2 border-yellow-500 rounded-2xl p-6 sm:p-8 shadow-2xl transition-all duration-300"
-              style={{ boxShadow: '0 0 40px rgba(251, 191, 36, 0.5)' }}
+            <button
+              onClick={() => setGoalSelected(true)}
+              className={`w-full text-center rounded-2xl p-6 sm:p-8 border-2 transition-all duration-300 ${
+                goalSelected
+                  ? 'bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500 shadow-2xl'
+                  : 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-yellow-500/50'
+              }`}
+              style={{ boxShadow: goalSelected ? '0 0 40px rgba(251, 191, 36, 0.5)' : 'inset 0 2px 10px rgba(0, 0, 0, 0.5)' }}
             >
               <div className="flex items-center justify-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-yellow-500/30 text-yellow-400 flex items-center justify-center">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${goalSelected ? 'bg-yellow-500/30 text-yellow-400' : 'bg-yellow-500/20 text-yellow-500'}`}>
                   <Target size={24} />
                 </div>
               </div>
@@ -886,13 +893,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               </h4>
 
               {aspirations && (
-                <p className="text-gray-300 mt-4 text-sm italic">"{aspirations}"</p>
+                <p className={`mt-4 text-sm italic ${goalSelected ? 'text-gray-300' : 'text-gray-400'}`}>"{aspirations}"</p>
               )}
-            </div>
+            </button>
 
             <button
               onClick={handleNextStep}
-              className="mt-8 px-12 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-3 mx-auto"
+              disabled={!goalSelected}
+              className="mt-8 px-12 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-600 disabled:from-gray-700 disabled:to-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed disabled:shadow-none transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:hover:translate-y-0 flex items-center gap-3 mx-auto"
             >
               Continue
               <ChevronRight size={20} />
