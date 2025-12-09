@@ -871,9 +871,12 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               Select Your Goal
             </h3>
 
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-yellow-500/40 rounded-2xl p-6 sm:p-8 shadow-xl hover:border-yellow-500 hover:shadow-yellow-500/20 transition-all duration-300">
+            <div 
+              className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-2 border-yellow-500 rounded-2xl p-6 sm:p-8 shadow-2xl transition-all duration-300"
+              style={{ boxShadow: '0 0 40px rgba(251, 191, 36, 0.5)' }}
+            >
               <div className="flex items-center justify-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-yellow-500/30 text-yellow-400 flex items-center justify-center">
                   <Target size={24} />
                 </div>
               </div>
@@ -883,7 +886,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               </h4>
 
               {aspirations && (
-                <p className="text-gray-400 mt-4 text-sm italic">"{aspirations}"</p>
+                <p className="text-gray-300 mt-4 text-sm italic">"{aspirations}"</p>
               )}
             </div>
 
