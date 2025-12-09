@@ -24,6 +24,7 @@ interface MomentumGeneratorModalProps {
   todaysContent: ContentLibraryItem;
   onAddContentLibrary?: () => void;
   isCompletedToday: boolean;
+  showSeizeTheDayPopup?: boolean;
 }
 
 type Step = 'streak' | 'vision' | 'content' | 'habits' | 'pledge' | 'launch';
@@ -39,6 +40,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   todaysContent,
   onAddContentLibrary,
   isCompletedToday,
+  showSeizeTheDayPopup = false,
 }) => {
   const [currentStep, setCurrentStep] = useState<Step>('streak');
   const [userQuestion, setUserQuestion] = useState('');
@@ -63,7 +65,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const countdownCompletedRef = useRef(false); // Persist popup state across re-renders
   const launchIntervalRef = useRef<number | null>(null); // Store interval ID for manual clearing
 
-  // Always include these 3 pre-generated life goal habits
+  // Get user's life goal habits
+  // If user has defined life goal habits, use them. Otherwise fallback to starters.
+  const userLifeGoals = habits.filter(h => h.type === 'Life Goal Habit');
+
   const starterHabits = [
     {
       id: 9999991,
@@ -102,13 +107,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       ]
     }
   ];
-  
-  // Get user's life goal habits and merge with starters (remove duplicates)
-  // Maximum 3 total life goal habits allowed
-  const userLifeGoals = habits.filter(h => h.type === 'Life Goal Habit');
-  const starterIds = new Set(starterHabits.map(h => h.id));
-  const uniqueUserHabits = userLifeGoals.filter(h => !starterIds.has(h.id));
-  const lifeGoals = [...starterHabits, ...uniqueUserHabits].slice(0, 3);
+
+  // PRIORITIZE user habits. Only use starters if NO user habits exist.
+  // This ensures that if a user edits/creates a life goal habit, they see THAT one.
+  const lifeGoals = userLifeGoals.length > 0 ? userLifeGoals : starterHabits;
   const currentStreak = calculateStreak();
   
   // Shared launch completion logic - called by both natural countdown and skip button
