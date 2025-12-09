@@ -1,6 +1,7 @@
 import { logger } from "../utils/logger";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronRight, Sparkles, Target } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Sparkles, Target } from 'lucide-react';
+import { useSwipeable } from 'react-swipeable';
 import { Habit, ContentLibraryItem } from '../types';
 import { formatDate } from '../utils';
 import { addToWatchHistory } from '../utils/videoRecommendation';
@@ -594,6 +595,34 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }
   };
 
+  // Navigate back to previous step (for goal-selection, habits, starter-action only)
+  const handlePreviousStep = () => {
+    const steps: Step[] = ['streak', 'vision', 'content', 'goal-selection', 'habits', 'starter-action', 'pledge', 'launch'];
+    const currentIndex = steps.indexOf(currentStep);
+    
+    // Only allow going back from goal-selection, habits, or starter-action
+    const backableSteps: Step[] = ['goal-selection', 'habits', 'starter-action'];
+    if (backableSteps.includes(currentStep) && currentIndex > 0) {
+      setCurrentStep(steps[currentIndex - 1]);
+    }
+  };
+
+  // Check if current step allows back navigation
+  const canGoBack = ['goal-selection', 'habits', 'starter-action'].includes(currentStep);
+
+  // Swipe handlers for mobile back navigation
+  const swipeHandlers = useSwipeable({
+    onSwipedRight: () => {
+      if (canGoBack) {
+        handlePreviousStep();
+      }
+    },
+    trackMouse: false,
+    trackTouch: true,
+    delta: 50, // Minimum swipe distance to trigger
+    preventScrollOnSwipe: false, // Allow vertical scrolling
+  });
+
   // Render step content based on current step (persistent backdrop pattern)
   const renderStepContent = () => {
     // "Come back tomorrow" screen (but not if popup is showing OR countdown just completed)
@@ -1184,7 +1213,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
     return (
       <div className="w-full h-full flex items-center justify-center p-4 sm:p-6" style={{ perspective: '2000px' }}>
-        <div className="max-w-[34rem] w-full">
+        <div className="max-w-md sm:max-w-lg md:max-w-xl w-full">
           <div 
             className="relative w-full transition-transform duration-700 cursor-pointer"
             style={{ 
@@ -1452,7 +1481,20 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const shouldShowContent = !isCompletedToday || countdownCompletedRef.current;
 
   return (
-    <div className={`fixed inset-0 z-50 ${isCompletedToday && !countdownCompletedRef.current ? 'bg-black/98 backdrop-blur-sm' : 'bg-gradient-to-b from-gray-900 via-black to-gray-900'} flex items-center justify-center`}>
+    <div 
+      {...swipeHandlers}
+      className={`fixed inset-0 z-50 ${isCompletedToday && !countdownCompletedRef.current ? 'bg-black/98 backdrop-blur-sm' : 'bg-gradient-to-b from-gray-900 via-black to-gray-900'} flex items-center justify-center`}
+    >
+      {/* Desktop-only back arrow button */}
+      {canGoBack && (
+        <button
+          onClick={handlePreviousStep}
+          className="hidden md:flex absolute top-6 left-6 z-50 w-10 h-10 rounded-full bg-gray-800/80 border border-gray-600 items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-all duration-200 hover:scale-110"
+          title="Go back"
+        >
+          <ChevronLeft size={24} />
+        </button>
+      )}
       <div className="w-full h-full flex items-center justify-center">
         {shouldShowContent ? renderStepContent() : null}
       </div>
