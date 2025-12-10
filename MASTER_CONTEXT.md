@@ -45,15 +45,9 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 -   **Smart Notification System**: Per-habit time picker, browser notifications with escalation logic, and "Hold-to-Ignite" modal for direct-to-action.
 -   **Engine A Mini-Apps (Mental Exercise System)**: Immersive full-screen mini-app experiences like BreathPacer and JournalModule, linkable to habits.
 -   **Program Library**: Pre-packaged habit programs for batch creation, browsable via a dedicated interface, with initial programs like Morning Starter, Deep Morning, Quick Reset, and Gratitude Practice.
--   **Momentum Generator**: A 7-step daily ritual including:
-    -   **Streak**: Radial firework celebration.
-    -   **Vision**: Goal display.
-    -   **Video**: Smart recommendation engine selects personalized educational content (4-8 minutes max) teaching how to START habits using Atomic Habits and Tiny Habits methodology. Algorithm considers user's habit categories, journey stage (beginner/intermediate/advanced based on total habits and completion rate), watch history (30-day repetition avoidance), time of week (shorter videos weekdays, longer on weekends), and content preferences. All videos include comprehensive tags (contentType, lifeDomain, difficulty, emotion, techniques) for intelligent matching. YouTube iframe API integration with failsafe error handling. Clickable YouTube links in Content Library Manager for both library and search tabs.
-    -   **Reflection**: Daily question tailored to each video's content.
-    -   **Habits**: Pre-generated and user's life goal habits.
-    -   **Pledge**: Interactive hold-to-commit button.
-    -   **Launch**: 60-second countdown in dark timer mode.
-    -   Automatically marks the "Ignite" anchor habit as complete.
+-   **Momentum Generator**: A structured 8-step daily ritual to break stasis.
+    -   *See [docs/momentum-generator.md](./docs/momentum-generator.md) for full flow and design details.*
+    -   Key features: Streak, Vision, Video, Goal Focus, Habits, Starter Action, Flip Card Pledge, Launch.
 -   **Data Persistence**: All user data (habits, goals, chat entries, reflections, streak progress, onboarding phase, logic tree, micro-win, app tour completion, emergency mode, notification schedules, mini-app types, journal entries, program library selections, momentum generator content) is saved in localStorage.
 -   **`createdAt` Field Contract**: Habits include a `createdAt` Unix timestamp.
 -   **Quick Navigation**: Home and Target icons for quick access to key phases.
