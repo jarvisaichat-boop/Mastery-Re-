@@ -6,6 +6,15 @@
 ## User Preferences
 I want to enable the AI to make changes to my codebase. I prefer detailed explanations. I want iterative development. I prefer simple language. I prefer that you ask me before making major changes. I like functional programming.
 
+## Documentation Standards (Protocol)
+**This file (`MASTER_CONTEXT.md`) is the Single Source of Truth.**
+*   **Protocol**: All AIs must read this file first to understand the project vision.
+*   **Structure**:
+    *   **High-Level**: Keep this file for Vision, Architecture, and Roadmap.
+    *   **Deep-Dives**: For complex features (e.g., Momentum Generator), create a separate file in `docs/` (e.g., `docs/momentum-generator.md`) and link to it from here. Do not clutter this file.
+    *   **Walkthroughs**: After completing a major feature, create/update a `walkthrough.md` to explain the "Why" behind the code changes.
+
+
 ## System Architecture
 The application is a single-page application (SPA) built with React 18 and TypeScript, using Vite 5 as the build tool. Tailwind CSS is used for styling, and Lucide React for icons. State management is handled via React Hooks with data persistence managed through localStorage.
 
