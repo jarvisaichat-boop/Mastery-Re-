@@ -1,5 +1,12 @@
 # Mastery Dashboard
 
+> **DO NOT DELETE THIS FILE**
+> This is the Single Source of Truth for project vision, architecture, and roadmap.
+> Note: `replit.md` (in root) is required by Replit Agent and must also be preserved.
+> These two files work together: `replit.md` for Agent config, `MASTER_CONTEXT.md` for detailed documentation.
+
+---
+
 ## Overview
 **Path - Self Mastery** is a gamified, AI-powered habit coaching program designed to guide users through a 7-phase coaching cycle: Intake, Goal Contract, Plan, Do, Review, Accountability, and Loop. The application aims to provide an engaging and effective platform for habit formation, leveraging a "Duolingo for Habit Forming" model with a dark mode "Focus Dojo" aesthetic. It emphasizes positive reinforcement and a comprehensive onboarding process to combat common pitfalls in habit formation.
 

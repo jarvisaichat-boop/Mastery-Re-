@@ -1,5 +1,11 @@
 # Mastery Dashboard
 
+> **DO NOT DELETE OR RENAME THIS FILE**
+> This `replit.md` file is automatically read by Replit Agent to understand project context, preferences, and architecture. Deleting or renaming it will break Agent's ability to work effectively on this project.
+> See also: `MASTER_CONTEXT.md` for detailed project vision and roadmap.
+
+---
+
 ## Overview
 
 Mastery Dashboard is a gamified, AI-powered habit coaching application designed to guide users through structured behavior change. The app combines habit tracking with psychological coaching principles, featuring a multi-phase onboarding system, gamification mechanics (streaks, celebrations, micro-wins), and a "Momentum Generator" feature to help users overcome inertia and build consistent habits.
