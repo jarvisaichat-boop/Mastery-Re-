@@ -1043,8 +1043,27 @@ function App() {
                         </div>
                     )}
                 </div>
-                <div className="flex items-center">
-                    {/* Add New Habit Button - Only button in top right */}
+                <div className="flex items-center gap-2">
+                    {/* View Mode Toggle - Next to Add Habit button */}
+                    {!showStatsView && (
+                        <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
+                            <button
+                                onClick={() => setShowDailyTrackingView(false)}
+                                className={`p-2 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
+                                title="Simple View"
+                            >
+                                <List className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => setShowDailyTrackingView(true)}
+                                className={`p-2 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
+                                title="Weekly View"
+                            >
+                                <Calendar className="w-4 h-4" />
+                            </button>
+                        </div>
+                    )}
+                    {/* Add New Habit Button */}
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
                 </div>
             </div>
@@ -1070,28 +1089,7 @@ function App() {
                     </div>
                 )}
 
-                <div className="mb-8 relative">
-                    {/* View Mode Toggle - Positioned absolutely on far right */}
-                    {!showStatsView && (
-                        <div className="absolute right-0 top-0">
-                            <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
-                                <button
-                                    onClick={() => setShowDailyTrackingView(false)}
-                                    className={`p-2 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
-                                    title="Simple View"
-                                >
-                                    <List className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => setShowDailyTrackingView(true)}
-                                    className={`p-2 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
-                                    title="Weekly View"
-                                >
-                                    <Calendar className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                <div className="mb-8">
                     {/* Title and Caption - Centered */}
                     <div className="text-center">
                         <h1 className="text-4xl font-bold mb-2">{showStatsView ? 'Mastery Dashboard' : 'Mastery Tracker'}</h1>
