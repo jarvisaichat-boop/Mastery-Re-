@@ -1077,12 +1077,11 @@ function App() {
                 )}
 
                 <div className="text-center mb-8 relative">
-                    <h1 className="text-4xl font-bold mb-2">{showStatsView ? 'Mastery Dashboard' : 'Habit Tracker'}</h1>
-                    <p className="text-gray-400 mb-4">Track your habits and build a better you, one day at a time.</p>
-
-                    {/* View Mode Toggle - Only show on Habit Tracker page */}
-                    {!showStatsView && (
-                        <div className="flex justify-center">
+                    {/* Title with View Mode Toggle inline */}
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                        <h1 className="text-4xl font-bold">{showStatsView ? 'Mastery Dashboard' : 'Habit Tracker'}</h1>
+                        {/* View Mode Toggle - Only show on Habit Tracker page */}
+                        {!showStatsView && (
                             <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
                                 <button
                                     onClick={() => setShowDailyTrackingView(false)}
@@ -1099,8 +1098,9 @@ function App() {
                                     <Calendar className="w-4 h-4" />
                                 </button>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
+                    <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
                 </div>
 
                 {/* STATS OVERVIEW */}
