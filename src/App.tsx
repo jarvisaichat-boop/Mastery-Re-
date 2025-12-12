@@ -1022,35 +1022,8 @@ function App() {
                         </div>
                     )}
                 </div>
-                <div className="flex items-center space-x-2">
-                    {/* BUTTON 1: Daily Check-In (Reflection + Chat) */}
-                    <button
-                        onClick={() => setShowChatCheckIn(true)}
-                        className="p-2 rounded-lg text-purple-400 hover:bg-gray-700 hover:text-purple-300"
-                        title="Daily Check-In"
-                    >
-                        <Sparkles className="w-5 h-5" />
-                    </button>
-
-                    {/* BUTTON 2: Habit Tracker View - Always visible, highlighted when active */}
-                    <button
-                        onClick={() => setShowStatsView(false)}
-                        className={`p-2 rounded-lg hover:bg-gray-700 ${!showStatsView ? 'text-blue-400' : 'text-gray-400'}`}
-                        title="Habit Tracker"
-                    >
-                        <List className="w-5 h-5" />
-                    </button>
-
-                    {/* BUTTON 3: Stats View Toggle */}
-                    <button
-                        onClick={() => setShowStatsView(p => !p)}
-                        className={`p-2 rounded-lg hover:bg-gray-700 ${showStatsView ? 'text-blue-400' : 'text-gray-400'}`}
-                        title="Stats Dashboard"
-                    >
-                        <BarChart3 className="w-5 h-5" />
-                    </button>
-
-                    {/* BUTTON 4: Add New Habit */}
+                <div className="flex items-center">
+                    {/* Add New Habit Button - Only button in top right */}
                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
                 </div>
             </div>
@@ -1077,11 +1050,9 @@ function App() {
                 )}
 
                 <div className="mb-8 relative">
-                    {/* Title with View Mode Toggle - title left, toggle far right */}
-                    <div className="flex items-center justify-between mb-2">
-                        <h1 className="text-4xl font-bold">{showStatsView ? 'Mastery Dashboard' : 'Habit Tracker'}</h1>
-                        {/* View Mode Toggle - Only show on Habit Tracker page */}
-                        {!showStatsView && (
+                    {/* View Mode Toggle - Positioned absolutely on far right */}
+                    {!showStatsView && (
+                        <div className="absolute right-0 top-0">
                             <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
                                 <button
                                     onClick={() => setShowDailyTrackingView(false)}
@@ -1098,9 +1069,13 @@ function App() {
                                     <Calendar className="w-4 h-4" />
                                 </button>
                             </div>
-                        )}
+                        </div>
+                    )}
+                    {/* Title and Caption - Centered */}
+                    <div className="text-center">
+                        <h1 className="text-4xl font-bold mb-2">{showStatsView ? 'Mastery Dashboard' : 'Habit Tracker'}</h1>
+                        <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
                     </div>
-                    <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
                 </div>
 
                 {/* STATS OVERVIEW */}
@@ -1439,6 +1414,40 @@ function App() {
                 contentLibrary={contentLibrary}
                 onSave={handleSaveContentLibrary}
             />
+
+            {/* Bottom Navigation Bar */}
+            <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 z-40">
+                <div className="max-w-2xl mx-auto px-4">
+                    <div className="flex justify-around items-center py-3">
+                        {/* Dashboard Button */}
+                        <button
+                            onClick={() => setShowStatsView(true)}
+                            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${showStatsView ? 'text-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
+                        >
+                            <BarChart3 className="w-6 h-6" />
+                            <span className="text-xs">Dashboard</span>
+                        </button>
+
+                        {/* Habits Button (Home) */}
+                        <button
+                            onClick={() => setShowStatsView(false)}
+                            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${!showStatsView ? 'text-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
+                        >
+                            <List className="w-6 h-6" />
+                            <span className="text-xs">Habits</span>
+                        </button>
+
+                        {/* Chat Button */}
+                        <button
+                            onClick={() => setShowChatCheckIn(true)}
+                            className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-purple-400 hover:text-purple-300 transition-colors"
+                        >
+                            <Sparkles className="w-6 h-6" />
+                            <span className="text-xs">Chat</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
