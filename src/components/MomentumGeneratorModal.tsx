@@ -1240,9 +1240,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   // First activation: flip to back of card for pledge hold
                   setPledgeCardFlipped(true);
                 } else {
-                  // Subsequent activations: skip flip AND launch screen, go straight to countdown
+                  // Subsequent activations: skip flip AND launch screen, show 3-2-1 pre-countdown
                   setLaunchCountdown(60);
-                  setLaunchActive(true);
+                  setPreCountdown(3);
                   setCurrentStep('launch');
                 }
               }
@@ -1312,9 +1312,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                       if (isFirstActivationToday) {
                         setPledgeCardFlipped(true);
                       } else {
-                        // Skip to launch and start countdown immediately
+                        // Skip to launch, show 3-2-1 pre-countdown first
                         setLaunchCountdown(60);
-                        setLaunchActive(true);
+                        setPreCountdown(3);
                         setCurrentStep('launch');
                       }
                     }

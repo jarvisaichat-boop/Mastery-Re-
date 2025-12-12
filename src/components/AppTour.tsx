@@ -13,7 +13,7 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
 
   const tourStops = [
     {
-      title: 'Habit Tracker',
+      title: 'Mastery Tracker',
       description: 'Your mission control. Track daily habits, build streaks, and watch your consistency grow with visual feedback.',
       spotlightSelector: '.habit-tracker-area',
       position: 'bottom' as const,
