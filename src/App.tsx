@@ -1050,7 +1050,7 @@ function App() {
                 )}
 
                 <div className="text-center mb-8 relative">
-                    <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
+                    <h1 className="text-4xl font-bold mb-2">Habit Tracker</h1>
                     <p className="text-gray-400 mb-4">Track your habits and build a better you, one day at a time.</p>
 
                     {/* View Mode Toggle - Only show on Habit Tracker page */}
