@@ -267,13 +267,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const content = selectedContent;
 
   function calculateStreak(): number {
-    // Calculate streak based on the "Ignite" habit which is marked when Momentum Generator is completed
-    // Also check for habits with isIgniteHabit flag for robustness
-    const igniteHabit = habits.find(h => 
-      h.name.toLowerCase() === 'ignite' || 
-      h.name.toLowerCase().includes('ignite') ||
-      (h as any).isIgniteHabit === true
-    );
+    // Calculate streak based on the "Ignite" habit (ID 9999994) which is marked when Momentum Generator is completed
+    const igniteHabit = habits.find(h => h.id === 9999994);
     if (!igniteHabit) return 0;
     
     let streak = 0;
