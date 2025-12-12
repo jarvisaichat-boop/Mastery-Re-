@@ -1124,13 +1124,13 @@ function App() {
                         <button
                             onClick={() => setShowMomentumConfirmation(true)}
                             disabled={isMomentumCompletedToday}
-                            className="relative w-24 h-12 sm:w-32 sm:h-16 md:w-36 md:h-[4.5rem] lg:w-40 lg:h-20 bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 rounded-t-full hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 transition-all duration-500 shadow-2xl flex flex-col items-center justify-center gap-1 font-bold text-black hover:scale-110 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0 animate-pulse"
+                            className="relative w-48 h-24 sm:w-32 sm:h-16 md:w-36 md:h-[4.5rem] lg:w-40 lg:h-20 bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 rounded-t-full hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 transition-all duration-500 shadow-2xl flex flex-col items-center justify-center gap-1 font-bold text-black hover:scale-110 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0 animate-pulse"
                             style={{
                                 boxShadow: '0 -10px 40px rgba(251, 191, 36, 0.5), 0 -5px 20px rgba(251, 191, 36, 0.3)'
                             }}
                             title={isMomentumCompletedToday ? "Come back tomorrow for the launch ritual" : "Launch the daily ignition sequence"}
                         >
-                            <Rocket className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 group-hover:rotate-12 transition-transform duration-300" />
+                            <Rocket className="w-14 h-14 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 group-hover:rotate-12 transition-transform duration-300" />
                         </button>
 
                         {/* Dev Reset Button - Only shows when completed */}
