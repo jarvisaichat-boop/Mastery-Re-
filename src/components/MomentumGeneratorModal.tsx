@@ -26,6 +26,7 @@ interface MomentumGeneratorModalProps {
   onAddContentLibrary?: () => void;
   isCompletedToday: boolean;
   showSeizeTheDayPopup?: boolean;
+  isFirstActivationToday?: boolean;
 }
 
 type Step = 'streak' | 'vision' | 'content' | 'goal-selection' | 'habits' | 'starter-action' | 'pledge' | 'launch';
@@ -42,6 +43,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   onAddContentLibrary,
   isCompletedToday,
   showSeizeTheDayPopup = false,
+  isFirstActivationToday = true,
 }) => {
   const [currentStep, setCurrentStep] = useState<Step>('streak');
   const [userQuestion, setUserQuestion] = useState('');
@@ -164,9 +166,12 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       setVideoCompleted(false); // Reset video completion
       setVideoStarted(false); // Reset video started state for new session
       setVideoError(false); // Reset error state
+      // Set starting step based on whether this is first activation today
+      // Skip streak and content on subsequent activations
+      setCurrentStep(isFirstActivationToday ? 'streak' : 'goal-selection');
     } else if (!isOpen) {
-      // Reset when modal closes
-      setCurrentStep('streak');
+      // Reset when modal closes - start at different step based on activation count
+      setCurrentStep(isFirstActivationToday ? 'streak' : 'goal-selection');
       setUserQuestion('');
       setSelectedHabits(new Set());
       // Keep starter action from localStorage - don't reset it
@@ -630,31 +635,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   // Render step content based on current step (persistent backdrop pattern)
   const renderStepContent = () => {
-    // "Come back tomorrow" screen (but not if popup is showing OR countdown just completed)
-    if (isCompletedToday && !showSeizeTheDayPopup && !countdownCompletedRef.current) {
-      return (
-        <div className="text-center max-w-lg mx-auto px-6">
-          <div className="mb-8 animate-scaleIn">
-            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/50">
-              <Sparkles size={64} className="text-white" />
-            </div>
-          </div>
-          <h3 className="text-4xl font-black text-white mb-4 tracking-tight" style={{textShadow: '0 0 30px rgba(16, 185, 129, 0.5)'}}>
-            Mission Complete
-          </h3>
-          <p className="text-xl text-gray-400 mb-12 leading-relaxed">
-            You've already ignited today. <br/>
-            Consistency is sacred. Return tomorrow to launch again.
-          </p>
-          <button
-            onClick={onClose}
-            className="px-8 py-4 bg-gray-800/50 border border-gray-700 text-white font-semibold rounded-xl hover:bg-gray-700/50 transition-all duration-300 hover:scale-105"
-          >
-            Close
-          </button>
-        </div>
-      );
-    }
+    // No longer blocking subsequent activations - user can run multiple times per day
 
     // Step 1: Streak Card with Side Fireworks
     if (currentStep === 'streak') {
