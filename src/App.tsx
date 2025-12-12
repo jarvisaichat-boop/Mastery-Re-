@@ -1424,11 +1424,8 @@ function App() {
                             <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{ textShadow: '0 0 60px rgba(251, 191, 36, 0.7)' }}>
                                 Now GO!
                             </h2>
-                            <p className="text-3xl text-yellow-400 font-light mb-4">
+                            <p className="text-3xl text-yellow-400 font-light">
                                 Your first action awaits
-                            </p>
-                            <p className="text-lg text-gray-400 italic">
-                                Click to start your journey
                             </p>
                         </div>
                     </div>
