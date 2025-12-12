@@ -1076,9 +1076,9 @@ function App() {
                     </div>
                 )}
 
-                <div className="text-center mb-8 relative">
-                    {/* Title with View Mode Toggle inline */}
-                    <div className="flex items-center justify-center gap-3 mb-2">
+                <div className="mb-8 relative">
+                    {/* Title with View Mode Toggle - title left, toggle far right */}
+                    <div className="flex items-center justify-between mb-2">
                         <h1 className="text-4xl font-bold">{showStatsView ? 'Mastery Dashboard' : 'Habit Tracker'}</h1>
                         {/* View Mode Toggle - Only show on Habit Tracker page */}
                         {!showStatsView && (
