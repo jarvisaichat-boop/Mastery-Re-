@@ -1473,13 +1473,13 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Force show launch countdown if countdown completed (even if isCompletedToday is true)
-  const shouldShowContent = !isCompletedToday || countdownCompletedRef.current;
+  // Always show content - we now allow multiple activations per day
+  const shouldShowContent = true;
 
   return (
     <div 
       {...swipeHandlers}
-      className={`fixed inset-0 z-50 ${isCompletedToday && !countdownCompletedRef.current ? 'bg-black/98 backdrop-blur-sm' : 'bg-gradient-to-b from-gray-900 via-black to-gray-900'} flex items-center justify-center`}
+      className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 flex items-center justify-center"
     >
       {/* Desktop-only back arrow button */}
       {canGoBack && (
