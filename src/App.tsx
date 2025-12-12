@@ -1414,9 +1414,9 @@ function App() {
             />
 
             {/* Bottom Navigation Bar - Dashboard (left), Momentum Generator (center), Chat (right) */}
-            <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-30 h-10">
+            <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-30 h-14">
                 <div className="max-w-2xl mx-auto px-8 h-full">
-                    <div className="flex justify-between items-center h-full">
+                    <div className="flex justify-between items-end h-full pb-2">
                         {/* Dashboard Button - Left (icon only) */}
                         <button
                             onClick={() => setShowStatsView(true)}
