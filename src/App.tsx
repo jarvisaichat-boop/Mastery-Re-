@@ -985,14 +985,13 @@ function App() {
                     {/* Emergency Latch Toggle */}
                     <button
                         onClick={() => setEmergencyMode(!emergencyMode)}
-                        className={`px-4 py-2 rounded-lg font-semibold transition-all ${emergencyMode
+                        className={`p-2 rounded-lg transition-all ${emergencyMode
                             ? 'bg-red-600 text-white hover:bg-red-500'
                             : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'
                             }`}
                         title={emergencyMode ? "Emergency Mode Active - All habits are 60-second micro-wins" : "Activate Emergency Mode - Shrink all habits to 60 seconds"}
                     >
-                        <Shield className="w-4 h-4 inline-block mr-2" />
-                        {emergencyMode ? "Emergency ON" : "I'm Overwhelmed"}
+                        <Shield className="w-5 h-5" />
                     </button>
                 </div>
                 <div className="flex items-center space-x-2">
