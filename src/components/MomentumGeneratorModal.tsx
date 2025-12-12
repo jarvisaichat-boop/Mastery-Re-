@@ -166,28 +166,11 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     if (isOpen && !hasInitialized) {
       // Set starting step based on whether this is first activation today
       // Skip streak and content on subsequent activations
-      const startingStep = isFirstActivationToday ? 'streak' : 'vision';
+      // First activation: full experience starting at streak
+      // Subsequent activations: streamlined, skip to goal-selection
+      const startingStep = isFirstActivationToday ? 'streak' : 'goal-selection';
       setCurrentStep(startingStep);
       setHasInitialized(true);
-      
-      // Generate random vision content if starting at vision step (for subsequent activations)
-      if (startingStep === 'vision' && !randomVisionContent) {
-        const randomWhys = [
-          "To prove to yourself that you're capable of anything you commit to",
-          "To build unshakeable discipline that transforms your entire life",
-          "To become the person your future self will thank you for being",
-          "To break free from limitation and step into your full potential"
-        ];
-        const randomRoutines = [
-          "Morning: Mindful movement, focused work, energized action",
-          "Ideal Day: Deep focus, intentional breaks, powerful completion",
-          "Daily Flow: Present in the moment, building unstoppable momentum",
-          "Your Rhythm: Wake with purpose, execute with precision, rest with gratitude",
-          "Perfect Day: Aligned actions, consistent progress, compound results"
-        ];
-        const newVision = `${randomWhys[Math.floor(Math.random() * randomWhys.length)]}\n\n${randomRoutines[Math.floor(Math.random() * randomRoutines.length)]}`;
-        setRandomVisionContent(newVision);
-      }
       
       if (todaysContent && !selectedContent) {
         // Use pre-selected today's content (already filtered <5 min by getTodayContent)
@@ -199,7 +182,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     } else if (!isOpen) {
       setHasInitialized(false); // Reset for next open
       // Reset when modal closes - start at different step based on activation count
-      setCurrentStep(isFirstActivationToday ? 'streak' : 'vision');
+      setCurrentStep(isFirstActivationToday ? 'streak' : 'goal-selection');
       setUserQuestion('');
       setSelectedHabits(new Set());
       // Keep starter action from localStorage - don't reset it
@@ -1251,7 +1234,17 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
               height: 'auto',
               minHeight: '450px'
             }}
-            onClick={() => !pledgeCardFlipped && commitmentReady && setPledgeCardFlipped(true)}
+            onClick={() => {
+              if (!pledgeCardFlipped && commitmentReady) {
+                if (isFirstActivationToday) {
+                  // First activation: flip to back of card for pledge hold
+                  setPledgeCardFlipped(true);
+                } else {
+                  // Subsequent activations: skip flip, go directly to launch
+                  setCurrentStep('launch');
+                }
+              }
+            }}
           >
             {/* Front of card - Summary */}
             <div 
