@@ -924,8 +924,8 @@ function App() {
 
     return (
         <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
-            {/* Quick Access Icons */}
-            <div className="fixed top-4 left-4 z-50 flex gap-2">
+            {/* Developer Quick Access Icons - Below header on mobile */}
+            <div className="flex justify-center gap-2 mb-4 flex-wrap">
                 <button
                     onClick={() => {
                         setJumpToPhase(0);
