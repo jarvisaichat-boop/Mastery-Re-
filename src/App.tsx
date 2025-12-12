@@ -970,6 +970,15 @@ function App() {
                 >
                     <Zap className="w-4 h-4" />
                 </button>
+                <button
+                    onClick={() => setShowContentLibraryManager(true)}
+                    className="p-2 bg-gray-800 hover:bg-gray-700 text-orange-400 hover:text-orange-300 rounded-lg border border-gray-700 transition-colors"
+                    title="Manage Video Library"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </button>
             </div>
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 <div className="flex-1">
@@ -1043,18 +1052,6 @@ function App() {
                 <div className="text-center mb-8 relative">
                     <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
                     <p className="text-gray-400 mb-4">Track your habits and build a better you, one day at a time.</p>
-
-                    {/* Developer: Manage Videos Button - Top Right */}
-                    <button
-                        onClick={() => setShowContentLibraryManager(true)}
-                        className="absolute top-0 right-4 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2 shadow-lg"
-                        title="Manage video library"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Manage Videos
-                    </button>
 
                     {/* View Mode Toggle - Only show on Habit Tracker page */}
                     {!showStatsView && (
