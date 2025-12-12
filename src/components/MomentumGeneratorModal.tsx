@@ -166,7 +166,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     if (isOpen && !hasInitialized) {
       // Set starting step based on whether this is first activation today
       // Skip streak and content on subsequent activations
-      setCurrentStep(isFirstActivationToday ? 'streak' : 'goal-selection');
+      setCurrentStep(isFirstActivationToday ? 'streak' : 'vision');
       setHasInitialized(true);
       
       if (todaysContent && !selectedContent) {
@@ -179,7 +179,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     } else if (!isOpen) {
       setHasInitialized(false); // Reset for next open
       // Reset when modal closes - start at different step based on activation count
-      setCurrentStep(isFirstActivationToday ? 'streak' : 'goal-selection');
+      setCurrentStep(isFirstActivationToday ? 'streak' : 'vision');
       setUserQuestion('');
       setSelectedHabits(new Set());
       // Keep starter action from localStorage - don't reset it
@@ -239,6 +239,14 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     // Only start timer once when entering pledge step with front card visible
     if (currentStep === 'pledge' && !pledgeCardFlipped && !commitmentTimerStartedRef.current) {
       commitmentTimerStartedRef.current = true;
+      
+      // Skip 3-second wait on subsequent activations - immediately ready
+      if (!isFirstActivationToday) {
+        setCommitmentReadyTimer(0);
+        setCommitmentReady(true);
+        return;
+      }
+      
       setCommitmentReadyTimer(3);
       setCommitmentReady(false);
       
@@ -273,7 +281,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     if (currentStep !== 'pledge') {
       commitmentTimerStartedRef.current = false;
     }
-  }, [currentStep, pledgeCardFlipped]);
+  }, [currentStep, pledgeCardFlipped, isFirstActivationToday]);
 
   // Random vision content now generated synchronously in handleNextStep to prevent card size glitch
   
