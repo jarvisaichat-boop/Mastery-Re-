@@ -158,18 +158,26 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     }
   }, []);
 
+  // Track if we've already initialized for this modal open
+  const [hasInitialized, setHasInitialized] = useState(false);
+
   // Lock in content selection when modal opens
   useEffect(() => {
-    if (isOpen && todaysContent && !selectedContent) {
-      // Use pre-selected today's content (already filtered <5 min by getTodayContent)
-      setSelectedContent(todaysContent);
-      setVideoCompleted(false); // Reset video completion
-      setVideoStarted(false); // Reset video started state for new session
-      setVideoError(false); // Reset error state
+    if (isOpen && !hasInitialized) {
       // Set starting step based on whether this is first activation today
       // Skip streak and content on subsequent activations
       setCurrentStep(isFirstActivationToday ? 'streak' : 'goal-selection');
+      setHasInitialized(true);
+      
+      if (todaysContent && !selectedContent) {
+        // Use pre-selected today's content (already filtered <5 min by getTodayContent)
+        setSelectedContent(todaysContent);
+        setVideoCompleted(false); // Reset video completion
+        setVideoStarted(false); // Reset video started state for new session
+        setVideoError(false); // Reset error state
+      }
     } else if (!isOpen) {
+      setHasInitialized(false); // Reset for next open
       // Reset when modal closes - start at different step based on activation count
       setCurrentStep(isFirstActivationToday ? 'streak' : 'goal-selection');
       setUserQuestion('');
