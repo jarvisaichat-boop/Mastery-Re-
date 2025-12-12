@@ -1071,9 +1071,11 @@ function App() {
                             </div>
                         </div>
                     )}
-                    {/* Title and Caption - Left aligned */}
-                    <h1 className="text-4xl font-bold mb-2">{showStatsView ? 'Mastery Dashboard' : 'Habit Tracker'}</h1>
-                    <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
+                    {/* Title and Caption - Centered */}
+                    <div className="text-center">
+                        <h1 className="text-4xl font-bold mb-2">{showStatsView ? 'Mastery Dashboard' : 'Habit Tracker'}</h1>
+                        <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
+                    </div>
                 </div>
 
                 {/* STATS OVERVIEW */}
