@@ -268,18 +268,17 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
   function calculateStreak(): number {
     // Calculate streak based on the "Ignite" habit (ID 9999994) which is marked when Momentum Generator is completed
+    // Always add 1 to include today (the day the user is about to complete)
     const igniteHabit = habits.find(h => h.id === 9999994);
-    if (!igniteHabit) return 0;
+    if (!igniteHabit) return 1; // At minimum, show 1 for today
     
     let streak = 0;
     const today = new Date();
     const todayStr = formatDate(today, 'yyyy-MM-dd');
     
-    // Start from today if completed, otherwise start from yesterday
+    // Start from yesterday to count consecutive past days
     let checkDate = new Date(today);
-    if (igniteHabit.completed[todayStr] !== true) {
-      checkDate.setDate(checkDate.getDate() - 1);
-    }
+    checkDate.setDate(checkDate.getDate() - 1);
     
     while (true) {
       const dateStr = formatDate(checkDate, 'yyyy-MM-dd');
@@ -291,7 +290,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       }
     }
     
-    return streak;
+    // Add 1 for today (since user is completing it now)
+    return streak + 1;
   }
 
   // Initialize YouTube player when content step loads
