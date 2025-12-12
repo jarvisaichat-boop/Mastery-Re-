@@ -267,23 +267,33 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const content = selectedContent;
 
   function calculateStreak(): number {
-    if (habits.length === 0) return 0;
-    const sorted = [...habits].sort((a, b) => {
-      const aCompletions = Object.values(a.completed).filter(v => v === true).length;
-      const bCompletions = Object.values(b.completed).filter(v => v === true).length;
-      return bCompletions - aCompletions;
-    });
+    // Calculate streak based on the "Ignite" habit which is marked when Momentum Generator is completed
+    // Also check for habits with isIgniteHabit flag for robustness
+    const igniteHabit = habits.find(h => 
+      h.name.toLowerCase() === 'ignite' || 
+      h.name.toLowerCase().includes('ignite') ||
+      (h as any).isIgniteHabit === true
+    );
+    if (!igniteHabit) return 0;
     
     let streak = 0;
     const today = new Date();
+    const todayStr = formatDate(today, 'yyyy-MM-dd');
+    
+    // Start from today if completed, otherwise start from yesterday
     let checkDate = new Date(today);
+    if (igniteHabit.completed[todayStr] !== true) {
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
     
     while (true) {
       const dateStr = formatDate(checkDate, 'yyyy-MM-dd');
-      const hasCompletion = sorted.some(h => h.completed[dateStr] === true);
-      if (!hasCompletion) break;
-      streak++;
-      checkDate.setDate(checkDate.getDate() - 1);
+      if (igniteHabit.completed[dateStr] === true) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
     }
     
     return streak;
@@ -740,7 +750,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 {currentStreak}
               </div>
               <div className="text-3xl sm:text-5xl md:text-6xl font-bold text-yellow-400 mb-3 sm:mb-4 tracking-wider">
-                DAY STREAK!! 🔥
+                {currentStreak === 1 ? 'DAY' : 'DAYS'} STREAK!! 🔥
               </div>
               <div className="text-lg sm:text-xl md:text-2xl text-yellow-200/80 font-light tracking-wide">
                 The chain is unbroken
