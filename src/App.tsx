@@ -1406,7 +1406,7 @@ function App() {
                 todaysContent={todaysContent}
                 onAddContentLibrary={() => setShowContentLibraryManager(true)}
                 isCompletedToday={isMomentumCompletedToday}
-                isFirstActivationToday={momentumActivationCountToday === 0}
+                isFirstActivationToday={!isMomentumCompletedToday}
             />
 
             {/* Floating "Now GO!" Popup - Appears over dashboard after countdown */}
