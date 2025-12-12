@@ -18,7 +18,7 @@ interface MomentumGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
-  onShowFloatingGo: () => void;
+  onShowFloatingGo: (isFirstActivation: boolean) => void;
   habits: Habit[];
   goal: string;
   aspirations: string;
@@ -139,9 +139,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       countdownCompletedRef.current = true;
       // Close modal immediately, then show floating popup on dashboard
       onClose();
-      onShowFloatingGo();
+      onShowFloatingGo(isFirstActivationToday);
     }
-  }, [onComplete, onClose, onShowFloatingGo]);
+  }, [onComplete, onClose, onShowFloatingGo, isFirstActivationToday]);
   
   // Load YouTube iframe API
   useEffect(() => {

@@ -301,6 +301,7 @@ function App() {
     const [showContentLibraryManager, setShowContentLibraryManager] = useState(false);
     const [showDevMenu, setShowDevMenu] = useState(false);
     const [showFloatingGoPopup, setShowFloatingGoPopup] = useState(false);
+    const [floatingGoIsFirstActivation, setFloatingGoIsFirstActivation] = useState(true);
     const [contentLibrary, setContentLibrary] = useState<ContentLibraryItem[]>(() => loadContentLibrary());
     const [momentumLastCompleted, setMomentumLastCompleted] = useState<string | null>(() => {
         try {
@@ -1396,7 +1397,8 @@ function App() {
                 isOpen={showMomentumGenerator}
                 onClose={() => setShowMomentumGenerator(false)}
                 onComplete={handleMomentumComplete}
-                onShowFloatingGo={() => {
+                onShowFloatingGo={(isFirstActivation: boolean) => {
+                    setFloatingGoIsFirstActivation(isFirstActivation);
                     setShowMomentumGenerator(false);
                     setShowFloatingGoPopup(true);
                 }}
@@ -1426,9 +1428,11 @@ function App() {
                             <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{ textShadow: '0 0 60px rgba(251, 191, 36, 0.7)' }}>
                                 Now GO!
                             </h2>
-                            <p className="text-3xl text-yellow-400 font-light">
-                                Your first action awaits
-                            </p>
+                            {floatingGoIsFirstActivation && (
+                                <p className="text-3xl text-yellow-400 font-light">
+                                    Your first action awaits
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
