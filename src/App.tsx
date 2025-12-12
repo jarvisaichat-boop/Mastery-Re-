@@ -1064,7 +1064,7 @@ function App() {
                         </div>
                     )}
                     {/* Add New Habit Button */}
-                    <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700"><Plus className="w-6 h-6" /></button>
+                    <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700" style={{boxShadow: '0 0 0 2px rgba(251, 191, 36, 0.2)'}}><Plus className="w-6 h-6" /></button>
                 </div>
             </div>
             <div className="max-w-2xl mx-auto">
