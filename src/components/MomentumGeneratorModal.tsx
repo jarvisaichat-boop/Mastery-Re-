@@ -1240,8 +1240,9 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                   // First activation: flip to back of card for pledge hold
                   setPledgeCardFlipped(true);
                 } else {
-                  // Subsequent activations: skip flip, go directly to launch
-                  setCurrentStep('launch');
+                  // Subsequent activations: skip flip AND launch screen, go straight to countdown
+                  setCountdown(60);
+                  setCurrentStep('countdown');
                 }
               }
             }}
