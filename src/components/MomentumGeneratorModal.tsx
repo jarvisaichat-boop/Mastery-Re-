@@ -1305,6 +1305,17 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                       : 'bg-gray-600 cursor-not-allowed'
                   }`}
                   style={{ boxShadow: commitmentReady ? '0 0 30px rgba(251, 191, 36, 0.6)' : 'none' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (commitmentReady) {
+                      if (isFirstActivationToday) {
+                        setPledgeCardFlipped(true);
+                      } else {
+                        setCountdown(60);
+                        setCurrentStep('countdown');
+                      }
+                    }
+                  }}
                 />
               </div>
             </div>
