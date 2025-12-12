@@ -1414,28 +1414,26 @@ function App() {
             />
 
             {/* Bottom Navigation Bar - Dashboard (left), Momentum Generator (center), Chat (right) */}
-            <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-30 h-14">
-                <div className="max-w-2xl mx-auto px-4 h-full">
-                    <div className="flex justify-between items-end h-full pb-2">
-                        {/* Dashboard Button - Left */}
+            <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-30 h-10">
+                <div className="max-w-2xl mx-auto px-8 h-full">
+                    <div className="flex justify-between items-center h-full">
+                        {/* Dashboard Button - Left (icon only) */}
                         <button
                             onClick={() => setShowStatsView(true)}
-                            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${showStatsView ? 'text-yellow-400' : 'text-gray-400 hover:text-gray-300'}`}
+                            className={`p-2 rounded-lg transition-colors ${showStatsView ? 'text-yellow-400' : 'text-gray-400 hover:text-gray-300'}`}
                         >
                             <BarChart3 className="w-6 h-6" />
-                            <span className="text-xs">Dashboard</span>
                         </button>
 
                         {/* Spacer for Momentum Generator button */}
                         <div className="w-24"></div>
 
-                        {/* Chat Button - Right */}
+                        {/* Chat Button - Right (icon only) */}
                         <button
                             onClick={() => setShowChatCheckIn(true)}
-                            className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-purple-400 hover:text-purple-300 transition-colors"
+                            className="p-2 rounded-lg text-purple-400 hover:text-purple-300 transition-colors"
                         >
                             <Sparkles className="w-6 h-6" />
-                            <span className="text-xs">Chat</span>
                         </button>
                     </div>
                 </div>
