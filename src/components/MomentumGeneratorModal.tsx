@@ -166,8 +166,28 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     if (isOpen && !hasInitialized) {
       // Set starting step based on whether this is first activation today
       // Skip streak and content on subsequent activations
-      setCurrentStep(isFirstActivationToday ? 'streak' : 'vision');
+      const startingStep = isFirstActivationToday ? 'streak' : 'vision';
+      setCurrentStep(startingStep);
       setHasInitialized(true);
+      
+      // Generate random vision content if starting at vision step (for subsequent activations)
+      if (startingStep === 'vision' && !randomVisionContent) {
+        const randomWhys = [
+          "To prove to yourself that you're capable of anything you commit to",
+          "To build unshakeable discipline that transforms your entire life",
+          "To become the person your future self will thank you for being",
+          "To break free from limitation and step into your full potential"
+        ];
+        const randomRoutines = [
+          "Morning: Mindful movement, focused work, energized action",
+          "Ideal Day: Deep focus, intentional breaks, powerful completion",
+          "Daily Flow: Present in the moment, building unstoppable momentum",
+          "Your Rhythm: Wake with purpose, execute with precision, rest with gratitude",
+          "Perfect Day: Aligned actions, consistent progress, compound results"
+        ];
+        const newVision = `${randomWhys[Math.floor(Math.random() * randomWhys.length)]}\n\n${randomRoutines[Math.floor(Math.random() * randomRoutines.length)]}`;
+        setRandomVisionContent(newVision);
+      }
       
       if (todaysContent && !selectedContent) {
         // Use pre-selected today's content (already filtered <5 min by getTodayContent)
@@ -593,7 +613,12 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
     const steps: Step[] = ['streak', 'vision', 'content', 'goal-selection', 'habits', 'starter-action', 'pledge', 'launch'];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
-      const nextStep = steps[currentIndex + 1];
+      let nextStep = steps[currentIndex + 1];
+      
+      // Skip 'content' (video) step on subsequent activations
+      if (nextStep === 'content' && !isFirstActivationToday) {
+        nextStep = 'goal-selection';
+      }
       
       // Generate random vision content BEFORE rendering vision step to prevent card size glitch
       if (nextStep === 'vision' && !randomVisionContent) {
