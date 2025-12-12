@@ -239,7 +239,7 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
     const reflectionComplete = !!todayReflection || !showReflectionCard;
 
     return (
-        <div className="daily-checkin-modal fixed inset-0 bg-black z-50 flex items-center justify-center">
+        <div className="daily-checkin-modal fixed inset-0 bg-black z-50 flex items-center justify-center px-4 sm:px-6">
             <div className="bg-gray-900 shadow-2xl w-full h-full flex flex-col">
                 <div className="flex items-center justify-between p-6 border-b border-gray-700">
                     <div className="flex items-center gap-3">
