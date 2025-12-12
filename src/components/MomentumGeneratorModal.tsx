@@ -1242,7 +1242,8 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                 } else {
                   // Subsequent activations: skip flip AND launch screen, go straight to countdown
                   setLaunchCountdown(60);
-                  setCurrentStep('countdown');
+                  setLaunchActive(true);
+                  setCurrentStep('launch');
                 }
               }
             }}
@@ -1311,8 +1312,10 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
                       if (isFirstActivationToday) {
                         setPledgeCardFlipped(true);
                       } else {
+                        // Skip to launch and start countdown immediately
                         setLaunchCountdown(60);
-                        setCurrentStep('countdown');
+                        setLaunchActive(true);
+                        setCurrentStep('launch');
                       }
                     }
                   }}
