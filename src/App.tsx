@@ -1427,18 +1427,18 @@ function App() {
                             <BarChart3 className="w-6 h-6" />
                         </button>
 
-                        {/* Habits Button - Only shows when on Dashboard page */}
-                        {showStatsView && (
-                            <button
-                                onClick={() => setShowStatsView(false)}
-                                className="p-2 rounded-lg text-gray-400 hover:text-gray-300 transition-colors"
-                            >
-                                <List className="w-6 h-6" />
-                            </button>
-                        )}
-
-                        {/* Spacer for Momentum Generator button */}
-                        <div className="w-24"></div>
+                        {/* Middle spacer - grows to fill, centers any content */}
+                        <div className="flex-grow flex justify-center items-end">
+                            {/* Habits Button - Only shows when on Dashboard page */}
+                            {showStatsView && (
+                                <button
+                                    onClick={() => setShowStatsView(false)}
+                                    className="p-2 rounded-lg text-gray-400 hover:text-gray-300 transition-colors"
+                                >
+                                    <List className="w-6 h-6" />
+                                </button>
+                            )}
+                        </div>
 
                         {/* Chat Button - Right (icon only) */}
                         <button
