@@ -1145,7 +1145,14 @@ function App() {
                 {onboardingComplete && !showStatsView && (
                     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 group">
                         <button
-                            onClick={() => setShowMomentumConfirmation(true)}
+                            onClick={() => {
+                                // Skip confirmation popup on subsequent activations
+                                if (isMomentumCompletedToday) {
+                                    setShowMomentumGenerator(true);
+                                } else {
+                                    setShowMomentumConfirmation(true);
+                                }
+                            }}
                             className="relative w-48 h-24 sm:w-32 sm:h-16 md:w-36 md:h-[4.5rem] lg:w-40 lg:h-20 bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 rounded-t-full hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 transition-all duration-500 shadow-2xl flex flex-col items-center justify-center gap-1 font-bold text-black hover:scale-110 hover:-translate-y-1 animate-pulse"
                             style={{
                                 boxShadow: '0 -10px 40px rgba(251, 191, 36, 0.5), 0 -5px 20px rgba(251, 191, 36, 0.3)'
