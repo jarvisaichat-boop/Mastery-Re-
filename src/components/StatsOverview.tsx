@@ -11,9 +11,10 @@ interface StatsOverviewProps {
     goal: string;
     onGoalUpdate: (newGoal: string) => void;
     habits: Habit[];
+    onOpenVisionBoard?: () => void;
 }
 
-export default function StatsOverview({ dashboardData, onToggleRateMode, onToggleStreakMode, goal, onGoalUpdate, habits }: StatsOverviewProps) {
+export default function StatsOverview({ dashboardData, onToggleRateMode, onToggleStreakMode, goal, onGoalUpdate, habits, onOpenVisionBoard }: StatsOverviewProps) {
     const [isEditingGoal, setIsEditingGoal] = useState(false);
     const [editedGoal, setEditedGoal] = useState(goal);
 
@@ -98,16 +99,25 @@ export default function StatsOverview({ dashboardData, onToggleRateMode, onToggl
                         {!isEditingGoal ? (
                             <div className="flex items-start gap-3">
                                 <p className="text-2xl font-bold text-white flex-1">{goal || 'No goal set'}</p>
-                                <button
-                                    onClick={() => {
-                                        setEditedGoal(goal);
-                                        setIsEditingGoal(true);
-                                    }}
-                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                    title="Edit goal"
-                                >
-                                    <Edit2 className="w-5 h-5 text-gray-400" />
-                                </button>
+                                <div className="flex gap-1">
+                                    <button
+                                        onClick={onOpenVisionBoard}
+                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors text-yellow-400"
+                                        title="Open Vision Board"
+                                    >
+                                        <Zap className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setEditedGoal(goal);
+                                            setIsEditingGoal(true);
+                                        }}
+                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                        title="Edit goal text"
+                                    >
+                                        <Edit2 className="w-5 h-5 text-gray-400" />
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <div className="space-y-3">

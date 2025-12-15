@@ -254,6 +254,9 @@ function isEmergencyModeActive(): boolean {
     }
 }
 
+import { VisionBoardProvider } from './contexts/VisionBoardContext';
+import { VisionBoardDashboard } from './components/VisionBoard/VisionBoardDashboard';
+
 function App() {
     // TESTING: Auto-complete onboarding for screenshots and testing  
     // TODO: Remove this before production - this is for development testing only
@@ -944,8 +947,30 @@ function App() {
     // Determine if we should show App Tour overlay
     const shouldShowAppTour = (onboardingComplete && !appTourComplete) || previewAppTour;
 
+    const [showVisionBoard, setShowVisionBoard] = useState(false);
+
+    // Conditional rendering for Vision Board Dashboard
+    if (showVisionBoard) {
+        return (
+            <VisionBoardProvider>
+                <div className="relative min-h-screen bg-gray-900">
+                    <button
+                        onClick={() => setShowVisionBoard(false)}
+                        className="fixed top-4 right-4 z-50 p-2 bg-gray-800 rounded-full text-white hover:bg-gray-700 transition-colors"
+                    >
+                        <Shield size={24} />
+                    </button>
+                    <VisionBoardDashboard habits={habits} />
+                </div>
+            </VisionBoardProvider>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-[#1C1C1E] font-sans text-white p-4">
+        <VisionBoardProvider>
+            <div className="min-h-screen bg-gray-950 text-white font-sans selection:bg-yellow-500/30">
+                {/* ... existing JSX ... */}
+
             <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
                 {/* Developer Menu - Single button that expands */}
                 <div className="relative flex-1">
@@ -1107,6 +1132,7 @@ function App() {
                             goal={goal}
                             onGoalUpdate={setGoal}
                             habits={habits}
+                                onOpenVisionBoard={() => setShowVisionBoard(true)}
                         />
                     </div>
                 )}
@@ -1479,7 +1505,8 @@ function App() {
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </VisionBoardProvider>
     );
 }
 

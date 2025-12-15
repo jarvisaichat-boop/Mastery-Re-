@@ -5,6 +5,7 @@ import { useSwipeable } from 'react-swipeable';
 import { Habit, ContentLibraryItem } from '../types';
 import { formatDate } from '../utils';
 import { addToWatchHistory } from '../utils/videoRecommendation';
+import { VisionBoardCarousel } from './VisionBoard/VisionBoardCarousel';
 
 // YouTube Player TypeScript declaration
 declare global {
@@ -775,46 +776,38 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   }
 
   // Step 2: Vision Board
-  if (currentStep === 'vision') {
-    const displayVision = aspirations || randomVisionContent;
-    
+    if (currentStep === 'vision') {
     return (
-      <div className="w-full h-full flex items-center justify-center cursor-pointer overflow-y-auto" onClick={handleNextStep}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-          <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-4 sm:p-5 shadow-2xl"
-               style={{boxShadow: '0 0 60px rgba(251, 191, 36, 0.3), inset 0 2px 20px rgba(0, 0, 0, 0.5)'}}>
-            <div className="text-center">
-              {/* Vision Board Title - Inside the card */}
-              <div className="text-xl sm:text-2xl text-yellow-400/90 font-bold mb-4 uppercase tracking-wider">Vision Board</div>
-              
-              {/* Combined Box - Grander Vision on top, Goal below - Expanded to fill outer box */}
-              <div className="p-6 sm:p-8 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-2 border-yellow-400/30 rounded-2xl">
-                {/* Grander Vision - On top */}
-                <div className="mb-8 pb-6 border-b border-yellow-400/20">
-                  <div className="text-lg sm:text-xl text-yellow-300 font-black mb-3 sm:mb-4 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
-                    Your Grander Vision
-                  </div>
-                  <p className="text-xl sm:text-2xl text-yellow-50 leading-relaxed font-light whitespace-pre-line">
-                    {displayVision}
-                  </p>
-                </div>
-                
-                {/* Goal - Below */}
-                <div>
-                  <div className="text-lg sm:text-xl text-yellow-300 font-black mb-3 sm:mb-4 uppercase tracking-wide" style={{textShadow: '0 0 20px rgba(251, 191, 36, 0.5)'}}>
-                    Goal
-                  </div>
-                  <div className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight" style={{textShadow: '0 0 50px rgba(251, 191, 36, 0.4)'}}>
-                    {goal}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="w-full h-full bg-black">
+        <VisionBoardCarousel
+          habits={habits}
+          onComplete={handleNextStep}
+        />
+        {/* Invisible Overlay for Next Step (User swipes manually, but tap can also advance if desired, or we rely on swipe) */}
+        {/* For now, let's keep the manual swipe navigation in the carousel, but add a specialized "Done" button or just let them swipe to end? 
+              The user requested "Manual navigation (Arrows or Swipe). NO Auto-Play." 
+              Typical carousel flow. Let's add a "Continue" button overlay at the bottom if needed, or just let them swipe. 
+              Actually, the Momentum flow usually requires an explicit "Next". 
+              Let's Wrap the Carousel and add a "Continue" button at the bottom floating if they are on the last slide?
+              Or just a global "Continue" button?
+              The request said "Swipe/Click Left & Right".
+              Let's let the Carousel handle internal nav. 
+              How do we go to Next Step ('content')?
+              Maybe we add a visible "Continue" button that is always there?
+              Or maybe the Carousel has a final slide action?
+              Let's add a floating "Next" button in the modal itself.
+          */}
+        <button
+          onClick={handleNextStep}
+          className="absolute bottom-6 right-6 z-50 flex items-center gap-2 px-6 py-3 bg-yellow-500 text-black font-bold rounded-full shadow-lg hover:bg-yellow-400 transition-all"
+        >
+          CONTINUE <ChevronRight size={20} />
+        </button>
       </div>
-    );
-  }
+      );
+    }
+
+
 
   // Step 3: Motivational Content with Full-Screen Intro then YouTube Player
   if (currentStep === 'content') {
