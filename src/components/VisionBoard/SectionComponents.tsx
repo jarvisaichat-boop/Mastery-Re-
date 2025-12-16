@@ -27,10 +27,10 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
           />
         </div>
       ) : (
-        <div className="flex items-baseline gap-3">
-          <span className="text-lg text-yellow-500 uppercase tracking-[0.15em] font-medium min-w-[90px]">{label}</span>
-          <span className="text-lg text-white font-light">{value || <span className="text-gray-600 italic">Not set</span>}</span>
-        </div>
+        <p className="text-lg leading-relaxed">
+          <span className="text-yellow-500 uppercase tracking-[0.15em] font-medium">{label}</span>{' '}
+          <span className="text-white font-light">{value || <span className="text-gray-600 italic">Not set</span>}</span>
+        </p>
       )}
     </div>
   );
@@ -106,16 +106,14 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
               </button>
             </div>
           ) : (
-            <ul className="space-y-4">
+            <div className="space-y-4">
               {coreValues.values.filter(v => v.title).map((val, idx) => (
-                <li key={idx}>
-                  <div className="text-yellow-500 font-medium">{val.title}</div>
-                  {val.description && (
-                    <div className="text-gray-300 text-sm font-light mt-0.5">{val.description}</div>
-                  )}
-                </li>
+                <p key={idx} className="text-lg leading-relaxed">
+                  <span className="text-yellow-500 font-medium">{val.title}</span>{' '}
+                  <span className="text-white font-light">{val.description}</span>
+                </p>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </div>
