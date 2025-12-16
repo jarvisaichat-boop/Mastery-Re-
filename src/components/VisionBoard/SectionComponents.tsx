@@ -109,7 +109,7 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
             <div className="space-y-4">
               {coreValues.values.filter(v => v.title).map((val, idx) => (
                 <p key={idx} className="text-lg leading-relaxed">
-                  <span className="text-yellow-500 font-medium">{val.title}</span>{' '}
+                  <span className="text-yellow-500 font-medium uppercase text-sm tracking-wide inline-block max-w-[50%] truncate align-bottom">{val.title}</span>{' '}
                   <span className="text-white font-light">{val.description}</span>
                 </p>
               ))}
