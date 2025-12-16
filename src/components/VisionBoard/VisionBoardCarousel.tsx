@@ -47,9 +47,9 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
       </div>
 
       {/* Main Card Container */}
-      <div className="flex-1 px-4 pb-4 overflow-hidden">
+      <div className="flex-1 px-6 sm:px-12 py-4 overflow-hidden flex items-center justify-center">
         <div 
-          className="h-full rounded-2xl overflow-hidden relative"
+          className="w-full max-w-md h-auto max-h-full rounded-2xl overflow-hidden relative"
           style={{
             background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.95), rgba(15, 15, 20, 0.98))',
             boxShadow: '0 0 40px rgba(234, 179, 8, 0.15), 0 0 80px rgba(234, 179, 8, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
@@ -75,21 +75,21 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
           />
 
           {/* Slides Container */}
-          <div className="h-full relative overflow-hidden">
+          <div className="relative overflow-hidden">
             <div
-              className="absolute inset-0 flex transition-transform duration-300 ease-out"
+              className="flex transition-transform duration-300 ease-out"
               style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
               {/* Slide 1: Core Values */}
-              <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+              <div className="w-full flex-shrink-0 overflow-y-auto no-scrollbar max-h-[60vh]">
                 <CoreValuesSection mode="view" />
               </div>
               {/* Slide 2: Path */}
-              <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+              <div className="w-full flex-shrink-0 overflow-y-auto no-scrollbar max-h-[60vh]">
                 <PathSection mode="view" habits={habits} />
               </div>
               {/* Slide 3: Schedule */}
-              <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+              <div className="w-full flex-shrink-0 overflow-y-auto no-scrollbar max-h-[60vh]">
                 <ScheduleSection mode="view" habits={habits} schedule={schedule} updateSchedule={updateSchedule} />
               </div>
             </div>
