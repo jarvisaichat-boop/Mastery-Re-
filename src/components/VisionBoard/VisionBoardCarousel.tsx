@@ -37,7 +37,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
       {...handlers}
     >
       {/* Header */}
-      <div className="flex-shrink-0 pt-6 pb-4 text-center">
+      <div className="flex-shrink-0 pt-4 pb-3 text-center">
         <h1 
           className="text-sm font-bold text-yellow-500 tracking-[0.3em] uppercase"
           style={{ textShadow: '0 0 20px rgba(234, 179, 8, 0.4)' }}
@@ -46,87 +46,96 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
         </h1>
       </div>
 
-      {/* Main Card Container */}
-      <div className="flex-1 px-6 sm:px-12 py-4 overflow-hidden flex items-center justify-center">
-        <div 
-          className="w-full max-w-md h-auto max-h-full rounded-2xl overflow-hidden relative"
-          style={{
-            background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.95), rgba(15, 15, 20, 0.98))',
-            boxShadow: '0 0 40px rgba(234, 179, 8, 0.15), 0 0 80px rgba(234, 179, 8, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(234, 179, 8, 0.3)'
-          }}
-          onClick={(e) => {
-            const width = e.currentTarget.offsetWidth;
-            const x = e.clientX - e.currentTarget.getBoundingClientRect().left;
-            if (x > width * 0.7) {
-              handleNext();
-            } else if (x < width * 0.3) {
-              handlePrev();
-            }
-          }}
-        >
-          {/* Golden glow accent at top */}
-          <div 
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 rounded-b-full"
-            style={{
-              background: 'linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.6), transparent)',
-              boxShadow: '0 0 20px rgba(234, 179, 8, 0.4)'
-            }}
-          />
+      {/* Main Content Area with Card */}
+      <div className="flex-1 flex items-center justify-center px-4 pb-2 min-h-0">
+        <div className="relative flex items-center gap-2 w-full max-w-lg">
+          {/* Left Arrow - Outside Card */}
+          <button
+            onClick={handlePrev}
+            className={`flex-shrink-0 p-2 rounded-full transition-all ${
+              currentIndex === 0 
+                ? 'opacity-0 pointer-events-none' 
+                : 'opacity-50 hover:opacity-100 text-gray-400 hover:text-white'
+            }`}
+          >
+            <ChevronLeft size={24} />
+          </button>
 
-          {/* Slides Container */}
-          <div className="relative overflow-hidden">
-            <div
-              className="flex transition-transform duration-300 ease-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {/* Slide 1: Core Values */}
-              <div className="w-full flex-shrink-0 overflow-y-auto no-scrollbar max-h-[60vh]">
-                <CoreValuesSection mode="view" />
-              </div>
-              {/* Slide 2: Path */}
-              <div className="w-full flex-shrink-0 overflow-y-auto no-scrollbar max-h-[60vh]">
-                <PathSection mode="view" habits={habits} />
-              </div>
-              {/* Slide 3: Schedule */}
-              <div className="w-full flex-shrink-0 overflow-y-auto no-scrollbar max-h-[60vh]">
-                <ScheduleSection mode="view" habits={habits} schedule={schedule} updateSchedule={updateSchedule} />
+          {/* Card Container */}
+          <div 
+            className="flex-1 rounded-2xl overflow-hidden relative"
+            style={{
+              background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.95), rgba(15, 15, 20, 0.98))',
+              boxShadow: '0 0 40px rgba(234, 179, 8, 0.12), 0 0 80px rgba(234, 179, 8, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(234, 179, 8, 0.25)',
+              maxHeight: 'calc(100vh - 180px)',
+              minHeight: '420px'
+            }}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const width = rect.width;
+              if (x > width * 0.7) handleNext();
+              else if (x < width * 0.3) handlePrev();
+            }}
+          >
+            {/* Golden glow accent at top */}
+            <div 
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-0.5 rounded-b-full z-10"
+              style={{
+                background: 'linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.7), transparent)',
+                boxShadow: '0 0 15px rgba(234, 179, 8, 0.5)'
+              }}
+            />
+
+            {/* Slides Container */}
+            <div className="h-full overflow-hidden">
+              <div
+                className="h-full flex transition-transform duration-300 ease-out"
+                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+              >
+                {/* Slide 1: Core Values */}
+                <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+                  <CoreValuesSection mode="view" />
+                </div>
+                {/* Slide 2: Path */}
+                <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+                  <PathSection mode="view" habits={habits} />
+                </div>
+                {/* Slide 3: Schedule */}
+                <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+                  <ScheduleSection mode="view" habits={habits} schedule={schedule} updateSchedule={updateSchedule} />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Navigation Arrows inside card */}
+          {/* Right Arrow - Outside Card */}
           <button
-            onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-            className={`absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 transition-all ${
-              currentIndex === 0 ? 'opacity-0 pointer-events-none' : 'opacity-60 hover:opacity-100 hover:border-yellow-500/30'
+            onClick={handleNext}
+            className={`flex-shrink-0 p-2 rounded-full transition-all ${
+              currentIndex === 2 
+                ? 'opacity-0 pointer-events-none' 
+                : 'opacity-50 hover:opacity-100 text-gray-400 hover:text-white'
             }`}
           >
-            <ChevronLeft size={20} className="text-white" />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); handleNext(); }}
-            className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 transition-all ${
-              currentIndex === 2 ? 'opacity-0 pointer-events-none' : 'opacity-60 hover:opacity-100 hover:border-yellow-500/30'
-            }`}
-          >
-            <ChevronRight size={20} className="text-white" />
+            <ChevronRight size={24} />
           </button>
         </div>
       </div>
 
       {/* Footer Navigation Dots */}
-      <div className="flex-shrink-0 py-4 flex justify-center items-center gap-3">
+      <div className="flex-shrink-0 py-3 flex justify-center items-center gap-2">
         {[0, 1, 2].map(idx => (
           <button
             key={idx}
             onClick={() => setCurrentIndex(idx)}
             className={`transition-all duration-300 rounded-full ${
               currentIndex === idx 
-                ? 'w-8 h-2 bg-yellow-500' 
-                : 'w-2 h-2 bg-gray-600 hover:bg-gray-500'
+                ? 'w-6 h-1.5 bg-yellow-500' 
+                : 'w-1.5 h-1.5 bg-gray-600 hover:bg-gray-500'
             }`}
-            style={currentIndex === idx ? { boxShadow: '0 0 12px rgba(234, 179, 8, 0.6)' } : {}}
+            style={currentIndex === idx ? { boxShadow: '0 0 10px rgba(234, 179, 8, 0.6)' } : {}}
           />
         ))}
       </div>
