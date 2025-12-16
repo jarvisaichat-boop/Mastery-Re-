@@ -47,12 +47,12 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
       </div>
 
       {/* Main Content Area with Card */}
-      <div className="flex-1 flex items-center justify-center px-4 pb-2 min-h-0">
-        <div className="relative flex items-center gap-2 w-full max-w-lg">
-          {/* Left Arrow - Outside Card */}
+      <div className="flex-1 flex items-center justify-center px-2 lg:px-4 pb-2 min-h-0">
+        <div className="relative flex items-center gap-0 lg:gap-2 w-full lg:max-w-lg">
+          {/* Left Arrow - Outside Card (Desktop only) */}
           <button
             onClick={handlePrev}
-            className={`flex-shrink-0 p-2 rounded-full transition-all ${
+            className={`hidden lg:flex flex-shrink-0 p-2 rounded-full transition-all ${
               currentIndex === 0 
                 ? 'opacity-0 pointer-events-none' 
                 : 'opacity-50 hover:opacity-100 text-gray-400 hover:text-white'
@@ -88,6 +88,28 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
               }}
             />
 
+            {/* Mobile Navigation Arrows - Inside Card */}
+            <button
+              onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+              className={`lg:hidden absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/30 backdrop-blur-sm transition-all ${
+                currentIndex === 0 
+                  ? 'opacity-0 pointer-events-none' 
+                  : 'opacity-60 active:opacity-100 text-white'
+              }`}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleNext(); }}
+              className={`lg:hidden absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/30 backdrop-blur-sm transition-all ${
+                currentIndex === 2 
+                  ? 'opacity-0 pointer-events-none' 
+                  : 'opacity-60 active:opacity-100 text-white'
+              }`}
+            >
+              <ChevronRight size={20} />
+            </button>
+
             {/* Slides Container */}
             <div className="h-full overflow-hidden">
               <div
@@ -110,10 +132,10 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
             </div>
           </div>
 
-          {/* Right Arrow - Outside Card */}
+          {/* Right Arrow - Outside Card (Desktop only) */}
           <button
             onClick={handleNext}
-            className={`flex-shrink-0 p-2 rounded-full transition-all ${
+            className={`hidden lg:flex flex-shrink-0 p-2 rounded-full transition-all ${
               currentIndex === 2 
                 ? 'opacity-0 pointer-events-none' 
                 : 'opacity-50 hover:opacity-100 text-gray-400 hover:text-white'
