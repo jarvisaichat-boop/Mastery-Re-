@@ -2,11 +2,11 @@ import React from 'react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { Habit } from '../../types';
 import { DailySchedule } from '../../types/visionBoard';
-import { ChevronRight, Plus, X } from 'lucide-react';
+import { Plus, X, Compass, Target, Clock } from 'lucide-react';
 
 interface SectionProps {
   mode: 'edit' | 'view';
-  habits?: Habit[]; // Only needed for PathSection
+  habits?: Habit[];
 }
 
 // --- Section A: Core Values ---
@@ -15,41 +15,46 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
   const { coreValues } = data;
 
   const InputOrText = ({ label, value, field }: { label: string, value: string, field: keyof typeof coreValues }) => (
-    <div className="mb-6">
-      <div className="text-xs text-gray-500 uppercase tracking-widest mb-1 font-semibold">{label}</div>
+    <div className="mb-5">
+      <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-1 font-semibold">{label}</div>
       {mode === 'edit' ? (
         <input
           type="text"
           value={value}
           onChange={(e) => updateCoreValues({ [field]: e.target.value })}
-          className="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all font-light"
+          className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-yellow-500/30 focus:border-yellow-500/40 transition-all"
         />
       ) : (
-        <div className="text-xl sm:text-2xl text-white font-light">{value}</div>
+        <div className="text-lg sm:text-xl text-white font-light leading-relaxed">{value || <span className="text-gray-600 italic">Not set</span>}</div>
       )}
     </div>
   );
 
   return (
-    <div className="h-full overflow-y-auto p-6 sm:p-8 no-scrollbar">
-      <div className="text-center mb-10">
-        <h2
-          className="text-3xl font-black text-yellow-500 mb-2 tracking-[0.2em] uppercase"
+    <div className="h-full p-6 sm:p-8">
+      {/* Section Header */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-500/10 mb-3">
+          <Compass className="w-6 h-6 text-yellow-500" />
+        </div>
+        <h2 
+          className="text-xl font-bold text-yellow-500 tracking-[0.15em] uppercase"
           style={{ textShadow: '0 0 20px rgba(234, 179, 8, 0.3)' }}
         >
           CORE VALUES
         </h2>
-        <div className="w-16 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent mx-auto rounded-full opacity-50"></div>
+        <p className="text-gray-500 text-xs mt-1">Your guiding principles</p>
       </div>
 
-      <div className="max-w-md mx-auto">
+      {/* Content */}
+      <div className="max-w-sm mx-auto space-y-1">
         <InputOrText label="PRIORITY" value={coreValues.priority} field="priority" />
         <InputOrText label="WHY" value={coreValues.why} field="why" />
         <InputOrText label="PURPOSE" value={coreValues.purpose} field="purpose" />
         <InputOrText label="MOTTO" value={coreValues.motto} field="motto" />
 
-        <div className="mb-6">
-          <div className="text-xs text-gray-500 uppercase tracking-widest mb-2 font-semibold">PERSONAL VALUES</div>
+        <div className="pt-4">
+          <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-3 font-semibold">PERSONAL VALUES</div>
           {mode === 'edit' ? (
             <div className="space-y-2">
               {coreValues.values.map((val, idx) => (
@@ -62,7 +67,7 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
                       newValues[idx] = e.target.value;
                       updateCoreValues({ values: newValues });
                     }}
-                    className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg p-2 text-white text-sm"
+                    className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
                   />
                   <button
                     onClick={() => {
@@ -83,11 +88,14 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
               </button>
             </div>
           ) : (
-            <ul className="space-y-4">
-              {coreValues.values.map((val, idx) => (
-                <li key={idx} className="flex items-center gap-4 group">
-                  <div className="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)] group-hover:scale-125 transition-transform" />
-                  <span className="text-xl text-gray-100 font-normal tracking-wide">{val}</span>
+            <ul className="space-y-3">
+              {coreValues.values.filter(v => v).map((val, idx) => (
+                <li key={idx} className="flex items-center gap-3">
+                  <div 
+                    className="w-1.5 h-1.5 rounded-full bg-yellow-400"
+                    style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
+                  />
+                  <span className="text-gray-200 font-light">{val}</span>
                 </li>
               ))}
             </ul>
@@ -106,25 +114,30 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
   const lifeGoalHabits = habits.filter(h => h.type === 'Life Goal Habit');
 
   return (
-    <div className="h-full overflow-y-auto p-6 sm:p-8 no-scrollbar">
-      <div className="text-center mb-10">
-        <h2
-          className="text-3xl font-black text-yellow-500 mb-2 tracking-[0.2em] uppercase"
+    <div className="h-full p-6 sm:p-8">
+      {/* Section Header */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-500/10 mb-3">
+          <Target className="w-6 h-6 text-yellow-500" />
+        </div>
+        <h2 
+          className="text-xl font-bold text-yellow-500 tracking-[0.15em] uppercase"
           style={{ textShadow: '0 0 20px rgba(234, 179, 8, 0.3)' }}
         >
           PATH
         </h2>
-        <div className="w-16 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent mx-auto rounded-full opacity-50"></div>
+        <p className="text-gray-500 text-xs mt-1">Your destination & journey</p>
       </div>
 
-      <div className="max-w-md mx-auto space-y-10">
+      {/* Content */}
+      <div className="max-w-sm mx-auto space-y-6">
         {/* Grand Vision */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 shadow-lg">
-          <div className="text-xs text-yellow-500/80 uppercase tracking-[0.2em] mb-4 font-bold">GRAND VISION</div>
+        <div className="bg-black/20 rounded-xl p-5 border border-white/5">
+          <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-3 font-semibold">GRAND VISION</div>
           {mode === 'edit' ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Feeling...</label>
+                <label className="text-[10px] text-gray-500 mb-1 block">Feeling...</label>
                 <input
                   type="text"
                   value={path.grandVision.feel}
@@ -134,7 +147,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">While...</label>
+                <label className="text-[10px] text-gray-500 mb-1 block">While...</label>
                 <input
                   type="text"
                   value={path.grandVision.how}
@@ -144,7 +157,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Giving me...</label>
+                <label className="text-[10px] text-gray-500 mb-1 block">Giving me...</label>
                 <input
                   type="text"
                   value={path.grandVision.what}
@@ -153,35 +166,34 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                   placeholder="e.g. Freedom and Growth"
                 />
               </div>
-              <div className="text-xs text-gray-500 italic mt-2">
-                Preview: "Feeling {path.grandVision.feel} while {path.grandVision.how} giving me {path.grandVision.what}."
-              </div>
             </div>
           ) : (
-            <div className="text-2xl sm:text-3xl text-white font-light leading-relaxed drop-shadow-md">
-              "Feeling <span className="text-yellow-400 font-bold" style={{ textShadow: '0 0 15px rgba(250,204,21,0.3)' }}>{path.grandVision.feel}</span> while <span className="text-yellow-400 font-bold" style={{ textShadow: '0 0 15px rgba(250,204,21,0.3)' }}>{path.grandVision.how}</span> giving me <span className="text-yellow-400 font-bold" style={{ textShadow: '0 0 15px rgba(250,204,21,0.3)' }}>{path.grandVision.what}</span>."
+            <div className="text-base text-gray-100 leading-relaxed">
+              "Feeling <span className="text-yellow-400 font-medium">{path.grandVision.feel || '...'}</span> while{' '}
+              <span className="text-yellow-400 font-medium">{path.grandVision.how || '...'}</span> giving me{' '}
+              <span className="text-yellow-400 font-medium">{path.grandVision.what || '...'}</span>."
             </div>
           )}
         </div>
 
         {/* Project */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 shadow-lg">
-          <div className="text-xs text-yellow-500/80 uppercase tracking-[0.2em] mb-4 font-bold">PROJECT</div>
+        <div>
+          <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-2 font-semibold">PROJECT</div>
           {mode === 'edit' ? (
             <input
               type="text"
               value={path.currentProject}
               onChange={(e) => updatePath({ currentProject: e.target.value })}
-              className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-white focus:border-yellow-500/50 transition-colors"
+              className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-yellow-500/50 transition-colors"
             />
           ) : (
-            <div className="text-xl text-white font-light tracking-wide">{path.currentProject}</div>
+            <div className="text-lg text-white font-light">{path.currentProject || <span className="text-gray-600 italic">Not set</span>}</div>
           )}
         </div>
 
         {/* Goals */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 shadow-lg">
-          <div className="text-xs text-yellow-500/80 uppercase tracking-[0.2em] mb-4 font-bold">GOALS</div>
+        <div>
+          <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-3 font-semibold">GOALS</div>
           {mode === 'edit' ? (
             <div className="space-y-2">
               {path.quarterlyGoals.map((g, idx) => (
@@ -193,7 +205,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                       newGoals[idx] = e.target.value;
                       updatePath({ quarterlyGoals: newGoals });
                     }}
-                    className="flex-1 bg-black/40 border border-white/10 rounded-lg p-2 text-white text-sm"
+                    className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
                   />
                   <button onClick={() => {
                     const newGoals = path.quarterlyGoals.filter((_, i) => i !== idx);
@@ -206,28 +218,34 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
               </button>
             </div>
           ) : (
-            <ul className="space-y-4">
-              {path.quarterlyGoals.map((g, idx) => (
+            <ul className="space-y-2">
+              {path.quarterlyGoals.filter(g => g).map((g, idx) => (
                 <li key={idx} className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]" />
-                  <span className="text-lg text-gray-200 font-light tracking-wide">{g}</span>
+                  <div 
+                    className="w-1.5 h-1.5 rounded-full bg-blue-400"
+                    style={{ boxShadow: '0 0 8px rgba(96, 165, 250, 0.6)' }}
+                  />
+                  <span className="text-gray-200 font-light">{g}</span>
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        {/* Habits (Standards) */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 shadow-lg">
-          <div className="text-xs text-yellow-500/80 uppercase tracking-[0.2em] mb-4 font-bold">HABITS</div>
-          <ul className="space-y-4">
+        {/* Habits */}
+        <div>
+          <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-3 font-semibold">HABITS</div>
+          <ul className="space-y-2">
             {lifeGoalHabits.length > 0 ? lifeGoalHabits.map((h) => (
               <li key={h.id} className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
-                <span className="text-lg text-gray-200 font-light tracking-wide">{h.name}</span>
+                <div 
+                  className="w-1.5 h-1.5 rounded-full bg-green-400"
+                  style={{ boxShadow: '0 0 8px rgba(74, 222, 128, 0.6)' }}
+                />
+                <span className="text-gray-200 font-light">{h.name}</span>
               </li>
             )) : (
-              <li className="text-gray-500 italic text-sm">No Life Goal Habits set in Tracker.</li>
+              <li className="text-gray-600 italic text-sm">No Life Goal Habits set</li>
             )}
           </ul>
         </div>
@@ -240,9 +258,20 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
 export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { schedule: DailySchedule; updateSchedule: (updates: Partial<DailySchedule>) => void; mode: 'view' | 'edit'; habits: Habit[] }) => {
   const lifeGoalHabits = habits.filter(h => h.type === 'Life Goal Habit');
 
-  const RoutineList = ({ title, items, field }: { title: string, items: string[], field: keyof DailySchedule }) => (
-    <div className="mb-8">
-      <div className="text-xs text-gray-500 uppercase tracking-widest mb-3 font-semibold">{title}</div>
+  const TimeBlock = ({ time, label, color }: { time: string, label: string, color: string }) => (
+    <div className="flex items-center gap-3 py-2">
+      <div className="text-[10px] text-gray-500 font-mono w-12">{time}</div>
+      <div 
+        className={`w-2 h-2 rounded-full ${color}`}
+        style={{ boxShadow: `0 0 8px currentColor` }}
+      />
+      <div className="text-sm text-gray-200 font-light">{label}</div>
+    </div>
+  );
+
+  const RoutineList = ({ title, items, field, color }: { title: string, items: string[], field: keyof DailySchedule, color: string }) => (
+    <div className="mb-5">
+      <div className={`text-[10px] uppercase tracking-[0.2em] mb-2 font-semibold ${color}`}>{title}</div>
       {mode === 'edit' ? (
         <div className="space-y-2">
           {items.map((item, idx) => (
@@ -255,7 +284,7 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
                   newItems[idx] = e.target.value;
                   updateSchedule({ [field]: newItems });
                 }}
-                className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg p-2 text-white text-sm"
+                className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
               />
               <button onClick={() => {
                 if (!Array.isArray(schedule[field])) return;
@@ -272,11 +301,11 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
           </button>
         </div>
       ) : (
-        <ul className="space-y-3">
-          {items.map((item, idx) => (
-            <li key={idx} className="flex items-start gap-3">
-              <span className="text-gray-400 mt-0.5">•</span>
-              <span className="text-gray-200 font-light">{item}</span>
+        <ul className="space-y-1.5">
+          {items.filter(i => i).map((item, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-sm text-gray-300 font-light">
+              <span className="text-gray-600">•</span>
+              <span>{item}</span>
             </li>
           ))}
         </ul>
@@ -285,93 +314,71 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
   );
 
   return (
-    <div className="h-full overflow-y-auto p-6 sm:p-8 no-scrollbar">
-      <div className="text-center mb-10">
-        <h2
-          className="text-3xl font-black text-yellow-500 mb-2 tracking-[0.2em] uppercase"
+    <div className="h-full p-6 sm:p-8">
+      {/* Section Header */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-500/10 mb-3">
+          <Clock className="w-6 h-6 text-yellow-500" />
+        </div>
+        <h2 
+          className="text-xl font-bold text-yellow-500 tracking-[0.15em] uppercase"
           style={{ textShadow: '0 0 20px rgba(234, 179, 8, 0.3)' }}
         >
           SCHEDULE
         </h2>
-        <div className="w-16 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent mx-auto rounded-full opacity-50"></div>
+        <p className="text-gray-500 text-xs mt-1">Your daily rhythm</p>
       </div>
 
-      {/* Timeline Visual - Block Calendar Style */}
-      <div className="relative border-l border-white/10 ml-4 pb-10 space-y-6">
-        {/* Helper to render a block */}
-        {renderTimeBlock("06:00", "Wake Up", "bg-gray-800", "h-12")}
-        {renderTimeBlock("07:00", "GM ROUTINE", "bg-yellow-500/20 border-l-2 border-yellow-500", "h-24", [
-          "Morning Acts (Pee, Weight, Sunlight)",
-          "Mental (Headspace, Gratitude)",
-          "Physical (Protein, Abs, Chest)"
-        ])}
-        {renderTimeBlock("10:00", "GD ROUTINE", "bg-blue-500/20 border-l-2 border-blue-500", "h-32", [
-          "Work on my goals",
-          "Code for 1 hour (Make sure this is included)"
-        ])}
-        {renderTimeBlock("17:00", "No Entertainment", "bg-red-500/20 border-l-2 border-red-500", "h-16", [
-          "No cheap dopamine until 5 PM"
-        ])}
-        {renderTimeBlock("21:00", "Work Done", "bg-green-500/20 border-l-2 border-green-500", "h-16", [
-          "Wind down starts"
-        ])}
-        {renderTimeBlock("23:00", "Sleep", "bg-purple-500/20 border-l-2 border-purple-500", "h-12")}
+      {/* Content */}
+      <div className="max-w-sm mx-auto">
+        {/* Timeline */}
+        <div className="bg-black/20 rounded-xl p-4 border border-white/5 mb-6">
+          <TimeBlock time="06:00" label="Wake Up" color="bg-gray-400" />
+          <TimeBlock time="07:00" label="GM Routine" color="bg-yellow-400" />
+          <TimeBlock time="10:00" label="Deep Work" color="bg-blue-400" />
+          <TimeBlock time="17:00" label="No Cheap Dopamine" color="bg-red-400" />
+          <TimeBlock time="21:00" label="Wind Down" color="bg-green-400" />
+          <TimeBlock time="23:00" label="Sleep" color="bg-purple-400" />
+        </div>
 
-        {/* Integrated Habits Section in Schedule */}
-        <div className="mt-8 pt-8 border-t border-white/10">
-          <h4 className="text-xs font-bold text-gray-500 tracking-widest uppercase mb-4">DAILY HABIT STACK</h4>
-          <div className="space-y-3">
+        {/* Routines */}
+        <RoutineList title="GM ROUTINE" items={schedule.gmRoutine} field="gmRoutine" color="text-yellow-500/70" />
+        <RoutineList title="GD ROUTINE" items={schedule.gdRoutine} field="gdRoutine" color="text-blue-400/70" />
+        <RoutineList title="GN ROUTINE" items={schedule.gnRoutine} field="gnRoutine" color="text-purple-400/70" />
+
+        {/* Daily Habits */}
+        <div className="mt-6 pt-4 border-t border-white/5">
+          <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-3 font-semibold">DAILY HABIT STACK</div>
+          <div className="space-y-2">
             {lifeGoalHabits.length > 0 ? lifeGoalHabits.map(h => (
-              <div key={h.id} className="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
-                <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
-                <span className="text-sm text-gray-200">{h.name}</span>
+              <div key={h.id} className="flex items-center gap-3 bg-black/20 p-3 rounded-lg border border-white/5">
+                <div 
+                  className="w-1.5 h-1.5 rounded-full bg-green-400"
+                  style={{ boxShadow: '0 0 8px rgba(74, 222, 128, 0.6)' }}
+                />
+                <span className="text-sm text-gray-200 font-light">{h.name}</span>
               </div>
             )) : (
-              <div className="text-gray-500 text-sm italic">No habits linked yet.</div>
+              <div className="text-gray-600 text-sm italic">No habits linked yet</div>
             )}
           </div>
         </div>
-      </div>
 
-      <div className="max-w-md mx-auto">
-        <RoutineList title="GM ROUTINE" items={schedule.gmRoutine} field="gmRoutine" />
-        <RoutineList title="GD ROUTINE" items={schedule.gdRoutine} field="gdRoutine" />
-        <RoutineList title="GN ROUTINE" items={schedule.gnRoutine} field="gnRoutine" />
-
-        <div className="mt-12 bg-gray-800/30 border border-gray-700 rounded-xl p-5">
-          <div className="text-xs text-gray-500 uppercase tracking-widest mb-3 font-semibold">THE BUSY DAY PLAN</div>
-          {mode === 'edit' ? (
-            <textarea
-              value={schedule.busyDayPlan}
-              onChange={(e) => updateSchedule({ busyDayPlan: e.target.value })}
-              className="w-full bg-gray-900 border border-gray-700 rounded p-3 text-white text-sm h-24"
-            />
-          ) : (
-            <div className="text-white font-light leading-relaxed italic opacity-80">
-              "{schedule.busyDayPlan}"
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Helper function for Time Blocks
-function renderTimeBlock(time: string, title: string, colorClass: string, heightClass: string, items?: string[]) {
-  return (
-    <div className={`relative pl-8 ${heightClass}`}>
-      <div className="absolute -left-[21px] top-0 bg-black border border-white/20 text-[10px] text-gray-400 px-1 py-0.5 rounded font-mono">
-        {time}
-      </div>
-      <div className={`w-full h-full rounded-lg p-3 ${colorClass} overflow-hidden hover:overflow-visible group relative z-10 transition-all hover:z-20`}>
-        <div className="font-bold text-white text-sm mb-1">{title}</div>
-        {items && (
-          <ul className="space-y-1">
-            {items.map((item, idx) => (
-              <li key={idx} className="text-xs text-white/70 truncate group-hover:whitespace-normal">• {item}</li>
-            ))}
-          </ul>
+        {/* Busy Day Plan */}
+        {(mode === 'edit' || schedule.busyDayPlan) && (
+          <div className="mt-6 bg-black/20 rounded-xl p-4 border border-white/5">
+            <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] mb-2 font-semibold">BUSY DAY PLAN</div>
+            {mode === 'edit' ? (
+              <textarea
+                value={schedule.busyDayPlan}
+                onChange={(e) => updateSchedule({ busyDayPlan: e.target.value })}
+                placeholder="What's your fallback plan for busy days?"
+                className="w-full bg-black/30 border border-white/10 rounded p-3 text-white text-sm h-24 placeholder-gray-600"
+              />
+            ) : (
+              <div className="text-gray-300 font-light italic text-sm">"{schedule.busyDayPlan}"</div>
+            )}
+          </div>
         )}
       </div>
     </div>
