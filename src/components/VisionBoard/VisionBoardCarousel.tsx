@@ -37,10 +37,10 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
       {...handlers}
     >
       {/* Header */}
-      <div className="flex-shrink-0 pt-4 pb-3 text-center">
+      <div className="flex-shrink-0 pt-6 pb-4 text-center">
         <h1 
-          className="text-sm font-bold text-yellow-500 tracking-[0.3em] uppercase"
-          style={{ textShadow: '0 0 20px rgba(234, 179, 8, 0.4)' }}
+          className="text-3xl font-bold text-yellow-500 tracking-[0.25em] uppercase"
+          style={{ textShadow: '0 0 30px rgba(234, 179, 8, 0.5)' }}
         >
           VISION BOARD
         </h1>
@@ -68,8 +68,8 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
               background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.95), rgba(15, 15, 20, 0.98))',
               boxShadow: '0 0 40px rgba(234, 179, 8, 0.12), 0 0 80px rgba(234, 179, 8, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
               border: '1px solid rgba(234, 179, 8, 0.25)',
-              maxHeight: 'calc(100vh - 180px)',
-              minHeight: '420px'
+              maxHeight: 'calc(100vh - 140px)',
+              minHeight: '520px'
             }}
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
