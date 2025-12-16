@@ -63,12 +63,28 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           grandVision = DEFAULT_DATA.path.grandVision;
         }
 
-        // Migrate old string-based values to new object format
+        // Migrate old string-based values to new object format and add missing descriptions
         let values = parsed.coreValues?.values;
         if (Array.isArray(values) && values.length > 0 && typeof values[0] === 'string') {
           values = values.map((v: string) => ({ title: v, description: '' }));
         } else if (!values) {
           values = DEFAULT_DATA.coreValues.values;
+        }
+        
+        // Auto-populate descriptions for known default values if they're empty
+        const defaultDescriptions: Record<string, string> = {
+          "The Omen": "Face the Fear of Uncertainty",
+          "The Great Work": "Why→How→What",
+          "Just Do It": "The need to relentlessly \"just do it\" in order to have the brain mirror my conscious actions subconsciously."
+        };
+        
+        if (Array.isArray(values)) {
+          values = values.map((v: { title: string; description: string }) => {
+            if (!v.description && defaultDescriptions[v.title]) {
+              return { ...v, description: defaultDescriptions[v.title] };
+            }
+            return v;
+          });
         }
 
         return {
