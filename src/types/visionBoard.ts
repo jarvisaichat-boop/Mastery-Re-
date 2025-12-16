@@ -1,9 +1,14 @@
+export interface PersonalValue {
+  title: string;
+  description: string;
+}
+
 export interface CoreValues {
   priority: string;
   why: string;
   purpose: string;
   motto: string;
-  values: string[];
+  values: PersonalValue[];
 }
 
 export interface GrandVision {

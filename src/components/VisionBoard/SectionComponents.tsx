@@ -14,18 +14,23 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
   const { data, updateCoreValues } = useVisionBoard();
   const { coreValues } = data;
 
-  const InputOrText = ({ label, value, field }: { label: string, value: string, field: keyof typeof coreValues }) => (
-    <div className="mb-5">
-      <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-1 font-semibold">{label}</div>
+  const InlineField = ({ label, value, field }: { label: string, value: string, field: 'priority' | 'why' | 'purpose' | 'motto' }) => (
+    <div className="mb-4">
       {mode === 'edit' ? (
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => updateCoreValues({ [field]: e.target.value })}
-          className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-yellow-500/30 focus:border-yellow-500/40 transition-all"
-        />
+        <div>
+          <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-1 font-semibold">{label}</div>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => updateCoreValues({ [field]: e.target.value })}
+            className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-yellow-500/30 focus:border-yellow-500/40 transition-all"
+          />
+        </div>
       ) : (
-        <div className="text-lg sm:text-xl text-white font-light leading-relaxed">{value || <span className="text-gray-600 italic">Not set</span>}</div>
+        <div className="flex items-baseline gap-3">
+          <span className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] font-semibold min-w-[70px]">{label}</span>
+          <span className="text-lg text-white font-light">{value || <span className="text-gray-600 italic">Not set</span>}</span>
+        </div>
       )}
     </div>
   );
@@ -48,54 +53,72 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
 
       {/* Content */}
       <div className="max-w-sm mx-auto space-y-1">
-        <InputOrText label="PRIORITY" value={coreValues.priority} field="priority" />
-        <InputOrText label="WHY" value={coreValues.why} field="why" />
-        <InputOrText label="PURPOSE" value={coreValues.purpose} field="purpose" />
-        <InputOrText label="MOTTO" value={coreValues.motto} field="motto" />
+        <InlineField label="PRIORITY" value={coreValues.priority} field="priority" />
+        <InlineField label="WHY" value={coreValues.why} field="why" />
+        <InlineField label="PURPOSE" value={coreValues.purpose} field="purpose" />
+        <InlineField label="MOTTO" value={coreValues.motto} field="motto" />
 
         <div className="pt-4">
           <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-3 font-semibold">PERSONAL VALUES</div>
           {mode === 'edit' ? (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {coreValues.values.map((val, idx) => (
-                <div key={idx} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={val}
+                <div key={idx} className="bg-black/20 rounded-lg p-3 border border-white/5">
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={val.title}
+                      placeholder="Value title"
+                      onChange={(e) => {
+                        const newValues = [...coreValues.values];
+                        newValues[idx] = { ...newValues[idx], title: e.target.value };
+                        updateCoreValues({ values: newValues });
+                      }}
+                      className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-yellow-500 text-sm font-medium"
+                    />
+                    <button
+                      onClick={() => {
+                        const newValues = coreValues.values.filter((_, i) => i !== idx);
+                        updateCoreValues({ values: newValues });
+                      }}
+                      className="p-2 text-gray-500 hover:text-red-400"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <textarea
+                    value={val.description}
+                    placeholder="Description..."
                     onChange={(e) => {
                       const newValues = [...coreValues.values];
-                      newValues[idx] = e.target.value;
+                      newValues[idx] = { ...newValues[idx], description: e.target.value };
                       updateCoreValues({ values: newValues });
                     }}
-                    className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm h-16 resize-none"
                   />
-                  <button
-                    onClick={() => {
-                      const newValues = coreValues.values.filter((_, i) => i !== idx);
-                      updateCoreValues({ values: newValues });
-                    }}
-                    className="p-2 text-gray-500 hover:text-red-400"
-                  >
-                    <X size={16} />
-                  </button>
                 </div>
               ))}
               <button
-                onClick={() => updateCoreValues({ values: [...coreValues.values, ""] })}
+                onClick={() => updateCoreValues({ values: [...coreValues.values, { title: '', description: '' }] })}
                 className="flex items-center gap-2 text-xs text-yellow-500 hover:text-yellow-400 mt-2"
               >
                 <Plus size={14} /> ADD VALUE
               </button>
             </div>
           ) : (
-            <ul className="space-y-3">
-              {coreValues.values.filter(v => v).map((val, idx) => (
-                <li key={idx} className="flex items-center gap-3">
+            <ul className="space-y-4">
+              {coreValues.values.filter(v => v.title).map((val, idx) => (
+                <li key={idx} className="flex items-start gap-3">
                   <div 
-                    className="w-1.5 h-1.5 rounded-full bg-yellow-400"
+                    className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0"
                     style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
                   />
-                  <span className="text-gray-200 font-light">{val}</span>
+                  <div>
+                    <div className="text-yellow-500 font-medium">{val.title}</div>
+                    {val.description && (
+                      <div className="text-gray-300 text-sm font-light mt-0.5">{val.description}</div>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>

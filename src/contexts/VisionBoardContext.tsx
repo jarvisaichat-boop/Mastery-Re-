@@ -11,9 +11,9 @@ const DEFAULT_DATA: VisionBoardData = {
     purpose: "Master of My Self",
     motto: "Live Life More",
     values: [
-      "The Omen",
-      "The Great Work",
-      "Just Do It"
+      { title: "The Omen", description: "Face the Fear of Uncertainty" },
+      { title: "The Great Work", description: "Why→How→What" },
+      { title: "Just Do It", description: "The need to relentlessly \"just do it\" in order to have the brain mirror my conscious actions subconsciously." }
     ]
   },
   path: {
@@ -63,10 +63,18 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           grandVision = DEFAULT_DATA.path.grandVision;
         }
 
+        // Migrate old string-based values to new object format
+        let values = parsed.coreValues?.values;
+        if (Array.isArray(values) && values.length > 0 && typeof values[0] === 'string') {
+          values = values.map((v: string) => ({ title: v, description: '' }));
+        } else if (!values) {
+          values = DEFAULT_DATA.coreValues.values;
+        }
+
         return {
           ...DEFAULT_DATA,
           ...parsed,
-          coreValues: { ...DEFAULT_DATA.coreValues, ...parsed.coreValues },
+          coreValues: { ...DEFAULT_DATA.coreValues, ...parsed.coreValues, values },
           path: { ...DEFAULT_DATA.path, ...parsed.path, grandVision },
           schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule }
         };
