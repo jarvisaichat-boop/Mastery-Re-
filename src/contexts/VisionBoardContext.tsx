@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { VisionBoardData, VisionBoardContextType, CoreValues, VisionPath, GrandVision, DailySchedule } from '../types/visionBoard';
 import { logger } from '../utils/logger';
 
-const LOCAL_STORAGE_KEY = 'mastery-vision-board-v1';
+const LOCAL_STORAGE_KEY = 'mastery-vision-board-v2';
 
 const DEFAULT_DATA: VisionBoardData = {
   coreValues: {

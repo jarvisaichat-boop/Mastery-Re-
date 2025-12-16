@@ -28,7 +28,7 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
         </div>
       ) : (
         <div className="flex items-baseline gap-3">
-          <span className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] font-semibold min-w-[70px]">{label}</span>
+          <span className="text-lg text-yellow-500 uppercase tracking-[0.15em] font-medium min-w-[90px]">{label}</span>
           <span className="text-lg text-white font-light">{value || <span className="text-gray-600 italic">Not set</span>}</span>
         </div>
       )}
@@ -108,17 +108,11 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
           ) : (
             <ul className="space-y-4">
               {coreValues.values.filter(v => v.title).map((val, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <div 
-                    className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0"
-                    style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
-                  />
-                  <div>
-                    <div className="text-yellow-500 font-medium">{val.title}</div>
-                    {val.description && (
-                      <div className="text-gray-300 text-sm font-light mt-0.5">{val.description}</div>
-                    )}
-                  </div>
+                <li key={idx}>
+                  <div className="text-yellow-500 font-medium">{val.title}</div>
+                  {val.description && (
+                    <div className="text-gray-300 text-sm font-light mt-0.5">{val.description}</div>
+                  )}
                 </li>
               ))}
             </ul>
