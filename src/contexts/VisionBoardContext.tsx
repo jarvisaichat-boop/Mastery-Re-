@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { VisionBoardData, VisionBoardContextType, CoreValues, VisionPath, GrandVision, DailySchedule } from '../types/visionBoard';
+import { VisionBoardData, VisionBoardContextType, CoreValues, VisionPath, DailySchedule } from '../types/visionBoard';
 import { logger } from '../utils/logger';
 
 const LOCAL_STORAGE_KEY = 'mastery-vision-board-v2';
@@ -17,11 +17,7 @@ const DEFAULT_DATA: VisionBoardData = {
     ]
   },
   path: {
-    grandVision: {
-      feel: "Excited and Glowing",
-      how: "Doing one exciting thing in life",
-      what: "Growth, Monetization, and Experience"
-    },
+    vision: "Do One Exciting thing in Life that makes me Grow / Glow. Monetize that experience.",
     currentProject: "Launch the Mastery App",
     quarterlyGoals: [
       "Build MVP"
@@ -57,10 +53,20 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
         const parsed = JSON.parse(stored);
 
         // Data migration/safety check
-        // If grandVision is a string (legacy/broken), reset it to default object
-        let grandVision = parsed.path?.grandVision;
-        if (typeof grandVision === 'string' || !grandVision) {
-          grandVision = DEFAULT_DATA.path.grandVision;
+        // Migrate old 3-part grandVision object to single vision string
+        let vision = parsed.path?.vision;
+        if (vision === undefined) {
+          const oldGrandVision = parsed.path?.grandVision;
+          if (oldGrandVision && typeof oldGrandVision === 'object') {
+            // Convert old format to single string
+            vision = `Feeling ${oldGrandVision.feel || '...'} while ${oldGrandVision.how || '...'} giving me ${oldGrandVision.what || '...'}`;
+          } else {
+            vision = DEFAULT_DATA.path.vision;
+          }
+        }
+        // Clean up legacy grandVision property
+        if (parsed.path?.grandVision) {
+          delete parsed.path.grandVision;
         }
 
         // Migrate old string-based values to new object format and add missing descriptions
@@ -91,7 +97,7 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           ...DEFAULT_DATA,
           ...parsed,
           coreValues: { ...DEFAULT_DATA.coreValues, ...parsed.coreValues, values },
-          path: { ...DEFAULT_DATA.path, ...parsed.path, grandVision },
+          path: { ...DEFAULT_DATA.path, ...parsed.path, vision },
           schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule }
         };
       }
@@ -123,16 +129,6 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
     }));
   };
 
-  const updateGrandVision = (updates: Partial<GrandVision>) => {
-    setData(prev => ({
-      ...prev,
-      path: {
-        ...prev.path,
-        grandVision: { ...prev.path.grandVision, ...updates }
-      }
-    }));
-  };
-
   const updateSchedule = (updates: Partial<DailySchedule>) => {
     setData(prev => ({
       ...prev,
@@ -145,7 +141,6 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
       data,
       updateCoreValues,
       updatePath,
-      updateGrandVision,
       updateSchedule
     }}>
       {children}

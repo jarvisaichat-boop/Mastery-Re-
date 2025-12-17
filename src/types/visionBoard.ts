@@ -11,14 +11,8 @@ export interface CoreValues {
   values: PersonalValue[];
 }
 
-export interface GrandVision {
-  feel: string;
-  how: string;
-  what: string;
-}
-
 export interface VisionPath {
-  grandVision: GrandVision;
+  vision: string;
   // Habits are derived from the main Habit[] state, so we don't store them here
   // But we might want to store specific "Projects" or "Goals" text if they aren't habits
   currentProject: string;
@@ -42,6 +36,5 @@ export interface VisionBoardContextType {
   data: VisionBoardData;
   updateCoreValues: (updates: Partial<CoreValues>) => void;
   updatePath: (updates: Partial<VisionPath>) => void;
-  updateGrandVision: (updates: Partial<GrandVision>) => void;
   updateSchedule: (updates: Partial<DailySchedule>) => void;
 }

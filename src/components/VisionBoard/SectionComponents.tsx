@@ -113,11 +113,11 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
                   <span className="text-white font-light">{val.description}</span>
                 </p>
               ))}
-              {/* Vision from Grand Vision */}
+              {/* Vision */}
               <p className="text-lg leading-relaxed">
                 <span className="text-yellow-500 font-medium uppercase tracking-wide">VISION</span>{' '}
                 <span className="text-white font-light">
-                  Feeling {path.grandVision.feel || '...'} while {path.grandVision.how || '...'} giving me {path.grandVision.what || '...'}
+                  {path.vision || 'Not set'}
                 </span>
               </p>
             </div>
@@ -130,7 +130,7 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
 
 // --- Section B: Path ---
 export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
-  const { data, updatePath, updateGrandVision } = useVisionBoard();
+  const { data, updatePath } = useVisionBoard();
   const { path } = data;
 
   const lifeGoalHabits = habits.filter(h => h.type === 'Life Goal Habit');
@@ -153,50 +153,27 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
 
       {/* Content */}
       <div className="max-w-sm mx-auto space-y-6">
-        {/* Grand Vision */}
+        {/* Vision */}
         <div>
           <p className="text-lg leading-relaxed mb-3">
-            <span className="text-yellow-500 font-medium uppercase tracking-wide">GRAND VISION</span>
+            <span className="text-yellow-500 font-medium uppercase tracking-wide">VISION</span>
           </p>
           <div className="bg-black/20 rounded-xl p-5 border border-white/5">
             {mode === 'edit' ? (
               <div className="space-y-3">
-                <div>
-                  <label className="text-[10px] text-gray-500 mb-1 block">Feeling...</label>
-                  <input
-                    type="text"
-                    value={path.grandVision.feel}
-                    onChange={(e) => updateGrandVision({ feel: e.target.value })}
-                    className="w-full bg-black/40 border border-white/10 rounded p-2 text-white text-sm focus:border-yellow-500/50 transition-colors"
-                    placeholder="e.g. Excited and Fascinated"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-gray-500 mb-1 block">While...</label>
-                  <input
-                    type="text"
-                    value={path.grandVision.how}
-                    onChange={(e) => updateGrandVision({ how: e.target.value })}
-                    className="w-full bg-black/40 border border-white/10 rounded p-2 text-white text-sm focus:border-yellow-500/50 transition-colors"
-                    placeholder="e.g. Building my own things"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-gray-500 mb-1 block">Giving me...</label>
-                  <input
-                    type="text"
-                    value={path.grandVision.what}
-                    onChange={(e) => updateGrandVision({ what: e.target.value })}
-                    className="w-full bg-black/40 border border-white/10 rounded p-2 text-white text-sm focus:border-yellow-500/50 transition-colors"
-                    placeholder="e.g. Freedom and Growth"
-                  />
-                </div>
+                <p className="text-[10px] text-gray-400 leading-relaxed mb-2">
+                  Think about: What do you want to <span className="text-yellow-500/80">feel</span>? What will you be <span className="text-yellow-500/80">doing</span>? What will it <span className="text-yellow-500/80">give you</span>?
+                </p>
+                <textarea
+                  value={path.vision}
+                  onChange={(e) => updatePath({ vision: e.target.value })}
+                  className="w-full bg-black/40 border border-white/10 rounded p-3 text-white text-sm focus:border-yellow-500/50 transition-colors resize-none h-24"
+                  placeholder="e.g. Do one exciting thing in life that makes me grow. Monetize that experience."
+                />
               </div>
             ) : (
               <div className="text-lg text-white font-light leading-relaxed">
-                "Feeling <span className="text-yellow-400 font-medium">{path.grandVision.feel || '...'}</span> while{' '}
-                <span className="text-yellow-400 font-medium">{path.grandVision.how || '...'}</span> giving me{' '}
-                <span className="text-yellow-400 font-medium">{path.grandVision.what || '...'}</span>."
+                {path.vision || <span className="text-gray-600 italic">Not set</span>}
               </div>
             )}
           </div>
