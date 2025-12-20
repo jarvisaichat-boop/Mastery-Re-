@@ -24,7 +24,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
     onSwipedLeft: () => handleNext(),
     onSwipedRight: () => handlePrev(),
     trackMouse: true,
-    preventScrollOnSwipe: true
+    preventScrollOnSwipe: false
   });
 
   const handleNext = () => {
@@ -121,20 +121,20 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
               >
                 {/* Slide 1: Core Values */}
-                <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+                <div className="w-full h-full flex-shrink-0 overflow-y-auto pb-6">
                   <CoreValuesSection mode="view" />
                 </div>
                 {/* Slide 2: Path */}
-                <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+                <div className="w-full h-full flex-shrink-0 overflow-y-auto pb-6">
                   <PathSection mode="view" habits={habits} />
                 </div>
                 {/* Slide 3: Schedule */}
-                <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+                <div className="w-full h-full flex-shrink-0 overflow-y-auto pb-6">
                   <ScheduleSection mode="view" habits={habits} schedule={schedule} updateSchedule={updateSchedule} />
                 </div>
                 {/* Slide 4: Custom (only if enabled) */}
                 {custom.enabled && (
-                  <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+                  <div className="w-full h-full flex-shrink-0 overflow-y-auto pb-6">
                     <CustomSectionComponent mode="view" />
                   </div>
                 )}
