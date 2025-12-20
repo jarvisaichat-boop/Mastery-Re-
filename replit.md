@@ -55,6 +55,13 @@ Additional preferences:
    - View/Edit mode toggle per section
    - Hidden items display with opacity and strikethrough in edit mode
    - Data migration for backward compatibility with legacy formats
+   - **Proportional Visual Timeline** in Schedule section:
+     - TimeBlock types: 'block' (with duration) and 'point' (single moment)
+     - Blocks sized proportionally based on duration (e.g., 8-hour work block is 8x taller than 1-hour break)
+     - Gaps between blocks shown as empty space (dashed lines) to visualize free time
+     - Essential blocks: Sleep, Work/School, Break, GM/GD/GN Routines
+     - Routine blocks can link to GM/GD/GN routine lists via routineKey property
+     - Edit mode: type selector, start/end time pickers, color dropdown, routine link dropdown
 
 ### Backend API Server
 - Express.js server running on port 3001
