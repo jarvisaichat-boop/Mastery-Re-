@@ -23,13 +23,12 @@ export interface RoutineItem {
 }
 
 export interface TimeBlock {
-  type: 'block' | 'point';
   time: string;
   endTime?: string;
   label: string;
   color: string;
   hidden: boolean;
-  routineKey?: 'gm' | 'gd' | 'gn';
+  isRoutine?: boolean;
 }
 
 export interface VisionPath {

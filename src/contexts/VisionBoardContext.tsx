@@ -32,13 +32,13 @@ const DEFAULT_DATA: VisionBoardData = {
   },
   schedule: {
     timeline: [
-      { type: "block", time: "23:00", endTime: "06:00", label: "Sleep", color: "bg-purple-400", hidden: false },
-      { type: "point", time: "06:00", label: "Wake Up", color: "bg-gray-400", hidden: false },
-      { type: "block", time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, routineKey: "gm" },
-      { type: "block", time: "09:00", endTime: "17:00", label: "Work/School", color: "bg-blue-400", hidden: false },
-      { type: "block", time: "12:00", endTime: "13:00", label: "Break", color: "bg-green-400", hidden: false },
-      { type: "block", time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, routineKey: "gd" },
-      { type: "block", time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, routineKey: "gn" }
+      { time: "23:00", endTime: "06:00", label: "Sleep", color: "bg-purple-400", hidden: false },
+      { time: "06:00", label: "Wake Up", color: "bg-gray-400", hidden: false },
+      { time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, isRoutine: true },
+      { time: "09:00", endTime: "17:00", label: "Work/School", color: "bg-blue-400", hidden: false },
+      { time: "12:00", endTime: "13:00", label: "Break", color: "bg-green-400", hidden: false },
+      { time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, isRoutine: true },
+      { time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, isRoutine: true }
     ],
     gmRoutine: [
       { text: "Morning Acts (Pee, Weight, Sunlight)", hidden: false },
@@ -158,23 +158,35 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
         const gdRoutine = migrateRoutine(parsed.schedule?.gdRoutine, DEFAULT_DATA.schedule.gdRoutine);
         const gnRoutine = migrateRoutine(parsed.schedule?.gnRoutine, DEFAULT_DATA.schedule.gnRoutine);
 
-        // Migrate timeline - if missing, use defaults; if exists, migrate old format to new
+        // Migrate timeline - normalize to new simplified format
         let timeline: TimeBlock[] = parsed.schedule?.timeline;
         if (!Array.isArray(timeline)) {
           timeline = DEFAULT_DATA.schedule.timeline;
         } else {
-          // Check if old format (no type field) - migrate to new format with defaults
-          const hasOldFormat = timeline.some((block: Partial<TimeBlock>) => !block.type);
-          if (hasOldFormat) {
-            // Old format detected - use new defaults instead
-            timeline = DEFAULT_DATA.schedule.timeline;
-          } else {
-            // New format - just ensure hidden property
-            timeline = timeline.map((block: TimeBlock) => ({
-              ...block,
-              hidden: block.hidden ?? false
-            }));
-          }
+          // Migrate: remove old type/routineKey, add isRoutine for GM/GD/GN entries
+          timeline = timeline.map((block: Partial<TimeBlock> & { type?: string; routineKey?: string }) => {
+            const isRoutineBlock = block.label?.includes('GM Routine') || 
+                                   block.label?.includes('GD Routine') || 
+                                   block.label?.includes('GN Routine');
+            const { type: _type, routineKey: _routineKey, ...rest } = block as Record<string, unknown>;
+            return {
+              time: rest.time as string || '',
+              label: rest.label as string || '',
+              color: rest.color as string || 'bg-gray-400',
+              hidden: (rest.hidden as boolean) ?? false,
+              endTime: rest.endTime as string | undefined,
+              isRoutine: isRoutineBlock || (rest.isRoutine as boolean) || false
+            };
+          });
+          
+          // Ensure GM/GD/GN routine blocks exist
+          const hasGM = timeline.some(b => b.label?.includes('GM Routine'));
+          const hasGD = timeline.some(b => b.label?.includes('GD Routine'));
+          const hasGN = timeline.some(b => b.label?.includes('GN Routine'));
+          
+          if (!hasGM) timeline.push({ time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, isRoutine: true });
+          if (!hasGD) timeline.push({ time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, isRoutine: true });
+          if (!hasGN) timeline.push({ time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, isRoutine: true });
         }
 
         // Safely merge custom section for legacy data without custom field

@@ -8,7 +8,7 @@ interface ActionMenuProps {
   onMoveUp: () => void;
   onMoveDown: () => void;
   onToggleHide: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }
 
 export const ActionMenu: React.FC<ActionMenuProps> = ({
@@ -83,14 +83,18 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
             {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
             {isHidden ? 'Show' : 'Hide'}
           </button>
-          <div className="border-t border-white/5 my-1" />
-          <button
-            onClick={() => handleAction(onDelete)}
-            className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-white/5 flex items-center gap-2"
-          >
-            <Trash2 size={14} />
-            Delete
-          </button>
+          {onDelete && (
+            <>
+              <div className="border-t border-white/5 my-1" />
+              <button
+                onClick={() => handleAction(onDelete)}
+                className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-white/5 flex items-center gap-2"
+              >
+                <Trash2 size={14} />
+                Delete
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

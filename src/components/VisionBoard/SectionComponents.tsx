@@ -425,8 +425,9 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
       const startMinutes = timeToMinutes(block.time);
       let endMinutes = startMinutes;
       
-      if (block.type === 'block' && block.endTime) {
-        endMinutes = timeToMinutes(block.endTime);
+      const isBlock = !!block.endTime;
+      if (isBlock) {
+        endMinutes = timeToMinutes(block.endTime!);
         if (endMinutes < startMinutes) endMinutes += 24 * 60;
       }
       
@@ -434,7 +435,7 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
         segments.push({ type: 'gap', startMinutes: currentMinute, endMinutes: startMinutes });
       }
       
-      if (block.type === 'point') {
+      if (!isBlock) {
         segments.push({ type: 'point', startMinutes, endMinutes: startMinutes, block });
         currentMinute = Math.max(currentMinute, startMinutes);
       } else {
@@ -494,7 +495,7 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${block.color} flex-shrink-0`} />
                     <span className="text-sm text-gray-200 font-medium truncate">{block.label}</span>
-                    {block.routineKey && <span className="text-[9px] text-yellow-500/50">→</span>}
+                    {block.isRoutine && <span className="text-[9px] text-yellow-500/50">→</span>}
                   </div>
                   <div className="text-[10px] text-gray-500 ml-4">{block.time} - {block.endTime}</div>
                 </div>
@@ -508,32 +509,29 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
     );
   };
 
+  const [colorPickerOpen, setColorPickerOpen] = useState<number | null>(null);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
+        setColorPickerOpen(null);
+      }
+    };
+    if (colorPickerOpen !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [colorPickerOpen]);
+
   const EditTimelineList = () => {
     const timeline = schedule.timeline || [];
     
     return (
       <div className="space-y-2">
         {timeline.map((block, idx) => (
-          <div key={idx} className={`flex flex-wrap items-center gap-2 py-1 px-2 rounded-lg bg-black/20 ${block.hidden ? 'opacity-50' : ''}`}>
+          <div key={idx} className={`flex items-center gap-2 py-1 px-2 rounded-lg bg-black/20 ${block.hidden ? 'opacity-50' : ''}`}>
             {block.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
-            
-            <select
-              value={block.type}
-              onChange={(e) => {
-                const newTimeline = [...timeline];
-                const newType = e.target.value as 'block' | 'point';
-                newTimeline[idx] = { 
-                  ...newTimeline[idx], 
-                  type: newType,
-                  endTime: newType === 'block' ? (block.endTime || block.time) : undefined
-                };
-                updateSchedule({ timeline: newTimeline });
-              }}
-              className="bg-black/30 border border-white/10 rounded p-1 text-white text-[10px] w-14"
-            >
-              <option value="block">Block</option>
-              <option value="point">Point</option>
-            </select>
             
             <input
               type="time"
@@ -546,35 +544,43 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
               className="bg-black/30 border border-white/10 rounded p-1 text-white text-xs w-[72px]"
             />
             
-            {block.type === 'block' && (
-              <>
-                <span className="text-gray-500 text-xs">-</span>
-                <input
-                  type="time"
-                  value={block.endTime || ''}
-                  onChange={(e) => {
-                    const newTimeline = [...timeline];
-                    newTimeline[idx] = { ...newTimeline[idx], endTime: e.target.value };
-                    updateSchedule({ timeline: newTimeline });
-                  }}
-                  className="bg-black/30 border border-white/10 rounded p-1 text-white text-xs w-[72px]"
-                />
-              </>
-            )}
+            <span className="text-gray-500 text-xs">-</span>
             
-            <select
-              value={block.color}
+            <input
+              type="time"
+              value={block.endTime || ''}
               onChange={(e) => {
                 const newTimeline = [...timeline];
-                newTimeline[idx] = { ...newTimeline[idx], color: e.target.value };
+                newTimeline[idx] = { ...newTimeline[idx], endTime: e.target.value || undefined };
                 updateSchedule({ timeline: newTimeline });
               }}
-              className="bg-black/30 border border-white/10 rounded p-1 text-white text-[10px] w-16"
-            >
-              {COLOR_OPTIONS.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+              placeholder="--:--"
+              className="bg-black/30 border border-white/10 rounded p-1 text-white text-xs w-[72px]"
+            />
+            
+            <div className="relative" ref={colorPickerOpen === idx ? colorPickerRef : undefined}>
+              <button
+                onClick={() => setColorPickerOpen(colorPickerOpen === idx ? null : idx)}
+                className={`w-6 h-6 rounded-full ${block.color} border border-white/20 flex-shrink-0`}
+                style={{ boxShadow: '0 0 4px currentColor' }}
+              />
+              {colorPickerOpen === idx && (
+                <div className="absolute z-20 top-8 left-0 bg-gray-900 border border-white/20 rounded-lg p-2 grid grid-cols-5 gap-1">
+                  {COLOR_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => {
+                        const newTimeline = [...timeline];
+                        newTimeline[idx] = { ...newTimeline[idx], color: opt.value };
+                        updateSchedule({ timeline: newTimeline });
+                        setColorPickerOpen(null);
+                      }}
+                      className={`w-5 h-5 rounded-full ${opt.value} border border-white/20 hover:scale-110 transition-transform`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
             
             <input
               value={block.label}
@@ -584,29 +590,10 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
                 updateSchedule({ timeline: newTimeline });
               }}
               className={`flex-1 min-w-[80px] bg-black/30 border border-white/10 rounded p-1 text-white text-sm ${block.hidden ? 'line-through' : ''}`}
-              placeholder="Label"
+              placeholder="Name"
             />
             
-            {block.type === 'block' && (
-              <select
-                value={block.routineKey || ''}
-                onChange={(e) => {
-                  const newTimeline = [...timeline];
-                  const value = e.target.value as 'gm' | 'gd' | 'gn' | '';
-                  newTimeline[idx] = { 
-                    ...newTimeline[idx], 
-                    routineKey: value || undefined 
-                  };
-                  updateSchedule({ timeline: newTimeline });
-                }}
-                className="bg-black/30 border border-white/10 rounded p-1 text-white text-[10px] w-14"
-              >
-                <option value="">-</option>
-                <option value="gm">GM</option>
-                <option value="gd">GD</option>
-                <option value="gn">GN</option>
-              </select>
-            )}
+            {block.isRoutine && <span className="text-[9px] text-yellow-500/70 flex-shrink-0">routine</span>}
             
             <ActionMenu
               index={idx}
@@ -631,7 +618,7 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
                 newTimeline[idx] = { ...newTimeline[idx], hidden: !newTimeline[idx].hidden };
                 updateSchedule({ timeline: newTimeline });
               }}
-              onDelete={() => {
+              onDelete={block.isRoutine ? undefined : () => {
                 const newTimeline = timeline.filter((_, i) => i !== idx);
                 updateSchedule({ timeline: newTimeline });
               }}
@@ -639,26 +626,15 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
           </div>
         ))}
         
-        <div className="flex gap-2 mt-2">
-          <button
-            onClick={() => {
-              const newBlock: TimeBlock = { type: "block", time: "12:00", endTime: "13:00", label: "New Block", color: "bg-gray-400", hidden: false };
-              updateSchedule({ timeline: [...(schedule.timeline || []), newBlock] });
-            }}
-            className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1"
-          >
-            <Plus size={14} /> ADD BLOCK
-          </button>
-          <button
-            onClick={() => {
-              const newPoint: TimeBlock = { type: "point", time: "08:00", label: "New Point", color: "bg-gray-400", hidden: false };
-              updateSchedule({ timeline: [...(schedule.timeline || []), newPoint] });
-            }}
-            className="text-xs text-gray-400 hover:text-gray-300 flex items-center gap-1"
-          >
-            <Plus size={14} /> ADD POINT
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            const newBlock: TimeBlock = { time: "12:00", label: "", color: "bg-gray-400", hidden: false };
+            updateSchedule({ timeline: [...(schedule.timeline || []), newBlock] });
+          }}
+          className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1 mt-2"
+        >
+          <Plus size={14} /> ADD
+        </button>
       </div>
     );
   };
