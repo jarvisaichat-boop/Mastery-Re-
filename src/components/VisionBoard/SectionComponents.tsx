@@ -222,7 +222,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                 path.projects.filter(p => p).map((project, idx) => (
                   <li key={idx} className="flex items-center gap-3">
                     <div 
-                      className="w-1.5 h-1.5 rounded-full bg-yellow-400"
+                      className="w-2 h-2 rounded-full bg-yellow-400"
                       style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
                     />
                     <span className="text-lg text-white font-light">{project}</span>
@@ -268,7 +268,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
               {path.quarterlyGoals.filter(g => g).map((g, idx) => (
                 <li key={idx} className="flex items-center gap-3">
                   <div 
-                    className="w-1.5 h-1.5 rounded-full bg-blue-400"
+                    className="w-2 h-2 rounded-full bg-blue-400"
                     style={{ boxShadow: '0 0 8px rgba(96, 165, 250, 0.6)' }}
                   />
                   <span className="text-lg text-white font-light">{g}</span>
@@ -287,7 +287,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
             {lifeGoalHabits.length > 0 ? lifeGoalHabits.map((h) => (
               <li key={h.id} className="flex items-center gap-3">
                 <div 
-                  className="w-1.5 h-1.5 rounded-full bg-green-400"
+                  className="w-2 h-2 rounded-full bg-green-400"
                   style={{ boxShadow: '0 0 8px rgba(74, 222, 128, 0.6)' }}
                 />
                 <span className="text-lg text-white font-light">{h.name}</span>
@@ -401,7 +401,7 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
             {lifeGoalHabits.length > 0 ? lifeGoalHabits.map(h => (
               <div key={h.id} className="flex items-center gap-3 bg-black/20 p-3 rounded-lg border border-white/5">
                 <div 
-                  className="w-1.5 h-1.5 rounded-full bg-green-400"
+                  className="w-2 h-2 rounded-full bg-green-400"
                   style={{ boxShadow: '0 0 8px rgba(74, 222, 128, 0.6)' }}
                 />
                 <span className="text-lg text-gray-200 font-light">{h.name}</span>
@@ -582,7 +582,7 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
                   {entry.items.filter(i => i).map((item, itemIdx) => (
                     <li key={itemIdx} className="flex items-center gap-3">
                       <div 
-                        className="w-1.5 h-1.5 rounded-full bg-yellow-400"
+                        className="w-2 h-2 rounded-full bg-yellow-400"
                         style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
                       />
                       <span className="text-lg text-white font-light">{item}</span>
