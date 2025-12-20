@@ -18,7 +18,14 @@ const DEFAULT_DATA: VisionBoardData = {
   },
   path: {
     vision: "Do One Exciting thing in Life that makes me Grow / Glow. Monetize that experience.",
-    projects: ["Launch the Mastery App"],
+    projects: [
+      "Finish defensive strategy - RE (Renovation & Airbnb ready)",
+      "Quit job or transfer - Q1 2026 Fixed!!",
+      "Move out of the country - NYC (WIP)",
+      "Do my own thing - App x AI or YouTube - AI App (VC?) and Shift to Lifestyle YouTube",
+      "Live my life for exciting things - Passion, Project",
+      "Improve myself til I fucking die - Grow physically / mentally & Life Goals"
+    ],
     quarterlyGoals: [
       "Build MVP"
     ]
