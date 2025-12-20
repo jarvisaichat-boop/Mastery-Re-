@@ -243,9 +243,11 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
             if (endMins < startMins) endMins += 24 * 60;
             
             const top = minutesToPixels(startMins);
-            const height = Math.max(30, minutesToPixels(endMins - startMins));
+            const durationMins = endMins - startMins;
+            const height = Math.max(30, minutesToPixels(durationMins));
             const isEditing = editingBlock === idx;
             const isProtected = block.isProtected || block.isRoutine;
+            const isCompact = durationMins < 45;
             
             return (
               <div
@@ -283,7 +285,7 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
                     setColorPickerBlock(null);
                   }}
                 >
-                  <div className="flex-1 p-2 flex flex-col justify-center min-w-0">
+                  <div className={`flex-1 ${isCompact ? 'px-2 py-1' : 'p-2'} flex ${isCompact ? 'flex-row items-center gap-2' : 'flex-col justify-center'} min-w-0`}>
                     {isEditing ? (
                       <input
                         type="text"
@@ -292,12 +294,12 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
                         onClick={(e) => e.stopPropagation()}
                         onBlur={() => setEditingBlock(null)}
                         autoFocus
-                        className="bg-transparent text-white text-sm font-medium border-b border-white/30 outline-none w-full"
+                        className={`bg-transparent text-white ${isCompact ? 'text-xs' : 'text-sm'} font-medium border-b border-white/30 outline-none flex-1`}
                       />
                     ) : (
-                      <div className="text-white text-sm font-medium truncate">{block.label || 'Untitled'}</div>
+                      <div className={`text-white ${isCompact ? 'text-xs' : 'text-sm'} font-medium truncate`}>{block.label || 'Untitled'}</div>
                     )}
-                    <div className="text-white/60 text-[10px]">
+                    <div className={`text-white/60 ${isCompact ? 'text-[9px]' : 'text-[10px]'}`}>
                       {formatTimeDisplay(block.time)} - {formatTimeDisplay(block.endTime!)}
                     </div>
                   </div>

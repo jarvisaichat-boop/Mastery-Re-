@@ -180,16 +180,16 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
             };
           });
           
-          // Ensure exactly 3 routine entries exist (users can rename them but must have 3 protected entries)
-          const routineCount = timeline.filter(b => b.isRoutine).length;
-          const defaults = [
-            { time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, isRoutine: true },
-            { time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, isRoutine: true },
-            { time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, isRoutine: true }
-          ];
-          
-          for (let i = 0; i < 3 - routineCount && i < defaults.length; i++) {
-            timeline.push(defaults[i]);
+          // Only add default routines if timeline has NO routine entries at all
+          // (prevents duplicate routines from being added on subsequent migrations)
+          const hasAnyRoutines = timeline.some(b => b.isRoutine);
+          if (!hasAnyRoutines) {
+            const defaults = [
+              { time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, isRoutine: true },
+              { time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, isRoutine: true },
+              { time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, isRoutine: true }
+            ];
+            timeline.push(...defaults);
           }
         }
 
