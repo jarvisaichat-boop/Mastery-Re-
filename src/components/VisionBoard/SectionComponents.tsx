@@ -181,20 +181,58 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
 
         {/* Short Term Vision (Projects) */}
         <div>
-          <p className="text-lg leading-relaxed">
-            <span className="text-yellow-500 font-medium uppercase tracking-wide">SHORT TERM VISION (PROJECTS)</span>{' '}
-            {mode === 'edit' ? null : (
-              <span className="text-white font-light">{path.currentProject || <span className="text-gray-600 italic">Not set</span>}</span>
-            )}
+          <p className="text-lg leading-relaxed mb-2">
+            <span className="text-yellow-500 font-medium uppercase tracking-wide">SHORT TERM VISION (PROJECTS)</span>
           </p>
           {mode === 'edit' ? (
-            <input
-              type="text"
-              value={path.currentProject}
-              onChange={(e) => updatePath({ currentProject: e.target.value })}
-              className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-yellow-500/50 transition-colors mt-2"
-            />
-          ) : null}
+            <div className="space-y-2">
+              {path.projects.map((project, idx) => (
+                <div key={idx} className="flex gap-2">
+                  <input
+                    value={project}
+                    onChange={(e) => {
+                      const newProjects = [...path.projects];
+                      newProjects[idx] = e.target.value;
+                      updatePath({ projects: newProjects });
+                    }}
+                    className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
+                    placeholder="Project name..."
+                  />
+                  <button 
+                    onClick={() => {
+                      const newProjects = path.projects.filter((_, i) => i !== idx);
+                      updatePath({ projects: newProjects });
+                    }} 
+                    className="text-gray-500 hover:text-red-400"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+              <button 
+                onClick={() => updatePath({ projects: [...path.projects, ""] })} 
+                className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1"
+              >
+                <Plus size={14} /> ADD PROJECT
+              </button>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {path.projects.filter(p => p).length > 0 ? (
+                path.projects.filter(p => p).map((project, idx) => (
+                  <li key={idx} className="flex items-center gap-3">
+                    <div 
+                      className="w-1.5 h-1.5 rounded-full bg-yellow-400"
+                      style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
+                    />
+                    <span className="text-lg text-white font-light">{project}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="text-gray-600 italic text-lg font-light">No projects set</li>
+              )}
+            </ul>
+          )}
         </div>
 
         {/* Goals */}

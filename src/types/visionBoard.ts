@@ -15,7 +15,7 @@ export interface VisionPath {
   vision: string;
   // Habits are derived from the main Habit[] state, so we don't store them here
   // But we might want to store specific "Projects" or "Goals" text if they aren't habits
-  currentProject: string;
+  projects: string[];
   quarterlyGoals: string[];
 }
 

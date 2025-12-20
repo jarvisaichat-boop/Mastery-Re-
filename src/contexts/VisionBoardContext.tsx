@@ -18,7 +18,7 @@ const DEFAULT_DATA: VisionBoardData = {
   },
   path: {
     vision: "Do One Exciting thing in Life that makes me Grow / Glow. Monetize that experience.",
-    currentProject: "Launch the Mastery App",
+    projects: ["Launch the Mastery App"],
     quarterlyGoals: [
       "Build MVP"
     ]
@@ -69,6 +69,22 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           delete parsed.path.grandVision;
         }
 
+        // Migrate old single currentProject string to projects array
+        let projects = parsed.path?.projects;
+        if (!Array.isArray(projects)) {
+          const oldProject = parsed.path?.currentProject;
+          if (oldProject !== undefined) {
+            // Preserve empty string as empty array, non-empty string as single-item array
+            projects = oldProject ? [oldProject] : [];
+          } else {
+            projects = DEFAULT_DATA.path.projects;
+          }
+        }
+        // Clean up legacy currentProject property
+        if (parsed.path?.currentProject !== undefined) {
+          delete parsed.path.currentProject;
+        }
+
         // Migrate old string-based values to new object format and add missing descriptions
         let values = parsed.coreValues?.values;
         if (Array.isArray(values) && values.length > 0 && typeof values[0] === 'string') {
@@ -97,7 +113,7 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           ...DEFAULT_DATA,
           ...parsed,
           coreValues: { ...DEFAULT_DATA.coreValues, ...parsed.coreValues, values },
-          path: { ...DEFAULT_DATA.path, ...parsed.path, vision },
+          path: { ...DEFAULT_DATA.path, ...parsed.path, vision, projects },
           schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule }
         };
       }
