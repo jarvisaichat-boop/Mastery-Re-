@@ -163,8 +163,11 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           timeline = DEFAULT_DATA.schedule.timeline;
         } else {
           // Migrate: preserve isRoutine from old routineKey field or existing isRoutine flag
+          // Also set isProtected for Sleep and Work/School blocks
           timeline = timeline.map((block: Partial<TimeBlock> & { type?: string; routineKey?: string }) => {
             const wasRoutine = block.isRoutine || !!block.routineKey;
+            const label = (block.label as string || '').toLowerCase();
+            const isProtected = block.isProtected || label === 'sleep' || label === 'work/school';
             const { type: _type, routineKey: _routineKey, ...rest } = block as Record<string, unknown>;
             return {
               time: rest.time as string || '',
@@ -172,7 +175,8 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
               color: rest.color as string || 'bg-gray-400',
               hidden: (rest.hidden as boolean) ?? false,
               endTime: rest.endTime as string | undefined,
-              isRoutine: wasRoutine
+              isRoutine: wasRoutine,
+              isProtected: isProtected || undefined
             };
           });
           
