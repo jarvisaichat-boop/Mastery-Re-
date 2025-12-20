@@ -49,7 +49,17 @@ const DEFAULT_DATA: VisionBoardData = {
   },
   custom: {
     enabled: false,
-    entries: [],
+    entries: [
+      {
+        title: "The Process - Alchemy",
+        items: [
+          "One Focus & Consistency + Coherent Effort - One Focus and Coherent Effort on One Action daily for a period of time is crucial for feeling alive",
+          "Coherent Effort - Focusing on one high-priority focus and action daily is crucial for a set period of time for fulfilment (week, month, or 6 months).",
+          "Consistency - Consistency of effort and focus, do not let the continuum die, improve the routine and keep the momentum alive forever.",
+          "One Focus - I want to quit or transfer to focus entirely on one aspect of my life, rejecting all others. Do Just That! Put focus on the one thing to grow myself and devote all my attention on it. This singular focus is crucial for growth and momentum for me and, in reverse, spreading my focus too thin kills my drive. What is that one crucial daily focus or action, now and forever? That is the most important thing, engrossing my whole being."
+        ]
+      }
+    ],
     images: []
   }
 };
