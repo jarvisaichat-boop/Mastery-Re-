@@ -2,7 +2,8 @@ import React, { useRef } from 'react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { Habit } from '../../types';
 import { DailySchedule, CustomEntry } from '../../types/visionBoard';
-import { Plus, X, Compass, Target, Clock, Sparkles, Image, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, X, Compass, Target, Clock, Sparkles, Image, ToggleLeft, ToggleRight, EyeOff } from 'lucide-react';
+import { ActionMenu } from './ActionMenu';
 
 interface SectionProps {
   mode: 'edit' | 'view';
@@ -187,30 +188,50 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
           {mode === 'edit' ? (
             <div className="space-y-2">
               {path.projects.map((project, idx) => (
-                <div key={idx} className="flex gap-2">
+                <div key={idx} className={`flex gap-2 items-center ${project.hidden ? 'opacity-50' : ''}`}>
+                  {project.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
                   <input
-                    value={project}
+                    value={project.text}
                     onChange={(e) => {
                       const newProjects = [...path.projects];
-                      newProjects[idx] = e.target.value;
+                      newProjects[idx] = { ...newProjects[idx], text: e.target.value };
                       updatePath({ projects: newProjects });
                     }}
-                    className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
+                    className={`flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm ${project.hidden ? 'line-through' : ''}`}
                     placeholder="Project name..."
                   />
-                  <button 
-                    onClick={() => {
+                  <ActionMenu
+                    index={idx}
+                    totalItems={path.projects.length}
+                    isHidden={project.hidden}
+                    onMoveUp={() => {
+                      if (idx > 0) {
+                        const newProjects = [...path.projects];
+                        [newProjects[idx - 1], newProjects[idx]] = [newProjects[idx], newProjects[idx - 1]];
+                        updatePath({ projects: newProjects });
+                      }
+                    }}
+                    onMoveDown={() => {
+                      if (idx < path.projects.length - 1) {
+                        const newProjects = [...path.projects];
+                        [newProjects[idx], newProjects[idx + 1]] = [newProjects[idx + 1], newProjects[idx]];
+                        updatePath({ projects: newProjects });
+                      }
+                    }}
+                    onToggleHide={() => {
+                      const newProjects = [...path.projects];
+                      newProjects[idx] = { ...newProjects[idx], hidden: !newProjects[idx].hidden };
+                      updatePath({ projects: newProjects });
+                    }}
+                    onDelete={() => {
                       const newProjects = path.projects.filter((_, i) => i !== idx);
                       updatePath({ projects: newProjects });
-                    }} 
-                    className="text-gray-500 hover:text-red-400"
-                  >
-                    <X size={16} />
-                  </button>
+                    }}
+                  />
                 </div>
               ))}
               <button 
-                onClick={() => updatePath({ projects: [...path.projects, ""] })} 
+                onClick={() => updatePath({ projects: [...path.projects, { text: "", hidden: false }] })} 
                 className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1"
               >
                 <Plus size={14} /> ADD PROJECT
@@ -218,14 +239,14 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
             </div>
           ) : (
             <ul className="space-y-2">
-              {path.projects.filter(p => p).length > 0 ? (
-                path.projects.filter(p => p).map((project, idx) => (
+              {path.projects.filter(p => p.text && !p.hidden).length > 0 ? (
+                path.projects.filter(p => p.text && !p.hidden).map((project, idx) => (
                   <li key={idx} className="flex items-center gap-3">
                     <div 
                       className="w-2 h-2 rounded-full bg-yellow-400"
                       style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
                     />
-                    <span className="text-lg text-white font-light">{project}</span>
+                    <span className="text-lg text-white font-light">{project.text}</span>
                   </li>
                 ))
               ) : (
@@ -242,36 +263,61 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
           </p>
           {mode === 'edit' ? (
             <div className="space-y-2">
-              {path.quarterlyGoals.map((g, idx) => (
-                <div key={idx} className="flex gap-2">
+              {path.quarterlyGoals.map((goal, idx) => (
+                <div key={idx} className={`flex gap-2 items-center ${goal.hidden ? 'opacity-50' : ''}`}>
+                  {goal.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
                   <input
-                    value={g}
+                    value={goal.text}
                     onChange={(e) => {
                       const newGoals = [...path.quarterlyGoals];
-                      newGoals[idx] = e.target.value;
+                      newGoals[idx] = { ...newGoals[idx], text: e.target.value };
                       updatePath({ quarterlyGoals: newGoals });
                     }}
-                    className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
+                    className={`flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm ${goal.hidden ? 'line-through' : ''}`}
                   />
-                  <button onClick={() => {
-                    const newGoals = path.quarterlyGoals.filter((_, i) => i !== idx);
-                    updatePath({ quarterlyGoals: newGoals });
-                  }} className="text-gray-500 hover:text-red-400"><X size={16} /></button>
+                  <ActionMenu
+                    index={idx}
+                    totalItems={path.quarterlyGoals.length}
+                    isHidden={goal.hidden}
+                    onMoveUp={() => {
+                      if (idx > 0) {
+                        const newGoals = [...path.quarterlyGoals];
+                        [newGoals[idx - 1], newGoals[idx]] = [newGoals[idx], newGoals[idx - 1]];
+                        updatePath({ quarterlyGoals: newGoals });
+                      }
+                    }}
+                    onMoveDown={() => {
+                      if (idx < path.quarterlyGoals.length - 1) {
+                        const newGoals = [...path.quarterlyGoals];
+                        [newGoals[idx], newGoals[idx + 1]] = [newGoals[idx + 1], newGoals[idx]];
+                        updatePath({ quarterlyGoals: newGoals });
+                      }
+                    }}
+                    onToggleHide={() => {
+                      const newGoals = [...path.quarterlyGoals];
+                      newGoals[idx] = { ...newGoals[idx], hidden: !newGoals[idx].hidden };
+                      updatePath({ quarterlyGoals: newGoals });
+                    }}
+                    onDelete={() => {
+                      const newGoals = path.quarterlyGoals.filter((_, i) => i !== idx);
+                      updatePath({ quarterlyGoals: newGoals });
+                    }}
+                  />
                 </div>
               ))}
-              <button onClick={() => updatePath({ quarterlyGoals: [...path.quarterlyGoals, ""] })} className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1">
+              <button onClick={() => updatePath({ quarterlyGoals: [...path.quarterlyGoals, { text: "", hidden: false }] })} className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1">
                 <Plus size={14} /> ADD GOAL
               </button>
             </div>
           ) : (
             <ul className="space-y-2">
-              {path.quarterlyGoals.filter(g => g).map((g, idx) => (
+              {path.quarterlyGoals.filter(g => g.text && !g.hidden).map((goal, idx) => (
                 <li key={idx} className="flex items-center gap-3">
                   <div 
                     className="w-2 h-2 rounded-full bg-blue-400"
                     style={{ boxShadow: '0 0 8px rgba(96, 165, 250, 0.6)' }}
                   />
-                  <span className="text-lg text-white font-light">{g}</span>
+                  <span className="text-lg text-white font-light">{goal.text}</span>
                 </li>
               ))}
             </ul>

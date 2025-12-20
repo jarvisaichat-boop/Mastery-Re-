@@ -11,12 +11,17 @@ export interface CoreValues {
   values: PersonalValue[];
 }
 
+export interface VisionItem {
+  text: string;
+  hidden: boolean;
+}
+
 export interface VisionPath {
   vision: string;
   // Habits are derived from the main Habit[] state, so we don't store them here
   // But we might want to store specific "Projects" or "Goals" text if they aren't habits
-  projects: string[];
-  quarterlyGoals: string[];
+  projects: VisionItem[];
+  quarterlyGoals: VisionItem[];
 }
 
 export interface DailySchedule {

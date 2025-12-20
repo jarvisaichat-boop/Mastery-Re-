@@ -19,15 +19,15 @@ const DEFAULT_DATA: VisionBoardData = {
   path: {
     vision: "Do One Exciting thing in Life that makes me Grow / Glow. Monetize that experience.",
     projects: [
-      "Finish defensive strategy - RE (Renovation & Airbnb ready)",
-      "Quit job or transfer - Q1 2026 Fixed!!",
-      "Move out of the country - NYC (WIP)",
-      "Do my own thing - App x AI or YouTube - AI App (VC?) and Shift to Lifestyle YouTube",
-      "Live my life for exciting things - Passion, Project",
-      "Improve myself til I fucking die - Grow physically / mentally & Life Goals"
+      { text: "Finish defensive strategy - RE (Renovation & Airbnb ready)", hidden: false },
+      { text: "Quit job or transfer - Q1 2026 Fixed!!", hidden: false },
+      { text: "Move out of the country - NYC (WIP)", hidden: false },
+      { text: "Do my own thing - App x AI or YouTube - AI App (VC?) and Shift to Lifestyle YouTube", hidden: false },
+      { text: "Live my life for exciting things - Passion, Project", hidden: false },
+      { text: "Improve myself til I fucking die - Grow physically / mentally & Life Goals", hidden: false }
     ],
     quarterlyGoals: [
-      "Build MVP"
+      { text: "Build MVP", hidden: false }
     ]
   },
   schedule: {
@@ -87,14 +87,29 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           const oldProject = parsed.path?.currentProject;
           if (oldProject !== undefined) {
             // Preserve empty string as empty array, non-empty string as single-item array
-            projects = oldProject ? [oldProject] : [];
+            projects = oldProject ? [{ text: oldProject, hidden: false }] : [];
           } else {
             projects = DEFAULT_DATA.path.projects;
           }
+        } else {
+          // Migrate string array to VisionItem array
+          projects = projects.map((p: string | { text: string; hidden: boolean }) => 
+            typeof p === 'string' ? { text: p, hidden: false } : p
+          );
         }
         // Clean up legacy currentProject property
         if (parsed.path?.currentProject !== undefined) {
           delete parsed.path.currentProject;
+        }
+
+        // Migrate quarterlyGoals from string array to VisionItem array
+        let quarterlyGoals = parsed.path?.quarterlyGoals;
+        if (Array.isArray(quarterlyGoals)) {
+          quarterlyGoals = quarterlyGoals.map((g: string | { text: string; hidden: boolean }) => 
+            typeof g === 'string' ? { text: g, hidden: false } : g
+          );
+        } else {
+          quarterlyGoals = DEFAULT_DATA.path.quarterlyGoals;
         }
 
         // Migrate old string-based values to new object format and add missing descriptions
@@ -134,7 +149,7 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           ...DEFAULT_DATA,
           ...parsed,
           coreValues: { ...DEFAULT_DATA.coreValues, ...parsed.coreValues, values },
-          path: { ...DEFAULT_DATA.path, ...parsed.path, vision, projects },
+          path: { ...DEFAULT_DATA.path, ...parsed.path, vision, projects, quarterlyGoals },
           schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule },
           custom
         };
