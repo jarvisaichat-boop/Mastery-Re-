@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { Habit } from '../../types';
 import { DailySchedule, CustomEntry, RoutineItem } from '../../types/visionBoard';
@@ -369,7 +369,28 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
 };
 
 // --- Section C: Schedule ---
-export const ScheduleSection = ({ schedule, updateSchedule, mode }: { schedule: DailySchedule; updateSchedule: (updates: Partial<DailySchedule>) => void; mode: 'view' | 'edit' }) => {
+const ROUTINE_KEY_MAP: Record<'gmRoutine' | 'gdRoutine' | 'gnRoutine', 'gm' | 'gd' | 'gn'> = {
+  gmRoutine: 'gm',
+  gdRoutine: 'gd',
+  gnRoutine: 'gn'
+};
+
+export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }: { schedule: DailySchedule; updateSchedule: (updates: Partial<DailySchedule>) => void; mode: 'view' | 'edit'; habits?: Habit[] }) => {
+  const [habitDropdownOpen, setHabitDropdownOpen] = useState<'gm' | 'gd' | 'gn' | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setHabitDropdownOpen(null);
+      }
+    };
+    if (habitDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [habitDropdownOpen]);
+
   const TimeBlock = ({ time, label, color }: { time: string, label: string, color: string }) => (
     <div className="flex items-center gap-3 py-2">
       <div className="text-[10px] text-gray-500 font-mono w-12">{time}</div>
@@ -428,11 +449,49 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode }: { schedule: 
               />
             </div>
           ))}
-          <button onClick={() => {
-            updateSchedule({ [field]: [...items, { text: "", hidden: false }] })
-          }} className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1">
-            <Plus size={14} /> ADD ITEM
-          </button>
+          <div className="flex items-center gap-3 mt-2">
+            <button onClick={() => {
+              updateSchedule({ [field]: [...items, { text: "", hidden: false }] })
+            }} className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1">
+              <Plus size={14} /> ADD ITEM
+            </button>
+            <div className="relative" ref={habitDropdownOpen === ROUTINE_KEY_MAP[field] ? dropdownRef : null}>
+              <button 
+                onClick={() => {
+                  const key = ROUTINE_KEY_MAP[field];
+                  setHabitDropdownOpen(habitDropdownOpen === key ? null : key);
+                }}
+                className="text-xs text-green-500 hover:text-green-400 flex items-center gap-1"
+              >
+                <Plus size={14} /> ADD HABIT
+              </button>
+              {habitDropdownOpen === ROUTINE_KEY_MAP[field] && habits.length > 0 && (
+                <div className="absolute top-6 left-0 z-50 bg-gray-800 border border-white/10 rounded-lg shadow-xl py-1 min-w-[180px] max-h-48 overflow-y-auto">
+                  {habits.map((habit) => (
+                    <button
+                      key={habit.id}
+                      onClick={() => {
+                        updateSchedule({ [field]: [...items, { text: habit.name, hidden: false }] });
+                        setHabitDropdownOpen(null);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-white hover:bg-white/10 flex items-center gap-2"
+                    >
+                      <div 
+                        className="w-2 h-2 rounded-full" 
+                        style={{ backgroundColor: habit.color }}
+                      />
+                      {habit.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {habitDropdownOpen === ROUTINE_KEY_MAP[field] && habits.length === 0 && (
+                <div className="absolute top-6 left-0 z-50 bg-gray-800 border border-white/10 rounded-lg shadow-xl py-2 px-3 min-w-[180px]">
+                  <span className="text-xs text-gray-400">No habits available</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       ) : (
         <ul className="space-y-2">

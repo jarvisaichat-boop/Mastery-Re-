@@ -130,7 +130,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
                 </div>
                 {/* Slide 3: Schedule */}
                 <div className="w-full h-full min-h-0 flex-shrink-0 overflow-y-auto pb-6">
-                  <ScheduleSection mode="view" schedule={schedule} updateSchedule={updateSchedule} />
+                  <ScheduleSection mode="view" schedule={schedule} updateSchedule={updateSchedule} habits={habits} />
                 </div>
                 {/* Slide 4: Custom (only if enabled) */}
                 {custom.enabled && (
