@@ -34,7 +34,7 @@ export const VisionBoardDashboard: React.FC<VisionBoardDashboardProps> = ({ habi
             </section>
 
             <section className="bg-gray-900">
-               <ScheduleSection mode="edit" habits={habits} schedule={schedule} updateSchedule={updateSchedule} />
+               <ScheduleSection mode="edit" schedule={schedule} updateSchedule={updateSchedule} />
             </section>
 
             <section className="bg-gray-900">

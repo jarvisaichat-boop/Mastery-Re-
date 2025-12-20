@@ -11,9 +11,9 @@ const DEFAULT_DATA: VisionBoardData = {
     purpose: "Master of My Self",
     motto: "Live Life More",
     values: [
-      { title: "The Omen", description: "Face the Fear of Uncertainty" },
-      { title: "The Great Work", description: "Why→How→What" },
-      { title: "Just Do It", description: "The need to relentlessly \"just do it\" in order to have the brain mirror my conscious actions subconsciously." }
+      { title: "The Omen", description: "Face the Fear of Uncertainty", hidden: false },
+      { title: "The Great Work", description: "Why→How→What", hidden: false },
+      { title: "Just Do It", description: "The need to relentlessly \"just do it\" in order to have the brain mirror my conscious actions subconsciously.", hidden: false }
     ]
   },
   path: {
@@ -32,18 +32,18 @@ const DEFAULT_DATA: VisionBoardData = {
   },
   schedule: {
     gmRoutine: [
-      "Morning Acts (Pee, Weight, Sunlight)",
-      "Mental (Headspace, Gratitude)",
-      "Physical (Protein, Abs, Chest)"
+      { text: "Morning Acts (Pee, Weight, Sunlight)", hidden: false },
+      { text: "Mental (Headspace, Gratitude)", hidden: false },
+      { text: "Physical (Protein, Abs, Chest)", hidden: false }
     ],
     gdRoutine: [
-      "Work on my goals",
-      "Code for 1 hour (Make sure this is included)"
+      { text: "Work on my goals", hidden: false },
+      { text: "Code for 1 hour (Make sure this is included)", hidden: false }
     ],
     gnRoutine: [
-      "No Entertainment (5 PM)",
-      "Work Done (9 PM)",
-      "Sleep (11 PM)"
+      { text: "No Entertainment (5 PM)", hidden: false },
+      { text: "Work Done (9 PM)", hidden: false },
+      { text: "Sleep (11 PM)", hidden: false }
     ],
     busyDayPlan: "10min Walk, 10min Headspace, 10min Vision Board, 10min GD."
   },
@@ -112,15 +112,15 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           quarterlyGoals = DEFAULT_DATA.path.quarterlyGoals;
         }
 
-        // Migrate old string-based values to new object format and add missing descriptions
+        // Migrate old string-based values to new object format and add missing descriptions/hidden
         let values = parsed.coreValues?.values;
         if (Array.isArray(values) && values.length > 0 && typeof values[0] === 'string') {
-          values = values.map((v: string) => ({ title: v, description: '' }));
+          values = values.map((v: string) => ({ title: v, description: '', hidden: false }));
         } else if (!values) {
           values = DEFAULT_DATA.coreValues.values;
         }
         
-        // Auto-populate descriptions for known default values if they're empty
+        // Auto-populate descriptions for known default values if they're empty, and add hidden property
         const defaultDescriptions: Record<string, string> = {
           "The Omen": "Face the Fear of Uncertainty",
           "The Great Work": "Why→How→What",
@@ -128,20 +128,46 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
         };
         
         if (Array.isArray(values)) {
-          values = values.map((v: { title: string; description: string }) => {
+          values = values.map((v: { title: string; description: string; hidden?: boolean }) => {
+            const updated = { ...v, hidden: v.hidden ?? false };
             if (!v.description && defaultDescriptions[v.title]) {
-              return { ...v, description: defaultDescriptions[v.title] };
+              return { ...updated, description: defaultDescriptions[v.title] };
             }
-            return v;
+            return updated;
           });
         }
 
+        // Migrate schedule routines from string arrays to RoutineItem arrays
+        const migrateRoutine = (routine: (string | { text: string; hidden: boolean })[] | undefined, defaultRoutine: { text: string; hidden: boolean }[]) => {
+          if (!Array.isArray(routine)) return defaultRoutine;
+          return routine.map((item) => 
+            typeof item === 'string' ? { text: item, hidden: false } : { ...item, hidden: item.hidden ?? false }
+          );
+        };
+        
+        const gmRoutine = migrateRoutine(parsed.schedule?.gmRoutine, DEFAULT_DATA.schedule.gmRoutine);
+        const gdRoutine = migrateRoutine(parsed.schedule?.gdRoutine, DEFAULT_DATA.schedule.gdRoutine);
+        const gnRoutine = migrateRoutine(parsed.schedule?.gnRoutine, DEFAULT_DATA.schedule.gnRoutine);
+
         // Safely merge custom section for legacy data without custom field
         const parsedCustom = parsed.custom && typeof parsed.custom === 'object' ? parsed.custom : {};
+        
+        // Migrate custom entries to include hidden property
+        let customEntries = Array.isArray(parsedCustom.entries) ? parsedCustom.entries : [];
+        customEntries = customEntries.map((entry: { title: string; items: (string | { text: string; hidden: boolean })[]; hidden?: boolean }) => ({
+          ...entry,
+          hidden: entry.hidden ?? false,
+          items: Array.isArray(entry.items) 
+            ? entry.items.map((item) => 
+                typeof item === 'string' ? { text: item, hidden: false } : { ...item, hidden: item.hidden ?? false }
+              )
+            : []
+        }));
+        
         const custom = {
           ...DEFAULT_DATA.custom,
           ...parsedCustom,
-          entries: Array.isArray(parsedCustom.entries) ? parsedCustom.entries : [],
+          entries: customEntries,
           images: Array.isArray(parsedCustom.images) ? parsedCustom.images : []
         };
 
@@ -150,7 +176,7 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           ...parsed,
           coreValues: { ...DEFAULT_DATA.coreValues, ...parsed.coreValues, values },
           path: { ...DEFAULT_DATA.path, ...parsed.path, vision, projects, quarterlyGoals },
-          schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule },
+          schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule, gmRoutine, gdRoutine, gnRoutine },
           custom
         };
       }

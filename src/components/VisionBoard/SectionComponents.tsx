@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { Habit } from '../../types';
-import { DailySchedule, CustomEntry } from '../../types/visionBoard';
+import { DailySchedule, CustomEntry, RoutineItem } from '../../types/visionBoard';
 import { Plus, X, Compass, Target, Clock, Sparkles, Image, ToggleLeft, ToggleRight, EyeOff } from 'lucide-react';
 import { ActionMenu } from './ActionMenu';
 
@@ -64,8 +64,9 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
           {mode === 'edit' ? (
             <div className="space-y-4">
               {coreValues.values.map((val, idx) => (
-                <div key={idx} className="bg-black/20 rounded-lg p-3 border border-white/5">
-                  <div className="flex gap-2 mb-2">
+                <div key={idx} className={`bg-black/20 rounded-lg p-3 border border-white/5 ${val.hidden ? 'opacity-50' : ''}`}>
+                  <div className="flex gap-2 mb-2 items-center">
+                    {val.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
                     <input
                       type="text"
                       value={val.title}
@@ -75,17 +76,36 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
                         newValues[idx] = { ...newValues[idx], title: e.target.value };
                         updateCoreValues({ values: newValues });
                       }}
-                      className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-yellow-500 text-sm font-medium"
+                      className={`flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-yellow-500 text-sm font-medium ${val.hidden ? 'line-through' : ''}`}
                     />
-                    <button
-                      onClick={() => {
+                    <ActionMenu
+                      index={idx}
+                      totalItems={coreValues.values.length}
+                      isHidden={val.hidden}
+                      onMoveUp={() => {
+                        if (idx > 0) {
+                          const newValues = [...coreValues.values];
+                          [newValues[idx - 1], newValues[idx]] = [newValues[idx], newValues[idx - 1]];
+                          updateCoreValues({ values: newValues });
+                        }
+                      }}
+                      onMoveDown={() => {
+                        if (idx < coreValues.values.length - 1) {
+                          const newValues = [...coreValues.values];
+                          [newValues[idx], newValues[idx + 1]] = [newValues[idx + 1], newValues[idx]];
+                          updateCoreValues({ values: newValues });
+                        }
+                      }}
+                      onToggleHide={() => {
+                        const newValues = [...coreValues.values];
+                        newValues[idx] = { ...newValues[idx], hidden: !newValues[idx].hidden };
+                        updateCoreValues({ values: newValues });
+                      }}
+                      onDelete={() => {
                         const newValues = coreValues.values.filter((_, i) => i !== idx);
                         updateCoreValues({ values: newValues });
                       }}
-                      className="p-2 text-gray-500 hover:text-red-400"
-                    >
-                      <X size={16} />
-                    </button>
+                    />
                   </div>
                   <textarea
                     value={val.description}
@@ -95,12 +115,12 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
                       newValues[idx] = { ...newValues[idx], description: e.target.value };
                       updateCoreValues({ values: newValues });
                     }}
-                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm h-16 resize-none"
+                    className={`w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm h-16 resize-none ${val.hidden ? 'line-through' : ''}`}
                   />
                 </div>
               ))}
               <button
-                onClick={() => updateCoreValues({ values: [...coreValues.values, { title: '', description: '' }] })}
+                onClick={() => updateCoreValues({ values: [...coreValues.values, { title: '', description: '', hidden: false }] })}
                 className="flex items-center gap-2 text-xs text-yellow-500 hover:text-yellow-400 mt-2"
               >
                 <Plus size={14} /> ADD VALUE
@@ -108,7 +128,7 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
             </div>
           ) : (
             <div className="space-y-4">
-              {coreValues.values.filter(v => v.title).map((val, idx) => (
+              {coreValues.values.filter(v => v.title && !v.hidden).map((val, idx) => (
                 <p key={idx} className="text-lg leading-relaxed">
                   <span className="text-yellow-500 font-medium uppercase tracking-wide inline-block max-w-[50%] truncate align-bottom">{val.title}</span>{' '}
                   <span className="text-white font-light">{val.description}</span>
@@ -349,9 +369,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
 };
 
 // --- Section C: Schedule ---
-export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { schedule: DailySchedule; updateSchedule: (updates: Partial<DailySchedule>) => void; mode: 'view' | 'edit'; habits: Habit[] }) => {
-  const lifeGoalHabits = habits.filter(h => h.type === 'Life Goal Habit');
-
+export const ScheduleSection = ({ schedule, updateSchedule, mode }: { schedule: DailySchedule; updateSchedule: (updates: Partial<DailySchedule>) => void; mode: 'view' | 'edit' }) => {
   const TimeBlock = ({ time, label, color }: { time: string, label: string, color: string }) => (
     <div className="flex items-center gap-3 py-2">
       <div className="text-[10px] text-gray-500 font-mono w-12">{time}</div>
@@ -363,43 +381,65 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
     </div>
   );
 
-  const RoutineList = ({ title, items, field, color }: { title: string, items: string[], field: keyof DailySchedule, color: string }) => (
+  const RoutineList = ({ title, items, field, color }: { title: string, items: RoutineItem[], field: 'gmRoutine' | 'gdRoutine' | 'gnRoutine', color: string }) => (
     <div className="mb-5">
       <div className={`text-[10px] uppercase tracking-[0.2em] mb-2 font-semibold ${color}`}>{title}</div>
       {mode === 'edit' ? (
         <div className="space-y-2">
           {items.map((item, idx) => (
-            <div key={idx} className="flex gap-2">
+            <div key={idx} className={`flex gap-2 items-center ${item.hidden ? 'opacity-50' : ''}`}>
+              {item.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
               <input
-                value={item}
+                value={item.text}
                 onChange={(e) => {
-                  if (!Array.isArray(schedule[field])) return;
-                  const newItems = [...(schedule[field] as string[])];
-                  newItems[idx] = e.target.value;
+                  const newItems = [...items];
+                  newItems[idx] = { ...newItems[idx], text: e.target.value };
                   updateSchedule({ [field]: newItems });
                 }}
-                className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
+                className={`flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm ${item.hidden ? 'line-through' : ''}`}
               />
-              <button onClick={() => {
-                if (!Array.isArray(schedule[field])) return;
-                const newItems = (schedule[field] as string[]).filter((_, i) => i !== idx);
-                updateSchedule({ [field]: newItems });
-              }} className="text-gray-500 hover:text-red-400"><X size={16} /></button>
+              <ActionMenu
+                index={idx}
+                totalItems={items.length}
+                isHidden={item.hidden}
+                onMoveUp={() => {
+                  if (idx > 0) {
+                    const newItems = [...items];
+                    [newItems[idx - 1], newItems[idx]] = [newItems[idx], newItems[idx - 1]];
+                    updateSchedule({ [field]: newItems });
+                  }
+                }}
+                onMoveDown={() => {
+                  if (idx < items.length - 1) {
+                    const newItems = [...items];
+                    [newItems[idx], newItems[idx + 1]] = [newItems[idx + 1], newItems[idx]];
+                    updateSchedule({ [field]: newItems });
+                  }
+                }}
+                onToggleHide={() => {
+                  const newItems = [...items];
+                  newItems[idx] = { ...newItems[idx], hidden: !newItems[idx].hidden };
+                  updateSchedule({ [field]: newItems });
+                }}
+                onDelete={() => {
+                  const newItems = items.filter((_, i) => i !== idx);
+                  updateSchedule({ [field]: newItems });
+                }}
+              />
             </div>
           ))}
           <button onClick={() => {
-            if (!Array.isArray(schedule[field])) return;
-            updateSchedule({ [field]: [...(schedule[field] as string[]), ""] })
+            updateSchedule({ [field]: [...items, { text: "", hidden: false }] })
           }} className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1">
             <Plus size={14} /> ADD ITEM
           </button>
         </div>
       ) : (
         <ul className="space-y-2">
-          {items.filter(i => i).map((item, idx) => (
+          {items.filter(i => i.text && !i.hidden).map((item, idx) => (
             <li key={idx} className="flex items-start gap-2 text-lg text-gray-300 font-light">
               <span className="text-gray-600">•</span>
-              <span>{item}</span>
+              <span>{item.text}</span>
             </li>
           ))}
         </ul>
@@ -439,24 +479,6 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
         <RoutineList title="GM ROUTINE" items={schedule.gmRoutine} field="gmRoutine" color="text-yellow-500/70" />
         <RoutineList title="GD ROUTINE" items={schedule.gdRoutine} field="gdRoutine" color="text-blue-400/70" />
         <RoutineList title="GN ROUTINE" items={schedule.gnRoutine} field="gnRoutine" color="text-purple-400/70" />
-
-        {/* Daily Habits */}
-        <div className="mt-6 pt-4 border-t border-white/5">
-          <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-3 font-semibold">DAILY HABIT STACK</div>
-          <div className="space-y-2">
-            {lifeGoalHabits.length > 0 ? lifeGoalHabits.map(h => (
-              <div key={h.id} className="flex items-center gap-3 bg-black/20 p-3 rounded-lg border border-white/5">
-                <div 
-                  className="w-2 h-2 rounded-full bg-green-400"
-                  style={{ boxShadow: '0 0 8px rgba(74, 222, 128, 0.6)' }}
-                />
-                <span className="text-lg text-gray-200 font-light">{h.name}</span>
-              </div>
-            )) : (
-              <div className="text-gray-600 text-lg italic">No habits linked yet</div>
-            )}
-          </div>
-        </div>
 
         {/* Busy Day Plan */}
         {(mode === 'edit' || schedule.busyDayPlan) && (
@@ -502,7 +524,7 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
   };
 
   const addEntry = () => {
-    updateCustom({ entries: [...custom.entries, { title: '', items: [''] }] });
+    updateCustom({ entries: [...custom.entries, { title: '', items: [{ text: '', hidden: false }], hidden: false }] });
   };
 
   const updateEntry = (idx: number, updates: Partial<CustomEntry>) => {
@@ -515,16 +537,31 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
     updateCustom({ entries: custom.entries.filter((_, i) => i !== idx) });
   };
 
+  const moveEntry = (idx: number, direction: 'up' | 'down') => {
+    const newEntries = [...custom.entries];
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx >= 0 && targetIdx < newEntries.length) {
+      [newEntries[idx], newEntries[targetIdx]] = [newEntries[targetIdx], newEntries[idx]];
+      updateCustom({ entries: newEntries });
+    }
+  };
+
+  const toggleEntryHidden = (idx: number) => {
+    const newEntries = [...custom.entries];
+    newEntries[idx] = { ...newEntries[idx], hidden: !newEntries[idx].hidden };
+    updateCustom({ entries: newEntries });
+  };
+
   const addItemToEntry = (entryIdx: number) => {
     const newEntries = [...custom.entries];
-    newEntries[entryIdx] = { ...newEntries[entryIdx], items: [...newEntries[entryIdx].items, ''] };
+    newEntries[entryIdx] = { ...newEntries[entryIdx], items: [...newEntries[entryIdx].items, { text: '', hidden: false }] };
     updateCustom({ entries: newEntries });
   };
 
   const updateItemInEntry = (entryIdx: number, itemIdx: number, value: string) => {
     const newEntries = [...custom.entries];
     const newItems = [...newEntries[entryIdx].items];
-    newItems[itemIdx] = value;
+    newItems[itemIdx] = { ...newItems[itemIdx], text: value };
     newEntries[entryIdx] = { ...newEntries[entryIdx], items: newItems };
     updateCustom({ entries: newEntries });
   };
@@ -535,6 +572,25 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
       ...newEntries[entryIdx], 
       items: newEntries[entryIdx].items.filter((_, i) => i !== itemIdx) 
     };
+    updateCustom({ entries: newEntries });
+  };
+
+  const moveItemInEntry = (entryIdx: number, itemIdx: number, direction: 'up' | 'down') => {
+    const newEntries = [...custom.entries];
+    const items = [...newEntries[entryIdx].items];
+    const targetIdx = direction === 'up' ? itemIdx - 1 : itemIdx + 1;
+    if (targetIdx >= 0 && targetIdx < items.length) {
+      [items[itemIdx], items[targetIdx]] = [items[targetIdx], items[itemIdx]];
+      newEntries[entryIdx] = { ...newEntries[entryIdx], items };
+      updateCustom({ entries: newEntries });
+    }
+  };
+
+  const toggleItemHidden = (entryIdx: number, itemIdx: number) => {
+    const newEntries = [...custom.entries];
+    const items = [...newEntries[entryIdx].items];
+    items[itemIdx] = { ...items[itemIdx], hidden: !items[itemIdx].hidden };
+    newEntries[entryIdx] = { ...newEntries[entryIdx], items };
     updateCustom({ entries: newEntries });
   };
 
@@ -574,39 +630,48 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
 
         {/* Custom Entries */}
         {custom.entries.map((entry, entryIdx) => (
-          <div key={entryIdx} className={mode === 'edit' ? 'bg-black/20 rounded-xl p-4 border border-white/5' : ''}>
+          mode === 'edit' || (!entry.hidden && entry.items.some(i => i.text && !i.hidden)) ? (
+          <div key={entryIdx} className={`${mode === 'edit' ? 'bg-black/20 rounded-xl p-4 border border-white/5' : ''} ${entry.hidden ? 'opacity-50' : ''}`}>
             {mode === 'edit' ? (
               <div className="space-y-3">
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                  {entry.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
                   <input
                     type="text"
                     value={entry.title}
                     onChange={(e) => updateEntry(entryIdx, { title: e.target.value })}
                     placeholder="Section title (e.g., Goals, Affirmations)"
-                    className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-yellow-500 text-sm font-medium uppercase"
+                    className={`flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-yellow-500 text-sm font-medium uppercase ${entry.hidden ? 'line-through' : ''}`}
                   />
-                  <button
-                    onClick={() => removeEntry(entryIdx)}
-                    className="p-2 text-gray-500 hover:text-red-400"
-                  >
-                    <X size={16} />
-                  </button>
+                  <ActionMenu
+                    index={entryIdx}
+                    totalItems={custom.entries.length}
+                    isHidden={entry.hidden}
+                    onMoveUp={() => moveEntry(entryIdx, 'up')}
+                    onMoveDown={() => moveEntry(entryIdx, 'down')}
+                    onToggleHide={() => toggleEntryHidden(entryIdx)}
+                    onDelete={() => removeEntry(entryIdx)}
+                  />
                 </div>
                 <div className="space-y-2">
                   {entry.items.map((item, itemIdx) => (
-                    <div key={itemIdx} className="flex gap-2">
+                    <div key={itemIdx} className={`flex gap-2 items-center ${item.hidden ? 'opacity-50' : ''}`}>
+                      {item.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
                       <input
-                        value={item}
+                        value={item.text}
                         onChange={(e) => updateItemInEntry(entryIdx, itemIdx, e.target.value)}
-                        className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
+                        className={`flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm ${item.hidden ? 'line-through' : ''}`}
                         placeholder="Entry..."
                       />
-                      <button 
-                        onClick={() => removeItemFromEntry(entryIdx, itemIdx)} 
-                        className="text-gray-500 hover:text-red-400"
-                      >
-                        <X size={16} />
-                      </button>
+                      <ActionMenu
+                        index={itemIdx}
+                        totalItems={entry.items.length}
+                        isHidden={item.hidden}
+                        onMoveUp={() => moveItemInEntry(entryIdx, itemIdx, 'up')}
+                        onMoveDown={() => moveItemInEntry(entryIdx, itemIdx, 'down')}
+                        onToggleHide={() => toggleItemHidden(entryIdx, itemIdx)}
+                        onDelete={() => removeItemFromEntry(entryIdx, itemIdx)}
+                      />
                     </div>
                   ))}
                   <button 
@@ -625,19 +690,20 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
                   </p>
                 )}
                 <ul className="space-y-2">
-                  {entry.items.filter(i => i).map((item, itemIdx) => (
+                  {entry.items.filter(i => i.text && !i.hidden).map((item, itemIdx) => (
                     <li key={itemIdx} className="flex items-center gap-3">
                       <div 
                         className="w-2 h-2 rounded-full bg-yellow-400"
                         style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
                       />
-                      <span className="text-lg text-white font-light">{item}</span>
+                      <span className="text-lg text-white font-light">{item.text}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
           </div>
+          ) : null
         ))}
 
         {/* Add Entry Button (Edit mode only) */}

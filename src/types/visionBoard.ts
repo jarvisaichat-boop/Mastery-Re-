@@ -1,6 +1,7 @@
 export interface PersonalValue {
   title: string;
   description: string;
+  hidden: boolean;
 }
 
 export interface CoreValues {
@@ -16,24 +17,28 @@ export interface VisionItem {
   hidden: boolean;
 }
 
+export interface RoutineItem {
+  text: string;
+  hidden: boolean;
+}
+
 export interface VisionPath {
   vision: string;
-  // Habits are derived from the main Habit[] state, so we don't store them here
-  // But we might want to store specific "Projects" or "Goals" text if they aren't habits
   projects: VisionItem[];
   quarterlyGoals: VisionItem[];
 }
 
 export interface DailySchedule {
-  gmRoutine: string[];
-  gdRoutine: string[];
-  gnRoutine: string[];
+  gmRoutine: RoutineItem[];
+  gdRoutine: RoutineItem[];
+  gnRoutine: RoutineItem[];
   busyDayPlan: string;
 }
 
 export interface CustomEntry {
   title: string;
-  items: string[];
+  items: VisionItem[];
+  hidden: boolean;
 }
 
 export interface CustomSection {
