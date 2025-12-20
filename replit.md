@@ -50,6 +50,11 @@ Additional preferences:
 2. **Discipline Engine**: Tiered logging windows based on habit strictness (Anchor, Life Goal, Regular)
 3. **Micro-Win Protocol**: Fallback system for overwhelming days with 60-second action options
 4. **Notification Escalation**: T-5 gentle → T-0 urgent → T+5 buzzing notification pattern
+5. **Vision Board** (`src/components/VisionBoard/`): Four-section carousel (Core Values, Path, Schedule, Custom) with:
+   - ActionMenu for item management (move up/down, hide/show, delete)
+   - View/Edit mode toggle per section
+   - Hidden items display with opacity and strikethrough in edit mode
+   - Data migration for backward compatibility with legacy formats
 
 ### Backend API Server
 - Express.js server running on port 3001
