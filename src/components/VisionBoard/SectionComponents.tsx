@@ -313,7 +313,7 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
         className={`w-2 h-2 rounded-full ${color}`}
         style={{ boxShadow: `0 0 8px currentColor` }}
       />
-      <div className="text-sm text-gray-200 font-light">{label}</div>
+      <div className="text-lg text-gray-200 font-light">{label}</div>
     </div>
   );
 
@@ -349,9 +349,9 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
           </button>
         </div>
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="space-y-2">
           {items.filter(i => i).map((item, idx) => (
-            <li key={idx} className="flex items-start gap-2 text-sm text-gray-300 font-light">
+            <li key={idx} className="flex items-start gap-2 text-lg text-gray-300 font-light">
               <span className="text-gray-600">•</span>
               <span>{item}</span>
             </li>
@@ -404,10 +404,10 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
                   className="w-1.5 h-1.5 rounded-full bg-green-400"
                   style={{ boxShadow: '0 0 8px rgba(74, 222, 128, 0.6)' }}
                 />
-                <span className="text-sm text-gray-200 font-light">{h.name}</span>
+                <span className="text-lg text-gray-200 font-light">{h.name}</span>
               </div>
             )) : (
-              <div className="text-gray-600 text-sm italic">No habits linked yet</div>
+              <div className="text-gray-600 text-lg italic">No habits linked yet</div>
             )}
           </div>
         </div>
@@ -424,7 +424,7 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
                 className="w-full bg-black/30 border border-white/10 rounded p-3 text-white text-sm h-24 placeholder-gray-600"
               />
             ) : (
-              <div className="text-gray-300 font-light italic text-sm">"{schedule.busyDayPlan}"</div>
+              <div className="text-gray-300 font-light italic text-lg">"{schedule.busyDayPlan}"</div>
             )}
           </div>
         )}
@@ -578,9 +578,9 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
                     {entry.title}
                   </div>
                 )}
-                <ul className="space-y-1.5">
+                <ul className="space-y-2">
                   {entry.items.filter(i => i).map((item, itemIdx) => (
-                    <li key={itemIdx} className="flex items-start gap-2 text-sm text-gray-300 font-light">
+                    <li key={itemIdx} className="flex items-start gap-2 text-lg text-gray-300 font-light">
                       <span className="text-gray-600">•</span>
                       <span>{item}</span>
                     </li>
@@ -648,7 +648,7 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
         {mode === 'view' && custom.entries.length === 0 && custom.images.length === 0 && (
           <div className="text-center py-8 text-gray-600">
             <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm italic">No custom content yet</p>
+            <p className="text-lg italic">No custom content yet</p>
           </div>
         )}
       </div>
