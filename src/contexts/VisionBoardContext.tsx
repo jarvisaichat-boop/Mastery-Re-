@@ -163,11 +163,9 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
         if (!Array.isArray(timeline)) {
           timeline = DEFAULT_DATA.schedule.timeline;
         } else {
-          // Migrate: remove old type/routineKey, add isRoutine for GM/GD/GN entries
+          // Migrate: preserve isRoutine from old routineKey field or existing isRoutine flag
           timeline = timeline.map((block: Partial<TimeBlock> & { type?: string; routineKey?: string }) => {
-            const isRoutineBlock = block.label?.includes('GM Routine') || 
-                                   block.label?.includes('GD Routine') || 
-                                   block.label?.includes('GN Routine');
+            const wasRoutine = block.isRoutine || !!block.routineKey;
             const { type: _type, routineKey: _routineKey, ...rest } = block as Record<string, unknown>;
             return {
               time: rest.time as string || '',
@@ -175,18 +173,21 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
               color: rest.color as string || 'bg-gray-400',
               hidden: (rest.hidden as boolean) ?? false,
               endTime: rest.endTime as string | undefined,
-              isRoutine: isRoutineBlock || (rest.isRoutine as boolean) || false
+              isRoutine: wasRoutine
             };
           });
           
-          // Ensure GM/GD/GN routine blocks exist
-          const hasGM = timeline.some(b => b.label?.includes('GM Routine'));
-          const hasGD = timeline.some(b => b.label?.includes('GD Routine'));
-          const hasGN = timeline.some(b => b.label?.includes('GN Routine'));
+          // Ensure exactly 3 routine entries exist (users can rename them but must have 3 protected entries)
+          const routineCount = timeline.filter(b => b.isRoutine).length;
+          const defaults = [
+            { time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, isRoutine: true },
+            { time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, isRoutine: true },
+            { time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, isRoutine: true }
+          ];
           
-          if (!hasGM) timeline.push({ time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, isRoutine: true });
-          if (!hasGD) timeline.push({ time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, isRoutine: true });
-          if (!hasGN) timeline.push({ time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, isRoutine: true });
+          for (let i = 0; i < 3 - routineCount && i < defaults.length; i++) {
+            timeline.push(defaults[i]);
+          }
         }
 
         // Safely merge custom section for legacy data without custom field
