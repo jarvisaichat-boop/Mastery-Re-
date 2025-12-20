@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { CoreValuesSection, PathSection, ScheduleSection } from './SectionComponents';
+import { CoreValuesSection, PathSection, ScheduleSection, CustomSectionComponent } from './SectionComponents';
 import { Habit } from '../../types';
 
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
@@ -13,8 +13,12 @@ interface VisionBoardCarouselProps {
 
 export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits }) => {
   const { data, updateSchedule } = useVisionBoard();
-  const { schedule } = data;
+  const { schedule, custom } = data;
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Calculate total slides: 3 base slides + 1 if custom is enabled
+  const totalSlides = custom.enabled ? 4 : 3;
+  const maxIndex = totalSlides - 1;
 
   const handlers = useSwipeable({
     onSwipedLeft: () => handleNext(),
@@ -24,7 +28,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
   });
 
   const handleNext = () => {
-    if (currentIndex < 2) setCurrentIndex(prev => prev + 1);
+    if (currentIndex < maxIndex) setCurrentIndex(prev => prev + 1);
   };
 
   const handlePrev = () => {
@@ -102,7 +106,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
             <button
               onClick={(e) => { e.stopPropagation(); handleNext(); }}
               className={`lg:hidden absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/30 backdrop-blur-sm transition-all ${
-                currentIndex === 2 
+                currentIndex === maxIndex 
                   ? 'opacity-0 pointer-events-none' 
                   : 'opacity-60 active:opacity-100 text-white'
               }`}
@@ -128,6 +132,12 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
                 <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
                   <ScheduleSection mode="view" habits={habits} schedule={schedule} updateSchedule={updateSchedule} />
                 </div>
+                {/* Slide 4: Custom (only if enabled) */}
+                {custom.enabled && (
+                  <div className="w-full h-full flex-shrink-0 overflow-y-auto no-scrollbar">
+                    <CustomSectionComponent mode="view" />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -136,7 +146,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
           <button
             onClick={handleNext}
             className={`hidden lg:flex flex-shrink-0 p-2 rounded-full transition-all ${
-              currentIndex === 2 
+              currentIndex === maxIndex 
                 ? 'opacity-0 pointer-events-none' 
                 : 'opacity-50 hover:opacity-100 text-gray-400 hover:text-white'
             }`}
@@ -148,7 +158,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
 
       {/* Footer Navigation Dots */}
       <div className="flex-shrink-0 py-3 flex justify-center items-center gap-2">
-        {[0, 1, 2].map(idx => (
+        {Array.from({ length: totalSlides }).map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentIndex(idx)}

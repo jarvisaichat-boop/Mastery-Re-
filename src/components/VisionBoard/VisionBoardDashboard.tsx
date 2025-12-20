@@ -1,5 +1,5 @@
 import React from 'react';
-import { CoreValuesSection, PathSection, ScheduleSection } from './SectionComponents';
+import { CoreValuesSection, PathSection, ScheduleSection, CustomSectionComponent } from './SectionComponents';
 import { Habit } from '../../types';
 
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
@@ -35,6 +35,10 @@ export const VisionBoardDashboard: React.FC<VisionBoardDashboardProps> = ({ habi
 
             <section className="bg-gray-900">
                <ScheduleSection mode="edit" habits={habits} schedule={schedule} updateSchedule={updateSchedule} />
+            </section>
+
+            <section className="bg-gray-900">
+               <CustomSectionComponent mode="edit" />
             </section>
          </div>
       </div>

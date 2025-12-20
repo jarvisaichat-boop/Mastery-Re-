@@ -26,10 +26,22 @@ export interface DailySchedule {
   busyDayPlan: string;
 }
 
+export interface CustomEntry {
+  title: string;
+  items: string[];
+}
+
+export interface CustomSection {
+  enabled: boolean;
+  entries: CustomEntry[];
+  images: string[];
+}
+
 export interface VisionBoardData {
   coreValues: CoreValues;
   path: VisionPath;
   schedule: DailySchedule;
+  custom: CustomSection;
 }
 
 export interface VisionBoardContextType {
@@ -37,4 +49,5 @@ export interface VisionBoardContextType {
   updateCoreValues: (updates: Partial<CoreValues>) => void;
   updatePath: (updates: Partial<VisionPath>) => void;
   updateSchedule: (updates: Partial<DailySchedule>) => void;
+  updateCustom: (updates: Partial<CustomSection>) => void;
 }

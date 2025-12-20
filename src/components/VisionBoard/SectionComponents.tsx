@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { Habit } from '../../types';
-import { DailySchedule } from '../../types/visionBoard';
-import { Plus, X, Compass, Target, Clock } from 'lucide-react';
+import { DailySchedule, CustomEntry } from '../../types/visionBoard';
+import { Plus, X, Compass, Target, Clock, Sparkles, Image, ToggleLeft, ToggleRight } from 'lucide-react';
 
 interface SectionProps {
   mode: 'edit' | 'view';
@@ -426,6 +426,229 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits }: { sc
             ) : (
               <div className="text-gray-300 font-light italic text-sm">"{schedule.busyDayPlan}"</div>
             )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// --- Section D: Custom ---
+export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
+  const { data, updateCustom } = useVisionBoard();
+  const { custom } = data;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        updateCustom({ images: [...custom.images, base64] });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (idx: number) => {
+    updateCustom({ images: custom.images.filter((_, i) => i !== idx) });
+  };
+
+  const addEntry = () => {
+    updateCustom({ entries: [...custom.entries, { title: '', items: [''] }] });
+  };
+
+  const updateEntry = (idx: number, updates: Partial<CustomEntry>) => {
+    const newEntries = [...custom.entries];
+    newEntries[idx] = { ...newEntries[idx], ...updates };
+    updateCustom({ entries: newEntries });
+  };
+
+  const removeEntry = (idx: number) => {
+    updateCustom({ entries: custom.entries.filter((_, i) => i !== idx) });
+  };
+
+  const addItemToEntry = (entryIdx: number) => {
+    const newEntries = [...custom.entries];
+    newEntries[entryIdx] = { ...newEntries[entryIdx], items: [...newEntries[entryIdx].items, ''] };
+    updateCustom({ entries: newEntries });
+  };
+
+  const updateItemInEntry = (entryIdx: number, itemIdx: number, value: string) => {
+    const newEntries = [...custom.entries];
+    const newItems = [...newEntries[entryIdx].items];
+    newItems[itemIdx] = value;
+    newEntries[entryIdx] = { ...newEntries[entryIdx], items: newItems };
+    updateCustom({ entries: newEntries });
+  };
+
+  const removeItemFromEntry = (entryIdx: number, itemIdx: number) => {
+    const newEntries = [...custom.entries];
+    newEntries[entryIdx] = { 
+      ...newEntries[entryIdx], 
+      items: newEntries[entryIdx].items.filter((_, i) => i !== itemIdx) 
+    };
+    updateCustom({ entries: newEntries });
+  };
+
+  return (
+    <div className="h-full p-6 sm:p-8">
+      {/* Section Header */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-500/10 mb-3">
+          <Sparkles className="w-6 h-6 text-yellow-500" />
+        </div>
+        <h2 
+          className="text-xl font-bold text-yellow-500 tracking-[0.15em] uppercase"
+          style={{ textShadow: '0 0 20px rgba(234, 179, 8, 0.3)' }}
+        >
+          CUSTOM
+        </h2>
+        <p className="text-gray-500 text-xs mt-1">Your personalized section</p>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-sm mx-auto space-y-6">
+        {/* Opt-in Toggle (Edit mode only) */}
+        {mode === 'edit' && (
+          <div className="flex items-center justify-between bg-black/20 rounded-xl p-4 border border-white/5">
+            <div>
+              <div className="text-sm text-white font-medium">Show in Vision Board</div>
+              <div className="text-[10px] text-gray-500">Display this section during GM sequence</div>
+            </div>
+            <button
+              onClick={() => updateCustom({ enabled: !custom.enabled })}
+              className="text-yellow-500 hover:text-yellow-400 transition-colors"
+            >
+              {custom.enabled ? <ToggleRight size={32} /> : <ToggleLeft size={32} className="text-gray-500" />}
+            </button>
+          </div>
+        )}
+
+        {/* Custom Entries */}
+        {custom.entries.map((entry, entryIdx) => (
+          <div key={entryIdx} className="bg-black/20 rounded-xl p-4 border border-white/5">
+            {mode === 'edit' ? (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={entry.title}
+                    onChange={(e) => updateEntry(entryIdx, { title: e.target.value })}
+                    placeholder="Section title (e.g., Goals, Affirmations)"
+                    className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-yellow-500 text-sm font-medium uppercase"
+                  />
+                  <button
+                    onClick={() => removeEntry(entryIdx)}
+                    className="p-2 text-gray-500 hover:text-red-400"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {entry.items.map((item, itemIdx) => (
+                    <div key={itemIdx} className="flex gap-2">
+                      <input
+                        value={item}
+                        onChange={(e) => updateItemInEntry(entryIdx, itemIdx, e.target.value)}
+                        className="flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm"
+                        placeholder="Entry..."
+                      />
+                      <button 
+                        onClick={() => removeItemFromEntry(entryIdx, itemIdx)} 
+                        className="text-gray-500 hover:text-red-400"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => addItemToEntry(entryIdx)} 
+                    className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1"
+                  >
+                    <Plus size={14} /> ADD ITEM
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                {entry.title && (
+                  <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-2 font-semibold">
+                    {entry.title}
+                  </div>
+                )}
+                <ul className="space-y-1.5">
+                  {entry.items.filter(i => i).map((item, itemIdx) => (
+                    <li key={itemIdx} className="flex items-start gap-2 text-sm text-gray-300 font-light">
+                      <span className="text-gray-600">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Add Entry Button (Edit mode only) */}
+        {mode === 'edit' && (
+          <button 
+            onClick={addEntry}
+            className="w-full flex items-center justify-center gap-2 text-xs text-yellow-500 hover:text-yellow-400 py-3 border border-dashed border-yellow-500/30 rounded-xl hover:border-yellow-500/50 transition-colors"
+          >
+            <Plus size={14} /> ADD CUSTOM SECTION
+          </button>
+        )}
+
+        {/* Images */}
+        {(custom.images.length > 0 || mode === 'edit') && (
+          <div className="space-y-3">
+            <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] font-semibold">IMAGES</div>
+            <div className="grid grid-cols-2 gap-3">
+              {custom.images.map((img, idx) => (
+                <div key={idx} className="relative group">
+                  <img 
+                    src={img} 
+                    alt={`Custom ${idx + 1}`} 
+                    className="w-full h-24 object-cover rounded-lg border border-white/10"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-1 right-1 p-1 bg-black/70 rounded-full text-gray-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {mode === 'edit' && (
+              <>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 text-xs text-yellow-500 hover:text-yellow-400 py-3 border border-dashed border-yellow-500/30 rounded-xl hover:border-yellow-500/50 transition-colors"
+                >
+                  <Image size={14} /> ADD IMAGE
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {mode === 'view' && custom.entries.length === 0 && custom.images.length === 0 && (
+          <div className="text-center py-8 text-gray-600">
+            <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm italic">No custom content yet</p>
           </div>
         )}
       </div>

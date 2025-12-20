@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { VisionBoardData, VisionBoardContextType, CoreValues, VisionPath, DailySchedule } from '../types/visionBoard';
+import { VisionBoardData, VisionBoardContextType, CoreValues, VisionPath, DailySchedule, CustomSection } from '../types/visionBoard';
 import { logger } from '../utils/logger';
 
 const LOCAL_STORAGE_KEY = 'mastery-vision-board-v2';
@@ -46,6 +46,11 @@ const DEFAULT_DATA: VisionBoardData = {
       "Sleep (11 PM)"
     ],
     busyDayPlan: "10min Walk, 10min Headspace, 10min Vision Board, 10min GD."
+  },
+  custom: {
+    enabled: false,
+    entries: [],
+    images: []
   }
 };
 
@@ -116,12 +121,22 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           });
         }
 
+        // Safely merge custom section for legacy data without custom field
+        const parsedCustom = parsed.custom && typeof parsed.custom === 'object' ? parsed.custom : {};
+        const custom = {
+          ...DEFAULT_DATA.custom,
+          ...parsedCustom,
+          entries: Array.isArray(parsedCustom.entries) ? parsedCustom.entries : [],
+          images: Array.isArray(parsedCustom.images) ? parsedCustom.images : []
+        };
+
         return {
           ...DEFAULT_DATA,
           ...parsed,
           coreValues: { ...DEFAULT_DATA.coreValues, ...parsed.coreValues, values },
           path: { ...DEFAULT_DATA.path, ...parsed.path, vision, projects },
-          schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule }
+          schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule },
+          custom
         };
       }
     } catch (e) {
@@ -159,12 +174,20 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
     }));
   };
 
+  const updateCustom = (updates: Partial<CustomSection>) => {
+    setData(prev => ({
+      ...prev,
+      custom: { ...prev.custom, ...updates }
+    }));
+  };
+
   return (
     <VisionBoardContext.Provider value={{
       data,
       updateCoreValues,
       updatePath,
-      updateSchedule
+      updateSchedule,
+      updateCustom
     }}>
       {children}
     </VisionBoardContext.Provider>
