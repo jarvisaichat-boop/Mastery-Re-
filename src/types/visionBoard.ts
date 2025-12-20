@@ -29,6 +29,7 @@ export interface TimeBlock {
   color: string;
   hidden: boolean;
   isRoutine?: boolean;
+  isProtected?: boolean;
 }
 
 export interface VisionPath {

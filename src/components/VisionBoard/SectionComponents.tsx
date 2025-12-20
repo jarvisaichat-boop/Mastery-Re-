@@ -4,6 +4,7 @@ import { Habit } from '../../types';
 import { DailySchedule, CustomEntry, RoutineItem, TimeBlock } from '../../types/visionBoard';
 import { Plus, X, Compass, Target, Clock, Sparkles, Image, ToggleLeft, ToggleRight, EyeOff } from 'lucide-react';
 import { ActionMenu } from './ActionMenu';
+import { VisualTimelineEditor } from './VisualTimelineEditor';
 
 interface SectionProps {
   mode: 'edit' | 'view';
@@ -391,19 +392,6 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [habitDropdownOpen]);
 
-  const COLOR_OPTIONS = [
-    { value: 'bg-gray-400', label: 'Gray' },
-    { value: 'bg-yellow-400', label: 'Yellow' },
-    { value: 'bg-blue-400', label: 'Blue' },
-    { value: 'bg-red-400', label: 'Red' },
-    { value: 'bg-green-400', label: 'Green' },
-    { value: 'bg-purple-400', label: 'Purple' },
-    { value: 'bg-orange-400', label: 'Orange' },
-    { value: 'bg-pink-400', label: 'Pink' },
-    { value: 'bg-cyan-400', label: 'Cyan' },
-    { value: 'bg-indigo-400', label: 'Indigo' }
-  ];
-
   const timeToMinutes = (time: string): number => {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
@@ -495,7 +483,6 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${block.color} flex-shrink-0`} />
                     <span className="text-sm text-gray-200 font-medium truncate">{block.label}</span>
-                    {block.isRoutine && <span className="text-[9px] text-yellow-500/50">→</span>}
                   </div>
                   <div className="text-[10px] text-gray-500 ml-4">{block.time} - {block.endTime}</div>
                 </div>
@@ -505,136 +492,6 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
           
           return null;
         })}
-      </div>
-    );
-  };
-
-  const [colorPickerOpen, setColorPickerOpen] = useState<number | null>(null);
-  const colorPickerRef = useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
-        setColorPickerOpen(null);
-      }
-    };
-    if (colorPickerOpen !== null) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [colorPickerOpen]);
-
-  const EditTimelineList = () => {
-    const timeline = schedule.timeline || [];
-    
-    return (
-      <div className="space-y-2">
-        {timeline.map((block, idx) => (
-          <div key={idx} className={`flex items-center gap-2 py-1 px-2 rounded-lg bg-black/20 ${block.hidden ? 'opacity-50' : ''}`}>
-            {block.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
-            
-            <input
-              type="time"
-              value={block.time}
-              onChange={(e) => {
-                const newTimeline = [...timeline];
-                newTimeline[idx] = { ...newTimeline[idx], time: e.target.value };
-                updateSchedule({ timeline: newTimeline });
-              }}
-              className="bg-black/30 border border-white/10 rounded p-1 text-white text-xs w-[72px]"
-            />
-            
-            <span className="text-gray-500 text-xs">-</span>
-            
-            <input
-              type="time"
-              value={block.endTime || ''}
-              onChange={(e) => {
-                const newTimeline = [...timeline];
-                newTimeline[idx] = { ...newTimeline[idx], endTime: e.target.value || undefined };
-                updateSchedule({ timeline: newTimeline });
-              }}
-              placeholder="--:--"
-              className="bg-black/30 border border-white/10 rounded p-1 text-white text-xs w-[72px]"
-            />
-            
-            <div className="relative" ref={colorPickerOpen === idx ? colorPickerRef : undefined}>
-              <button
-                onClick={() => setColorPickerOpen(colorPickerOpen === idx ? null : idx)}
-                className={`w-6 h-6 rounded-full ${block.color} border border-white/20 flex-shrink-0`}
-                style={{ boxShadow: '0 0 4px currentColor' }}
-              />
-              {colorPickerOpen === idx && (
-                <div className="absolute z-20 top-8 left-0 bg-gray-900 border border-white/20 rounded-lg p-2 grid grid-cols-5 gap-1">
-                  {COLOR_OPTIONS.map(opt => (
-                    <button
-                      key={opt.value}
-                      onClick={() => {
-                        const newTimeline = [...timeline];
-                        newTimeline[idx] = { ...newTimeline[idx], color: opt.value };
-                        updateSchedule({ timeline: newTimeline });
-                        setColorPickerOpen(null);
-                      }}
-                      className={`w-5 h-5 rounded-full ${opt.value} border border-white/20 hover:scale-110 transition-transform`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <input
-              value={block.label}
-              onChange={(e) => {
-                const newTimeline = [...timeline];
-                newTimeline[idx] = { ...newTimeline[idx], label: e.target.value };
-                updateSchedule({ timeline: newTimeline });
-              }}
-              className={`flex-1 min-w-[80px] bg-black/30 border border-white/10 rounded p-1 text-white text-sm ${block.hidden ? 'line-through' : ''}`}
-              placeholder="Name"
-            />
-            
-            {block.isRoutine && <span className="text-[9px] text-yellow-500/70 flex-shrink-0">routine</span>}
-            
-            <ActionMenu
-              index={idx}
-              totalItems={timeline.length}
-              isHidden={block.hidden}
-              onMoveUp={() => {
-                if (idx > 0) {
-                  const newTimeline = [...timeline];
-                  [newTimeline[idx - 1], newTimeline[idx]] = [newTimeline[idx], newTimeline[idx - 1]];
-                  updateSchedule({ timeline: newTimeline });
-                }
-              }}
-              onMoveDown={() => {
-                if (idx < timeline.length - 1) {
-                  const newTimeline = [...timeline];
-                  [newTimeline[idx], newTimeline[idx + 1]] = [newTimeline[idx + 1], newTimeline[idx]];
-                  updateSchedule({ timeline: newTimeline });
-                }
-              }}
-              onToggleHide={() => {
-                const newTimeline = [...timeline];
-                newTimeline[idx] = { ...newTimeline[idx], hidden: !newTimeline[idx].hidden };
-                updateSchedule({ timeline: newTimeline });
-              }}
-              onDelete={block.isRoutine ? undefined : () => {
-                const newTimeline = timeline.filter((_, i) => i !== idx);
-                updateSchedule({ timeline: newTimeline });
-              }}
-            />
-          </div>
-        ))}
-        
-        <button
-          onClick={() => {
-            const newBlock: TimeBlock = { time: "12:00", label: "", color: "bg-gray-400", hidden: false };
-            updateSchedule({ timeline: [...(schedule.timeline || []), newBlock] });
-          }}
-          className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1 mt-2"
-        >
-          <Plus size={14} /> ADD
-        </button>
       </div>
     );
   };
@@ -763,7 +620,14 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
       <div className="max-w-sm mx-auto">
         {/* Timeline */}
         <div className="bg-black/20 rounded-xl p-4 border border-white/5 mb-6">
-          {mode === 'edit' ? <EditTimelineList /> : <ProportionalTimeline />}
+          {mode === 'edit' ? (
+            <VisualTimelineEditor 
+              timeline={schedule.timeline || []} 
+              onUpdate={(newTimeline) => updateSchedule({ timeline: newTimeline })}
+            />
+          ) : (
+            <ProportionalTimeline />
+          )}
         </div>
 
         {/* Routines */}

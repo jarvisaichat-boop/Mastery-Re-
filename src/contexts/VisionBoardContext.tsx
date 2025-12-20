@@ -32,10 +32,9 @@ const DEFAULT_DATA: VisionBoardData = {
   },
   schedule: {
     timeline: [
-      { time: "23:00", endTime: "06:00", label: "Sleep", color: "bg-purple-400", hidden: false },
-      { time: "06:00", label: "Wake Up", color: "bg-gray-400", hidden: false },
+      { time: "23:00", endTime: "06:00", label: "Sleep", color: "bg-purple-400", hidden: false, isProtected: true },
       { time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, isRoutine: true },
-      { time: "09:00", endTime: "17:00", label: "Work/School", color: "bg-blue-400", hidden: false },
+      { time: "09:00", endTime: "17:00", label: "Work/School", color: "bg-blue-400", hidden: false, isProtected: true },
       { time: "12:00", endTime: "13:00", label: "Break", color: "bg-green-400", hidden: false },
       { time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, isRoutine: true },
       { time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, isRoutine: true }
