@@ -12,17 +12,22 @@ const TOTAL_HOURS = 24;
 const SNAP_MINUTES = 15;
 
 const COLOR_OPTIONS = [
-  { value: 'bg-purple-400', label: 'Purple' },
-  { value: 'bg-gray-400', label: 'Gray' },
-  { value: 'bg-yellow-400', label: 'Yellow' },
-  { value: 'bg-blue-400', label: 'Blue' },
-  { value: 'bg-green-400', label: 'Green' },
-  { value: 'bg-orange-400', label: 'Orange' },
-  { value: 'bg-indigo-400', label: 'Indigo' },
-  { value: 'bg-red-400', label: 'Red' },
-  { value: 'bg-pink-400', label: 'Pink' },
-  { value: 'bg-cyan-400', label: 'Cyan' }
+  { value: 'bg-purple-400', label: 'Purple', hex: '#c084fc' },
+  { value: 'bg-gray-400', label: 'Gray', hex: '#9ca3af' },
+  { value: 'bg-yellow-400', label: 'Yellow', hex: '#facc15' },
+  { value: 'bg-blue-400', label: 'Blue', hex: '#60a5fa' },
+  { value: 'bg-green-400', label: 'Green', hex: '#4ade80' },
+  { value: 'bg-orange-400', label: 'Orange', hex: '#fb923c' },
+  { value: 'bg-indigo-400', label: 'Indigo', hex: '#818cf8' },
+  { value: 'bg-red-400', label: 'Red', hex: '#f87171' },
+  { value: 'bg-pink-400', label: 'Pink', hex: '#f472b6' },
+  { value: 'bg-cyan-400', label: 'Cyan', hex: '#22d3ee' }
 ];
+
+const getHexColor = (tailwindClass: string): string => {
+  const option = COLOR_OPTIONS.find(opt => opt.value === tailwindClass);
+  return option?.hex || '#9ca3af';
+};
 
 const timeToMinutes = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -265,7 +270,11 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
                 />
 
                 <div
-                  className={`h-full flex ${block.color.replace('400', '400/30')} border-l-4 ${block.color.replace('bg-', 'border-')}`}
+                  className="h-full flex border-l-4 rounded-lg"
+                  style={{ 
+                    backgroundColor: `${getHexColor(block.color)}40`,
+                    borderLeftColor: getHexColor(block.color)
+                  }}
                   onMouseDown={(e) => handleMouseDown(e, idx, 'move')}
                   onTouchStart={(e) => handleMouseDown(e, idx, 'move')}
                   onClick={(e) => {
@@ -286,7 +295,7 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
                         className="bg-transparent text-white text-sm font-medium border-b border-white/30 outline-none w-full"
                       />
                     ) : (
-                      <div className="text-white text-sm font-medium truncate">{block.label}</div>
+                      <div className="text-white text-sm font-medium truncate">{block.label || 'Untitled'}</div>
                     )}
                     <div className="text-white/60 text-[10px]">
                       {formatTimeDisplay(block.time)} - {formatTimeDisplay(block.endTime!)}
