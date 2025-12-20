@@ -22,6 +22,13 @@ export interface RoutineItem {
   hidden: boolean;
 }
 
+export interface TimeBlock {
+  time: string;
+  label: string;
+  color: string;
+  hidden: boolean;
+}
+
 export interface VisionPath {
   vision: string;
   projects: VisionItem[];
@@ -29,6 +36,7 @@ export interface VisionPath {
 }
 
 export interface DailySchedule {
+  timeline: TimeBlock[];
   gmRoutine: RoutineItem[];
   gdRoutine: RoutineItem[];
   gnRoutine: RoutineItem[];

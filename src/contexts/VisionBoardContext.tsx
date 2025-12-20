@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { VisionBoardData, VisionBoardContextType, CoreValues, VisionPath, DailySchedule, CustomSection } from '../types/visionBoard';
+import { VisionBoardData, VisionBoardContextType, CoreValues, VisionPath, DailySchedule, CustomSection, TimeBlock } from '../types/visionBoard';
 import { logger } from '../utils/logger';
 
 const LOCAL_STORAGE_KEY = 'mastery-vision-board-v2';
@@ -31,6 +31,14 @@ const DEFAULT_DATA: VisionBoardData = {
     ]
   },
   schedule: {
+    timeline: [
+      { time: "06:00", label: "Wake Up", color: "bg-gray-400", hidden: false },
+      { time: "07:00", label: "GM Routine", color: "bg-yellow-400", hidden: false },
+      { time: "10:00", label: "Deep Work", color: "bg-blue-400", hidden: false },
+      { time: "17:00", label: "No Cheap Dopamine", color: "bg-red-400", hidden: false },
+      { time: "21:00", label: "Wind Down", color: "bg-green-400", hidden: false },
+      { time: "23:00", label: "Sleep", color: "bg-purple-400", hidden: false }
+    ],
     gmRoutine: [
       { text: "Morning Acts (Pee, Weight, Sunlight)", hidden: false },
       { text: "Mental (Headspace, Gratitude)", hidden: false },
@@ -149,6 +157,17 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
         const gdRoutine = migrateRoutine(parsed.schedule?.gdRoutine, DEFAULT_DATA.schedule.gdRoutine);
         const gnRoutine = migrateRoutine(parsed.schedule?.gnRoutine, DEFAULT_DATA.schedule.gnRoutine);
 
+        // Migrate timeline - if missing, use defaults; if exists, ensure hidden property
+        let timeline: TimeBlock[] = parsed.schedule?.timeline;
+        if (!Array.isArray(timeline)) {
+          timeline = DEFAULT_DATA.schedule.timeline;
+        } else {
+          timeline = timeline.map((block: TimeBlock) => ({
+            ...block,
+            hidden: block.hidden ?? false
+          }));
+        }
+
         // Safely merge custom section for legacy data without custom field
         const parsedCustom = parsed.custom && typeof parsed.custom === 'object' ? parsed.custom : {};
         
@@ -176,7 +195,7 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
           ...parsed,
           coreValues: { ...DEFAULT_DATA.coreValues, ...parsed.coreValues, values },
           path: { ...DEFAULT_DATA.path, ...parsed.path, vision, projects, quarterlyGoals },
-          schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule, gmRoutine, gdRoutine, gnRoutine },
+          schedule: { ...DEFAULT_DATA.schedule, ...parsed.schedule, timeline, gmRoutine, gdRoutine, gnRoutine },
           custom
         };
       }
