@@ -67,7 +67,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
 
           {/* Card Container */}
           <div 
-            className="flex-1 rounded-2xl overflow-hidden relative"
+            className="flex-1 flex flex-col min-h-0 rounded-2xl overflow-hidden relative"
             style={{
               background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.95), rgba(15, 15, 20, 0.98))',
               boxShadow: '0 0 40px rgba(234, 179, 8, 0.12), 0 0 80px rgba(234, 179, 8, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
@@ -115,26 +115,26 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
             </button>
 
             {/* Slides Container */}
-            <div className="h-full overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden">
               <div
                 className="h-full flex transition-transform duration-300 ease-out"
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
               >
                 {/* Slide 1: Core Values */}
-                <div className="w-full h-full flex-shrink-0 overflow-y-auto pb-6">
+                <div className="w-full h-full min-h-0 flex-shrink-0 overflow-y-auto pb-6">
                   <CoreValuesSection mode="view" />
                 </div>
                 {/* Slide 2: Path */}
-                <div className="w-full h-full flex-shrink-0 overflow-y-auto pb-6">
+                <div className="w-full h-full min-h-0 flex-shrink-0 overflow-y-auto pb-6">
                   <PathSection mode="view" habits={habits} />
                 </div>
                 {/* Slide 3: Schedule */}
-                <div className="w-full h-full flex-shrink-0 overflow-y-auto pb-6">
+                <div className="w-full h-full min-h-0 flex-shrink-0 overflow-y-auto pb-6">
                   <ScheduleSection mode="view" habits={habits} schedule={schedule} updateSchedule={updateSchedule} />
                 </div>
                 {/* Slide 4: Custom (only if enabled) */}
                 {custom.enabled && (
-                  <div className="w-full h-full flex-shrink-0 overflow-y-auto pb-6">
+                  <div className="w-full h-full min-h-0 flex-shrink-0 overflow-y-auto pb-6">
                     <CustomSectionComponent mode="view" />
                   </div>
                 )}

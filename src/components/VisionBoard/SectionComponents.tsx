@@ -528,7 +528,7 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
 
         {/* Custom Entries */}
         {custom.entries.map((entry, entryIdx) => (
-          <div key={entryIdx} className="bg-black/20 rounded-xl p-4 border border-white/5">
+          <div key={entryIdx} className={mode === 'edit' ? 'bg-black/20 rounded-xl p-4 border border-white/5' : ''}>
             {mode === 'edit' ? (
               <div className="space-y-3">
                 <div className="flex gap-2">
@@ -574,15 +574,18 @@ export const CustomSectionComponent: React.FC<SectionProps> = ({ mode }) => {
             ) : (
               <div>
                 {entry.title && (
-                  <div className="text-[10px] text-yellow-500/70 uppercase tracking-[0.2em] mb-2 font-semibold">
-                    {entry.title}
-                  </div>
+                  <p className="text-lg leading-relaxed mb-3">
+                    <span className="text-yellow-500 font-medium uppercase tracking-wide">{entry.title}</span>
+                  </p>
                 )}
                 <ul className="space-y-2">
                   {entry.items.filter(i => i).map((item, itemIdx) => (
-                    <li key={itemIdx} className="flex items-start gap-2 text-lg text-gray-300 font-light">
-                      <span className="text-gray-600">•</span>
-                      <span>{item}</span>
+                    <li key={itemIdx} className="flex items-center gap-3">
+                      <div 
+                        className="w-1.5 h-1.5 rounded-full bg-yellow-400"
+                        style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
+                      />
+                      <span className="text-lg text-white font-light">{item}</span>
                     </li>
                   ))}
                 </ul>
