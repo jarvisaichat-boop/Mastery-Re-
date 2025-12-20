@@ -400,89 +400,240 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
     { value: 'bg-purple-400', label: 'Purple' },
     { value: 'bg-orange-400', label: 'Orange' },
     { value: 'bg-pink-400', label: 'Pink' },
-    { value: 'bg-cyan-400', label: 'Cyan' }
+    { value: 'bg-cyan-400', label: 'Cyan' },
+    { value: 'bg-indigo-400', label: 'Indigo' }
   ];
 
-  const TimeBlockItem = ({ block, idx }: { block: TimeBlock, idx: number }) => {
-    const timeline = schedule.timeline || [];
+  const timeToMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const getDurationMinutes = (block: TimeBlock): number => {
+    if (block.type === 'point' || !block.endTime) return 0;
+    let start = timeToMinutes(block.time);
+    let end = timeToMinutes(block.endTime);
+    if (end < start) end += 24 * 60;
+    return end - start;
+  };
+
+  const ProportionalTimeline = () => {
+    const timeline = (schedule.timeline || []).filter(b => mode === 'edit' || !b.hidden);
+    const HOUR_HEIGHT = 24;
+    const MIN_BLOCK_HEIGHT = 20;
     
-    if (mode === 'edit') {
-      return (
-        <div className={`flex items-center gap-2 py-1 ${block.hidden ? 'opacity-50' : ''}`}>
-          {block.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
-          <input
-            type="time"
-            value={block.time}
-            onChange={(e) => {
-              const newTimeline = [...timeline];
-              newTimeline[idx] = { ...newTimeline[idx], time: e.target.value };
-              updateSchedule({ timeline: newTimeline });
-            }}
-            className="bg-black/30 border border-white/10 rounded p-1 text-white text-xs w-20"
-          />
-          <select
-            value={block.color}
-            onChange={(e) => {
-              const newTimeline = [...timeline];
-              newTimeline[idx] = { ...newTimeline[idx], color: e.target.value };
-              updateSchedule({ timeline: newTimeline });
-            }}
-            className="bg-black/30 border border-white/10 rounded p-1 text-white text-xs w-16"
-          >
-            {COLOR_OPTIONS.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-          <input
-            value={block.label}
-            onChange={(e) => {
-              const newTimeline = [...timeline];
-              newTimeline[idx] = { ...newTimeline[idx], label: e.target.value };
-              updateSchedule({ timeline: newTimeline });
-            }}
-            className={`flex-1 bg-black/30 border border-white/10 rounded p-1 text-white text-sm ${block.hidden ? 'line-through' : ''}`}
-            placeholder="Label"
-          />
-          <ActionMenu
-            index={idx}
-            totalItems={timeline.length}
-            isHidden={block.hidden}
-            onMoveUp={() => {
-              if (idx > 0) {
-                const newTimeline = [...timeline];
-                [newTimeline[idx - 1], newTimeline[idx]] = [newTimeline[idx], newTimeline[idx - 1]];
-                updateSchedule({ timeline: newTimeline });
-              }
-            }}
-            onMoveDown={() => {
-              if (idx < timeline.length - 1) {
-                const newTimeline = [...timeline];
-                [newTimeline[idx], newTimeline[idx + 1]] = [newTimeline[idx + 1], newTimeline[idx]];
-                updateSchedule({ timeline: newTimeline });
-              }
-            }}
-            onToggleHide={() => {
-              const newTimeline = [...timeline];
-              newTimeline[idx] = { ...newTimeline[idx], hidden: !newTimeline[idx].hidden };
-              updateSchedule({ timeline: newTimeline });
-            }}
-            onDelete={() => {
-              const newTimeline = timeline.filter((_, i) => i !== idx);
-              updateSchedule({ timeline: newTimeline });
-            }}
-          />
-        </div>
-      );
-    }
+    const sortedBlocks = [...timeline].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
     
     return (
-      <div className="flex items-center gap-3 py-2">
-        <div className="text-[10px] text-gray-500 font-mono w-12">{block.time}</div>
-        <div 
-          className={`w-2 h-2 rounded-full ${block.color}`}
-          style={{ boxShadow: `0 0 8px currentColor` }}
-        />
-        <div className="text-lg text-gray-200 font-light">{block.label}</div>
+      <div className="relative" style={{ minHeight: '280px' }}>
+        <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between text-[9px] text-gray-600 font-mono">
+          {[0, 6, 12, 18, 24].map(h => (
+            <div key={h} style={{ position: 'absolute', top: `${(h / 24) * 100}%` }}>
+              {`${h.toString().padStart(2, '0')}:00`}
+            </div>
+          ))}
+        </div>
+        
+        <div className="ml-12 relative border-l border-white/10" style={{ height: `${24 * HOUR_HEIGHT}px` }}>
+          {sortedBlocks.map((block, i) => {
+            const startMinutes = timeToMinutes(block.time);
+            const topPercent = (startMinutes / (24 * 60)) * 100;
+            
+            if (block.type === 'point') {
+              return (
+                <div
+                  key={i}
+                  className={`absolute left-0 right-0 flex items-center gap-2 ${block.hidden ? 'opacity-50' : ''}`}
+                  style={{ top: `${topPercent}%`, transform: 'translateY(-50%)' }}
+                >
+                  <div className={`w-3 h-3 rounded-full ${block.color} flex-shrink-0`} style={{ boxShadow: '0 0 8px currentColor' }} />
+                  <span className="text-xs text-gray-400">{block.time}</span>
+                  <span className={`text-sm text-gray-200 ${block.hidden ? 'line-through' : ''}`}>{block.label}</span>
+                  {block.routineKey && <span className="text-[9px] text-yellow-500/50 ml-1">→ routine</span>}
+                </div>
+              );
+            }
+            
+            const durationMinutes = getDurationMinutes(block);
+            const heightPercent = (durationMinutes / (24 * 60)) * 100;
+            
+            return (
+              <div
+                key={i}
+                className={`absolute left-2 right-2 rounded-lg border border-white/10 overflow-hidden ${block.hidden ? 'opacity-50' : ''}`}
+                style={{ 
+                  top: `${topPercent}%`, 
+                  height: `${heightPercent}%`,
+                  minHeight: `${MIN_BLOCK_HEIGHT}px`
+                }}
+              >
+                <div className={`h-full ${block.color.replace('400', '400/20')} flex flex-col justify-center px-2`}>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${block.color} flex-shrink-0`} />
+                    <span className={`text-sm text-gray-200 font-medium truncate ${block.hidden ? 'line-through' : ''}`}>{block.label}</span>
+                    {block.routineKey && <span className="text-[9px] text-yellow-500/50">→</span>}
+                  </div>
+                  <div className="text-[10px] text-gray-500 ml-4">{block.time} - {block.endTime}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const EditTimelineList = () => {
+    const timeline = schedule.timeline || [];
+    
+    return (
+      <div className="space-y-2">
+        {timeline.map((block, idx) => (
+          <div key={idx} className={`flex flex-wrap items-center gap-2 py-1 px-2 rounded-lg bg-black/20 ${block.hidden ? 'opacity-50' : ''}`}>
+            {block.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
+            
+            <select
+              value={block.type}
+              onChange={(e) => {
+                const newTimeline = [...timeline];
+                const newType = e.target.value as 'block' | 'point';
+                newTimeline[idx] = { 
+                  ...newTimeline[idx], 
+                  type: newType,
+                  endTime: newType === 'block' ? (block.endTime || block.time) : undefined
+                };
+                updateSchedule({ timeline: newTimeline });
+              }}
+              className="bg-black/30 border border-white/10 rounded p-1 text-white text-[10px] w-14"
+            >
+              <option value="block">Block</option>
+              <option value="point">Point</option>
+            </select>
+            
+            <input
+              type="time"
+              value={block.time}
+              onChange={(e) => {
+                const newTimeline = [...timeline];
+                newTimeline[idx] = { ...newTimeline[idx], time: e.target.value };
+                updateSchedule({ timeline: newTimeline });
+              }}
+              className="bg-black/30 border border-white/10 rounded p-1 text-white text-xs w-[72px]"
+            />
+            
+            {block.type === 'block' && (
+              <>
+                <span className="text-gray-500 text-xs">-</span>
+                <input
+                  type="time"
+                  value={block.endTime || ''}
+                  onChange={(e) => {
+                    const newTimeline = [...timeline];
+                    newTimeline[idx] = { ...newTimeline[idx], endTime: e.target.value };
+                    updateSchedule({ timeline: newTimeline });
+                  }}
+                  className="bg-black/30 border border-white/10 rounded p-1 text-white text-xs w-[72px]"
+                />
+              </>
+            )}
+            
+            <select
+              value={block.color}
+              onChange={(e) => {
+                const newTimeline = [...timeline];
+                newTimeline[idx] = { ...newTimeline[idx], color: e.target.value };
+                updateSchedule({ timeline: newTimeline });
+              }}
+              className="bg-black/30 border border-white/10 rounded p-1 text-white text-[10px] w-16"
+            >
+              {COLOR_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            
+            <input
+              value={block.label}
+              onChange={(e) => {
+                const newTimeline = [...timeline];
+                newTimeline[idx] = { ...newTimeline[idx], label: e.target.value };
+                updateSchedule({ timeline: newTimeline });
+              }}
+              className={`flex-1 min-w-[80px] bg-black/30 border border-white/10 rounded p-1 text-white text-sm ${block.hidden ? 'line-through' : ''}`}
+              placeholder="Label"
+            />
+            
+            {block.type === 'block' && (
+              <select
+                value={block.routineKey || ''}
+                onChange={(e) => {
+                  const newTimeline = [...timeline];
+                  const value = e.target.value as 'gm' | 'gd' | 'gn' | '';
+                  newTimeline[idx] = { 
+                    ...newTimeline[idx], 
+                    routineKey: value || undefined 
+                  };
+                  updateSchedule({ timeline: newTimeline });
+                }}
+                className="bg-black/30 border border-white/10 rounded p-1 text-white text-[10px] w-14"
+              >
+                <option value="">-</option>
+                <option value="gm">GM</option>
+                <option value="gd">GD</option>
+                <option value="gn">GN</option>
+              </select>
+            )}
+            
+            <ActionMenu
+              index={idx}
+              totalItems={timeline.length}
+              isHidden={block.hidden}
+              onMoveUp={() => {
+                if (idx > 0) {
+                  const newTimeline = [...timeline];
+                  [newTimeline[idx - 1], newTimeline[idx]] = [newTimeline[idx], newTimeline[idx - 1]];
+                  updateSchedule({ timeline: newTimeline });
+                }
+              }}
+              onMoveDown={() => {
+                if (idx < timeline.length - 1) {
+                  const newTimeline = [...timeline];
+                  [newTimeline[idx], newTimeline[idx + 1]] = [newTimeline[idx + 1], newTimeline[idx]];
+                  updateSchedule({ timeline: newTimeline });
+                }
+              }}
+              onToggleHide={() => {
+                const newTimeline = [...timeline];
+                newTimeline[idx] = { ...newTimeline[idx], hidden: !newTimeline[idx].hidden };
+                updateSchedule({ timeline: newTimeline });
+              }}
+              onDelete={() => {
+                const newTimeline = timeline.filter((_, i) => i !== idx);
+                updateSchedule({ timeline: newTimeline });
+              }}
+            />
+          </div>
+        ))}
+        
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={() => {
+              const newBlock: TimeBlock = { type: "block", time: "12:00", endTime: "13:00", label: "New Block", color: "bg-gray-400", hidden: false };
+              updateSchedule({ timeline: [...(schedule.timeline || []), newBlock] });
+            }}
+            className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1"
+          >
+            <Plus size={14} /> ADD BLOCK
+          </button>
+          <button
+            onClick={() => {
+              const newPoint: TimeBlock = { type: "point", time: "08:00", label: "New Point", color: "bg-gray-400", hidden: false };
+              updateSchedule({ timeline: [...(schedule.timeline || []), newPoint] });
+            }}
+            className="text-xs text-gray-400 hover:text-gray-300 flex items-center gap-1"
+          >
+            <Plus size={14} /> ADD POINT
+          </button>
+        </div>
       </div>
     );
   };
@@ -611,22 +762,7 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
       <div className="max-w-sm mx-auto">
         {/* Timeline */}
         <div className="bg-black/20 rounded-xl p-4 border border-white/5 mb-6">
-          {(schedule.timeline || [])
-            .filter(block => mode === 'edit' || !block.hidden)
-            .map((block, idx) => (
-              <TimeBlockItem key={idx} block={block} idx={mode === 'edit' ? idx : (schedule.timeline || []).indexOf(block)} />
-            ))}
-          {mode === 'edit' && (
-            <button
-              onClick={() => {
-                const newBlock: TimeBlock = { time: "12:00", label: "New Block", color: "bg-gray-400", hidden: false };
-                updateSchedule({ timeline: [...(schedule.timeline || []), newBlock] });
-              }}
-              className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1 mt-2"
-            >
-              <Plus size={14} /> ADD BLOCK
-            </button>
-          )}
+          {mode === 'edit' ? <EditTimelineList /> : <ProportionalTimeline />}
         </div>
 
         {/* Routines */}

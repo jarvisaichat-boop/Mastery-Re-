@@ -32,12 +32,13 @@ const DEFAULT_DATA: VisionBoardData = {
   },
   schedule: {
     timeline: [
-      { time: "06:00", label: "Wake Up", color: "bg-gray-400", hidden: false },
-      { time: "07:00", label: "GM Routine", color: "bg-yellow-400", hidden: false },
-      { time: "10:00", label: "Deep Work", color: "bg-blue-400", hidden: false },
-      { time: "17:00", label: "No Cheap Dopamine", color: "bg-red-400", hidden: false },
-      { time: "21:00", label: "Wind Down", color: "bg-green-400", hidden: false },
-      { time: "23:00", label: "Sleep", color: "bg-purple-400", hidden: false }
+      { type: "block", time: "23:00", endTime: "06:00", label: "Sleep", color: "bg-purple-400", hidden: false },
+      { type: "point", time: "06:00", label: "Wake Up", color: "bg-gray-400", hidden: false },
+      { type: "block", time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, routineKey: "gm" },
+      { type: "block", time: "09:00", endTime: "17:00", label: "Work/School", color: "bg-blue-400", hidden: false },
+      { type: "block", time: "12:00", endTime: "13:00", label: "Break", color: "bg-green-400", hidden: false },
+      { type: "block", time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, routineKey: "gd" },
+      { type: "block", time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, routineKey: "gn" }
     ],
     gmRoutine: [
       { text: "Morning Acts (Pee, Weight, Sunlight)", hidden: false },
@@ -157,15 +158,23 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
         const gdRoutine = migrateRoutine(parsed.schedule?.gdRoutine, DEFAULT_DATA.schedule.gdRoutine);
         const gnRoutine = migrateRoutine(parsed.schedule?.gnRoutine, DEFAULT_DATA.schedule.gnRoutine);
 
-        // Migrate timeline - if missing, use defaults; if exists, ensure hidden property
+        // Migrate timeline - if missing, use defaults; if exists, migrate old format to new
         let timeline: TimeBlock[] = parsed.schedule?.timeline;
         if (!Array.isArray(timeline)) {
           timeline = DEFAULT_DATA.schedule.timeline;
         } else {
-          timeline = timeline.map((block: TimeBlock) => ({
-            ...block,
-            hidden: block.hidden ?? false
-          }));
+          // Check if old format (no type field) - migrate to new format with defaults
+          const hasOldFormat = timeline.some((block: Partial<TimeBlock>) => !block.type);
+          if (hasOldFormat) {
+            // Old format detected - use new defaults instead
+            timeline = DEFAULT_DATA.schedule.timeline;
+          } else {
+            // New format - just ensure hidden property
+            timeline = timeline.map((block: TimeBlock) => ({
+              ...block,
+              hidden: block.hidden ?? false
+            }));
+          }
         }
 
         // Safely merge custom section for legacy data without custom field
