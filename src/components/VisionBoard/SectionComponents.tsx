@@ -409,76 +409,101 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
     return hours * 60 + minutes;
   };
 
-  const getDurationMinutes = (block: TimeBlock): number => {
-    if (block.type === 'point' || !block.endTime) return 0;
-    let start = timeToMinutes(block.time);
-    let end = timeToMinutes(block.endTime);
-    if (end < start) end += 24 * 60;
-    return end - start;
-  };
-
   const ProportionalTimeline = () => {
-    const timeline = (schedule.timeline || []).filter(b => mode === 'edit' || !b.hidden);
-    const HOUR_HEIGHT = 24;
-    const MIN_BLOCK_HEIGHT = 20;
+    const timeline = (schedule.timeline || []).filter(b => !b.hidden);
+    const HOUR_HEIGHT = 20;
+    const POINT_HEIGHT = 24;
+    
+    type Segment = { type: 'gap' | 'block' | 'point'; startMinutes: number; endMinutes: number; block?: TimeBlock };
     
     const sortedBlocks = [...timeline].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
     
+    const segments: Segment[] = [];
+    let currentMinute = 0;
+    
+    for (const block of sortedBlocks) {
+      const startMinutes = timeToMinutes(block.time);
+      let endMinutes = startMinutes;
+      
+      if (block.type === 'block' && block.endTime) {
+        endMinutes = timeToMinutes(block.endTime);
+        if (endMinutes < startMinutes) endMinutes += 24 * 60;
+      }
+      
+      if (startMinutes > currentMinute) {
+        segments.push({ type: 'gap', startMinutes: currentMinute, endMinutes: startMinutes });
+      }
+      
+      if (block.type === 'point') {
+        segments.push({ type: 'point', startMinutes, endMinutes: startMinutes, block });
+        currentMinute = Math.max(currentMinute, startMinutes);
+      } else {
+        segments.push({ type: 'block', startMinutes, endMinutes, block });
+        currentMinute = Math.max(currentMinute, endMinutes);
+      }
+    }
+    
+    if (currentMinute < 24 * 60) {
+      segments.push({ type: 'gap', startMinutes: currentMinute, endMinutes: 24 * 60 });
+    }
+    
+    const getHeight = (seg: Segment): number => {
+      if (seg.type === 'point') return POINT_HEIGHT;
+      const duration = seg.endMinutes - seg.startMinutes;
+      return Math.max(4, (duration / 60) * HOUR_HEIGHT);
+    };
+    
+    const formatTime = (minutes: number): string => {
+      const h = Math.floor(minutes / 60) % 24;
+      const m = minutes % 60;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    };
+    
     return (
-      <div className="relative" style={{ minHeight: '280px' }}>
-        <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between text-[9px] text-gray-600 font-mono">
-          {[0, 6, 12, 18, 24].map(h => (
-            <div key={h} style={{ position: 'absolute', top: `${(h / 24) * 100}%` }}>
-              {`${h.toString().padStart(2, '0')}:00`}
-            </div>
-          ))}
-        </div>
-        
-        <div className="ml-12 relative border-l border-white/10" style={{ height: `${24 * HOUR_HEIGHT}px` }}>
-          {sortedBlocks.map((block, i) => {
-            const startMinutes = timeToMinutes(block.time);
-            const topPercent = (startMinutes / (24 * 60)) * 100;
-            
-            if (block.type === 'point') {
-              return (
-                <div
-                  key={i}
-                  className={`absolute left-0 right-0 flex items-center gap-2 ${block.hidden ? 'opacity-50' : ''}`}
-                  style={{ top: `${topPercent}%`, transform: 'translateY(-50%)' }}
-                >
-                  <div className={`w-3 h-3 rounded-full ${block.color} flex-shrink-0`} style={{ boxShadow: '0 0 8px currentColor' }} />
-                  <span className="text-xs text-gray-400">{block.time}</span>
-                  <span className={`text-sm text-gray-200 ${block.hidden ? 'line-through' : ''}`}>{block.label}</span>
-                  {block.routineKey && <span className="text-[9px] text-yellow-500/50 ml-1">→ routine</span>}
-                </div>
-              );
-            }
-            
-            const durationMinutes = getDurationMinutes(block);
-            const heightPercent = (durationMinutes / (24 * 60)) * 100;
-            
+      <div className="flex flex-col">
+        {segments.map((seg, i) => {
+          const height = getHeight(seg);
+          
+          if (seg.type === 'gap') {
+            if (height < 8) return null;
             return (
-              <div
-                key={i}
-                className={`absolute left-2 right-2 rounded-lg border border-white/10 overflow-hidden ${block.hidden ? 'opacity-50' : ''}`}
-                style={{ 
-                  top: `${topPercent}%`, 
-                  height: `${heightPercent}%`,
-                  minHeight: `${MIN_BLOCK_HEIGHT}px`
-                }}
-              >
-                <div className={`h-full ${block.color.replace('400', '400/20')} flex flex-col justify-center px-2`}>
+              <div key={i} className="flex items-center gap-2 opacity-30" style={{ height: `${height}px` }}>
+                <div className="text-[9px] text-gray-600 font-mono w-10">{formatTime(seg.startMinutes)}</div>
+                <div className="flex-1 border-l border-dashed border-white/10 h-full ml-1" />
+              </div>
+            );
+          }
+          
+          if (seg.type === 'point' && seg.block) {
+            const block = seg.block;
+            return (
+              <div key={i} className="flex items-center gap-2 py-1" style={{ minHeight: `${POINT_HEIGHT}px` }}>
+                <div className="text-[9px] text-gray-500 font-mono w-10">{block.time}</div>
+                <div className={`w-3 h-3 rounded-full ${block.color} flex-shrink-0`} style={{ boxShadow: '0 0 8px currentColor' }} />
+                <span className="text-sm text-gray-200">{block.label}</span>
+              </div>
+            );
+          }
+          
+          if (seg.type === 'block' && seg.block) {
+            const block = seg.block;
+            return (
+              <div key={i} className="flex gap-2" style={{ minHeight: `${Math.max(32, height)}px` }}>
+                <div className="text-[9px] text-gray-500 font-mono w-10 pt-1">{block.time}</div>
+                <div className={`flex-1 rounded-lg border border-white/10 ${block.color.replace('400', '400/20')} flex flex-col justify-center px-2 py-1`}>
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${block.color} flex-shrink-0`} />
-                    <span className={`text-sm text-gray-200 font-medium truncate ${block.hidden ? 'line-through' : ''}`}>{block.label}</span>
+                    <span className="text-sm text-gray-200 font-medium truncate">{block.label}</span>
                     {block.routineKey && <span className="text-[9px] text-yellow-500/50">→</span>}
                   </div>
                   <div className="text-[10px] text-gray-500 ml-4">{block.time} - {block.endTime}</div>
                 </div>
               </div>
             );
-          })}
-        </div>
+          }
+          
+          return null;
+        })}
       </div>
     );
   };
