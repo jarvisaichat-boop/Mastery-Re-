@@ -180,6 +180,21 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
             };
           });
           
+          // Cleanup: Remove duplicate routine blocks created by migration bug
+          // The bug added default routines with exact labels: "GM Routine", "GD Routine", "GN Routine"
+          // Strategy: For each default routine label, keep only the first occurrence
+          const defaultRoutineLabels = ['gm routine', 'gd routine', 'gn routine'];
+          const seenDefaultLabels = new Set<string>();
+          timeline = timeline.filter(b => {
+            if (!b.isRoutine) return true;
+            const labelKey = (b.label || '').toLowerCase().trim();
+            // Only dedupe blocks with default routine labels (the ones the bug was adding)
+            if (!defaultRoutineLabels.includes(labelKey)) return true;
+            if (seenDefaultLabels.has(labelKey)) return false;
+            seenDefaultLabels.add(labelKey);
+            return true;
+          });
+          
           // Only add default routines if timeline has NO routine entries at all
           // (prevents duplicate routines from being added on subsequent migrations)
           const hasAnyRoutines = timeline.some(b => b.isRoutine);
