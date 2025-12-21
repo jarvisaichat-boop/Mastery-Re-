@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { VisionBoardData, VisionBoardContextType, CoreValues, VisionPath, DailySchedule, CustomSection, TimeBlock } from '../types/visionBoard';
+import { VisionBoardData, VisionBoardContextType, CoreValues, VisionPath, DailySchedule, CustomSection, TimeBlock, CompletedGoalInfo } from '../types/visionBoard';
 import { logger } from '../utils/logger';
 
 const LOCAL_STORAGE_KEY = 'mastery-vision-board-v2';
@@ -90,34 +90,49 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
         }
 
         // Migrate old single currentProject string to projects array
+        const migrationTime = Date.now();
         let projects = parsed.path?.projects;
         if (!Array.isArray(projects)) {
           const oldProject = parsed.path?.currentProject;
           if (oldProject !== undefined) {
             // Preserve empty string as empty array, non-empty string as single-item array
-            projects = oldProject ? [{ text: oldProject, hidden: false }] : [];
+            projects = oldProject ? [{ text: oldProject, hidden: false, migratedAt: migrationTime }] : [];
           } else {
-            projects = DEFAULT_DATA.path.projects;
+            projects = DEFAULT_DATA.path.projects.map(p => ({ ...p, migratedAt: migrationTime }));
           }
         } else {
-          // Migrate string array to VisionItem array
-          projects = projects.map((p: string | { text: string; hidden: boolean }) => 
-            typeof p === 'string' ? { text: p, hidden: false } : p
-          );
+          // Migrate string array to VisionItem array (add migratedAt for items without createdAt)
+          projects = projects.map((p: string | { text: string; hidden?: boolean; createdAt?: number; migratedAt?: number }) => {
+            if (typeof p === 'string') {
+              return { text: p, hidden: false, migratedAt: migrationTime };
+            }
+            // Only add migratedAt if item doesn't have createdAt (legacy item)
+            if (!p.createdAt && !p.migratedAt) {
+              return { ...p, hidden: p.hidden ?? false, migratedAt: migrationTime };
+            }
+            return { ...p, hidden: p.hidden ?? false };
+          });
         }
         // Clean up legacy currentProject property
         if (parsed.path?.currentProject !== undefined) {
           delete parsed.path.currentProject;
         }
 
-        // Migrate quarterlyGoals from string array to VisionItem array
+        // Migrate quarterlyGoals from string array to VisionItem array (add migratedAt for items without createdAt)
         let quarterlyGoals = parsed.path?.quarterlyGoals;
         if (Array.isArray(quarterlyGoals)) {
-          quarterlyGoals = quarterlyGoals.map((g: string | { text: string; hidden: boolean }) => 
-            typeof g === 'string' ? { text: g, hidden: false } : g
-          );
+          quarterlyGoals = quarterlyGoals.map((g: string | { text: string; hidden?: boolean; createdAt?: number; migratedAt?: number }) => {
+            if (typeof g === 'string') {
+              return { text: g, hidden: false, migratedAt: migrationTime };
+            }
+            // Only add migratedAt if item doesn't have createdAt (legacy item)
+            if (!g.createdAt && !g.migratedAt) {
+              return { ...g, hidden: g.hidden ?? false, migratedAt: migrationTime };
+            }
+            return { ...g, hidden: g.hidden ?? false };
+          });
         } else {
-          quarterlyGoals = DEFAULT_DATA.path.quarterlyGoals;
+          quarterlyGoals = DEFAULT_DATA.path.quarterlyGoals.map(g => ({ ...g, migratedAt: migrationTime }));
         }
 
         // Migrate old string-based values to new object format and add missing descriptions/hidden
@@ -320,7 +335,16 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
     } catch (e) {
       logger.error('Failed to load Vision Board data', e);
     }
-    return DEFAULT_DATA;
+    // Return DEFAULT_DATA with migratedAt added to path items
+    const initTime = Date.now();
+    return {
+      ...DEFAULT_DATA,
+      path: {
+        ...DEFAULT_DATA.path,
+        projects: DEFAULT_DATA.path.projects.map(p => ({ ...p, migratedAt: initTime })),
+        quarterlyGoals: DEFAULT_DATA.path.quarterlyGoals.map(g => ({ ...g, migratedAt: initTime }))
+      }
+    };
   });
 
   useEffect(() => {
@@ -359,13 +383,54 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
     }));
   };
 
+  const completePathItem = (type: 'project' | 'goal', index: number): CompletedGoalInfo | null => {
+    const items = type === 'project' ? data.path.projects : data.path.quarterlyGoals;
+    if (index < 0 || index >= items.length) return null;
+    
+    const item = items[index];
+    const now = Date.now();
+    const hasOriginalCreatedAt = !!item.createdAt;
+    const hasMigratedAt = !!item.migratedAt;
+    
+    // Defensive: if item has neither createdAt nor migratedAt, treat as migrated now
+    // This handles any edge cases where timestamps weren't properly set
+    const startTime = item.createdAt || item.migratedAt || now;
+    const durationDays = Math.floor((now - startTime) / (24 * 60 * 60 * 1000));
+    const isApproximate = !hasOriginalCreatedAt;
+    
+    const completedInfo: CompletedGoalInfo = {
+      text: item.text,
+      type,
+      createdAt: item.createdAt || item.migratedAt || now,
+      completedAt: now,
+      durationDays,
+      isApproximateDuration: isApproximate
+    };
+
+    const updatedItems = [...items];
+    updatedItems[index] = {
+      ...item,
+      isCompleted: true,
+      completedAt: now
+    };
+
+    if (type === 'project') {
+      updatePath({ projects: updatedItems });
+    } else {
+      updatePath({ quarterlyGoals: updatedItems });
+    }
+
+    return completedInfo;
+  };
+
   return (
     <VisionBoardContext.Provider value={{
       data,
       updateCoreValues,
       updatePath,
       updateSchedule,
-      updateCustom
+      updateCustom,
+      completePathItem
     }}>
       {children}
     </VisionBoardContext.Provider>

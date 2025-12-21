@@ -1,42 +1,29 @@
-import { useState } from 'react';
-import { Edit2, Check, X, TrendingUp, Target, Zap } from 'lucide-react';
+import { Edit2, TrendingUp, Target, Zap } from 'lucide-react';
 import { DashboardData } from '../types';
 import { formatDate, getStartOfWeek, addDays } from '../utils';
 import { Habit } from '../types';
+import { useVisionBoard } from '../contexts/VisionBoardContext';
 
 interface StatsOverviewProps {
     dashboardData: DashboardData;
     onToggleRateMode: () => void;
     onToggleStreakMode: () => void;
-    goal: string;
-    onGoalUpdate: (newGoal: string) => void;
     habits: Habit[];
     onOpenVisionBoard?: () => void;
 }
 
-export default function StatsOverview({ dashboardData, onToggleRateMode, onToggleStreakMode, goal, onGoalUpdate, habits, onOpenVisionBoard }: StatsOverviewProps) {
-    const [isEditingGoal, setIsEditingGoal] = useState(false);
-    const [editedGoal, setEditedGoal] = useState(goal);
+export default function StatsOverview({ dashboardData, onToggleRateMode, onToggleStreakMode, habits, onOpenVisionBoard }: StatsOverviewProps) {
+    const { data } = useVisionBoard();
+    
+    const visibleGoals = data.path.quarterlyGoals.filter(g => !g.hidden && !g.isCompleted);
+    const visibleProjects = data.path.projects.filter(p => !p.hidden && !p.isCompleted);
+    const allGoals = [...visibleGoals, ...visibleProjects];
 
-    const handleSaveGoal = () => {
-        if (editedGoal.trim()) {
-            onGoalUpdate(editedGoal.trim());
-            setIsEditingGoal(false);
-        }
-    };
-
-    const handleCancelEdit = () => {
-        setEditedGoal(goal);
-        setIsEditingGoal(false);
-    };
-
-    // Calculate weekly analysis
     const getWeeklyAnalysis = () => {
         const today = new Date();
         const startOfWeek = getStartOfWeek(today);
         const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek, i));
         
-        // Count completions by day
         const dailyCompletions: Record<string, number> = {};
         const dailyTotal: Record<string, number> = {};
         
@@ -57,7 +44,6 @@ export default function StatsOverview({ dashboardData, onToggleRateMode, onToggl
             });
         });
 
-        // Find best and worst days
         const dayStats = Object.entries(dailyCompletions).map(([dateStr, count]) => ({
             date: new Date(dateStr),
             dateStr,
@@ -87,66 +73,42 @@ export default function StatsOverview({ dashboardData, onToggleRateMode, onToggl
 
     return (
         <div className="space-y-6 mb-8">
-            {/* Goal Section */}
+            {/* Goal Section - Shows goals from Vision Board */}
             <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-lg p-6">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-3">
                             <Target className="w-5 h-5 text-blue-400" />
-                            <h3 className="text-lg font-semibold text-blue-400">Goal</h3>
+                            <h3 className="text-lg font-semibold text-blue-400">Goals</h3>
                         </div>
                         
-                        {!isEditingGoal ? (
-                            <div className="flex items-start gap-3">
-                                <p className="text-2xl font-bold text-white flex-1">{goal || 'No goal set'}</p>
-                                <div className="flex gap-1">
-                                    <button
-                                        onClick={onOpenVisionBoard}
-                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors text-yellow-400"
-                                        title="Open Vision Board"
-                                    >
-                                        <Zap className="w-5 h-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setEditedGoal(goal);
-                                            setIsEditingGoal(true);
-                                        }}
-                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                        title="Edit goal text"
-                                    >
-                                        <Edit2 className="w-5 h-5 text-gray-400" />
-                                    </button>
-                                </div>
+                        <div className="flex items-start gap-3">
+                            <div className="flex-1">
+                                {allGoals.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {allGoals.slice(0, 3).map((goal, idx) => (
+                                            <p key={idx} className="text-lg font-medium text-white">
+                                                • {goal.text}
+                                            </p>
+                                        ))}
+                                        {allGoals.length > 3 && (
+                                            <p className="text-sm text-gray-400">
+                                                +{allGoals.length - 3} more goals
+                                            </p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="text-lg text-gray-400">No active goals set</p>
+                                )}
                             </div>
-                        ) : (
-                            <div className="space-y-3">
-                                <input
-                                    type="text"
-                                    value={editedGoal}
-                                    onChange={(e) => setEditedGoal(e.target.value)}
-                                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                                    placeholder="Enter your #1 priority..."
-                                    autoFocus
-                                />
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={handleSaveGoal}
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
-                                    >
-                                        <Check className="w-4 h-4" />
-                                        Save
-                                    </button>
-                                    <button
-                                        onClick={handleCancelEdit}
-                                        className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                                    >
-                                        <X className="w-4 h-4" />
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                            <button
+                                onClick={onOpenVisionBoard}
+                                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                                title="Edit in Vision Board"
+                            >
+                                <Edit2 className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

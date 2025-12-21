@@ -15,6 +15,10 @@ export interface CoreValues {
 export interface VisionItem {
   text: string;
   hidden: boolean;
+  createdAt?: number;
+  completedAt?: number;
+  isCompleted?: boolean;
+  migratedAt?: number;
 }
 
 export interface RoutineItem {
@@ -67,10 +71,20 @@ export interface VisionBoardData {
   custom: CustomSection;
 }
 
+export interface CompletedGoalInfo {
+  text: string;
+  type: 'project' | 'goal';
+  createdAt?: number;
+  completedAt: number;
+  durationDays: number;
+  isApproximateDuration?: boolean;
+}
+
 export interface VisionBoardContextType {
   data: VisionBoardData;
   updateCoreValues: (updates: Partial<CoreValues>) => void;
   updatePath: (updates: Partial<VisionPath>) => void;
   updateSchedule: (updates: Partial<DailySchedule>) => void;
   updateCustom: (updates: Partial<CustomSection>) => void;
+  completePathItem: (type: 'project' | 'goal', index: number) => CompletedGoalInfo | null;
 }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreVertical, ChevronUp, ChevronDown, EyeOff, Eye, Trash2 } from 'lucide-react';
+import { MoreVertical, ChevronUp, ChevronDown, EyeOff, Eye, Trash2, Trophy } from 'lucide-react';
 
 interface ActionMenuProps {
   index: number;
@@ -9,6 +9,8 @@ interface ActionMenuProps {
   onMoveDown: () => void;
   onToggleHide: () => void;
   onDelete?: () => void;
+  onComplete?: () => void;
+  isCompleted?: boolean;
 }
 
 export const ActionMenu: React.FC<ActionMenuProps> = ({
@@ -18,7 +20,9 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
   onMoveUp,
   onMoveDown,
   onToggleHide,
-  onDelete
+  onDelete,
+  onComplete,
+  isCompleted
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -83,6 +87,18 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
             {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
             {isHidden ? 'Show' : 'Hide'}
           </button>
+          {onComplete && !isCompleted && (
+            <>
+              <div className="border-t border-white/5 my-1" />
+              <button
+                onClick={() => handleAction(onComplete)}
+                className="w-full px-3 py-2 text-left text-sm text-green-400 hover:bg-white/5 flex items-center gap-2"
+              >
+                <Trophy size={14} />
+                Completed
+              </button>
+            </>
+          )}
           {onDelete && (
             <>
               <div className="border-t border-white/5 my-1" />

@@ -1129,10 +1129,8 @@ function App() {
                             dashboardData={dashboardData}
                             onToggleRateMode={handleToggleRateMode}
                             onToggleStreakMode={handleToggleStreakMode}
-                            goal={goal}
-                            onGoalUpdate={setGoal}
                             habits={habits}
-                                onOpenVisionBoard={() => setShowVisionBoard(true)}
+                            onOpenVisionBoard={() => setShowVisionBoard(true)}
                         />
                     </div>
                 )}

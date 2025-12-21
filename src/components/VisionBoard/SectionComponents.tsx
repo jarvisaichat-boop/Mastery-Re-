@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { Habit } from '../../types';
-import { DailySchedule, CustomEntry, RoutineItem, TimeBlock } from '../../types/visionBoard';
-import { Plus, X, Compass, Target, Clock, Sparkles, Image, ToggleLeft, ToggleRight, EyeOff } from 'lucide-react';
+import { DailySchedule, CustomEntry, RoutineItem, TimeBlock, CompletedGoalInfo } from '../../types/visionBoard';
+import { Plus, X, Compass, Target, Clock, Sparkles, Image, ToggleLeft, ToggleRight, EyeOff, Trophy } from 'lucide-react';
 import { ActionMenu } from './ActionMenu';
 import { VisualTimelineEditor } from './VisualTimelineEditor';
+import { GoalCompletionCelebration } from '../GoalCompletionCelebration';
 
 interface SectionProps {
   mode: 'edit' | 'view';
@@ -152,10 +153,25 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
 
 // --- Section B: Path ---
 export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
-  const { data, updatePath } = useVisionBoard();
+  const { data, updatePath, completePathItem } = useVisionBoard();
   const { path } = data;
+  const [celebrationInfo, setCelebrationInfo] = useState<CompletedGoalInfo | null>(null);
 
   const lifeGoalHabits = habits.filter(h => h.type === 'Life Goal Habit');
+
+  const handleCompleteProject = (idx: number) => {
+    const info = completePathItem('project', idx);
+    if (info) {
+      setCelebrationInfo(info);
+    }
+  };
+
+  const handleCompleteGoal = (idx: number) => {
+    const info = completePathItem('goal', idx);
+    if (info) {
+      setCelebrationInfo(info);
+    }
+  };
 
   return (
     <div className="w-full p-6 sm:p-8">
@@ -225,6 +241,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                     index={idx}
                     totalItems={path.projects.length}
                     isHidden={project.hidden}
+                    isCompleted={project.isCompleted}
                     onMoveUp={() => {
                       if (idx > 0) {
                         const newProjects = [...path.projects];
@@ -244,6 +261,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                       newProjects[idx] = { ...newProjects[idx], hidden: !newProjects[idx].hidden };
                       updatePath({ projects: newProjects });
                     }}
+                    onComplete={() => handleCompleteProject(idx)}
                     onDelete={() => {
                       const newProjects = path.projects.filter((_, i) => i !== idx);
                       updatePath({ projects: newProjects });
@@ -252,7 +270,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                 </div>
               ))}
               <button
-                onClick={() => updatePath({ projects: [...path.projects, { text: "", hidden: false }] })}
+                onClick={() => updatePath({ projects: [...path.projects, { text: "", hidden: false, createdAt: Date.now() }] })}
                 className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1"
               >
                 <Plus size={14} /> ADD PROJECT
@@ -260,16 +278,26 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
             </div>
           ) : (
             <ul className="space-y-2">
-              {path.projects.filter(p => p.text && !p.hidden).length > 0 ? (
-                path.projects.filter(p => p.text && !p.hidden).map((project, idx) => (
-                  <li key={idx} className="flex items-center gap-3">
-                    <div
-                      className="w-2 h-2 rounded-full bg-yellow-400"
-                      style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
-                    />
-                    <span className="text-lg text-white font-light">{project.text}</span>
-                  </li>
-                ))
+              {path.projects.filter(p => p.text && !p.hidden && !p.isCompleted).length > 0 ? (
+                path.projects.filter(p => p.text && !p.hidden && !p.isCompleted).map((project) => {
+                  const originalIdx = path.projects.findIndex(p => p === project);
+                  return (
+                    <li key={originalIdx} className="flex items-center gap-3">
+                      <div
+                        className="w-2 h-2 rounded-full bg-yellow-400"
+                        style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
+                      />
+                      <span className="text-lg text-white font-light flex-1">{project.text}</span>
+                      <button
+                        onClick={() => handleCompleteProject(originalIdx)}
+                        className="p-1 text-gray-500 hover:text-green-400 transition-colors"
+                        title="Mark as completed"
+                      >
+                        <Trophy size={16} />
+                      </button>
+                    </li>
+                  );
+                })
               ) : (
                 <li className="text-gray-600 italic text-lg font-light">No projects set</li>
               )}
@@ -300,6 +328,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                     index={idx}
                     totalItems={path.quarterlyGoals.length}
                     isHidden={goal.hidden}
+                    isCompleted={goal.isCompleted}
                     onMoveUp={() => {
                       if (idx > 0) {
                         const newGoals = [...path.quarterlyGoals];
@@ -319,6 +348,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                       newGoals[idx] = { ...newGoals[idx], hidden: !newGoals[idx].hidden };
                       updatePath({ quarterlyGoals: newGoals });
                     }}
+                    onComplete={() => handleCompleteGoal(idx)}
                     onDelete={() => {
                       const newGoals = path.quarterlyGoals.filter((_, i) => i !== idx);
                       updatePath({ quarterlyGoals: newGoals });
@@ -326,21 +356,31 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                   />
                 </div>
               ))}
-              <button onClick={() => updatePath({ quarterlyGoals: [...path.quarterlyGoals, { text: "", hidden: false }] })} className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1">
+              <button onClick={() => updatePath({ quarterlyGoals: [...path.quarterlyGoals, { text: "", hidden: false, createdAt: Date.now() }] })} className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1">
                 <Plus size={14} /> ADD GOAL
               </button>
             </div>
           ) : (
             <ul className="space-y-2">
-              {path.quarterlyGoals.filter(g => g.text && !g.hidden).map((goal, idx) => (
-                <li key={idx} className="flex items-center gap-3">
-                  <div
-                    className="w-2 h-2 rounded-full bg-blue-400"
-                    style={{ boxShadow: '0 0 8px rgba(96, 165, 250, 0.6)' }}
-                  />
-                  <span className="text-lg text-white font-light">{goal.text}</span>
-                </li>
-              ))}
+              {path.quarterlyGoals.filter(g => g.text && !g.hidden && !g.isCompleted).map((goal) => {
+                const originalIdx = path.quarterlyGoals.findIndex(g => g === goal);
+                return (
+                  <li key={originalIdx} className="flex items-center gap-3">
+                    <div
+                      className="w-2 h-2 rounded-full bg-blue-400"
+                      style={{ boxShadow: '0 0 8px rgba(96, 165, 250, 0.6)' }}
+                    />
+                    <span className="text-lg text-white font-light flex-1">{goal.text}</span>
+                    <button
+                      onClick={() => handleCompleteGoal(originalIdx)}
+                      className="p-1 text-gray-500 hover:text-green-400 transition-colors"
+                      title="Mark as completed"
+                    >
+                      <Trophy size={16} />
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -365,6 +405,13 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
           </ul>
         </div>
       </div>
+
+      {celebrationInfo && (
+        <GoalCompletionCelebration
+          goalInfo={celebrationInfo}
+          onClose={() => setCelebrationInfo(null)}
+        />
+      )}
     </div>
   );
 };
