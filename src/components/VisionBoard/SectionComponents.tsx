@@ -503,19 +503,41 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
       if (block.endTime) {
         const endMinutes = timeToMinutes(block.endTime);
         if (endMinutes < startMinutes) {
-          // Block wraps around midnight
-          // Part 1: Start to Midnight
-          processedTimeline.push({
-            ...block,
-            endTime: '24:00'
-          });
-          // Part 2: Midnight to End
-          processedTimeline.push({
-            ...block,
-            time: '00:00',
-            endTime: block.endTime,
-            // Optional: Mark as continuation?
-          });
+          // Block wraps around midnight (overnight block)
+          const isSleep = block.label.toLowerCase() === 'sleep';
+          
+          if (mode === 'view' && isSleep) {
+            // In view mode, show truncated Sleep block (first 2 hours)
+            // This shows user when to go to sleep without cluttering the morning
+            // Calculate actual duration of original sleep block
+            const originalDuration = (endMinutes + 24 * 60 - startMinutes) % (24 * 60) || 24 * 60;
+            const truncatedDuration = Math.min(originalDuration, 120); // Cap at 2 hours
+            const truncatedEndMinutes = startMinutes + truncatedDuration;
+            // Format as HH:MM with modulo 24 for next-day times (e.g., 25:00 = 01:00)
+            const truncatedEndHours = Math.floor(truncatedEndMinutes / 60) % 24;
+            const truncatedEndMins = truncatedEndMinutes % 60;
+            const truncatedEndTime = `${truncatedEndHours.toString().padStart(2, '0')}:${truncatedEndMins.toString().padStart(2, '0')}`;
+            
+            // Keep as single block - the segment builder handles midnight wrap via endMinutes += 24*60
+            // This ensures the full 2-hour duration displays without being filtered out
+            processedTimeline.push({
+              ...block,
+              endTime: truncatedEndTime
+            });
+          } else {
+            // Edit mode or non-sleep blocks: split at midnight
+            // Part 1: Start to Midnight
+            processedTimeline.push({
+              ...block,
+              endTime: '24:00'
+            });
+            // Part 2: Midnight to End
+            processedTimeline.push({
+              ...block,
+              time: '00:00',
+              endTime: block.endTime,
+            });
+          }
         } else {
           processedTimeline.push(block);
         }
