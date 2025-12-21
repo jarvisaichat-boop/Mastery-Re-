@@ -84,7 +84,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
           className="text-3xl font-bold text-yellow-500 tracking-[0.25em] uppercase"
           style={{ textShadow: '0 0 30px rgba(234, 179, 8, 0.5)' }}
         >
-          VISION BOARD
+          WALKTHROUGH
         </h1>
       </div>
 

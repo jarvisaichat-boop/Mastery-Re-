@@ -50,7 +50,7 @@ Additional preferences:
 2. **Discipline Engine**: Tiered logging windows based on habit strictness (Anchor, Life Goal, Regular)
 3. **Micro-Win Protocol**: Fallback system for overwhelming days with 60-second action options
 4. **Notification Escalation**: T-5 gentle → T-0 urgent → T+5 buzzing notification pattern
-5. **Vision Board** (`src/components/VisionBoard/`): Four-section carousel (Core Values, Path, Schedule, Custom) with:
+5. **Walkthrough** (`src/components/VisionBoard/`): Four-section carousel (Core Values, Path, Schedule, Custom) with:
    - ActionMenu for item management (move up/down, hide/show, delete)
    - View/Edit mode toggle per section
    - Hidden items display with opacity and strikethrough in edit mode
@@ -71,7 +71,7 @@ Additional preferences:
 
 ### Visual Timeline Editor - Complete Feature Walkthrough
 
-The Schedule section of the Vision Board now features a fully interactive visual timeline editor, similar to Google Calendar's day view.
+The Schedule section of the Walkthrough now features a fully interactive visual timeline editor, similar to Google Calendar's day view.
 
 #### Core Functionality
 1. **24-Hour Vertical Grid**: Displays hours from 00:00 to 23:00 with a proportional layout where each hour takes equal vertical space
