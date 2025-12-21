@@ -13,7 +13,7 @@ export const VisionBoardDashboard: React.FC<VisionBoardDashboardProps> = ({ habi
    const { schedule } = data;
    return (
       <div className="min-h-screen bg-gray-900 text-white pb-20">
-         <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-md border-b border-white/5 px-6 py-4 flex justify-between items-center">
+         <div className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-md border-b border-white/5 px-6 py-4 flex justify-between items-center">
             <div>
                <h1 className="text-xl font-bold text-white tracking-tight">Vision Board</h1>
                <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">MASTER DASHBOARD</p>

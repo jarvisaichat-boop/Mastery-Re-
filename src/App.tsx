@@ -956,7 +956,7 @@ function App() {
                 <div className="relative min-h-screen bg-gray-900">
                     <button
                         onClick={() => setShowVisionBoard(false)}
-                        className="fixed top-4 right-4 z-50 p-2 bg-gray-800 rounded-full text-white hover:bg-gray-700 transition-colors"
+                        className="fixed top-4 right-4 z-[60] p-2 bg-gray-800 rounded-full text-white hover:bg-gray-700 transition-colors"
                     >
                         <Shield size={24} />
                     </button>
