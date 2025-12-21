@@ -87,15 +87,10 @@ export default function StatsOverview({ dashboardData, onToggleRateMode, onToggl
                                 {allGoals.length > 0 ? (
                                     <div className="space-y-2">
                                         {allGoals.slice(0, 3).map((goal, idx) => (
-                                            <p key={idx} className="text-lg font-medium text-white">
+                                            <p key={idx} className="text-lg font-semibold tracking-wide text-white">
                                                 • {goal.text}
                                             </p>
                                         ))}
-                                        {allGoals.length > 3 && (
-                                            <p className="text-sm text-gray-400">
-                                                +{allGoals.length - 3} more goals
-                                            </p>
-                                        )}
                                     </div>
                                 ) : (
                                     <p className="text-lg text-gray-400">No active goals set</p>
