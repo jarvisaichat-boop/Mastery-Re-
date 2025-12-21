@@ -10,6 +10,7 @@ import { GoalCompletionCelebration } from '../GoalCompletionCelebration';
 interface SectionProps {
   mode: 'edit' | 'view';
   habits?: Habit[];
+  readOnly?: boolean; // When true, hides trophy buttons and other interactive elements in view mode
 }
 
 // --- Section A: Core Values ---
@@ -152,7 +153,7 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
 };
 
 // --- Section B: Path ---
-export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
+export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnly = false }) => {
   const { data, updatePath, completePathItem } = useVisionBoard();
   const { path } = data;
   const [celebrationInfo, setCelebrationInfo] = useState<CompletedGoalInfo | null>(null);
@@ -288,13 +289,15 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                         style={{ boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)' }}
                       />
                       <span className="text-lg text-white font-light flex-1">{project.text}</span>
-                      <button
-                        onClick={() => handleCompleteProject(originalIdx)}
-                        className="p-1 text-gray-500 hover:text-green-400 transition-colors"
-                        title="Mark as completed"
-                      >
-                        <Trophy size={16} />
-                      </button>
+                      {!readOnly && (
+                        <button
+                          onClick={() => handleCompleteProject(originalIdx)}
+                          className="p-1 text-gray-500 hover:text-green-400 transition-colors"
+                          title="Mark as completed"
+                        >
+                          <Trophy size={16} />
+                        </button>
+                      )}
                     </li>
                   );
                 })
@@ -371,13 +374,15 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [] }) => {
                       style={{ boxShadow: '0 0 8px rgba(96, 165, 250, 0.6)' }}
                     />
                     <span className="text-lg text-white font-light flex-1">{goal.text}</span>
-                    <button
-                      onClick={() => handleCompleteGoal(originalIdx)}
-                      className="p-1 text-gray-500 hover:text-green-400 transition-colors"
-                      title="Mark as completed"
-                    >
-                      <Trophy size={16} />
-                    </button>
+                    {!readOnly && (
+                      <button
+                        onClick={() => handleCompleteGoal(originalIdx)}
+                        className="p-1 text-gray-500 hover:text-green-400 transition-colors"
+                        title="Mark as completed"
+                      >
+                        <Trophy size={16} />
+                      </button>
+                    )}
                   </li>
                 );
               })}

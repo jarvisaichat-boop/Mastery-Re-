@@ -15,9 +15,8 @@ interface StatsOverviewProps {
 export default function StatsOverview({ dashboardData, onToggleRateMode, onToggleStreakMode, habits, onOpenVisionBoard }: StatsOverviewProps) {
     const { data } = useVisionBoard();
     
-    const visibleGoals = data.path.quarterlyGoals.filter(g => !g.hidden && !g.isCompleted);
-    const visibleProjects = data.path.projects.filter(p => !p.hidden && !p.isCompleted);
-    const allGoals = [...visibleGoals, ...visibleProjects];
+    // Only show quarterly goals in the Goals section (not projects/short-term visions)
+    const allGoals = data.path.quarterlyGoals.filter(g => !g.hidden && !g.isCompleted);
 
     const getWeeklyAnalysis = () => {
         const today = new Date();

@@ -160,7 +160,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
                 </div>
                 {/* Slide 2: Path */}
                 <div ref={setSlideRef(1)} className="w-full flex-shrink-0 pb-6">
-                  <PathSection mode="view" habits={habits} />
+                  <PathSection mode="view" habits={habits} readOnly={true} />
                 </div>
                 {/* Slide 3: Schedule */}
                 <div ref={setSlideRef(2)} className="w-full flex-shrink-0 pb-6">
