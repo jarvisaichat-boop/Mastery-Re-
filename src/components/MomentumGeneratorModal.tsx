@@ -1488,7 +1488,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       {...swipeHandlers}
       className="fixed inset-0 z-50 bg-gradient-to-b from-gray-900 via-black to-gray-900 overflow-y-auto overflow-x-hidden"
     >
-      <div className="min-h-full w-full flex items-center justify-center py-6">
+      <div className="min-h-full w-full flex items-start justify-center py-6">
         {shouldShowContent ? renderStepContent() : null}
       </div>
     </div>
