@@ -157,6 +157,55 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
         const gdRoutine = migrateRoutine(parsed.schedule?.gdRoutine, DEFAULT_DATA.schedule.gdRoutine);
         const gnRoutine = migrateRoutine(parsed.schedule?.gnRoutine, DEFAULT_DATA.schedule.gnRoutine);
 
+        // Helper to infer canonical routineType from block data
+        // Uses "closest canonical anchor" strategy - every routine gets classified
+        const inferRoutineType = (block: Partial<TimeBlock> & { routineKey?: string }): 'gm' | 'gd' | 'gn' => {
+          // 1. Check legacy routineKey field
+          if (block.routineKey) {
+            const key = block.routineKey.toLowerCase();
+            if (key.includes('gm') || key.includes('morning')) return 'gm';
+            if (key.includes('gd') || key.includes('day')) return 'gd';
+            if (key.includes('gn') || key.includes('night')) return 'gn';
+          }
+          // 2. Check existing routineType
+          if (block.routineType) return block.routineType;
+          // 3. Check label patterns (broad keywords)
+          const label = (block.label || '').toLowerCase();
+          if (label.includes('gm') || label.includes('morning') || label.includes('wake') || label.includes('sunrise') || label.includes('am routine')) return 'gm';
+          if (label.includes('gd') || label.includes('midday') || label.includes('afternoon') || label.includes('lunch') || label.includes('growth') || label.includes('mid-day')) return 'gd';
+          if (label.includes('gn') || label.includes('night') || label.includes('evening') || label.includes('bed') || label.includes('wind') || label.includes('pm routine')) return 'gn';
+          // 4. Closest canonical anchor strategy - ALWAYS classify based on nearest anchor
+          // Canonical anchors: GM=06:30 (390min), GD=17:30 (1050min), GN=21:00 (1260min)
+          const time = block.time || '06:30';
+          const [h, m] = time.split(':').map(Number);
+          const totalMinutes = (!isNaN(h) ? h * 60 : 0) + (!isNaN(m) ? m : 0);
+          const distances = {
+            gm: Math.abs(totalMinutes - 390),   // 06:30
+            gd: Math.abs(totalMinutes - 1050),  // 17:30
+            gn: Math.abs(totalMinutes - 1260)   // 21:00
+          };
+          // Return the type with smallest distance
+          if (distances.gm <= distances.gd && distances.gm <= distances.gn) return 'gm';
+          if (distances.gd <= distances.gn) return 'gd';
+          return 'gn';
+        };
+
+        // Helper to check if a routine block differs from defaults (customized by user)
+        const isCustomized = (block: TimeBlock): boolean => {
+          const defaults = {
+            gm: { label: 'gm routine', time: '06:30', endTime: '07:30', color: 'bg-yellow-400' },
+            gd: { label: 'gd routine', time: '17:30', endTime: '18:30', color: 'bg-orange-400' },
+            gn: { label: 'gn routine', time: '21:00', endTime: '22:00', color: 'bg-indigo-400' }
+          };
+          const type = block.routineType;
+          if (!type || !defaults[type]) return true; // Assume customized if unknown type
+          const def = defaults[type];
+          const labelDiff = (block.label || '').toLowerCase().trim() !== def.label;
+          const timeDiff = block.time !== def.time || block.endTime !== def.endTime;
+          const colorDiff = block.color !== def.color;
+          return labelDiff || timeDiff || colorDiff;
+        };
+
         // Migrate timeline - normalize to new simplified format
         let timeline: TimeBlock[] = parsed.schedule?.timeline;
         if (!Array.isArray(timeline)) {
@@ -164,10 +213,12 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
         } else {
           // Migrate: preserve isRoutine from old routineKey field or existing isRoutine flag
           // Also set isProtected for Sleep and Work/School blocks
+          // Infer and assign routineType for routine blocks
           timeline = timeline.map((block: Partial<TimeBlock> & { type?: string; routineKey?: string }) => {
             const wasRoutine = block.isRoutine || !!block.routineKey;
             const label = (block.label as string || '').toLowerCase();
             const isProtected = block.isProtected || label === 'sleep' || label === 'work/school';
+            const routineType = wasRoutine ? inferRoutineType(block) : undefined;
             const { type: _type, routineKey: _routineKey, ...rest } = block as Record<string, unknown>;
             return {
               time: rest.time as string || '',
@@ -176,33 +227,60 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
               hidden: (rest.hidden as boolean) ?? false,
               endTime: rest.endTime as string | undefined,
               isRoutine: wasRoutine,
-              isProtected: isProtected || undefined
+              isProtected: isProtected || undefined,
+              routineType
             };
           });
           
-          // Cleanup: Remove duplicate routine blocks created by migration bug
-          // The bug added default routines with exact labels: "GM Routine", "GD Routine", "GN Routine"
-          // Strategy: For each default routine label, keep only the first occurrence
-          const defaultRoutineLabels = ['gm routine', 'gd routine', 'gn routine'];
-          const seenDefaultLabels = new Set<string>();
+          // Cleanup: Remove duplicate routine blocks using routineType for robust deduplication
+          // Strategy: First pass - identify the BEST block per type (prefer customized over default)
+          // Second pass - filter timeline keeping only the best block per type, preserving order
+          const routinesByType = new Map<string, TimeBlock[]>();
+          
+          // First pass: group routines by type
+          timeline.forEach(b => {
+            if (!b.isRoutine) return;
+            const typeKey = b.routineType || 'unknown';
+            if (!routinesByType.has(typeKey)) {
+              routinesByType.set(typeKey, []);
+            }
+            routinesByType.get(typeKey)!.push(b);
+          });
+          
+          // Determine which block to keep per type (prefer customized, including hidden flag changes)
+          const bestBlockPerType = new Map<string, TimeBlock>();
+          routinesByType.forEach((blocks, typeKey) => {
+            if (blocks.length === 1) {
+              bestBlockPerType.set(typeKey, blocks[0]);
+            } else {
+              // Prefer customized blocks (label/time/color/hidden differs from default)
+              const customized = blocks.find(b => isCustomized(b) || b.hidden);
+              bestBlockPerType.set(typeKey, customized || blocks[0]);
+            }
+          });
+          
+          // Second pass: filter timeline keeping best blocks, preserving original order
+          const seenTypes = new Set<string>();
           timeline = timeline.filter(b => {
             if (!b.isRoutine) return true;
-            const labelKey = (b.label || '').toLowerCase().trim();
-            // Only dedupe blocks with default routine labels (the ones the bug was adding)
-            if (!defaultRoutineLabels.includes(labelKey)) return true;
-            if (seenDefaultLabels.has(labelKey)) return false;
-            seenDefaultLabels.add(labelKey);
-            return true;
+            const typeKey = b.routineType || 'unknown';
+            const bestBlock = bestBlockPerType.get(typeKey);
+            // Keep this block only if it's the best one and we haven't seen this type yet
+            if (b === bestBlock && !seenTypes.has(typeKey)) {
+              seenTypes.add(typeKey);
+              return true;
+            }
+            return false;
           });
           
           // Only add default routines if timeline has NO routine entries at all
           // (prevents duplicate routines from being added on subsequent migrations)
           const hasAnyRoutines = timeline.some(b => b.isRoutine);
           if (!hasAnyRoutines) {
-            const defaults = [
-              { time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, isRoutine: true },
-              { time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, isRoutine: true },
-              { time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, isRoutine: true }
+            const defaults: TimeBlock[] = [
+              { time: "06:30", endTime: "07:30", label: "GM Routine", color: "bg-yellow-400", hidden: false, isRoutine: true, routineType: 'gm' },
+              { time: "17:30", endTime: "18:30", label: "GD Routine", color: "bg-orange-400", hidden: false, isRoutine: true, routineType: 'gd' },
+              { time: "21:00", endTime: "22:00", label: "GN Routine", color: "bg-indigo-400", hidden: false, isRoutine: true, routineType: 'gn' }
             ];
             timeline.push(...defaults);
           }
