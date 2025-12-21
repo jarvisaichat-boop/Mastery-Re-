@@ -103,6 +103,30 @@ The Schedule section of the Vision Board now features a fully interactive visual
 - Sleep blocks can span midnight (e.g., 23:00 → 06:00)
 - System correctly handles the wrap-around calculation for display and editing
 
+### Goal Completion Celebration System (December 2024)
+
+The Vision Board Path section now supports marking projects and goals as "Completed" with a celebratory popup:
+
+#### Completion Flow
+1. **View Mode**: Trophy button visible next to each project/goal (gray, turns green on hover)
+2. **Edit Mode**: ActionMenu includes "Completed" option with trophy icon
+3. **Celebration Popup**: Confetti animation with trophy icon, goal text, and duration stats
+
+#### Duration Tracking
+- **VisionItem.createdAt**: Timestamp when item was created (for new items)
+- **VisionItem.migratedAt**: Timestamp when legacy items were migrated to tracking system
+- **VisionItem.isCompleted / completedAt**: Completion status and timestamp
+
+#### Celebration Stats Display
+- **New Items** (have createdAt): Shows "Journey Duration" and "Started on [date]"
+- **Legacy Items** (have migratedAt): Shows "Time Since Tracking" and "Tracked since [date]"
+- Both show completion date and celebratory confetti
+
+#### Dashboard Integration
+- StatsOverview Goal section now pulls from VisionBoardContext (path.projects + path.quarterlyGoals)
+- Displays up to 3 visible goals with count of remaining
+- Single edit icon opens Vision Board Dashboard
+
 ### Migration & Data Cleanup
 
 #### Duplicate Routine Cleanup
