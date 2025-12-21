@@ -71,7 +71,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
               background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.95), rgba(15, 15, 20, 0.98))',
               boxShadow: '0 0 40px rgba(234, 179, 8, 0.12), 0 0 80px rgba(234, 179, 8, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
               border: '1px solid rgba(234, 179, 8, 0.25)',
-              minHeight: '200px', // Minimum card height
+              minHeight: '100px', // Minimum card height
               height: 'auto', // Expand with content
               paddingBottom: currentIndex === maxIndex ? '80px' : '0' // Extra padding for continue button on last slide
             }}
