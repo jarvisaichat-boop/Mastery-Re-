@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { CoreValuesSection, PathSection, ScheduleSection, CustomSectionComponent } from './SectionComponents';
@@ -11,14 +11,48 @@ interface VisionBoardCarouselProps {
   onComplete?: () => void;
 }
 
+const MIN_CARD_HEIGHT = 100;
+
 export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits, onComplete }) => {
   const { data, updateSchedule } = useVisionBoard();
   const { schedule, custom } = data;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [cardHeight, setCardHeight] = useState(MIN_CARD_HEIGHT);
+  
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const footerRef = useRef<HTMLDivElement | null>(null);
 
-  // Calculate total slides: 3 base slides + 1 if custom is enabled
   const totalSlides = custom.enabled ? 4 : 3;
   const maxIndex = totalSlides - 1;
+
+  const measureActiveSlide = useCallback(() => {
+    const activeSlide = slideRefs.current[currentIndex];
+    if (activeSlide) {
+      let height = activeSlide.scrollHeight;
+      // Add footer height if we're on the last slide
+      if (currentIndex === maxIndex && footerRef.current) {
+        height += footerRef.current.scrollHeight;
+      }
+      setCardHeight(Math.max(MIN_CARD_HEIGHT, height));
+    }
+  }, [currentIndex, maxIndex]);
+
+  useEffect(() => {
+    measureActiveSlide();
+    
+    const resizeObserver = new ResizeObserver(() => {
+      measureActiveSlide();
+    });
+    
+    const activeSlide = slideRefs.current[currentIndex];
+    if (activeSlide) {
+      resizeObserver.observe(activeSlide);
+    }
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [currentIndex, measureActiveSlide, data]);
 
   const handlers = useSwipeable({
     onSwipedLeft: () => handleNext(),
@@ -33,6 +67,10 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
 
   const handlePrev = () => {
     if (currentIndex > 0) setCurrentIndex(prev => prev - 1);
+  };
+
+  const setSlideRef = (index: number) => (el: HTMLDivElement | null) => {
+    slideRefs.current[index] = el;
   };
 
   return (
@@ -66,14 +104,12 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
 
           {/* Card Container */}
           <div
-            className="w-full flex flex-col rounded-2xl overflow-hidden relative"
+            className="w-full flex flex-col rounded-2xl overflow-hidden relative transition-[height] duration-300 ease-out"
             style={{
               background: 'linear-gradient(145deg, rgba(30, 30, 35, 0.95), rgba(15, 15, 20, 0.98))',
               boxShadow: '0 0 40px rgba(234, 179, 8, 0.12), 0 0 80px rgba(234, 179, 8, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
               border: '1px solid rgba(234, 179, 8, 0.25)',
-              minHeight: '100px', // Minimum card height
-              height: 'auto', // Expand with content
-              paddingBottom: currentIndex === maxIndex ? '80px' : '0' // Extra padding for continue button on last slide
+              height: `${cardHeight}px`
             }}
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
@@ -115,24 +151,24 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
             {/* Slides Container */}
             <div className="overflow-hidden">
               <div
-                className="flex transition-transform duration-300 ease-out"
+                className="flex transition-transform duration-300 ease-out items-start"
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
               >
                 {/* Slide 1: Core Values */}
-                <div className="w-full flex-shrink-0 pb-6">
+                <div ref={setSlideRef(0)} className="w-full flex-shrink-0 pb-6">
                   <CoreValuesSection mode="view" />
                 </div>
                 {/* Slide 2: Path */}
-                <div className="w-full flex-shrink-0 pb-6">
+                <div ref={setSlideRef(1)} className="w-full flex-shrink-0 pb-6">
                   <PathSection mode="view" habits={habits} />
                 </div>
                 {/* Slide 3: Schedule */}
-                <div className="w-full flex-shrink-0 pb-6">
+                <div ref={setSlideRef(2)} className="w-full flex-shrink-0 pb-6">
                   <ScheduleSection mode="view" schedule={schedule} updateSchedule={updateSchedule} habits={habits} />
                 </div>
                 {/* Slide 4: Custom (only if enabled) */}
                 {custom.enabled && (
-                  <div className="w-full flex-shrink-0 pb-6">
+                  <div ref={setSlideRef(3)} className="w-full flex-shrink-0 pb-6">
                     <CustomSectionComponent mode="view" />
                   </div>
                 )}
@@ -141,7 +177,7 @@ export const VisionBoardCarousel: React.FC<VisionBoardCarouselProps> = ({ habits
 
             {/* Continue Button - Only on Last Slide */}
             {(currentIndex === maxIndex) && (
-              <div className="w-full flex justify-center pb-8 pt-4">
+              <div ref={footerRef} className="w-full flex justify-center pb-8 pt-4">
                 <button
                   onClick={onComplete}
                   className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-full shadow-lg hover:bg-yellow-400 transition-all flex items-center gap-2 animate-pulse"
