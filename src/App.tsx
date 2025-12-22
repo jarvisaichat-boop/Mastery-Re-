@@ -303,6 +303,7 @@ function App() {
     const [showMomentumGenerator, setShowMomentumGenerator] = useState(false);
     const [showContentLibraryManager, setShowContentLibraryManager] = useState(false);
     const [showDevMenu, setShowDevMenu] = useState(false);
+    const [showVisionBoard, setShowVisionBoard] = useState(false);
     const [showFloatingGoPopup, setShowFloatingGoPopup] = useState(false);
     const [floatingGoIsFirstActivation, setFloatingGoIsFirstActivation] = useState(true);
     const [contentLibrary, setContentLibrary] = useState<ContentLibraryItem[]>(() => loadContentLibrary());
@@ -946,8 +947,6 @@ function App() {
 
     // Determine if we should show App Tour overlay
     const shouldShowAppTour = (onboardingComplete && !appTourComplete) || previewAppTour;
-
-    const [showVisionBoard, setShowVisionBoard] = useState(false);
 
     // Conditional rendering for Vision Board Dashboard
     if (showVisionBoard) {
