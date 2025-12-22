@@ -44,7 +44,15 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 -   **Aesthetic**: Dark mode "Focus Dojo" theme with improved readability.
 -   **Interaction**: Intuitive habit tracking, drag-and-drop reordering, multiple calendar views, floating "Now GO!" completion popup.
 -   **Gamification**: AI Coach reactions, streak celebrations, unified daily check-ins with reflection and AI chat.
--   **Onboarding**: Multi-phase onboarding with conversational AI, a logic tree builder ("The Architect"), interstitial wisdom screens, and coach feedback. Includes a mandatory 60-second "Micro-Win Protocol" and an interactive app tour.
+-   **Onboarding**: Comprehensive 7-phase initiation sequence:
+        1. **Manifesto**: Initial commitment to the Path.
+        2. **Context Baseline**: Current state assessment and starting metrics.
+        3. **Core Values**: Defining the "Why" and underlying identity.
+        4. **The Path**: Conversational Logic Tree ("The Architect") to map Goals → Milestones → Daily Actions.
+        5. **The Schedule**: Time-blocking and routine design.
+        6. **The Enforcer**: Negotiation of stakes and accountability.
+        7. **The Contract**: Final signed commitment.
+        -   Includes a mandatory 60-second "Micro-Win Protocol" and an interactive app tour covering the Tracker, Check-In, and Dashboard.
 -   **Daily Check-in**: Unified within a chat interface with AI motivational responses.
 -   **Vision Check**: Users visualize the complete pathway (action → milestone → goal).
 -   **Discipline Engine Visuals**: Path-focused UI with past dates dimmed, and information toasts for unloggable habits.

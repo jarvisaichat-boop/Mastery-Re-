@@ -142,6 +142,23 @@ The Vision Board Path section now supports marking projects and goals as "Comple
 - Migrations are idempotent - safe to run multiple times
 - Legacy format detection ensures backward compatibility with older data structures
 
+### Onboarding System Overhaul (December 2024)
+
+Role-playing-heavy, 7-phase initiation sequence that replaces the old wizard.
+
+#### Phases 0-7
+1. **Manifesto**: User signs the "Seeker's Code".
+2. **Context**: Collects baseline metrics (sleep, stress, focus).
+3. **Core Values**: Identity definition.
+4. **The Path**: "The Architect" Logic Tree (Goal → Milestones → Actions).
+5. **The Schedule**: Visual blocking of the day.
+6. **The Enforcer**: Stake-setting and accountability.
+7. **The Contract**: Final commitment signature.
+
+#### App Tour & Micro-Win
+- **Interactive Tour**: Highlights Tracker, Check-In, and Dashboard layers.
+- **Micro-Win Protocol**: Mandatory 60-second timer to prove immediate action ability before full access.
+
 ### Backend API Server
 - Express.js server running on port 3001
 - Vite proxy configuration routes `/api/*` requests to backend during development
