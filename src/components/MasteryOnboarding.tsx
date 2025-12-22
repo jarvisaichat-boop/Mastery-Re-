@@ -5,12 +5,14 @@ import { Habit } from '../types';
 import { Home, Target } from 'lucide-react';
 import Phase0Manifesto from './mastery-onboarding/Phase0Manifesto';
 import Phase1ContextBaseline from './mastery-onboarding/Phase1ContextBaseline';
-import Phase2DeepDiscovery from './mastery-onboarding/Phase2DeepDiscovery';
-import Phase3Logistics from './mastery-onboarding/Phase3Logistics';
-import Phase4Architect from './mastery-onboarding/Phase4Architect';
-import Phase5Synthesis from './mastery-onboarding/Phase5Synthesis';
-import Phase6Negotiation from './mastery-onboarding/Phase6Negotiation';
+
+// Phase 3, 4, 5, 6 old components replaced by new imports below
 import Phase7Contract from './mastery-onboarding/Phase7Contract';
+
+import Phase3CoreValues from './mastery-onboarding/Phase3CoreValues';
+import Phase4Path from './mastery-onboarding/Phase4Path';
+import Phase5Schedule from './mastery-onboarding/Phase5Schedule';
+import Phase6Enforcer from './mastery-onboarding/Phase6Enforcer';
 
 const STORAGE_KEY = 'mastery-onboarding-profile';
 const PHASE_STORAGE_KEY = 'mastery-onboarding-phase';
@@ -73,6 +75,8 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
     setProfile(prev => ({ ...prev, ...updates }));
   };
 
+
+
   const nextPhase = () => {
     setCurrentPhase(prev => Math.min(prev + 1, 7) as OnboardingPhase);
   };
@@ -88,29 +92,6 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
 
   const handlePhase2Complete = (data: Partial<MasteryProfile>) => {
     updateProfile(data);
-    nextPhase();
-  };
-
-  const handlePhase3Complete = (data: Partial<MasteryProfile>) => {
-    updateProfile(data);
-    // After Phase 3, jump to Phase 5 (Synthesis) instead of Phase 4
-    setCurrentPhase(5);
-  };
-
-  const handlePhase4Complete = (data: Partial<MasteryProfile>) => {
-    updateProfile(data);
-    // After Phase 4 (Architect), go to Phase 6
-    setCurrentPhase(6);
-  };
-
-  const handlePhase5Complete = (persona: string) => {
-    updateProfile({ aiPersona: persona });
-    // After Phase 5 (Synthesis), go to Phase 4 (Architect)
-    setCurrentPhase(4);
-  };
-
-  const handlePhase6Complete = (habitData: Partial<MasteryProfile>) => {
-    updateProfile(habitData);
     nextPhase();
   };
 
@@ -195,6 +176,33 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
     }
   };
 
+
+
+  // ... (existing code top) ...
+
+  // Handlers for new phases
+  const handlePhase3Complete = (data: Partial<MasteryProfile>) => {
+    updateProfile(data);
+    nextPhase();
+  };
+
+  const handlePhase4Complete = (data: Partial<MasteryProfile>) => {
+    updateProfile(data);
+    nextPhase();
+  };
+
+  const handlePhase5Complete = (data: Partial<MasteryProfile>) => {
+    updateProfile(data);
+    nextPhase();
+  };
+
+  const handlePhase6Complete = (data: Partial<MasteryProfile>) => {
+    updateProfile(data);
+    nextPhase();
+  };
+
+  // ... (existing code mid) ...
+
   const renderPhase = () => {
     switch (currentPhase) {
       case 0:
@@ -202,15 +210,28 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
       case 1:
         return <Phase1ContextBaseline profile={profile} onComplete={handlePhase1Complete} />;
       case 2:
-        return <Phase2DeepDiscovery profile={profile} onComplete={handlePhase2Complete} />;
+        return <Phase3CoreValues onComplete={handlePhase2Complete} />;
       case 3:
-        return <Phase3Logistics profile={profile} onComplete={handlePhase3Complete} />;
+        return <Phase4Path profile={profile} onComplete={handlePhase3Complete} />;
       case 4:
-        return <Phase4Architect profile={profile} onComplete={handlePhase4Complete} />;
+        return <Phase5Schedule onComplete={handlePhase4Complete} />;
       case 5:
-        return <Phase5Synthesis profile={profile as MasteryProfile} onComplete={handlePhase5Complete} />;
+        return <Phase6Enforcer profile={profile} onComplete={handlePhase5Complete} />;
       case 6:
-        return <Phase6Negotiation profile={profile as MasteryProfile} onComplete={handlePhase6Complete} />;
+        // Skip phase 6 if needed or just use Enforcer again/placeholder -> Actually we should just jump to 7?
+        // If we want Enforcer to be Phase 5, then handlePhase5Complete calls nextPhase -> 6.
+        // If 6 is empty/skipped, we should auto-forward or just render Contract at 6?
+        // Let's just map Enforcer to 5, and if we are at 6, go to 7 immediately?
+        // Or better: Let's make Enforcer Phase 5, and then next phase is 7 (Contract).
+        // But nextPhase() increments by 1. 5->6.
+        // So at 6 we need something.
+        // Let's Put Contract at 6 and 7? Or just auto-skip 6?
+        // Simplest: Enforcer is Phase 5. Contract is Phase 6.
+        // But existing code uses 7 phases (0-7).
+        // Let's make Phase 6 a "Pre-Launch" or just Contract part 1?
+        // Valid Fix: Change Phase 7 Contract to be Phase 6?
+        // Or just render Contract at 6 too?
+        return <Phase7Contract onComplete={handlePhase7Complete} />; 
       case 7:
         return <Phase7Contract onComplete={handlePhase7Complete} />;
       default:

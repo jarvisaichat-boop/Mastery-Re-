@@ -32,11 +32,9 @@ const LOCAL_STORAGE_ONBOARDING_KEY = 'mastery-dashboard-onboarding-complete';
 const LOCAL_STORAGE_APP_TOUR_KEY = 'mastery-dashboard-app-tour-complete';
 const LOCAL_STORAGE_MICRO_WIN_KEY = 'mastery-dashboard-micro-win-complete';
 const LOCAL_STORAGE_CELEBRATED_STREAKS_KEY = 'mastery-dashboard-celebrated-streaks';
-const LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY = 'mastery-dashboard-last-daily-summary';
-const LOCAL_STORAGE_DAILY_REASONS_KEY = 'mastery-dashboard-daily-reasons';
 const LOCAL_STORAGE_GOAL_KEY = 'mastery-dashboard-goal';
 const LOCAL_STORAGE_ASPIRATIONS_KEY = 'mastery-dashboard-aspirations';
-const LOCAL_STORAGE_CHAT_ENTRIES_KEY = 'mastery-dashboard-chat-entries';
+
 const LOCAL_STORAGE_EMERGENCY_MODE_KEY = 'mastery-dashboard-emergency-mode';
 const LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY = 'mastery-dashboard-last-streak-repair-check';
 const LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY = 'mastery-momentum-last-completed';
@@ -260,7 +258,7 @@ import { VisionBoardDashboard } from './components/VisionBoard/VisionBoardDashbo
 function App() {
     // TESTING: Auto-complete onboarding for screenshots and testing  
     // TODO: Remove this before production - this is for development testing only
-    const AUTO_SKIP_ONBOARDING = true; // Set to false to enable normal onboarding flow
+    const AUTO_SKIP_ONBOARDING = false; // Set to false to enable normal onboarding flow
 
     const urlParams = new URLSearchParams(window.location.search);
     const shouldSkipOnboarding = AUTO_SKIP_ONBOARDING || urlParams.get('skipOnboarding') === 'true' || urlParams.get('test') === 'true';
@@ -362,23 +360,12 @@ function App() {
             return stored ? new Set(JSON.parse(stored)) : new Set();
         } catch { return new Set(); }
     });
-    const [dailyReasons, setDailyReasons] = useState<Record<string, Record<number, string>>>(() => {
-        try {
-            const stored = localStorage.getItem(LOCAL_STORAGE_DAILY_REASONS_KEY);
-            return stored ? JSON.parse(stored) : {};
-        } catch { return {}; }
-    });
-    const [chatEntries, setChatEntries] = useState<Record<string, any>>(() => {
-        try {
-            const stored = localStorage.getItem(LOCAL_STORAGE_CHAT_ENTRIES_KEY);
-            return stored ? JSON.parse(stored) : {};
-        } catch { return {}; }
-    });
+
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [igniteHabit, setIgniteHabit] = useState<Habit | null>(null);
     const [activeMiniApp, setActiveMiniApp] = useState<{ habit: Habit; date: string; type: 'breath' | 'journal' | 'vision' } | null>(null);
 
-    const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string, profile?: any) => {
+    const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string) => {
         logger.log('🎊 App.tsx handleOnboardingComplete called');
         logger.log('📦 Received habits:', newHabits);
         logger.log('🎯 Received goal:', userGoal);
@@ -457,10 +444,8 @@ function App() {
     useEffect(() => {
         try {
             localStorage.setItem(LOCAL_STORAGE_CELEBRATED_STREAKS_KEY, JSON.stringify(Array.from(celebratedStreaks)));
-            localStorage.setItem(LOCAL_STORAGE_DAILY_REASONS_KEY, JSON.stringify(dailyReasons));
-            localStorage.setItem(LOCAL_STORAGE_CHAT_ENTRIES_KEY, JSON.stringify(chatEntries));
         } catch (e) { logger.error("Failed to save motivation data", e); }
-    }, [celebratedStreaks, dailyReasons, chatEntries]);
+    }, [celebratedStreaks]);
 
     // Initialize Notification Service
     useEffect(() => {
@@ -770,12 +755,7 @@ function App() {
         }
     }, []);
 
-    const handleChatCheckInSubmit = (entry: { wins: string; challenges: string; messages: any[] }) => {
-        const today = formatDate(new Date(), 'yyyy-MM-dd');
-        setChatEntries(prev => ({ ...prev, [today]: entry }));
-        localStorage.setItem(LOCAL_STORAGE_LAST_DAILY_SUMMARY_KEY, today);
-        setShowChatCheckIn(false);
-    };
+
 
     const handleEmergencyHabitComplete = () => {
         if (!emergencyHabitAction) return;
@@ -901,57 +881,54 @@ function App() {
     }, [onboardingComplete, appTourComplete, microWinComplete, previewMicroWin, habits]);
 
     // Determine if we should show Micro-Win (either first time or preview)
+    const shouldShowAppTour = (onboardingComplete && !appTourComplete) || previewAppTour;
     const shouldShowMicroWin = (onboardingComplete && appTourComplete && !microWinComplete) || previewMicroWin;
     const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
 
-    // Show onboarding if not complete or in preview mode
-    if (!onboardingComplete || previewOnboarding) {
-        // When jumping to Phase 7, pre-populate with mock data to test full flow
-        const mockProfileForPhase7 = jumpToPhase === 7 ? {
-            name: 'Test User',
-            context: 'Testing the flow',
-            mentalState: 'STUCK' as const,
-            archetype: 'Warrior' as const,
-            fuel: 'Glory' as const,
-            saboteur: 'Perfectionist' as const,
-            goldenHour: 'Morning' as const,
-            aiPersona: 'Drill Sergeant' as const,
-            northStar: 'Build a successful habit tracking app',
-            northStarTimeline: '3 Months' as const,
-            logicTreeRoot: 'Build a successful habit tracking app',
-            logicTreeBranch: 'Complete MVP with core features',
-            logicTreeLeaf: 'Code for 30 minutes daily',
-            existingHabits: [],
-            canEnvisionPath: true,
-            proposedHabit: {
-                name: 'Code for 30 minutes daily',
-                description: 'Your daily action to achieve "Build a successful habit tracking app" - optimized for your morning golden hour',
-                duration: 30,
-                difficulty: 'challenging' as const
-            },
-            acceptedHabit: true,
-            finalHabitDuration: 30
-        } : undefined;
-
-        return <MasteryOnboarding
-            onComplete={handleOnboardingComplete}
-            isPreview={previewOnboarding}
-            onExitPreview={() => {
-                setPreviewOnboarding(false);
-                setJumpToPhase(null);
-            }}
-            initialPhase={jumpToPhase}
-            initialProfile={mockProfileForPhase7}
-        />;
-    }
-
-    // Determine if we should show App Tour overlay
-    const shouldShowAppTour = (onboardingComplete && !appTourComplete) || previewAppTour;
-
-    // Conditional rendering for Vision Board Dashboard
-    if (showVisionBoard) {
-        return (
-            <VisionBoardProvider>
+    return (
+        <VisionBoardProvider>
+            {(!onboardingComplete || previewOnboarding) ? (
+                // Onboarding Layout
+                <div className="min-h-screen bg-gray-950 text-white font-sans selection:bg-yellow-500/30">
+                    <MasteryOnboarding
+                        onComplete={handleOnboardingComplete}
+                        isPreview={previewOnboarding}
+                        onExitPreview={() => {
+                            setPreviewOnboarding(false);
+                            setJumpToPhase(null);
+                        }}
+                        initialPhase={jumpToPhase}
+                        initialProfile={
+                            (jumpToPhase === 7 && previewOnboarding) ? {
+                                name: 'Test User',
+                                context: 'Testing the flow',
+                                mentalState: 'STUCK' as const,
+                                archetype: 'Warrior' as const,
+                                fuel: 'Glory' as const,
+                                saboteur: 'Perfectionist' as const,
+                                goldenHour: 'Morning' as const,
+                                aiPersona: 'Drill Sergeant' as const,
+                                northStar: 'Build a successful habit tracking app',
+                                northStarTimeline: '3 Months' as const,
+                                logicTreeRoot: 'Build a successful habit tracking app',
+                                logicTreeBranch: 'Complete MVP with core features',
+                                logicTreeLeaf: 'Code for 30 minutes daily',
+                                existingHabits: [],
+                                canEnvisionPath: true,
+                                proposedHabit: {
+                                    name: 'Code for 30 minutes daily',
+                                    description: 'Your daily action to achieve "Build a successful habit tracking app" - optimized for your morning golden hour',
+                                    duration: 30,
+                                    difficulty: 'challenging' as const
+                                },
+                                acceptedHabit: true,
+                                finalHabitDuration: 30
+                            } : undefined
+                        }
+                    />
+                </div>
+            ) : showVisionBoard ? (
+                // Vision Board Dashboard Overlay
                 <div className="relative min-h-screen bg-gray-900">
                     <button
                         onClick={() => setShowVisionBoard(false)}
@@ -961,548 +938,546 @@ function App() {
                     </button>
                     <VisionBoardDashboard habits={habits} />
                 </div>
-            </VisionBoardProvider>
-        );
-    }
+                ) : (
+                    // Main Dashboard Layout
+                    <div className="min-h-screen bg-gray-950 text-white font-sans selection:bg-yellow-500/30">
+                        {/* ... existing JSX ... */}
 
-    return (
-        <VisionBoardProvider>
-            <div className="min-h-screen bg-gray-950 text-white font-sans selection:bg-yellow-500/30">
-                {/* ... existing JSX ... */}
+                            <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
+                                {/* Developer Menu - Single button that expands */}
+                                <div className="relative flex-1">
+                                    <button
+                                        onClick={() => setShowDevMenu(!showDevMenu)}
+                                        className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg border border-gray-700 transition-colors"
+                                        title="Developer Shortcuts"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </button>
 
-            <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
-                {/* Developer Menu - Single button that expands */}
-                <div className="relative flex-1">
-                    <button
-                        onClick={() => setShowDevMenu(!showDevMenu)}
-                        className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg border border-gray-700 transition-colors"
-                        title="Developer Shortcuts"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </button>
-                    
-                    {showDevMenu && (
-                        <div className="absolute left-0 top-full mt-2 bg-gray-800 border border-gray-700 rounded-lg p-2 z-50 flex flex-wrap gap-2 shadow-xl">
-                            <button
-                                onClick={() => {
-                                    setEmergencyMode(!emergencyMode);
-                                    setShowDevMenu(false);
-                                }}
-                                className={`p-2 rounded-lg transition-all ${emergencyMode
-                                    ? 'bg-red-600 text-white hover:bg-red-500'
-                                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
-                                    }`}
-                                title={emergencyMode ? "Emergency Mode Active" : "Activate Emergency Mode"}
-                            >
-                                <Shield className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setJumpToPhase(0);
-                                    setPreviewOnboarding(true);
-                                    setShowDevMenu(false);
-                                }}
-                                className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-400 hover:text-white rounded-lg transition-colors"
-                                title="Jump to Phase 0"
-                            >
-                                <Home className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setJumpToPhase(4);
-                                    setPreviewOnboarding(true);
-                                    setShowDevMenu(false);
-                                }}
-                                className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-400 hover:text-white rounded-lg transition-colors"
-                                title="Jump to Phase 4"
-                            >
-                                <Target className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setJumpToPhase(7);
-                                    setPreviewOnboarding(true);
-                                    setShowDevMenu(false);
-                                }}
-                                className="p-2 bg-gray-700 hover:bg-gray-600 text-green-400 hover:text-green-300 rounded-lg transition-colors"
-                                title="Jump to Phase 7"
-                            >
-                                <FileCheck className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setPreviewAppTour(true);
-                                    setShowDevMenu(false);
-                                }}
-                                className="p-2 bg-gray-700 hover:bg-gray-600 text-blue-400 hover:text-blue-300 rounded-lg transition-colors"
-                                title="Preview App Tour"
-                            >
-                                <BookOpen className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setPreviewMicroWin(true);
-                                    setShowDevMenu(false);
-                                }}
-                                className="p-2 bg-gray-700 hover:bg-gray-600 text-yellow-400 hover:text-yellow-300 rounded-lg transition-colors"
-                                title="Preview Micro-Win"
-                            >
-                                <Zap className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setShowContentLibraryManager(true);
-                                    setShowDevMenu(false);
-                                }}
-                                className="p-2 bg-gray-700 hover:bg-gray-600 text-orange-400 hover:text-orange-300 rounded-lg transition-colors"
-                                title="Manage Videos"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-                        </div>
-                    )}
-                </div>
-                <div className="flex items-center gap-2">
-                    {/* View Mode Toggle - Next to Add Habit button */}
-                    {!showStatsView && (
-                        <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
-                            <button
-                                onClick={() => setShowDailyTrackingView(false)}
-                                className={`p-2 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
-                                title="Simple View"
-                            >
-                                <List className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={() => setShowDailyTrackingView(true)}
-                                className={`p-2 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
-                                title="Weekly View"
-                            >
-                                <Calendar className="w-4 h-4" />
-                            </button>
-                        </div>
-                    )}
-                    {/* Add New Habit Button */}
-                    <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700" style={{boxShadow: '0 0 0 2px rgba(251, 191, 36, 0.2)'}}><Plus className="w-6 h-6" /></button>
-                </div>
-            </div>
-            <div className="max-w-2xl mx-auto">
-                {/* Emergency Mode Banner */}
-                {emergencyMode && (
-                    <div className="mb-6 p-4 bg-red-600/20 border border-red-500 rounded-lg">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <Shield className="w-6 h-6 text-red-400" />
-                                <div>
-                                    <h3 className="font-bold text-red-400">Emergency Mode Active</h3>
-                                    <p className="text-sm text-gray-300">All habits are now 60-second micro-wins. Just show up.</p>
+                                    {showDevMenu && (
+                                        <div className="absolute left-0 top-full mt-2 bg-gray-800 border border-gray-700 rounded-lg p-2 z-50 flex flex-wrap gap-2 shadow-xl">
+                                            <button
+                                                onClick={() => {
+                                                    setEmergencyMode(!emergencyMode);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className={`p-2 rounded-lg transition-all ${emergencyMode
+                                                    ? 'bg-red-600 text-white hover:bg-red-500'
+                                                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                                                    }`}
+                                                title={emergencyMode ? "Emergency Mode Active" : "Activate Emergency Mode"}
+                                            >
+                                                <Shield className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setJumpToPhase(0);
+                                                    setPreviewOnboarding(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-400 hover:text-white rounded-lg transition-colors"
+                                                title="Jump to Phase 0"
+                                            >
+                                                <Home className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setJumpToPhase(4);
+                                                    setPreviewOnboarding(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-400 hover:text-white rounded-lg transition-colors"
+                                                title="Jump to Phase 4"
+                                            >
+                                                <Target className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setJumpToPhase(7);
+                                                    setPreviewOnboarding(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-green-400 hover:text-green-300 rounded-lg transition-colors"
+                                                title="Jump to Phase 7"
+                                            >
+                                                <FileCheck className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setPreviewAppTour(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-blue-400 hover:text-blue-300 rounded-lg transition-colors"
+                                                title="Preview App Tour"
+                                            >
+                                                <BookOpen className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setPreviewMicroWin(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-yellow-400 hover:text-yellow-300 rounded-lg transition-colors"
+                                                title="Preview Micro-Win"
+                                            >
+                                                <Zap className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setShowContentLibraryManager(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-orange-400 hover:text-orange-300 rounded-lg transition-colors"
+                                                title="Manage Videos"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {/* View Mode Toggle - Next to Add Habit button */}
+                                    {!showStatsView && (
+                                        <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
+                                            <button
+                                                onClick={() => setShowDailyTrackingView(false)}
+                                                className={`p-2 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
+                                                title="Simple View"
+                                            >
+                                                <List className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => setShowDailyTrackingView(true)}
+                                                className={`p-2 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
+                                                title="Weekly View"
+                                            >
+                                                <Calendar className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    )}
+                                    {/* Add New Habit Button */}
+                                    <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700" style={{ boxShadow: '0 0 0 2px rgba(251, 191, 36, 0.2)' }}><Plus className="w-6 h-6" /></button>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => setEmergencyMode(false)}
-                                className="text-sm px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded transition-colors"
-                            >
-                                Deactivate
-                            </button>
-                        </div>
-                    </div>
-                )}
+                            <div className="max-w-2xl mx-auto">
+                                {/* Emergency Mode Banner */}
+                                {emergencyMode && (
+                                    <div className="mb-6 p-4 bg-red-600/20 border border-red-500 rounded-lg">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <Shield className="w-6 h-6 text-red-400" />
+                                                <div>
+                                                    <h3 className="font-bold text-red-400">Emergency Mode Active</h3>
+                                                    <p className="text-sm text-gray-300">All habits are now 60-second micro-wins. Just show up.</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => setEmergencyMode(false)}
+                                                className="text-sm px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded transition-colors"
+                                            >
+                                                Deactivate
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
 
-                <div className="mb-8">
-                    {/* Title and Caption - Centered */}
-                    <div className="text-center">
-                        <h1 className="text-4xl font-bold mb-2">{showStatsView ? 'Mastery Dashboard' : 'Mastery Tracker'}</h1>
-                        <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
-                    </div>
-                </div>
+                                <div className="mb-8">
+                                    {/* Title and Caption - Centered */}
+                                    <div className="text-center">
+                                        <h1 className="text-4xl font-bold mb-2">{showStatsView ? 'Mastery Dashboard' : 'Mastery Tracker'}</h1>
+                                        <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
+                                    </div>
+                                </div>
 
-                {/* STATS OVERVIEW */}
-                {showStatsView && (
-                    <div className="stats-dashboard-area">
-                        <StatsOverview
-                            dashboardData={dashboardData}
-                            onToggleRateMode={handleToggleRateMode}
-                            onToggleStreakMode={handleToggleStreakMode}
-                            habits={habits}
-                            onOpenVisionBoard={() => setShowVisionBoard(true)}
-                        />
-                    </div>
-                )}
+                                {/* STATS OVERVIEW */}
+                                {showStatsView && (
+                                    <div className="stats-dashboard-area">
+                                        <StatsOverview
+                                            dashboardData={dashboardData}
+                                            onToggleRateMode={handleToggleRateMode}
+                                            onToggleStreakMode={handleToggleStreakMode}
+                                            habits={habits}
+                                            onOpenVisionBoard={() => setShowVisionBoard(true)}
+                                        />
+                                    </div>
+                                )}
 
-                {/* Calendar Header shown for all calendar views (week/month/year) when showDailyTrackingView is true */}
-                {!showStatsView && showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick} />}
-                {!showStatsView && viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
+                                {/* Calendar Header shown for all calendar views (week/month/year) when showDailyTrackingView is true */}
+                                {!showStatsView && showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick} />}
+                                {!showStatsView && viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
 
-                {/* Month and Year Views are shown when showDailyTrackingView is true (calendar mode) */}
-                {!showStatsView && viewMode === 'month' && showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick} />}
-                {!showStatsView && viewMode === 'year' && showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick} />}
+                                {/* Month and Year Views are shown when showDailyTrackingView is true (calendar mode) */}
+                                {!showStatsView && viewMode === 'month' && showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick} />}
+                                {!showStatsView && viewMode === 'year' && showDailyTrackingView && <YearView currentDate={currentDate} onMonthClick={handleDateClick} />}
 
-                {/* Habit rows only show in week view (calendar mode) or simple list mode */}
-                {!showStatsView && (viewMode === 'week' || !showDailyTrackingView) && (
-                    <div className="habit-tracker-area space-y-2 pb-28">
-                        {sortedHabits.map(habit => (
-                            <HabitRow
-                                key={habit.id}
-                                habit={habit}
-                                weekDates={weekDates}
-                                onToggle={handleToggleHabit}
-                                onEditHabit={handleEditHabit}
-                                showCircles={viewMode === 'week' && showDailyTrackingView}
-                                onDragStart={handleDragStart}
-                                onDragOver={handleDragOver}
-                                onDrop={handleDrop}
-                                isDragging={draggedHabitId === habit.id}
-                                onUnloggableClick={handleUnloggableClick}
+                                {/* Habit rows only show in week view (calendar mode) or simple list mode */}
+                                {!showStatsView && (viewMode === 'week' || !showDailyTrackingView) && (
+                                    <div className="habit-tracker-area space-y-2 pb-28">
+                                        {sortedHabits.map(habit => (
+                                            <HabitRow
+                                                key={habit.id}
+                                                habit={habit}
+                                                weekDates={weekDates}
+                                                onToggle={handleToggleHabit}
+                                                onEditHabit={handleEditHabit}
+                                                showCircles={viewMode === 'week' && showDailyTrackingView}
+                                                onDragStart={handleDragStart}
+                                                onDragOver={handleDragOver}
+                                                onDrop={handleDrop}
+                                                isDragging={draggedHabitId === habit.id}
+                                                onUnloggableClick={handleUnloggableClick}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Launch Pad Button - Premium Half-circle at bottom-center */}
+                                {onboardingComplete && !showStatsView && (
+                                    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 group">
+                                        <button
+                                            onClick={() => {
+                                                // Skip confirmation popup on subsequent activations
+                                                if (isMomentumCompletedToday) {
+                                                    setShowMomentumGenerator(true);
+                                                } else {
+                                                    setShowMomentumConfirmation(true);
+                                                }
+                                            }}
+                                            className="relative w-48 h-24 sm:w-32 sm:h-16 md:w-36 md:h-[4.5rem] lg:w-40 lg:h-20 bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 rounded-t-full hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 transition-all duration-500 shadow-2xl flex flex-col items-center justify-center gap-1 font-bold text-black hover:scale-110 hover:-translate-y-1 animate-pulse"
+                                            style={{
+                                                boxShadow: '0 -10px 40px rgba(251, 191, 36, 0.5), 0 -5px 20px rgba(251, 191, 36, 0.3)'
+                                            }}
+                                            title="Launch the daily ignition sequence"
+                                        >
+                                            <Rocket className="w-14 h-14 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 group-hover:rotate-12 transition-transform duration-300" />
+                                        </button>
+
+                                        {/* Dev Reset Button - Only shows when completed */}
+                                        {isMomentumCompletedToday && (
+                                            <button
+                                                onClick={() => {
+                                                    const today = formatDate(new Date(), 'yyyy-MM-dd');
+
+                                                    // Clear momentum completion timestamp
+                                                    setMomentumLastCompleted(null);
+                                                    localStorage.removeItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY);
+
+                                                    // Clear Ignite habit completion for today
+                                                    setHabits(prevHabits => {
+                                                        return prevHabits.map(h => {
+                                                            if (h.id === 9999994) {
+                                                                const updatedCompleted = { ...h.completed };
+                                                                delete updatedCompleted[today];
+                                                                return { ...h, completed: updatedCompleted };
+                                                            }
+                                                            return h;
+                                                        });
+                                                    });
+
+                                                    console.log('🔄 Reset: Cleared momentum completion and Ignite habit for', today);
+                                                }}
+                                                className="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded-lg border border-gray-500 transition-all duration-200"
+                                                title="Reset for testing"
+                                            >
+                                                🔧 Reset
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+
+                            </div>
+
+                            {/* MOTIVATION COMPONENTS */}
+                            <AICoachWidget
+                                message={aiCoachMessage}
+                                visible={showAiCoach}
+                                onDismiss={() => setShowAiCoach(false)}
                             />
-                        ))}
-                    </div>
-                )}
 
-                {/* Launch Pad Button - Premium Half-circle at bottom-center */}
-                {onboardingComplete && !showStatsView && (
-                    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 group">
-                        <button
-                            onClick={() => {
-                                // Skip confirmation popup on subsequent activations
-                                if (isMomentumCompletedToday) {
-                                    setShowMomentumGenerator(true);
-                                } else {
-                                    setShowMomentumConfirmation(true);
-                                }
-                            }}
-                            className="relative w-48 h-24 sm:w-32 sm:h-16 md:w-36 md:h-[4.5rem] lg:w-40 lg:h-20 bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 rounded-t-full hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 transition-all duration-500 shadow-2xl flex flex-col items-center justify-center gap-1 font-bold text-black hover:scale-110 hover:-translate-y-1 animate-pulse"
-                            style={{
-                                boxShadow: '0 -10px 40px rgba(251, 191, 36, 0.5), 0 -5px 20px rgba(251, 191, 36, 0.3)'
-                            }}
-                            title="Launch the daily ignition sequence"
-                        >
-                            <Rocket className="w-14 h-14 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 group-hover:rotate-12 transition-transform duration-300" />
-                        </button>
+                            {streakCelebration && (
+                                <StreakCelebration
+                                    habitName={streakCelebration.habitName}
+                                    streakDays={streakCelebration.days}
+                                    onClose={() => setStreakCelebration(null)}
+                                />
+                            )}
 
-                        {/* Dev Reset Button - Only shows when completed */}
-                        {isMomentumCompletedToday && (
-                            <button
-                                onClick={() => {
-                                    const today = formatDate(new Date(), 'yyyy-MM-dd');
+                            {showChatCheckIn && (
+                                <ChatDailyCheckIn
+                                    onDismiss={() => setShowChatCheckIn(false)}
+                                />
+                            )}
 
-                                    // Clear momentum completion timestamp
-                                    setMomentumLastCompleted(null);
-                                    localStorage.removeItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY);
+                            {emergencyHabitAction && (
+                                <EmergencyHabitAction
+                                    habitName={emergencyHabitAction.habit.name}
+                                    onComplete={handleEmergencyHabitComplete}
+                                    onCancel={handleEmergencyHabitCancel}
+                                />
+                            )}
 
-                                    // Clear Ignite habit completion for today
-                                    setHabits(prevHabits => {
-                                        return prevHabits.map(h => {
-                                            if (h.id === 9999994) {
-                                                const updatedCompleted = { ...h.completed };
-                                                delete updatedCompleted[today];
-                                                return { ...h, completed: updatedCompleted };
+                            {brokenStreaks.length > 0 && (
+                                <StreakRepair
+                                    brokenHabits={brokenStreaks}
+                                    onRepairComplete={handleStreakRepairComplete}
+                                    onDismiss={handleStreakRepairDismiss}
+                                />
+                            )}
+
+                            {igniteHabit && (
+                                <HoldToIgnite
+                                    habitName={igniteHabit.name}
+                                    habitColor={igniteHabit.color || '#22c55e'}
+                                    onComplete={handleIgniteComplete}
+                                    onCancel={handleIgniteCancel}
+                                />
+                            )}
+
+                            {activeMiniApp && activeMiniApp.type === 'breath' && (
+                                <BreathPacer
+                                    habitName={activeMiniApp.habit.name}
+                                    onComplete={() => {
+                                        // Mark habit as complete for the date
+                                        const habitId = activeMiniApp.habit.id;
+                                        const dateString = activeMiniApp.date;
+
+                                        setHabits(p => p.map(h => {
+                                            if (h.id === habitId) {
+                                                return { ...h, completed: { ...h.completed, [dateString]: true } };
                                             }
                                             return h;
-                                        });
-                                    });
+                                        }));
 
-                                    console.log('🔄 Reset: Cleared momentum completion and Ignite habit for', today);
+                                        setActiveMiniApp(null);
+
+                                        // Show AI coach message
+                                        const messages = [
+                                            "Beautiful practice! 🌟",
+                                            "Your breath is your power! 💨",
+                                            "Centered and focused! 🎯",
+                                            "That's mindfulness! 🧘",
+                                        ];
+                                        setAiCoachMessage(messages[Math.floor(Math.random() * messages.length)]);
+                                        setShowAiCoach(true);
+                                    }}
+                                    onCancel={() => setActiveMiniApp(null)}
+                                />
+                            )}
+
+                            {activeMiniApp && activeMiniApp.type === 'journal' && (
+                                <JournalModule
+                                    habitName={activeMiniApp.habit.name}
+                                    habitId={activeMiniApp.habit.id}
+                                    onComplete={() => {
+                                        // Mark habit as complete for the date
+                                        const habitId = activeMiniApp.habit.id;
+                                        const dateString = activeMiniApp.date;
+
+                                        setHabits(p => p.map(h => {
+                                            if (h.id === habitId) {
+                                                return { ...h, completed: { ...h.completed, [dateString]: true } };
+                                            }
+                                            return h;
+                                        }));
+
+                                        setActiveMiniApp(null);
+
+                                        // Show AI coach message
+                                        const messages = [
+                                            "Gratitude unlocks abundance! ✨",
+                                            "Your heart is full! 💖",
+                                            "Beautiful reflections! 📝",
+                                            "That's the spirit! 🌟",
+                                        ];
+                                        setAiCoachMessage(messages[Math.floor(Math.random() * messages.length)]);
+                                        setShowAiCoach(true);
+                                    }}
+                                    onCancel={() => setActiveMiniApp(null)}
+                                />
+                            )}
+
+                            {shouldShowMicroWin && coreHabit && (
+                                <MicroWinProtocol
+                                    habit={{
+                                        name: coreHabit.name,
+                                        description: coreHabit.description || ''
+                                    }}
+                                    onComplete={handleMicroWinComplete}
+                                    isPreview={previewMicroWin}
+                                    onDismiss={() => setPreviewMicroWin(false)}
+                                />
+                            )}
+
+                            {shouldShowAppTour && (
+                                <AppTour
+                                    onComplete={() => {
+                                        setAppTourComplete(true);
+                                        setPreviewAppTour(false);
+                                    }}
+                                    onToggleStatsView={setShowStatsView}
+                                />
+                            )}
+
+                            {toastMessage && (
+                                <Toast
+                                    message={toastMessage}
+                                    onClose={() => setToastMessage(null)}
+                                />
+                            )}
+
+                            <AddHabitModal
+                                isOpen={showAddHabitModal}
+                                onClose={() => { setShowAddHabitModal(false); setSelectedHabitToEdit(null); }}
+                                onSaveHabit={handleSaveHabit}
+                                onDeleteHabit={handleDeleteHabit}
+                                habitToEdit={selectedHabitToEdit}
+                                habitMuscleCount={habitMuscleCount}
+                                lifeGoalsCount={lifeGoalsCount}
+                                onOpenProgramLibrary={handleOpenProgramLibrary}
+                            />
+
+                            <ProgramLibraryModal
+                                isOpen={showProgramLibrary}
+                                onClose={() => setShowProgramLibrary(false)}
+                                onSelectHabits={handleSelectProgramHabits}
+                            />
+
+                            {/* Momentum Generator - Daily Ignition Flow */}
+                            {/* Pre-Launch Confirmation Popup */}
+                            {showMomentumConfirmation && (
+                                <div
+                                    className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 animate-fadeIn"
+                                    onClick={() => setShowMomentumConfirmation(false)}
+                                >
+                                    <div
+                                        className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-10 shadow-2xl max-w-lg mx-auto text-center animate-scaleIn"
+                                        style={{ boxShadow: '0 0 60px rgba(251, 191, 36, 0.4)' }}
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <div className="mb-6 animate-bounce">
+                                            <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 flex items-center justify-center" style={{ boxShadow: '0 0 40px rgba(251, 191, 36, 0.6)' }}>
+                                                <Rocket size={56} className="text-black" />
+                                            </div>
+                                        </div>
+                                        <h3 className="text-3xl font-black text-yellow-400 mb-6" style={{ textShadow: '0 0 20px rgba(251, 191, 36, 0.5)' }}>
+                                            Ready to Launch?
+                                        </h3>
+                                        <p className="text-xl text-gray-300 mb-10 leading-relaxed">
+                                            Are you ready to launch your rocket<br />and kickstart your habits today?
+                                        </p>
+                                        <div className="flex justify-center">
+                                            <button
+                                                onClick={() => {
+                                                    setShowMomentumConfirmation(false);
+                                                    setShowMomentumGenerator(true);
+                                                }}
+                                                className="px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-white font-black text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50"
+                                                style={{ textShadow: '0 0 15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(251, 146, 60, 0.9)' }}
+                                            >
+                                                Lift Off 🔥
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Momentum Generator - Daily Ignition Flow */}
+                            <MomentumGeneratorModal
+                                isOpen={showMomentumGenerator}
+                                onClose={() => setShowMomentumGenerator(false)}
+                                onComplete={handleMomentumComplete}
+                                onShowFloatingGo={(isFirstActivation: boolean) => {
+                                    setFloatingGoIsFirstActivation(isFirstActivation);
+                                    setShowMomentumGenerator(false);
+                                    setShowFloatingGoPopup(true);
                                 }}
-                                className="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded-lg border border-gray-500 transition-all duration-200"
-                                title="Reset for testing"
-                            >
-                                🔧 Reset
-                            </button>
-                        )}
-                    </div>
-                )}
+                                habits={habits}
+                                goal={goal}
+                                aspirations={aspirations}
+                                todaysContent={todaysContent}
+                                onAddContentLibrary={() => setShowContentLibraryManager(true)}
+                                isCompletedToday={isMomentumCompletedToday}
+                                isFirstActivationToday={!isMomentumCompletedToday}
+                            />
 
-            </div>
+                            {/* Floating "Now GO!" Popup - Appears over dashboard after countdown */}
+                            {showFloatingGoPopup && (
+                                <div
+                                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fadeIn"
+                                    onClick={() => setShowFloatingGoPopup(false)}
+                                >
+                                    <div className="relative bg-gradient-to-b from-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 max-w-lg shadow-2xl shadow-yellow-500/30 animate-scaleIn cursor-pointer">
+                                        <div className="text-center">
+                                            <div className="mb-6">
+                                                <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse"
+                                                    style={{ textShadow: '0 0 100px rgba(251, 191, 36, 0.9)' }}>
+                                                    🔥
+                                                </div>
+                                            </div>
+                                            <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{ textShadow: '0 0 60px rgba(251, 191, 36, 0.7)' }}>
+                                                Now GO!
+                                            </h2>
+                                            {floatingGoIsFirstActivation && (
+                                                <p className="text-3xl text-yellow-400 font-light">
+                                                    Your first action awaits
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-            {/* MOTIVATION COMPONENTS */}
-            <AICoachWidget
-                message={aiCoachMessage}
-                visible={showAiCoach}
-                onDismiss={() => setShowAiCoach(false)}
-            />
+                            {/* Content Library Manager - Admin Panel */}
+                            <ContentLibraryManager
+                                isOpen={showContentLibraryManager}
+                                onClose={() => setShowContentLibraryManager(false)}
+                                contentLibrary={contentLibrary}
+                                onSave={handleSaveContentLibrary}
+                            />
 
-            {streakCelebration && (
-                <StreakCelebration
-                    habitName={streakCelebration.habitName}
-                    streakDays={streakCelebration.days}
-                    onClose={() => setStreakCelebration(null)}
-                />
-            )}
+                            {/* Bottom Navigation Bar - Dashboard (left), Momentum Generator (center), Chat (right) */}
+                            <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-30 h-14">
+                                <div className="max-w-2xl mx-auto px-8 h-full">
+                                    <div className="flex justify-between items-end h-full pb-2">
+                                        {/* Dashboard Button - Left (icon only) */}
+                                        <button
+                                            onClick={() => setShowStatsView(true)}
+                                            className={`p-2 rounded-lg transition-colors ${showStatsView ? 'text-yellow-400' : 'text-gray-400 hover:text-gray-300'}`}
+                                        >
+                                            <BarChart3 className="w-6 h-6" />
+                                        </button>
 
-            {showChatCheckIn && (
-                <ChatDailyCheckIn
-                    onDismiss={() => setShowChatCheckIn(false)}
-                />
-            )}
+                                        {/* Middle spacer - grows to fill, centers any content */}
+                                        <div className="flex-grow flex justify-center items-end">
+                                            {/* Habits Button - Only shows when on Dashboard page */}
+                                            {showStatsView && (
+                                                <button
+                                                    onClick={() => setShowStatsView(false)}
+                                                    className="p-2 rounded-lg text-gray-400 hover:text-gray-300 transition-colors"
+                                                >
+                                                    <List className="w-6 h-6" />
+                                                </button>
+                                            )}
+                                        </div>
 
-            {emergencyHabitAction && (
-                <EmergencyHabitAction
-                    habitName={emergencyHabitAction.habit.name}
-                    onComplete={handleEmergencyHabitComplete}
-                    onCancel={handleEmergencyHabitCancel}
-                />
-            )}
-
-            {brokenStreaks.length > 0 && (
-                <StreakRepair
-                    brokenHabits={brokenStreaks}
-                    onRepairComplete={handleStreakRepairComplete}
-                    onDismiss={handleStreakRepairDismiss}
-                />
-            )}
-
-            {igniteHabit && (
-                <HoldToIgnite
-                    habitName={igniteHabit.name}
-                    habitColor={igniteHabit.color || '#22c55e'}
-                    onComplete={handleIgniteComplete}
-                    onCancel={handleIgniteCancel}
-                />
-            )}
-
-            {activeMiniApp && activeMiniApp.type === 'breath' && (
-                <BreathPacer
-                    habitName={activeMiniApp.habit.name}
-                    onComplete={() => {
-                        // Mark habit as complete for the date
-                        const habitId = activeMiniApp.habit.id;
-                        const dateString = activeMiniApp.date;
-
-                        setHabits(p => p.map(h => {
-                            if (h.id === habitId) {
-                                return { ...h, completed: { ...h.completed, [dateString]: true } };
-                            }
-                            return h;
-                        }));
-
-                        setActiveMiniApp(null);
-
-                        // Show AI coach message
-                        const messages = [
-                            "Beautiful practice! 🌟",
-                            "Your breath is your power! 💨",
-                            "Centered and focused! 🎯",
-                            "That's mindfulness! 🧘",
-                        ];
-                        setAiCoachMessage(messages[Math.floor(Math.random() * messages.length)]);
-                        setShowAiCoach(true);
-                    }}
-                    onCancel={() => setActiveMiniApp(null)}
-                />
-            )}
-
-            {activeMiniApp && activeMiniApp.type === 'journal' && (
-                <JournalModule
-                    habitName={activeMiniApp.habit.name}
-                    habitId={activeMiniApp.habit.id}
-                    onComplete={() => {
-                        // Mark habit as complete for the date
-                        const habitId = activeMiniApp.habit.id;
-                        const dateString = activeMiniApp.date;
-
-                        setHabits(p => p.map(h => {
-                            if (h.id === habitId) {
-                                return { ...h, completed: { ...h.completed, [dateString]: true } };
-                            }
-                            return h;
-                        }));
-
-                        setActiveMiniApp(null);
-
-                        // Show AI coach message
-                        const messages = [
-                            "Gratitude unlocks abundance! ✨",
-                            "Your heart is full! 💖",
-                            "Beautiful reflections! 📝",
-                            "That's the spirit! 🌟",
-                        ];
-                        setAiCoachMessage(messages[Math.floor(Math.random() * messages.length)]);
-                        setShowAiCoach(true);
-                    }}
-                    onCancel={() => setActiveMiniApp(null)}
-                />
-            )}
-
-            {shouldShowMicroWin && coreHabit && (
-                <MicroWinProtocol
-                    habit={{
-                        name: coreHabit.name,
-                        description: coreHabit.description || ''
-                    }}
-                    onComplete={handleMicroWinComplete}
-                    isPreview={previewMicroWin}
-                    onDismiss={() => setPreviewMicroWin(false)}
-                />
-            )}
-
-            {shouldShowAppTour && (
-                <AppTour
-                    onComplete={() => {
-                        setAppTourComplete(true);
-                        setPreviewAppTour(false);
-                    }}
-                    onToggleStatsView={setShowStatsView}
-                />
-            )}
-
-            {toastMessage && (
-                <Toast
-                    message={toastMessage}
-                    onClose={() => setToastMessage(null)}
-                />
-            )}
-
-            <AddHabitModal
-                isOpen={showAddHabitModal}
-                onClose={() => { setShowAddHabitModal(false); setSelectedHabitToEdit(null); }}
-                onSaveHabit={handleSaveHabit}
-                onDeleteHabit={handleDeleteHabit}
-                habitToEdit={selectedHabitToEdit}
-                habitMuscleCount={habitMuscleCount}
-                lifeGoalsCount={lifeGoalsCount}
-                onOpenProgramLibrary={handleOpenProgramLibrary}
-            />
-
-            <ProgramLibraryModal
-                isOpen={showProgramLibrary}
-                onClose={() => setShowProgramLibrary(false)}
-                onSelectHabits={handleSelectProgramHabits}
-            />
-
-            {/* Momentum Generator - Daily Ignition Flow */}
-            {/* Pre-Launch Confirmation Popup */}
-            {showMomentumConfirmation && (
-                <div 
-                    className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 animate-fadeIn"
-                    onClick={() => setShowMomentumConfirmation(false)}
-                >
-                    <div 
-                        className="bg-gradient-to-br from-gray-800 via-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-10 shadow-2xl max-w-lg mx-auto text-center animate-scaleIn"
-                        style={{ boxShadow: '0 0 60px rgba(251, 191, 36, 0.4)' }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="mb-6 animate-bounce">
-                            <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 flex items-center justify-center" style={{ boxShadow: '0 0 40px rgba(251, 191, 36, 0.6)' }}>
-                                <Rocket size={56} className="text-black" />
-                            </div>
-                        </div>
-                        <h3 className="text-3xl font-black text-yellow-400 mb-6" style={{ textShadow: '0 0 20px rgba(251, 191, 36, 0.5)' }}>
-                            Ready to Launch?
-                        </h3>
-                        <p className="text-xl text-gray-300 mb-10 leading-relaxed">
-                            Are you ready to launch your rocket<br />and kickstart your habits today?
-                        </p>
-                        <div className="flex justify-center">
-                            <button
-                                onClick={() => {
-                                    setShowMomentumConfirmation(false);
-                                    setShowMomentumGenerator(true);
-                                }}
-                                className="px-12 py-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-white font-black text-xl rounded-2xl hover:from-yellow-500 hover:to-orange-500 transition-all duration-300 hover:scale-105 shadow-2xl shadow-yellow-500/50"
-                                style={{ textShadow: '0 0 15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(251, 146, 60, 0.9)' }}
-                            >
-                                Lift Off 🔥
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Momentum Generator - Daily Ignition Flow */}
-            <MomentumGeneratorModal
-                isOpen={showMomentumGenerator}
-                onClose={() => setShowMomentumGenerator(false)}
-                onComplete={handleMomentumComplete}
-                onShowFloatingGo={(isFirstActivation: boolean) => {
-                    setFloatingGoIsFirstActivation(isFirstActivation);
-                    setShowMomentumGenerator(false);
-                    setShowFloatingGoPopup(true);
-                }}
-                habits={habits}
-                goal={goal}
-                aspirations={aspirations}
-                todaysContent={todaysContent}
-                onAddContentLibrary={() => setShowContentLibraryManager(true)}
-                isCompletedToday={isMomentumCompletedToday}
-                isFirstActivationToday={!isMomentumCompletedToday}
-            />
-
-            {/* Floating "Now GO!" Popup - Appears over dashboard after countdown */}
-            {showFloatingGoPopup && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fadeIn"
-                    onClick={() => setShowFloatingGoPopup(false)}
-                >
-                    <div className="relative bg-gradient-to-b from-gray-900 to-black border-2 border-yellow-500/50 rounded-3xl p-12 max-w-lg shadow-2xl shadow-yellow-500/30 animate-scaleIn cursor-pointer">
-                        <div className="text-center">
-                            <div className="mb-6">
-                                <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 mb-6 animate-pulse"
-                                    style={{ textShadow: '0 0 100px rgba(251, 191, 36, 0.9)' }}>
-                                    🔥
+                                        {/* Chat Button - Right (icon only) */}
+                                        <button
+                                            onClick={() => setShowChatCheckIn(true)}
+                                            className="p-2 rounded-lg text-purple-400 hover:text-purple-300 transition-colors"
+                                            title="Daily Check-In"
+                                        >
+                                            <Sparkles className="w-6 h-6" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <h2 className="text-7xl font-black text-white mb-6 tracking-tight" style={{ textShadow: '0 0 60px rgba(251, 191, 36, 0.7)' }}>
-                                Now GO!
-                            </h2>
-                            {floatingGoIsFirstActivation && (
-                                <p className="text-3xl text-yellow-400 font-light">
-                                    Your first action awaits
-                                </p>
-                            )}
                         </div>
-                    </div>
-                </div>
             )}
-
-            {/* Content Library Manager - Admin Panel */}
-            <ContentLibraryManager
-                isOpen={showContentLibraryManager}
-                onClose={() => setShowContentLibraryManager(false)}
-                contentLibrary={contentLibrary}
-                onSave={handleSaveContentLibrary}
-            />
-
-            {/* Bottom Navigation Bar - Dashboard (left), Momentum Generator (center), Chat (right) */}
-            <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-30 h-14">
-                <div className="max-w-2xl mx-auto px-8 h-full">
-                    <div className="flex justify-between items-end h-full pb-2">
-                        {/* Dashboard Button - Left (icon only) */}
-                        <button
-                            onClick={() => setShowStatsView(true)}
-                            className={`p-2 rounded-lg transition-colors ${showStatsView ? 'text-yellow-400' : 'text-gray-400 hover:text-gray-300'}`}
-                        >
-                            <BarChart3 className="w-6 h-6" />
-                        </button>
-
-                        {/* Middle spacer - grows to fill, centers any content */}
-                        <div className="flex-grow flex justify-center items-end">
-                            {/* Habits Button - Only shows when on Dashboard page */}
-                            {showStatsView && (
-                                <button
-                                    onClick={() => setShowStatsView(false)}
-                                    className="p-2 rounded-lg text-gray-400 hover:text-gray-300 transition-colors"
-                                >
-                                    <List className="w-6 h-6" />
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Chat Button - Right (icon only) */}
-                        <button
-                            onClick={() => setShowChatCheckIn(true)}
-                            className="p-2 rounded-lg text-purple-400 hover:text-purple-300 transition-colors"
-                        >
-                            <Sparkles className="w-6 h-6" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-            </div>
         </VisionBoardProvider>
     );
 }

@@ -16,20 +16,20 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
       title: 'Mastery Tracker',
       description: 'Your mission control. Track daily habits, build streaks, and watch your consistency grow with visual feedback.',
       spotlightSelector: '.habit-tracker-area',
-      position: 'bottom' as const,
+      position: 'top' as const,
     },
     {
       title: 'Daily Check-In Chat',
       description: 'Click the sparkles button to open your AI coach chat. Reflect on your day, share wins and challenges, and get personalized encouragement tailored to your coaching style.',
       spotlightSelector: 'button[title="Daily Check-In"]',
-      position: 'bottom' as const,
+      position: 'top' as const,
       showPreview: true,
     },
     {
       title: 'Mastery Dashboard',
       description: 'See your transformation unfold. Weekly stats, completion rates, streak breakdowns, and heatmaps show exactly how far you\'ve come.',
       spotlightSelector: '.stats-dashboard-area',
-      position: 'top' as const,
+      position: 'bottom' as const,
       requireStatsView: true,
     },
   ];
@@ -126,7 +126,14 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
     const previewWidth = 380;
     const gap = 32;
     const viewportWidth = window.innerWidth;
-    
+    const viewportHeight = window.innerHeight;
+
+    // Check vertical position (top or bottom half)
+    const isBottomHalf = rect.top > viewportHeight / 2;
+    const verticalStyle = isBottomHalf
+      ? { bottom: `${viewportHeight - rect.bottom}px` }
+      : { top: `${rect.top}px` };
+
     // Try to position to the right first
     const rightPosition = rect.right + gap;
     const wouldOverflow = rightPosition + previewWidth > viewportWidth;
@@ -134,14 +141,14 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
     if (wouldOverflow) {
       // Position to the left instead
       return {
-        top: `${rect.top}px`,
+        ...verticalStyle,
         right: `${viewportWidth - rect.left + gap}px`,
       };
     }
     
     // Default: position to the right
     return {
-      top: `${rect.top}px`,
+      ...verticalStyle,
       left: `${rightPosition}px`,
     };
   };
