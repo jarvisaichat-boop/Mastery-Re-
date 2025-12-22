@@ -507,20 +507,20 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
           const isSleep = block.label.toLowerCase() === 'sleep';
           
           if (mode === 'view' && isSleep) {
-            // In view mode, keep original times in label (shows "23:00 - 08:00")
-            // but cap visual height to 2 hours via visualDurationMinutes
+            // In view mode: split at midnight like normal, but cap first part's visual height to 2 hours
+            // and hide the second part (morning portion)
             const originalDuration = (endMinutes + 24 * 60 - startMinutes) % (24 * 60) || 24 * 60;
             const cappedVisualDuration = Math.min(originalDuration, 120); // Cap visual to 2 hours
             const displayTimeRange = `${block.time} - ${block.endTime}`; // Original full range for label
             
-            // Only show the first part (start to capped end) - don't split
-            // This keeps the block at end of day with capped height
+            // Part 1: Start to Midnight (with capped visual height, shows original time range)
             processedTimeline.push({
               ...block,
-              endTime: '24:00', // Position at end of day
+              endTime: '24:00',
               visualDurationMinutes: cappedVisualDuration,
               displayTimeRange // Shows original "23:00 - 08:00" in label
             });
+            // Skip Part 2 (morning portion) in view mode - only show evening portion
           } else {
             // Edit mode or non-sleep blocks: split at midnight
             // Part 1: Start to Midnight
