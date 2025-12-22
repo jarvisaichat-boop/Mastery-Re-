@@ -507,22 +507,19 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
           const isSleep = block.label.toLowerCase() === 'sleep';
           
           if (mode === 'view' && isSleep) {
-            // In view mode, show truncated Sleep block (first 2 hours)
-            // This shows user when to go to sleep without cluttering the morning
-            // Calculate actual duration of original sleep block
+            // In view mode, keep original times in label (shows "23:00 - 08:00")
+            // but cap visual height to 2 hours via visualDurationMinutes
             const originalDuration = (endMinutes + 24 * 60 - startMinutes) % (24 * 60) || 24 * 60;
-            const truncatedDuration = Math.min(originalDuration, 120); // Cap at 2 hours
-            const truncatedEndMinutes = startMinutes + truncatedDuration;
-            // Format as HH:MM with modulo 24 for next-day times (e.g., 25:00 = 01:00)
-            const truncatedEndHours = Math.floor(truncatedEndMinutes / 60) % 24;
-            const truncatedEndMins = truncatedEndMinutes % 60;
-            const truncatedEndTime = `${truncatedEndHours.toString().padStart(2, '0')}:${truncatedEndMins.toString().padStart(2, '0')}`;
+            const cappedVisualDuration = Math.min(originalDuration, 120); // Cap visual to 2 hours
+            const displayTimeRange = `${block.time} - ${block.endTime}`; // Original full range for label
             
-            // Keep as single block - the segment builder handles midnight wrap via endMinutes += 24*60
-            // This ensures the full 2-hour duration displays without being filtered out
+            // Only show the first part (start to capped end) - don't split
+            // This keeps the block at end of day with capped height
             processedTimeline.push({
               ...block,
-              endTime: truncatedEndTime
+              endTime: '24:00', // Position at end of day
+              visualDurationMinutes: cappedVisualDuration,
+              displayTimeRange // Shows original "23:00 - 08:00" in label
             });
           } else {
             // Edit mode or non-sleep blocks: split at midnight
@@ -607,7 +604,9 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
 
     const getHeight = (seg: Segment): number => {
       if (seg.type === 'point') return POINT_HEIGHT;
-      const duration = seg.endMinutes - seg.startMinutes;
+      // Use visualDurationMinutes if provided (for view-mode capped blocks like Sleep)
+      // Otherwise use actual duration
+      const duration = seg.block?.visualDurationMinutes ?? (seg.endMinutes - seg.startMinutes);
       return Math.max(4, (duration / 60) * HOUR_HEIGHT);
     };
 
@@ -689,7 +688,7 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
                     <div className={`w-2 h-2 rounded-full flex-shrink-0`} style={{ backgroundColor: getColorStyle(block.color, 1) }} />
                     <span className="text-sm text-gray-200 font-medium truncate">{block.label}</span>
                   </div>
-                  <div className="text-[10px] text-gray-500 ml-4">{block.time} - {block.endTime}</div>
+                  <div className="text-[10px] text-gray-500 ml-4">{block.displayTimeRange || `${block.time} - ${block.endTime}`}</div>
                 </div>
               </div>
             );
