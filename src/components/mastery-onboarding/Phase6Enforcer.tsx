@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Shield, ArrowRight, Zap, Bell, CheckCircle } from 'lucide-react';
 import { MasteryProfile } from '../../types/onboarding';
 
@@ -7,30 +7,30 @@ interface Phase6EnforcerProps {
   profile: Partial<MasteryProfile>;
 }
 
-export default function Phase6Enforcer({ onComplete, profile }: Phase6EnforcerProps) {
+export default function Phase6Enforcer({ onComplete }: Phase6EnforcerProps) {
   const [level, setLevel] = useState<'gentle' | 'tax' | 'camera'>('gentle');
 
   const options = [
     {
       id: 'gentle',
-      title: 'Gentle',
-      description: 'Standard notifications. No penalty for missing habits.',
+      title: 'Guide (Gentle)',
+      description: 'Standard notifications. No penalties. Good for high-discipline days when you just need a nudge.',
       icon: Bell,
       color: 'text-blue-400',
       border: 'border-blue-400'
     },
     {
-      id: 'tax',
-      title: 'Snooze Tax',
-      description: 'Pay $1.00 every time you snooze or miss your main habit.',
+      id: 'standard',
+      title: 'Drill Sergeant (Standard)',
+      description: 'Persistent Nagging. I will not stop buzzing and bothering you until the task is marked done.',
       icon: Zap,
       color: 'text-yellow-500',
       border: 'border-yellow-500'
     },
     {
-      id: 'camera',
-      title: 'Camera Proof',
-      description: 'Must upload a photo to verify habit completion. No excuses.',
+      id: 'nuclear',
+      title: 'The Enforcer (Nuclear)',
+      description: 'High Stakes. Real Consequences. Pay money (Shards) to snooze, and if you fail, I text your accountability partner that you didn\'t show up.',
       icon: Shield,
       color: 'text-red-500',
       border: 'border-red-500'
@@ -84,7 +84,7 @@ export default function Phase6Enforcer({ onComplete, profile }: Phase6EnforcerPr
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent z-40">
         <div className="max-w-xl mx-auto">
           <button
-            onClick={() => onComplete({})} // Saving strictly local for now, or could save 'enforcementLevel' to profile
+            onClick={() => onComplete({ enforcementTier: level as 'gentle' | 'standard' | 'nuclear' })}
             className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
           >
             CONFIRM PROTOCOL <ArrowRight size={20} />

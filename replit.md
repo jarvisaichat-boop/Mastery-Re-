@@ -146,14 +146,14 @@ The Vision Board Path section now supports marking projects and goals as "Comple
 
 Role-playing-heavy, 7-phase initiation sequence that replaces the old wizard.
 
-#### Phases 0-7
-1. **Manifesto**: User signs the "Seeker's Code".
-2. **Context**: Collects baseline metrics (sleep, stress, focus).
-3. **Core Values**: Identity definition.
-4. **The Path**: "The Architect" Logic Tree (Goal → Milestones → Actions).
-5. **The Schedule**: Visual blocking of the day.
-6. **The Enforcer**: Stake-setting and accountability.
-7. **The Contract**: Final commitment signature.
+#### Action OS Program Phases
+1. **Manifesto**: "This is not an app, this is a Program".
+2. **Context Baseline**: 3-Screen diagnostic (Motivation Sliders, Distraction Tag Cloud, Identity/Age).
+3.  **Core Values**: Identity definition.
+4.  **The Path**: "The Architect" Logic Tree (Goal → Milestones → Actions).
+5.  **The Schedule**: Visual blocking of the day.
+6.  **The Enforcer**: 3-Tier Accountability (Guide, Drill Sergeant, Nuclear).
+7.  **The Contract**: Final commitment signature.
 
 #### App Tour & Micro-Win
 - **Interactive Tour**: Highlights Tracker, Check-In, and Dashboard layers.

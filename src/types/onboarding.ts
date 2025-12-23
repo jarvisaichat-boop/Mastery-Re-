@@ -5,14 +5,26 @@ export interface MasteryProfile {
   context: string;
   mentalState: 'SPARK' | 'STUCK' | 'CURIOUS' | 'GOAL' | '';
   name: string;
+  age: number | string; // New: Required for AI calibration
   location: string;
   occupation: string;
   interests: string;
-  northStar: string;
-  northStarTimeline: '1 Month' | '3 Months' | '6 Months' | '1 Year' | '';
-  deepDive: string;
-  existingHabits: Array<{name: string; isSafe: boolean}>;
-  
+
+  // Phase 1: Action OS Updates
+  goals: string[]; // Multi-select goals
+  baselineStats: {
+    motivation: number;
+    discipline: number;
+    consistency: number;
+    clarity: number;
+    satisfaction: number;
+  };
+  obstacles: Array<{
+    name: string;
+    category: 'digital' | 'mental' | 'environmental';
+    impact: number;
+  }>;
+
   // Phase 2: Deep Discovery (Psychology)
   archetype: 'Commander' | 'Monk' | 'Warrior' | 'Explorer' | '';
   mbti: string;
@@ -38,7 +50,10 @@ export interface MasteryProfile {
   // Phase 5: Synthesis
   aiPersona: string; // "Hype Man" or "Drill Sergeant"
   
-  // Phase 6: Negotiation
+  // Phase 6: Enforcer
+  enforcementTier: 'gentle' | 'standard' | 'nuclear';
+
+  // Phase 6: Negotiation (Legacy / kept for compatibility)
   proposedHabit: {
     name: string;
     description: string;

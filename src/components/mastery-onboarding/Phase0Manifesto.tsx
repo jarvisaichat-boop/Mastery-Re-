@@ -7,20 +7,20 @@ interface Phase0ManifestoProps {
 
 const SLIDES = [
   {
-    title: 'Stop Blaming Your Willpower',
-    subtitle: 'Tools are passive. Mastery is Active.',
+    title: 'This is not an app. This is a program.',
+    subtitle: 'You are here to change your Life.',
     visual: '⚡',
     description: 'Most habit apps treat you like a checklist. We treat you like an athlete. This isn\'t about tracking—it\'s about transformation.',
   },
   {
-    title: 'The Science',
-    subtitle: 'Dopamine Stacking & Game Theory',
+    title: 'Most of you know what to do. The problem is doing it.',
+    subtitle: 'We bridge the gap between intention and action using motivation science.',
     visual: '🧠',
     description: 'We use behavioral psychology to automate discipline. Your brain craves wins. We engineer micro-victories that compound into unstoppable momentum.',
   },
   {
-    title: 'The Promise',
-    subtitle: 'Turn Your Life Goals Into An Addictive Game',
+    title: 'Make you Addicted to Winning.',
+    subtitle: 'Autopilot your PATH to your goals and dreams.',
     visual: '🎯',
     description: 'In the next 7 phases, we\'ll calibrate your psychology, audit your logistics, and build a custom protocol. No fluff. No theory. Pure execution.',
   },
