@@ -9,22 +9,22 @@ function parseContextForProfile(
 
   // Name: "The user's name is X." or "named X" or "my name is X"
   const nameMatch =
-    context.match(/the user(?:'s)?\s+name\s+is\s+([A-Z][a-zA-Z\s\-'.]{1,35}?)(?:\.|,|\n|$)/i) ||
+    context.match(/the user(?:['\u2019]s)?\s+name\s+is\s+([A-Z][a-zA-Z\s\-'.]{1,35}?)(?:\.|,|\n|$)/i) ||
     context.match(/named\s+([A-Z][a-zA-Z\s\-'.]{1,35}?)(?:\.|,|\n|$)/i);
   if (nameMatch) {
     const name = nameMatch[1].trim().replace(/[,.]$/, '');
     if (name.length >= 2 && name.length <= 40) result.name = name;
   }
 
-  // Occupation: "The user works as X" — stop before " in [City]"
+  // Occupation: "The user works as X" — stop before comma, period, or " in [City]"
   const occMatch =
-    context.match(/the user works as\s+(.*?)(?:\.|\n|$)/i) ||
-    context.match(/occupation[:\s]+([^\n.]+)/i);
+    context.match(/the user works as\s+(.*?)(?:,|\.|\n|$)/i) ||
+    context.match(/occupation[:\s]+([^\n.,]+)/i);
   if (occMatch) {
     let occ = occMatch[1].trim().replace(/[,.]$/, '');
     occ = occ.replace(/\s+in\s+[A-Z][\w\s,]+$/, '').trim();
     occ = occ.replace(/^an?\s+/i, '').trim();
-    if (occ.length >= 2 && occ.length <= 80) result.occupation = occ;
+    if (occ.length >= 2 && occ.length <= 100) result.occupation = occ;
   }
 
   // Location: "located in / lives in / based in / living in / from X"
@@ -44,7 +44,7 @@ function parseContextForProfile(
     searchIn.match(/interests?[:\s]+([^\n.]+)/i);
   if (intMatch) {
     const interests = intMatch[1].trim().replace(/[,.]$/, '');
-    if (interests.length >= 2 && interests.length <= 120) result.interests = interests;
+    if (interests.length >= 2 && interests.length <= 300) result.interests = interests;
   }
 
   return result;
