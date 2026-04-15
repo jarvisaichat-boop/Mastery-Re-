@@ -12,7 +12,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
   const { path } = data;
 
-  const [step, setStep] = useState<'vision' | 'synthesis' | 'project' | 'goals' | 'habit' | 'confirm'>('vision');
+  const [step, setStep] = useState<'vision' | 'project' | 'goals' | 'habit' | 'confirm'>('vision');
   
   // Vision Inputs
   const [visionInputs, setVisionInputs] = useState({
@@ -37,21 +37,18 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
     frequency: 'daily' as 'daily' | 'weekly'
   });
 
-  const generateVision = () => {
-    if (visionInputs.do && visionInputs.feel && visionInputs.give) {
+  // Auto-generate vision sentence whenever inputs change
+  useEffect(() => {
+    if (visionInputs.do || visionInputs.feel || visionInputs.give) {
       const sentence = `To ${visionInputs.do} feeling ${visionInputs.feel}, giving me ${visionInputs.give}.`;
       setSynthesizedVision(sentence);
-      updatePath({ vision: sentence });
     }
-  };
+  }, [visionInputs.do, visionInputs.feel, visionInputs.give]);
 
   const toNextStep = () => {
     switch (step) {
       case 'vision':
-        generateVision();
-        setStep('synthesis');
-        break;
-      case 'synthesis':
+        if (synthesizedVision) updatePath({ vision: synthesizedVision });
         setStep('project');
         break;
       case 'project':
@@ -70,8 +67,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
 
   const toPrevStep = () => {
     switch (step) {
-      case 'synthesis': setStep('vision'); break;
-      case 'project':  setStep('synthesis'); break;
+      case 'project':  setStep('vision'); break;
       case 'goals':    setStep('project'); break;
       case 'habit':    setStep('goals'); break;
       case 'confirm':  setStep('habit'); break;
@@ -144,21 +140,22 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
                 />
               </div>
             </div>
-          </div>
-        );
 
-      case 'synthesis':
-        return (
-          <div className="space-y-8 animate-fadeIn">
-            <h3 className="text-2xl font-bold text-yellow-500">Does this vision sound about right?</h3>
-            <div className="bg-black/40 p-6 rounded-xl border border-white/10">
-              <textarea
-                value={synthesizedVision}
-                onChange={e => setSynthesizedVision(e.target.value)}
-                className="w-full h-32 bg-transparent text-xl font-light leading-relaxed text-white outline-none resize-none"
-              />
-            </div>
-            <p className="text-sm text-gray-400">Feel free to edit it to make it flow better.</p>
+            {/* Live Vision Preview */}
+            {(visionInputs.do || visionInputs.feel || visionInputs.give) && (
+              <div className="space-y-3 animate-fadeIn">
+                <p className="text-sm font-medium text-yellow-500/80 uppercase tracking-widest">Does this vision sound about right?</p>
+                <div className="bg-black/40 p-5 rounded-xl border border-white/10">
+                  <textarea
+                    value={synthesizedVision}
+                    onChange={e => setSynthesizedVision(e.target.value)}
+                    className="w-full bg-transparent text-lg font-light leading-relaxed text-white outline-none resize-none"
+                    rows={2}
+                  />
+                </div>
+                <p className="text-xs text-gray-600">Feel free to edit it to make it flow better.</p>
+              </div>
+            )}
           </div>
         );
 
@@ -277,12 +274,12 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
     <div className="max-w-xl mx-auto px-6 py-12 pb-32">
       {/* Step Indicator */}
       <div className="flex justify-center gap-2 mb-8">
-        {['vision', 'synthesis', 'project', 'goals', 'habit', 'confirm'].map((s, i) => (
+        {['vision', 'project', 'goals', 'habit', 'confirm'].map((s, i) => (
           <div
             key={s}
             className={`h-1 rounded-full transition-all duration-500 ${
               step === s ? 'w-8 bg-yellow-500' : 
-              ['vision', 'synthesis', 'project', 'goals', 'habit', 'confirm'].indexOf(step) > i ? 'w-8 bg-yellow-500/50' : 'w-2 bg-gray-800'
+              ['vision', 'project', 'goals', 'habit', 'confirm'].indexOf(step) > i ? 'w-8 bg-yellow-500/50' : 'w-2 bg-gray-800'
             }`}
           />
         ))}
