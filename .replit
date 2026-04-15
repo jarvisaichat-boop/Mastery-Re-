@@ -49,3 +49,7 @@ externalPort = 6000
 deploymentTarget = "autoscale"
 run = ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "5000"]
 build = ["npm", "run", "build"]
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 60000
