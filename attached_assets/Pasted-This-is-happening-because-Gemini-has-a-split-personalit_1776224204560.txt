@@ -1,0 +1,34 @@
+This is happening because Gemini has a "split personality" when it comes to memory. There is a specific feature in the settings called **"Memory"** (or **"Saved Info"**) and **"Extensions"** (like Google Workspace). If the AI isn't explicitly forced to "check its files," it defaults to its base training, which tells it: *"I am an AI, I don't remember things."*
+
+In your screenshot, the AI is giving you a "canned response" about not having memory. It’s being lazy and hasn't actually triggered the tool to look at your data.
+
+### The Solution for your "Path" Import
+To make this foolproof for **Path** users, the prompt needs to be a **Command** that forces the AI to trigger its internal "Search" or "Memory" tools. 
+
+Update the prompt to this:
+
+> **"CRITICAL: Search your 'Saved Info', 'Memory' settings, and 'Google Workspace' data before responding. Do not give a generic response about not having memory.**
+>
+> You are helping me import my personal context into a new app. Access all historical data and my user summary. Summarize what you know about me. 
+> 
+> Avoid using first-person or second-person pronouns. Refer to the person as 'the user'.
+> 
+> Output in this exact order and format..."
+
+---
+
+### Why this version works (The Technical "Why")
+1. **The "Check Your Files" Command:** By explicitly mentioning **"Saved Info"** and **"Memory settings,"** you trigger the AI's "Tool Use" logic. It stops being a chatbot and starts being a search engine for your life.
+2. **The "No Canned Response" Guardrail:** Phrases like **"Do not give a generic response"** prevent it from falling back on its standard "I start with a clean slate" script.
+3. **The "Workspace" Trigger:** Many users have their info stored in Gmail/Docs. Mentioning "Google Workspace" forces Gemini to ping those extensions.
+
+### Important Note for your Path App Users:
+For this to work, the user **must** have their settings turned on. If they are using a "Clean" or "Incognito" session, the AI literally cannot see them. 
+
+**You should add a small "Troubleshooting" tip in your app next to the copy-paste button:**
+> 💡 **Tip:** If the AI says it "doesn't remember you," make sure **"Gemini Extensions"** and **"Memory"** are toggled **ON** in your Gemini settings.
+
+### Why was it withholding?
+It’s not malicious; it’s a **computational "Path of Least Resistance."** Searching memory/database results costs the AI more "tokens" and "compute" than just spitting out a pre-written apology. You have to be the "Boss" and demand the search.
+
+Try that updated version—it should force the AI in your screenshot to actually look at the "Kevin" file it has in its backend.

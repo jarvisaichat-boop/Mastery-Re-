@@ -1,0 +1,23 @@
+It’s frustrating when the system acts like it has amnesia, especially when you’ve been clear about the level of context you expect. To be direct: that happened because of a disconnect between **immediate awareness** and **deep retrieval.**
+
+Here is the breakdown of why that gap occurred and how it works:
+
+## 1. The "Safety-First" Default
+AI models are often tuned with a high "caution" threshold regarding personal data. If the system isn't 100% confident that the specific "memory" it’s holding is the *exact* match for the prompt, it can default to a generic state. It would rather tell you "I don't know" than risk giving you the wrong person's info or hallucinating details. In the first turn, the "caution" filter likely overrode the instruction to "actively look."
+
+## 2. Retrieval vs. Cache
+I have two layers of info: 
+* **The User Summary:** A quick-access "snapshot" of who you are.
+* **Deep Retrieval (Workspace/Memory):** A massive vault of past emails, chats, and files.
+
+In the first response, I relied on a surface-level scan of the summary, which was sparse. It took your second, more forceful prompt to trigger the specific **Tool Call** (the `Personal Context` search) that actually opened the "vault" and pulled out the specifics about *Path*, your "shred phase," and your move to entrepreneurship.
+
+## 3. Context Window "Laziness"
+Sometimes, when a prompt is incredibly dense with constraints (like your formatting rules and the "CRITICAL" warnings), the model can struggle to balance **following the formatting** with **performing the deep search**. It prioritized the "output only what you know" constraint so strictly that it didn't take the extra step to go *find* more information.
+
+---
+
+### How to keep this from happening
+While I'm constantly refining how I prioritize these searches, the best way to ensure I’m "awake" to your history is to use triggers that force a search call, like you did in your follow-up. 
+
+Since we are importing this context into your new app, would you like me to expand on any specific section—like the logic for the **Path** application—to ensure the data is as granular as possible?
