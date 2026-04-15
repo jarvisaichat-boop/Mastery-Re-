@@ -142,20 +142,22 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
             </div>
 
             {/* Live Vision Preview */}
-            {(visionInputs.do || visionInputs.feel || visionInputs.give) && (
-              <div className="space-y-3 animate-fadeIn">
-                <p className="text-sm font-medium text-yellow-500/80 uppercase tracking-widest">Does this vision sound about right?</p>
-                <div className="bg-black/40 p-5 rounded-xl border border-white/10">
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-yellow-500/80 uppercase tracking-widest">Does this vision sound about right?</p>
+              <div className="bg-black/40 p-5 rounded-xl border border-white/10 min-h-[80px]">
+                {(visionInputs.do || visionInputs.feel || visionInputs.give) ? (
                   <textarea
                     value={synthesizedVision}
                     onChange={e => setSynthesizedVision(e.target.value)}
                     className="w-full bg-transparent text-lg font-light leading-relaxed text-white outline-none resize-none"
                     rows={2}
                   />
-                </div>
-                <p className="text-xs text-gray-600">Feel free to edit it to make it flow better.</p>
+                ) : (
+                  <p className="text-gray-600 text-base italic">Your vision will appear here as you type...</p>
+                )}
               </div>
-            )}
+              <p className="text-xs text-gray-600">Feel free to edit it to make it flow better.</p>
+            </div>
           </div>
         );
 
