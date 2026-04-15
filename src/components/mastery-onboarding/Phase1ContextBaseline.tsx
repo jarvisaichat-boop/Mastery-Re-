@@ -175,6 +175,9 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
 
   const prevScreen = () => {
     if (currentScreen > 1) {
+      if (currentScreen === 3 && autofillFields.size > 0) {
+        setAutofillFields(new Set());
+      }
       setCurrentScreen(prev => prev - 1);
     }
   };
