@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check, Sparkles } from 'lucide-react';
+import { Copy, Check, X } from 'lucide-react';
 import { MasteryProfile } from '../../types/onboarding';
 
 function parseContextForProfile(
@@ -117,18 +117,21 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     interests: profile.interests || '',
   });
   const [copied, setCopied] = useState(false);
-  const [autofillFields, setAutofillFields] = useState<Set<string>>(new Set());
+  const [suggestions, setSuggestions] = useState<Record<string, string>>({});
 
   const updateData = (updates: Partial<MasteryProfile>) => {
     setData(prev => ({ ...prev, ...updates }));
-    const updatedKeys = Object.keys(updates);
-    if (updatedKeys.some(k => autofillFields.has(k))) {
-      setAutofillFields(prev => {
-        const next = new Set(prev);
-        updatedKeys.forEach(k => next.delete(k));
-        return next;
-      });
-    }
+  };
+
+  const acceptSuggestion = (field: string) => {
+    const value = suggestions[field];
+    if (!value) return;
+    setData(prev => ({ ...prev, [field]: value }));
+    setSuggestions(prev => { const next = { ...prev }; delete next[field]; return next; });
+  };
+
+  const dismissSuggestion = (field: string) => {
+    setSuggestions(prev => { const next = { ...prev }; delete next[field]; return next; });
   };
 
   const handleCopy = async () => {
@@ -152,16 +155,14 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     if (currentScreen === 2) {
       if (data.context && data.context.length > 10) {
         const parsed = parseContextForProfile(data.context);
-        const updates: Partial<MasteryProfile> = {};
-        const newAutofill = new Set<string>();
-        if (parsed.name && !data.name) { updates.name = parsed.name; newAutofill.add('name'); }
-        if (parsed.occupation && !data.occupation) { updates.occupation = parsed.occupation; newAutofill.add('occupation'); }
-        if (parsed.location && !data.location) { updates.location = parsed.location; newAutofill.add('location'); }
-        if (parsed.interests && !data.interests) { updates.interests = parsed.interests; newAutofill.add('interests'); }
-        if (Object.keys(updates).length > 0) {
-          setData(prev => ({ ...prev, ...updates }));
-          setAutofillFields(newAutofill);
-        }
+        const newSuggestions: Record<string, string> = {};
+        if (parsed.name) newSuggestions.name = parsed.name;
+        if (parsed.occupation) newSuggestions.occupation = parsed.occupation;
+        if (parsed.location) newSuggestions.location = parsed.location;
+        if (parsed.interests) newSuggestions.interests = parsed.interests;
+        setSuggestions(newSuggestions);
+      } else {
+        setSuggestions({});
       }
       setCurrentScreen(3);
       return;
@@ -175,9 +176,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
 
   const prevScreen = () => {
     if (currentScreen > 1) {
-      if (currentScreen === 3 && autofillFields.size > 0) {
-        setAutofillFields(new Set());
-      }
+      if (currentScreen === 3) setSuggestions({});
       setCurrentScreen(prev => prev - 1);
     }
   };
@@ -291,18 +290,31 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
         );
 
       case 3: {
-        const hasAnyAutofill = autofillFields.size > 0;
-        const autofillBadge = (field: string) =>
-          autofillFields.has(field) ? (
-            <span className="flex items-center gap-1 text-xs text-blue-400/70 mt-1 ml-1">
-              <Sparkles className="w-3 h-3" />
-              from your context — edit if needed
-            </span>
-          ) : null;
-        const autofillBorder = (field: string) =>
-          autofillFields.has(field)
-            ? 'border-blue-500/40 bg-blue-500/5'
-            : 'border-gray-700/50 bg-gray-900/50';
+        const hasAnySuggestion = Object.keys(suggestions).length > 0;
+        const SuggestionChip = ({ field }: { field: string }) => {
+          const value = suggestions[field];
+          if (!value) return null;
+          return (
+            <div className="mt-1.5 flex items-center justify-between gap-2 px-3 py-2 bg-gray-800/60 border border-gray-600/40 rounded-lg">
+              <button
+                type="button"
+                onClick={() => acceptSuggestion(field)}
+                className="flex-1 text-left text-sm text-gray-400 hover:text-white transition-colors truncate"
+              >
+                <span className="text-gray-600 mr-1">Suggestion:</span>
+                {value}
+              </button>
+              <button
+                type="button"
+                onClick={() => dismissSuggestion(field)}
+                className="flex-shrink-0 text-gray-600 hover:text-gray-400 transition-colors p-0.5"
+                aria-label="Dismiss suggestion"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          );
+        };
 
         return (
           <div className="space-y-6 animate-fadeIn">
@@ -310,8 +322,8 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
               <p className="text-xs text-yellow-400/80 uppercase tracking-widest font-medium">Almost done</p>
               <h2 className="text-3xl font-bold text-white leading-tight">Your Profile</h2>
               <p className="text-gray-400 text-base">
-                {hasAnyAutofill
-                  ? 'We found some details from your context — confirm or edit them.'
+                {hasAnySuggestion
+                  ? 'We found some details — tap a suggestion to use it.'
                   : 'Tell me a bit about yourself.'}
               </p>
             </div>
@@ -322,10 +334,10 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   value={data.name}
                   onChange={(e) => updateData({ name: e.target.value })}
                   placeholder="Your name *"
-                  className={`w-full px-4 py-3 border-2 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none ${autofillBorder('name')}`}
+                  className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                   autoFocus
                 />
-                {autofillBadge('name')}
+                <SuggestionChip field="name" />
               </div>
               <div>
                 <input
@@ -333,9 +345,9 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   value={data.occupation}
                   onChange={(e) => updateData({ occupation: e.target.value })}
                   placeholder="Occupation"
-                  className={`w-full px-4 py-3 border-2 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none ${autofillBorder('occupation')}`}
+                  className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                 />
-                {autofillBadge('occupation')}
+                <SuggestionChip field="occupation" />
               </div>
               <div>
                 <input
@@ -343,9 +355,9 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   value={data.location}
                   onChange={(e) => updateData({ location: e.target.value })}
                   placeholder="Location (optional)"
-                  className={`w-full px-4 py-3 border-2 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none ${autofillBorder('location')}`}
+                  className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                 />
-                {autofillBadge('location')}
+                <SuggestionChip field="location" />
               </div>
               <div>
                 <input
@@ -353,9 +365,9 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   value={data.interests}
                   onChange={(e) => updateData({ interests: e.target.value })}
                   placeholder="Interests (fitness, business, creative...)"
-                  className={`w-full px-4 py-3 border-2 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none ${autofillBorder('interests')}`}
+                  className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                 />
-                {autofillBadge('interests')}
+                <SuggestionChip field="interests" />
               </div>
             </div>
           </div>
