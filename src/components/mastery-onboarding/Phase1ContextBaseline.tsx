@@ -108,19 +108,29 @@ const WHY_OPTIONS = [
 
 export default function Phase1ContextBaseline({ profile, onComplete }: Phase1ContextBaselineProps) {
   const [currentScreen, setCurrentScreen] = useState(1);
+  const clean = (val: string | undefined) => { const s = (val || '').trim(); return s.length >= 2 ? s : ''; };
   const [data, setData] = useState<Partial<MasteryProfile>>({
     context: profile.context || '',
     mentalState: profile.mentalState || '',
-    name: profile.name || '',
-    location: profile.location || '',
-    occupation: profile.occupation || '',
-    interests: profile.interests || '',
+    name: clean(profile.name),
+    location: clean(profile.location),
+    occupation: clean(profile.occupation),
+    interests: clean(profile.interests),
   });
   const [copied, setCopied] = useState(false);
   const [suggestions, setSuggestions] = useState<Record<string, string>>({});
 
   const updateData = (updates: Partial<MasteryProfile>) => {
     setData(prev => ({ ...prev, ...updates }));
+  };
+
+  const splitSuggestion = (raw: string) =>
+    raw.split(/,|\s+and\s+/i).map(s => s.trim().replace(/^and\s+/i, '')).filter(s => s.length >= 2);
+
+  const removeSuggestionItem = (prev: Record<string, string>, field: string, item: string) => {
+    const remaining = splitSuggestion(prev[field] || '').filter(s => s !== item).join(', ');
+    if (!remaining) { const next = { ...prev }; delete next[field]; return next; }
+    return { ...prev, [field]: remaining };
   };
 
   const acceptSuggestionItem = (field: string, item: string) => {
@@ -132,19 +142,11 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     } else {
       setData(prev => ({ ...prev, [field]: item }));
     }
-    setSuggestions(prev => {
-      const remaining = (prev[field] || '').split(',').map(s => s.trim()).filter(s => s !== item).join(', ');
-      if (!remaining) { const next = { ...prev }; delete next[field]; return next; }
-      return { ...prev, [field]: remaining };
-    });
+    setSuggestions(prev => removeSuggestionItem(prev, field, item));
   };
 
   const dismissSuggestionItem = (field: string, item: string) => {
-    setSuggestions(prev => {
-      const remaining = (prev[field] || '').split(',').map(s => s.trim()).filter(s => s !== item).join(', ');
-      if (!remaining) { const next = { ...prev }; delete next[field]; return next; }
-      return { ...prev, [field]: remaining };
-    });
+    setSuggestions(prev => removeSuggestionItem(prev, field, item));
   };
 
   const handleCopy = async () => {
@@ -307,7 +309,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
         const SuggestionRow = ({ field }: { field: string }) => {
           const raw = suggestions[field];
           if (!raw) return null;
-          const items = raw.split(',').map(s => s.trim()).filter(Boolean);
+          const items = splitSuggestion(raw);
           return (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {items.map(item => (
