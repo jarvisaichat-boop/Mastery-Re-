@@ -123,15 +123,28 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     setData(prev => ({ ...prev, ...updates }));
   };
 
-  const acceptSuggestion = (field: string) => {
-    const value = suggestions[field];
-    if (!value) return;
-    setData(prev => ({ ...prev, [field]: value }));
-    setSuggestions(prev => { const next = { ...prev }; delete next[field]; return next; });
+  const acceptSuggestionItem = (field: string, item: string) => {
+    if (field === 'interests') {
+      setData(prev => ({
+        ...prev,
+        interests: prev.interests ? `${prev.interests}, ${item}` : item,
+      }));
+    } else {
+      setData(prev => ({ ...prev, [field]: item }));
+    }
+    setSuggestions(prev => {
+      const remaining = (prev[field] || '').split(',').map(s => s.trim()).filter(s => s !== item).join(', ');
+      if (!remaining) { const next = { ...prev }; delete next[field]; return next; }
+      return { ...prev, [field]: remaining };
+    });
   };
 
-  const dismissSuggestion = (field: string) => {
-    setSuggestions(prev => { const next = { ...prev }; delete next[field]; return next; });
+  const dismissSuggestionItem = (field: string, item: string) => {
+    setSuggestions(prev => {
+      const remaining = (prev[field] || '').split(',').map(s => s.trim()).filter(s => s !== item).join(', ');
+      if (!remaining) { const next = { ...prev }; delete next[field]; return next; }
+      return { ...prev, [field]: remaining };
+    });
   };
 
   const handleCopy = async () => {
@@ -291,28 +304,30 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
 
       case 3: {
         const hasAnySuggestion = Object.keys(suggestions).length > 0;
-        const SuggestionChip = ({ field }: { field: string }) => {
-          const value = suggestions[field];
-          if (!value) return null;
+        const SuggestionRow = ({ field }: { field: string }) => {
+          const raw = suggestions[field];
+          if (!raw) return null;
+          const items = raw.split(',').map(s => s.trim()).filter(Boolean);
           return (
-            <button
-              type="button"
-              onClick={() => acceptSuggestion(field)}
-              className="mt-1.5 w-full flex items-center justify-between gap-2 px-3 py-2 bg-gray-800/60 border border-gray-600/40 rounded-lg hover:border-gray-500/60 hover:bg-gray-800/80 transition-colors cursor-pointer text-left"
-            >
-              <span className="flex-1 text-sm text-gray-400 truncate">
-                <span className="text-gray-600 mr-1">Suggestion:</span>
-                {value}
-              </span>
-              <span
-                role="button"
-                onClick={(e) => { e.stopPropagation(); dismissSuggestion(field); }}
-                className="flex-shrink-0 text-gray-600 hover:text-gray-400 transition-colors p-0.5"
-                aria-label="Dismiss suggestion"
-              >
-                <X className="w-3.5 h-3.5" />
-              </span>
-            </button>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {items.map(item => (
+                <span
+                  key={item}
+                  className="inline-flex items-center gap-1 pl-3 pr-1.5 py-1 bg-gray-800/70 border border-gray-600/50 rounded-full text-sm text-gray-300 cursor-pointer hover:border-gray-500 hover:bg-gray-700/60 transition-colors group"
+                  onClick={() => acceptSuggestionItem(field, item)}
+                >
+                  {item}
+                  <span
+                    role="button"
+                    onClick={(e) => { e.stopPropagation(); dismissSuggestionItem(field, item); }}
+                    className="ml-0.5 text-gray-600 hover:text-gray-300 transition-colors"
+                    aria-label={`Remove ${item}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </span>
+                </span>
+              ))}
+            </div>
           );
         };
 
@@ -337,7 +352,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                   autoFocus
                 />
-                <SuggestionChip field="name" />
+                <SuggestionRow field="name" />
               </div>
               <div>
                 <input
@@ -347,7 +362,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   placeholder="Occupation"
                   className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                 />
-                <SuggestionChip field="occupation" />
+                <SuggestionRow field="occupation" />
               </div>
               <div>
                 <input
@@ -357,7 +372,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   placeholder="Location (optional)"
                   className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                 />
-                <SuggestionChip field="location" />
+                <SuggestionRow field="location" />
               </div>
               <div>
                 <input
@@ -367,7 +382,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   placeholder="Interests (fitness, business, creative...)"
                   className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                 />
-                <SuggestionChip field="interests" />
+                <SuggestionRow field="interests" />
               </div>
             </div>
           </div>
