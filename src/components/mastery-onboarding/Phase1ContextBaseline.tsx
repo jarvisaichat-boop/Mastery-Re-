@@ -1,6 +1,54 @@
 import { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Sparkles } from 'lucide-react';
 import { MasteryProfile } from '../../types/onboarding';
+
+function parseContextForProfile(
+  context: string
+): Partial<Pick<MasteryProfile, 'name' | 'occupation' | 'location' | 'interests'>> {
+  const result: Partial<Pick<MasteryProfile, 'name' | 'occupation' | 'location' | 'interests'>> = {};
+
+  // Name: "The user's name is X." or "named X" or "my name is X"
+  const nameMatch =
+    context.match(/the user(?:'s)?\s+name\s+is\s+([A-Z][a-zA-Z\s\-'.]{1,35}?)(?:\.|,|\n|$)/i) ||
+    context.match(/named\s+([A-Z][a-zA-Z\s\-'.]{1,35}?)(?:\.|,|\n|$)/i);
+  if (nameMatch) {
+    const name = nameMatch[1].trim().replace(/[,.]$/, '');
+    if (name.length >= 2 && name.length <= 40) result.name = name;
+  }
+
+  // Occupation: "The user works as X" — stop before " in [City]"
+  const occMatch =
+    context.match(/the user works as\s+(.*?)(?:\.|\n|$)/i) ||
+    context.match(/occupation[:\s]+([^\n.]+)/i);
+  if (occMatch) {
+    let occ = occMatch[1].trim().replace(/[,.]$/, '');
+    occ = occ.replace(/\s+in\s+[A-Z][\w\s,]+$/, '').trim();
+    occ = occ.replace(/^an?\s+/i, '').trim();
+    if (occ.length >= 2 && occ.length <= 80) result.occupation = occ;
+  }
+
+  // Location: "located in / lives in / based in / living in / from X"
+  const locMatch =
+    context.match(/the user(?:\s+is)?\s+(?:located in|lives in|based in|living in|residing in|currently in|from)\s+([^.\n]+?)(?:\.|,|\n|$)/i) ||
+    context.match(/location[:\s]+([^\n.]+)/i);
+  if (locMatch) {
+    const loc = locMatch[1].trim().replace(/[,.]$/, '');
+    if (loc.length >= 2 && loc.length <= 80) result.location = loc;
+  }
+
+  // Interests: look inside section 7 first, then fall back to full text
+  const sectionMatch = context.match(/7\.\s+INTERESTS[^\n]*\n([\s\S]+?)(?=\n\d+\.\s+[A-Z]|$)/i);
+  const searchIn = sectionMatch ? sectionMatch[1] : context;
+  const intMatch =
+    searchIn.match(/the user is interested in\s+([^.\n]+)/i) ||
+    searchIn.match(/interests?[:\s]+([^\n.]+)/i);
+  if (intMatch) {
+    const interests = intMatch[1].trim().replace(/[,.]$/, '');
+    if (interests.length >= 2 && interests.length <= 120) result.interests = interests;
+  }
+
+  return result;
+}
 
 interface Phase1ContextBaselineProps {
   profile: Partial<MasteryProfile>;
@@ -69,9 +117,18 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     interests: profile.interests || '',
   });
   const [copied, setCopied] = useState(false);
+  const [autofillFields, setAutofillFields] = useState<Set<string>>(new Set());
 
   const updateData = (updates: Partial<MasteryProfile>) => {
     setData(prev => ({ ...prev, ...updates }));
+    const updatedKeys = Object.keys(updates);
+    if (updatedKeys.some(k => autofillFields.has(k))) {
+      setAutofillFields(prev => {
+        const next = new Set(prev);
+        updatedKeys.forEach(k => next.delete(k));
+        return next;
+      });
+    }
   };
 
   const handleCopy = async () => {
@@ -92,6 +149,23 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
   };
 
   const nextScreen = () => {
+    if (currentScreen === 2) {
+      if (data.context && data.context.length > 10) {
+        const parsed = parseContextForProfile(data.context);
+        const updates: Partial<MasteryProfile> = {};
+        const newAutofill = new Set<string>();
+        if (parsed.name && !data.name) { updates.name = parsed.name; newAutofill.add('name'); }
+        if (parsed.occupation && !data.occupation) { updates.occupation = parsed.occupation; newAutofill.add('occupation'); }
+        if (parsed.location && !data.location) { updates.location = parsed.location; newAutofill.add('location'); }
+        if (parsed.interests && !data.interests) { updates.interests = parsed.interests; newAutofill.add('interests'); }
+        if (Object.keys(updates).length > 0) {
+          setData(prev => ({ ...prev, ...updates }));
+          setAutofillFields(newAutofill);
+        }
+      }
+      setCurrentScreen(3);
+      return;
+    }
     if (currentScreen < 3) {
       setCurrentScreen(prev => prev + 1);
     } else {
@@ -213,47 +287,77 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           </div>
         );
 
-      case 3:
+      case 3: {
+        const hasAnyAutofill = autofillFields.size > 0;
+        const autofillBadge = (field: string) =>
+          autofillFields.has(field) ? (
+            <span className="flex items-center gap-1 text-xs text-blue-400/70 mt-1 ml-1">
+              <Sparkles className="w-3 h-3" />
+              from your context — edit if needed
+            </span>
+          ) : null;
+        const autofillBorder = (field: string) =>
+          autofillFields.has(field)
+            ? 'border-blue-500/40 bg-blue-500/5'
+            : 'border-gray-700/50 bg-gray-900/50';
+
         return (
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-2">
               <p className="text-xs text-yellow-400/80 uppercase tracking-widest font-medium">Almost done</p>
               <h2 className="text-3xl font-bold text-white leading-tight">Your Profile</h2>
-              <p className="text-gray-400 text-base">Tell me a bit about yourself.</p>
+              <p className="text-gray-400 text-base">
+                {hasAnyAutofill
+                  ? 'We found some details from your context — confirm or edit them.'
+                  : 'Tell me a bit about yourself.'}
+              </p>
             </div>
             <div className="space-y-3">
-              <input
-                type="text"
-                value={data.name}
-                onChange={(e) => updateData({ name: e.target.value })}
-                placeholder="Your name *"
-                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-                autoFocus
-              />
-              <input
-                type="text"
-                value={data.occupation}
-                onChange={(e) => updateData({ occupation: e.target.value })}
-                placeholder="Occupation"
-                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
-              <input
-                type="text"
-                value={data.location}
-                onChange={(e) => updateData({ location: e.target.value })}
-                placeholder="Location (optional)"
-                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
-              <input
-                type="text"
-                value={data.interests}
-                onChange={(e) => updateData({ interests: e.target.value })}
-                placeholder="Interests (fitness, business, creative...)"
-                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
+              <div>
+                <input
+                  type="text"
+                  value={data.name}
+                  onChange={(e) => updateData({ name: e.target.value })}
+                  placeholder="Your name *"
+                  className={`w-full px-4 py-3 border-2 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none ${autofillBorder('name')}`}
+                  autoFocus
+                />
+                {autofillBadge('name')}
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={data.occupation}
+                  onChange={(e) => updateData({ occupation: e.target.value })}
+                  placeholder="Occupation"
+                  className={`w-full px-4 py-3 border-2 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none ${autofillBorder('occupation')}`}
+                />
+                {autofillBadge('occupation')}
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={data.location}
+                  onChange={(e) => updateData({ location: e.target.value })}
+                  placeholder="Location (optional)"
+                  className={`w-full px-4 py-3 border-2 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none ${autofillBorder('location')}`}
+                />
+                {autofillBadge('location')}
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={data.interests}
+                  onChange={(e) => updateData({ interests: e.target.value })}
+                  placeholder="Interests (fitness, business, creative...)"
+                  className={`w-full px-4 py-3 border-2 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none ${autofillBorder('interests')}`}
+                />
+                {autofillBadge('interests')}
+              </div>
             </div>
           </div>
         );
+      }
 
       default:
         return null;
