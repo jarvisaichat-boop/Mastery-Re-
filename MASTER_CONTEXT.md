@@ -46,13 +46,30 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 -   **Gamification**: AI Coach reactions, streak celebrations, unified daily check-ins with reflection and AI chat.
 -   **Onboarding**: Comprehensive 7-phase initiation sequence:
         1. **Manifesto**: Initial commitment to the Path.
-        2. **Context Baseline**: Current state assessment and starting metrics.
+        2. **Profile**: Current state assessment and starting metrics.
         3. **Core Values**: Defining the "Why" and underlying identity.
-        4. **The Path**: Conversational Logic Tree ("The Architect") to map Goals → Milestones → Daily Actions.
+        4. **The Path**: Conversational Logic Tree to map Goals → Milestones → Daily Actions.
         5. **The Schedule**: Time-blocking and routine design.
         6. **The Enforcer**: Negotiation of stakes and accountability.
         7. **The Contract**: Final signed commitment.
         -   Includes a mandatory 60-second "Micro-Win Protocol" and an interactive app tour covering the Tracker, Check-In, and Dashboard.
+
+    **Core Onboarding Principle (DO NOT FORGET):**
+    > Every onboarding step should be *writing to* a specific part of the app. The user isn't just answering questions — they're **building their dashboard for the first time.**
+
+    | Onboarding Step | Feeds Into |
+    |---|---|
+    | Why (mental state) | User profile / AI coach tone |
+    | Import Memory (brain dump) | AI pre-fills vision, values, habit suggestions |
+    | Profile (name, occupation) | Personalizes all copy throughout the app |
+    | Core Values | Vision Board → Core Values section |
+    | Goal + milestones | Vision Board → Path section |
+    | Daily schedule / time blocks | Vision Board → Schedule section |
+    | Life Goal Habit | Habit Tracker (primary habit) |
+    | Accountability level | Discipline Engine strictness setting |
+
+    **Known Bug — Orphaned Onboarding Data:**
+    Most onboarding data is currently lost. `App.tsx handleOnboardingComplete` only captures `newHabits`, `userGoal`, and `userAspirations`. Everything else (core values, schedule, profile, logic tree) is stored in `mastery-onboarding-profile` localStorage and then **deleted** at completion (line ~405 in App.tsx). Core values do NOT flow to the Vision Board. Schedule does NOT pre-populate the timeline. This must be fixed so every step writes to its destination.
 -   **Daily Check-in**: Unified within a chat interface with AI motivational responses.
 -   **Vision Check**: Users visualize the complete pathway (action → milestone → goal).
 -   **Discipline Engine Visuals**: Path-focused UI with past dates dimmed, and information toasts for unloggable habits.

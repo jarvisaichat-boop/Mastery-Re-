@@ -1,11 +1,30 @@
 import { useState } from 'react';
+import { Copy, Check } from 'lucide-react';
 import { MasteryProfile } from '../../types/onboarding';
-import { Brain } from 'lucide-react';
 
 interface Phase1ContextBaselineProps {
   profile: Partial<MasteryProfile>;
   onComplete: (data: Partial<MasteryProfile>) => void;
 }
+
+const IMPORT_PROMPT = `Please summarize everything you know about me in a structured block I can paste into another app. Include:
+- My main life goals and what I'm working toward
+- Habits I've been trying to build or maintain
+- Any recurring struggles or blockers I've mentioned
+- My values or what matters most to me
+- Anything about my daily schedule or routines
+
+Format it as plain text, no headers needed.`;
+
+const WHY_OPTIONS = [
+  { value: 'RESTART', emoji: '🔁', label: 'I keep starting over', sub: 'I set goals but never follow through' },
+  { value: 'GOAL', emoji: '🎯', label: 'I have a specific goal', sub: 'I know what I want, I just need structure' },
+  { value: 'OVERWHELMED', emoji: '😵', label: 'I feel overwhelmed', sub: 'Too much going on, hard to focus' },
+  { value: 'FELL_OFF', emoji: '📉', label: 'I lost my momentum', sub: 'I was doing well, then fell off track' },
+  { value: 'NEW_HABIT', emoji: '🌱', label: 'I want to build new habits', sub: 'Starting fresh with something new' },
+  { value: 'LOST', emoji: '🧭', label: 'I feel lost', sub: "Not sure what to focus on, I need direction" },
+  { value: 'LEVEL_UP', emoji: '⚡', label: "I'm ready to level up", sub: "Things are okay — I want exceptional" },
+];
 
 export default function Phase1ContextBaseline({ profile, onComplete }: Phase1ContextBaselineProps) {
   const [currentScreen, setCurrentScreen] = useState(1);
@@ -17,9 +36,27 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
     occupation: profile.occupation || '',
     interests: profile.interests || '',
   });
+  const [copied, setCopied] = useState(false);
 
   const updateData = (updates: Partial<MasteryProfile>) => {
     setData(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(IMPORT_PROMPT);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = IMPORT_PROMPT;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const nextScreen = () => {
@@ -38,8 +75,8 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
 
   const canProceed = () => {
     switch (currentScreen) {
-      case 1: return data.context && data.context.length > 0;
-      case 2: return data.mentalState !== '';
+      case 1: return data.mentalState !== '';
+      case 2: return true;
       case 3: return data.name !== '';
       default: return false;
     }
@@ -47,103 +84,137 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
 
   const renderScreen = () => {
     switch (currentScreen) {
+
       case 1:
         return (
-          <ScreenContainer
-            icon={<Brain className="w-12 h-12 text-blue-400" />}
-            goldenHeader="Don't start from zero."
-            header="Context Injection (Brain Dump)"
-            subtext="Paste your journals, goals, or AI chats."
-          >
-            <textarea
-              value={data.context}
-              onChange={(e) => updateData({ context: e.target.value })}
-              placeholder="Paste any existing journal entries, goal lists, or chat transcripts here..."
-              className="w-full h-64 px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-lg text-white text-base placeholder-gray-400 focus:border-blue-500 focus:outline-none resize-none"
-              autoFocus
-            />
-            {data.context && data.context.length > 50 && (
-              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-sm text-blue-200">
-                ✓ Analyzing... ({data.context.length} characters)
-              </div>
-            )}
-          </ScreenContainer>
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-2">
+              <p className="text-xs text-yellow-400/80 uppercase tracking-widest font-medium">What brought you here?</p>
+              <h2 className="text-3xl font-bold text-white leading-tight">Why are you here?</h2>
+              <p className="text-gray-400 text-base">Pick the one that fits right now.</p>
+            </div>
+            <div className="space-y-2.5">
+              {WHY_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => updateData({ mentalState: option.value })}
+                  className={`w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
+                    data.mentalState === option.value
+                      ? 'bg-blue-500/20 border-blue-400 shadow-lg shadow-blue-500/20'
+                      : 'bg-gray-900/40 border-gray-700/50 hover:border-gray-600 hover:bg-gray-800/40'
+                  }`}
+                >
+                  <span className="text-2xl w-8 text-center flex-shrink-0">{option.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-white text-base">{option.label}</p>
+                    <p className="text-sm text-gray-400">{option.sub}</p>
+                  </div>
+                  {data.mentalState === option.value && (
+                    <div className="w-5 h-5 rounded-full bg-blue-400 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
         );
 
       case 2:
         return (
-          <ScreenContainer
-            icon={<span className="text-5xl">⚡</span>}
-            goldenHeader="What brought you here?"
-            header="The Spark"
-            subtext="Choose the one that resonates"
-          >
-            <div className="space-y-3">
-              {[
-                { value: 'STUCK' as const, emoji: '🧱', label: 'STUCK', sub: 'I need to break through' },
-                { value: 'GOAL' as const, emoji: '🎯', label: 'Specific GOAL', sub: 'I know what I want' },
-                { value: 'CURIOUS' as const, emoji: '🧐', label: 'Just CURIOUS', sub: 'Show me what this is' },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => updateData({ mentalState: option.value })}
-                  className={`w-full p-5 rounded-lg border-2 transition-all text-left flex items-center gap-4 ${
-                    data.mentalState === option.value
-                      ? 'bg-blue-500/20 border-blue-400 shadow-lg shadow-blue-500/20'
-                      : 'bg-gray-900/30 border-gray-700/50 hover:border-gray-600'
-                  }`}
-                >
-                  <span className="text-3xl">{option.emoji}</span>
-                  <div className="flex-1">
-                    <p className="font-bold text-white text-lg">{option.label}</p>
-                    <p className="text-sm text-gray-300">{option.sub}</p>
-                  </div>
-                </button>
-              ))}
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-2">
+              <p className="text-xs text-yellow-400/80 uppercase tracking-widest font-medium">Optional — skip if you're starting fresh</p>
+              <h2 className="text-3xl font-bold text-white leading-tight">Import your memory</h2>
+              <p className="text-gray-400 text-base">Already working with an AI? Bring your context here.</p>
             </div>
-          </ScreenContainer>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-gray-700 text-xs flex items-center justify-center text-gray-300 flex-shrink-0">1</span>
+                  Copy this prompt into your AI (ChatGPT, Gemini, etc.)
+                </p>
+                <div className="relative bg-gray-900 border border-gray-700 rounded-xl p-4">
+                  <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line pr-20">{IMPORT_PROMPT}</p>
+                  <button
+                    onClick={handleCopy}
+                    className={`absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      copied
+                        ? 'bg-green-600/30 text-green-400 border border-green-600/40'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white border border-gray-600'
+                    }`}
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-gray-700 text-xs flex items-center justify-center text-gray-300 flex-shrink-0">2</span>
+                  Paste the response here
+                </p>
+                <div className="relative">
+                  <textarea
+                    value={data.context}
+                    onChange={(e) => updateData({ context: e.target.value })}
+                    placeholder="Paste your info here..."
+                    className="w-full h-36 px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"
+                  />
+                  {data.context && data.context.length > 20 && (
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1.5 text-xs text-green-400 bg-gray-900/80 px-2 py-1 rounded-md">
+                      <Check className="w-3 h-3" />
+                      {data.context.length} chars saved
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         );
 
       case 3:
         return (
-          <ScreenContainer
-            icon={<span className="text-5xl">👤</span>}
-            goldenHeader="Who are you?"
-            header="Your Profile"
-            subtext="Tell me about yourself"
-          >
-            <div className="space-y-4">
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center space-y-2">
+              <p className="text-xs text-yellow-400/80 uppercase tracking-widest font-medium">Almost done</p>
+              <h2 className="text-3xl font-bold text-white leading-tight">Your Profile</h2>
+              <p className="text-gray-400 text-base">Tell me a bit about yourself.</p>
+            </div>
+            <div className="space-y-3">
               <input
                 type="text"
                 value={data.name}
                 onChange={(e) => updateData({ name: e.target.value })}
-                placeholder="Name"
-                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-lg text-white text-base placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                placeholder="Your name *"
+                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                 autoFocus
-              />
-              <input
-                type="text"
-                value={data.location}
-                onChange={(e) => updateData({ location: e.target.value })}
-                placeholder="Location (Optional)"
-                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-lg text-white text-base placeholder-gray-400 focus:border-blue-500 focus:outline-none"
               />
               <input
                 type="text"
                 value={data.occupation}
                 onChange={(e) => updateData({ occupation: e.target.value })}
                 placeholder="Occupation"
-                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-lg text-white text-base placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+              />
+              <input
+                type="text"
+                value={data.location}
+                onChange={(e) => updateData({ location: e.target.value })}
+                placeholder="Location (optional)"
+                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
               />
               <input
                 type="text"
                 value={data.interests}
                 onChange={(e) => updateData({ interests: e.target.value })}
-                placeholder="Interests (Business, Fitness, Creative, etc.)"
-                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-lg text-white text-base placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                placeholder="Interests (fitness, business, creative...)"
+                className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700/50 rounded-xl text-white text-base placeholder-gray-500 focus:border-blue-500 focus:outline-none"
               />
             </div>
-          </ScreenContainer>
+          </div>
         );
 
       default:
@@ -156,7 +227,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
       <div className="max-w-2xl w-full">
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-400 mb-3">
-            <span className="font-medium">Phase 1: The Download</span>
+            <span className="font-medium">Phase 1: Profile</span>
             <span>Screen {currentScreen} of 3</span>
           </div>
           <div className="w-full h-2 bg-gray-800/50 rounded-full overflow-hidden">
@@ -173,7 +244,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           <button
             onClick={prevScreen}
             disabled={currentScreen === 1}
-            className={`px-6 py-3 rounded-lg font-medium transition-all ${
+            className={`px-6 py-3 rounded-xl font-medium transition-all ${
               currentScreen === 1
                 ? 'bg-gray-800/30 text-gray-600 cursor-not-allowed'
                 : 'bg-gray-800/50 text-white hover:bg-gray-700/50 border border-gray-700/50'
@@ -184,40 +255,22 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           <button
             onClick={nextScreen}
             disabled={!canProceed()}
-            className={`flex-1 px-6 py-3 rounded-lg font-bold transition-all ${
+            className={`flex-1 px-6 py-3 rounded-xl font-bold transition-all ${
               canProceed()
                 ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/30'
                 : 'bg-gray-800/30 text-gray-600 cursor-not-allowed'
             }`}
           >
-            {currentScreen === 3 ? 'Complete Phase 1' : 'Next'}
+            {currentScreen === 3 ? 'Complete Phase 1' : currentScreen === 2 ? 'Next →' : 'Next'}
           </button>
         </div>
-      </div>
-    </div>
-  );
-}
 
-interface ScreenContainerProps {
-  icon: React.ReactNode;
-  goldenHeader?: string;
-  header: string;
-  subtext: string;
-  children: React.ReactNode;
-}
-
-function ScreenContainer({ icon, goldenHeader, header, subtext, children }: ScreenContainerProps) {
-  return (
-    <div className="space-y-8 animate-fadeIn">
-      <div className="text-center space-y-3">
-        <div className="flex justify-center mb-2">{icon}</div>
-        {goldenHeader && (
-          <p className="text-xs text-yellow-400/80 uppercase tracking-widest font-medium">{goldenHeader}</p>
+        {currentScreen === 2 && (
+          <p className="text-center text-xs text-gray-600 mt-3">
+            This step is optional — tap Next to skip
+          </p>
         )}
-        <h2 className="text-3xl font-bold text-white leading-tight">{header}</h2>
-        <p className="text-lg text-gray-300">{subtext}</p>
       </div>
-      <div>{children}</div>
     </div>
   );
 }

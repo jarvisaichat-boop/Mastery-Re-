@@ -3,7 +3,7 @@
 export interface MasteryProfile {
   // Phase 1: Context & Baseline
   context: string;
-  mentalState: 'SPARK' | 'STUCK' | 'CURIOUS' | 'GOAL' | '';
+  mentalState: 'SPARK' | 'STUCK' | 'CURIOUS' | 'GOAL' | 'RESTART' | 'OVERWHELMED' | 'FELL_OFF' | 'NEW_HABIT' | 'LOST' | 'LEVEL_UP' | '';
   name: string;
   location: string;
   occupation: string;
