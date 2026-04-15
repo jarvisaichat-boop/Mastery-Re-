@@ -134,14 +134,10 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
   };
 
   const acceptSuggestionItem = (field: string, item: string) => {
-    if (field === 'interests') {
-      setData(prev => ({
-        ...prev,
-        interests: prev.interests ? `${prev.interests}, ${item}` : item,
-      }));
-    } else {
-      setData(prev => ({ ...prev, [field]: item }));
-    }
+    setData(prev => {
+      const existing = (prev[field as keyof typeof prev] as string) || '';
+      return { ...prev, [field]: existing ? `${existing}, ${item}` : item };
+    });
     setSuggestions(prev => removeSuggestionItem(prev, field, item));
   };
 
