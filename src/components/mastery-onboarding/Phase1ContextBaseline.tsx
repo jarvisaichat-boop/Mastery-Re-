@@ -295,24 +295,24 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           const value = suggestions[field];
           if (!value) return null;
           return (
-            <div className="mt-1.5 flex items-center justify-between gap-2 px-3 py-2 bg-gray-800/60 border border-gray-600/40 rounded-lg">
-              <button
-                type="button"
-                onClick={() => acceptSuggestion(field)}
-                className="flex-1 text-left text-sm text-gray-400 hover:text-white transition-colors truncate"
-              >
+            <button
+              type="button"
+              onClick={() => acceptSuggestion(field)}
+              className="mt-1.5 w-full flex items-center justify-between gap-2 px-3 py-2 bg-gray-800/60 border border-gray-600/40 rounded-lg hover:border-gray-500/60 hover:bg-gray-800/80 transition-colors cursor-pointer text-left"
+            >
+              <span className="flex-1 text-sm text-gray-400 truncate">
                 <span className="text-gray-600 mr-1">Suggestion:</span>
                 {value}
-              </button>
-              <button
-                type="button"
-                onClick={() => dismissSuggestion(field)}
+              </span>
+              <span
+                role="button"
+                onClick={(e) => { e.stopPropagation(); dismissSuggestion(field); }}
                 className="flex-shrink-0 text-gray-600 hover:text-gray-400 transition-colors p-0.5"
                 aria-label="Dismiss suggestion"
               >
                 <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
+              </span>
+            </button>
           );
         };
 
