@@ -7,14 +7,41 @@ interface Phase1ContextBaselineProps {
   onComplete: (data: Partial<MasteryProfile>) => void;
 }
 
-const IMPORT_PROMPT = `Please summarize everything you know about me in a structured block I can paste into another app. Include:
-- My main life goals and what I'm working toward
-- Habits I've been trying to build or maintain
-- Any recurring struggles or blockers I've mentioned
-- My values or what matters most to me
-- Anything about my daily schedule or routines
+const IMPORT_PROMPT = `You are helping me import my personal context into a new app. Go through our past conversations and summarize what you know about me.
 
-Format it as plain text, no headers needed.`;
+Avoid using first-person (I, my, me) or second-person (you, your) pronouns. Refer to the person as "the user".
+
+Output in this exact order and format:
+
+1. PROFILE
+Name, age, occupation, location, education, lifestyle notes.
+Format: "The user's name is X. The user works as Y."
+
+2. CORE VALUES
+What matters most to the user. Identity statements, principles they live by, what they stand for.
+Format: "The user values X. The user believes Y."
+
+3. LIFE GOALS & PROJECTS
+Long-term goals, current big projects, quarterly targets, what the user is actively working toward.
+Format: "The user's main goal is X. The user is currently working on Y."
+
+4. DAILY SCHEDULE & ROUTINES
+Wake/sleep times, work hours, peak energy windows, established routines (morning, evening, etc.), commitments that block time.
+Format: "The user wakes at X. The user's peak focus time is Y."
+
+5. HABITS
+Habits the user is trying to build or maintain. Frequency, duration, context. What has worked and what hasn't.
+Format: "The user is building a habit of X. The user struggles to maintain Y."
+
+6. STRUGGLES & BLOCKERS
+Recurring challenges, patterns of failure, what gets in the way, emotional blockers.
+Format: "The user repeatedly struggles with X. A common blocker is Y."
+
+7. INTERESTS & RELATIONSHIPS
+Active interests, communities, important relationships that provide context or accountability.
+Format: "The user is interested in X. The user has Y as an accountability partner."
+
+Output everything as a single plain-text block. Use the numbered section labels above.`;
 
 const WHY_OPTIONS = [
   { value: 'RESTART', emoji: '🔁', label: 'I keep starting over', sub: 'I set goals but never follow through' },
@@ -135,8 +162,10 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   <span className="w-5 h-5 rounded-full bg-gray-700 text-xs flex items-center justify-center text-gray-300 flex-shrink-0">1</span>
                   Copy this prompt into your AI (ChatGPT, Gemini, etc.)
                 </p>
-                <div className="relative bg-gray-900 border border-gray-700 rounded-xl p-4">
-                  <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line pr-20">{IMPORT_PROMPT}</p>
+                <div className="relative bg-gray-900 border border-gray-700 rounded-xl">
+                  <div className="overflow-y-auto max-h-44 p-4 pr-24 custom-scrollbar">
+                    <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">{IMPORT_PROMPT}</p>
+                  </div>
                   <button
                     onClick={handleCopy}
                     className={`absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
@@ -148,6 +177,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? 'Copied!' : 'Copy'}
                   </button>
+                  <div className="px-4 pb-2 text-xs text-gray-600 italic">Scroll to read full prompt</div>
                 </div>
               </div>
 
