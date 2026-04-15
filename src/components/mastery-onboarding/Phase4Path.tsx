@@ -108,7 +108,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
         return (
           <div className="space-y-8 animate-fadeIn">
             <h3 className="text-2xl font-bold text-yellow-500">Vision</h3>
-            <p className="text-gray-400 text-sm">Build and recognize your vision in life.<br /><span className="text-gray-600 italic">Ex. I want to work on my business that makes me feel fulfilled and give me financial freedom</span></p>
+            <p className="text-gray-400 text-sm">Build and recognize your <span className="text-yellow-500">vision in life</span>.<br /><span className="text-gray-600 italic">Ex. I want to work on my business that makes me feel fulfilled and give me financial freedom</span></p>
             <div className="space-y-6">
               <div>
                 <label className="block text-sm text-gray-400 mb-2">1. The Action (DO)</label>
