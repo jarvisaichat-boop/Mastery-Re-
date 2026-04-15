@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, ArrowRight, Eye, Brain } from 'lucide-react';
+import { Target, ArrowRight, ArrowLeft, Eye, Brain } from 'lucide-react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { MasteryProfile } from '../../types/onboarding';
 
@@ -65,6 +65,16 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
       case 'habit':
         setStep('confirm');
         break;
+    }
+  };
+
+  const toPrevStep = () => {
+    switch (step) {
+      case 'synthesis': setStep('vision'); break;
+      case 'project':  setStep('synthesis'); break;
+      case 'goals':    setStep('project'); break;
+      case 'habit':    setStep('goals'); break;
+      case 'confirm':  setStep('habit'); break;
     }
   };
 
@@ -257,13 +267,6 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
               <br /><br />
               Can you see yourself doing this <strong>Micro Win</strong> ({habitData.microMethod})?
             </p>
-
-            <button
-              onClick={handleFinish}
-              className="px-12 py-5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-xl rounded-full shadow-lg shadow-purple-500/30 hover:scale-105 transition-all"
-            >
-              Yes, I can see it.
-            </button>
           </div>
         );
     }
@@ -286,19 +289,34 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
 
       {renderStepContent()}
 
-      {/* Navigation (Hidden on Confirm step as it has its own button) */}
-      {step !== 'confirm' && (
-        <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent z-40">
-          <div className="max-w-xl mx-auto">
+      {/* Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent z-40">
+        <div className="max-w-xl mx-auto flex gap-3">
+          {step !== 'vision' && (
+            <button
+              onClick={toPrevStep}
+              className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-all flex items-center gap-2"
+            >
+              <ArrowLeft size={18} /> Back
+            </button>
+          )}
+          {step !== 'confirm' ? (
             <button
               onClick={toNextStep}
-              className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
+              className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
             >
               CONTINUE <ArrowRight size={20} />
             </button>
-          </div>
+          ) : (
+            <button
+              onClick={handleFinish}
+              className="flex-1 py-5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-xl rounded-full shadow-lg shadow-purple-500/30 hover:scale-105 transition-all flex items-center justify-center"
+            >
+              Yes, I can see it.
+            </button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
