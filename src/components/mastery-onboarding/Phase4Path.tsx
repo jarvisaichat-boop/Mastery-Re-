@@ -101,7 +101,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm text-gray-400 mb-2">1. The Action (DO)</label>
-                <p className="text-xs text-gray-500 mb-2">What is the one core activity you want to DO as your daily lifestyle? (Start with a verb)</p>
+                <p className="text-xs text-gray-500 mb-2">What is the one core activity you want to DO everyday in your life? (Use a verb)</p>
                 <input
                   type="text"
                   value={visionInputs.do}
@@ -123,7 +123,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-2">3. The Result (GIVE)</label>
-                <p className="text-xs text-gray-500 mb-2">What tangible result does this lifestyle GIVE you?</p>
+                <p className="text-xs text-gray-500 mb-2">What tangible result does this lifestyle GIVE you? (ex. money, fame, relationship, family)</p>
                 <input
                   type="text"
                   value={visionInputs.give}
