@@ -244,7 +244,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-2">
               <p className="text-gray-400 text-base">Paste anything — a journal, goals doc, notes, or an AI export. Whatever you've got.</p>
-              <h2 className="text-3xl font-bold text-white leading-tight">Bring your context</h2>
+              <h2 className="text-3xl font-bold text-white leading-tight">Import Your Profile Info</h2>
               <p className="text-xs text-yellow-400/80 uppercase tracking-widest font-medium">Optional — skip if you're starting fresh</p>
             </div>
 
