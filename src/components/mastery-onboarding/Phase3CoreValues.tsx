@@ -72,11 +72,11 @@ export default function Phase3CoreValues({ onComplete }: Phase3CoreValuesProps) 
         {/* 1. Priority */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-400 uppercase tracking-wider">
-            1. The Planetary System (Your Center)
+            1. Priority
           </label>
           <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
             <p className="text-gray-300 mb-4 text-sm">
-              You are the Sun. Which planet currently has the <span className="text-yellow-500">strongest gravitational pull</span> on you?
+              Which aspect of life resonates as the <span className="text-yellow-500">highest priority</span> of your life?
             </p>
             <div className="grid gap-3">
               {priorities.map((p) => (
