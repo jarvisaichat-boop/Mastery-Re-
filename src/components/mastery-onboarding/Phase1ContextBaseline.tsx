@@ -9,37 +9,44 @@ interface Phase1ContextBaselineProps {
 
 const IMPORT_PROMPT = `I'm setting up a new personal dashboard and want to pre-fill it with what you already know about me. I'm giving you full permission to use our conversation history and any saved context you have about me.
 
-Refer to me as "the user" throughout. Only include sections where you have real information — skip any section entirely if you have nothing concrete to say. Do not write "unknown" or "not recorded."
+Refer to me as "the user" throughout. Do not write "unknown" or "not recorded."
 
 1. PROFILE
 Name, age, occupation, location, lifestyle notes.
 Example: "The user's name is X. The user works as Y in Z."
+If you have no real data here, skip this section entirely.
 
 2. CORE VALUES
 What matters most to the user. Beliefs and principles they've expressed.
 Example: "The user values X. The user believes Y."
+If you have no real data here, skip this section entirely.
 
 3. LIFE GOALS & PROJECTS
 Long-term goals, current projects, what the user is actively working toward.
 Example: "The user's main goal is X. The user is currently working on Y."
+If you have no real data here, skip this section entirely.
 
 4. DAILY SCHEDULE & ROUTINES
 Wake/sleep times, work hours, energy patterns, regular routines.
 Example: "The user wakes at X. The user's peak focus time is Y."
+If you have no real data here, skip this section entirely.
 
 5. HABITS
 Habits the user is building or maintaining. What's worked, what hasn't.
 Example: "The user is building a habit of X."
+If you have no real data here, skip this section entirely.
 
 6. STRUGGLES & BLOCKERS
 Recurring challenges, patterns of failure, emotional blockers.
 Example: "The user repeatedly struggles with X."
+If you have no real data here, skip this section entirely.
 
 7. INTERESTS & RELATIONSHIPS
 Active interests, communities, accountability partners.
 Example: "The user is interested in X."
+If you have no real data here, skip this section entirely.
 
-Output as a single plain-text block using the numbered labels above. Skip any section with no real data.`;
+Output as a single plain-text block using the numbered labels above.`;
 
 const WHY_OPTIONS = [
   { value: 'RESTART', emoji: '🔁', label: 'I keep starting over', sub: 'I set goals but never follow through' },
@@ -158,7 +165,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-300 flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-700 text-xs flex items-center justify-center text-gray-300 flex-shrink-0">1</span>
-                  <span>If you use an AI: <span className="text-gray-500 font-normal">paste this into the chat you use most — an existing conversation, not a new one.</span></span>
+                  <span>Paste this into the AI you talk to most — <span className="text-gray-500 font-normal">use an existing conversation, not a new chat.</span></span>
                 </p>
                 <div className="relative bg-gray-900 border border-gray-700 rounded-xl">
                   <div className="overflow-y-auto max-h-44 p-4 pr-24 custom-scrollbar">
@@ -178,7 +185,7 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
                   <div className="px-4 pb-2 text-xs text-gray-600 italic">Scroll to read full prompt</div>
                 </div>
                 <p className="text-xs text-gray-600 leading-relaxed">
-                  Getting blank or generic responses? Make sure Memory and Extensions are turned on in your AI's settings.
+                  Tip: Getting blank responses? Check that Memory and Extensions are turned on in your AI settings.
                 </p>
               </div>
 
