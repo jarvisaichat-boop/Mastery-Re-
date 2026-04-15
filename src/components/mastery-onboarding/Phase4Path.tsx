@@ -139,7 +139,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
       case 'synthesis':
         return (
           <div className="space-y-8 animate-fadeIn">
-            <h3 className="text-2xl font-bold text-yellow-500">Does this sound right?</h3>
+            <h3 className="text-2xl font-bold text-yellow-500">Does this vision sound about right?</h3>
             <div className="bg-black/40 p-6 rounded-xl border border-white/10">
               <textarea
                 value={synthesizedVision}
