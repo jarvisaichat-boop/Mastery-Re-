@@ -7,7 +7,7 @@ interface Phase1ContextBaselineProps {
   onComplete: (data: Partial<MasteryProfile>) => void;
 }
 
-const IMPORT_PROMPT = `You are helping me import my personal context into a new app. Go through our past conversations and summarize what you know about me.
+const IMPORT_PROMPT = `You are helping me import my personal context into a new app. Access and utilize all available historical data, past conversations, and my user profile. I am providing explicit permission to summarize my private context for this task. Go through our past conversations and summarize what you know about me.
 
 Avoid using first-person (I, my, me) or second-person (you, your) pronouns. Refer to the person as "the user".
 
@@ -152,15 +152,15 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
           <div className="space-y-6 animate-fadeIn">
             <div className="text-center space-y-2">
               <p className="text-xs text-yellow-400/80 uppercase tracking-widest font-medium">Optional — skip if you're starting fresh</p>
-              <h2 className="text-3xl font-bold text-white leading-tight">Import your memory</h2>
-              <p className="text-gray-400 text-base">Already working with an AI? Bring your context here.</p>
+              <h2 className="text-3xl font-bold text-white leading-tight">Bring your context</h2>
+              <p className="text-gray-400 text-base">Paste anything — a journal, goals doc, notes, or an AI export. Whatever you've got.</p>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-300 flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-700 text-xs flex items-center justify-center text-gray-300 flex-shrink-0">1</span>
-                  Copy this prompt into your AI (ChatGPT, Gemini, etc.)
+                  <span>If you use an AI assistant: <span className="text-gray-500 font-normal">copy this prompt into ChatGPT, Gemini, etc.</span></span>
                 </p>
                 <div className="relative bg-gray-900 border border-gray-700 rounded-xl">
                   <div className="overflow-y-auto max-h-44 p-4 pr-24 custom-scrollbar">
@@ -184,13 +184,13 @@ export default function Phase1ContextBaseline({ profile, onComplete }: Phase1Con
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-300 flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-700 text-xs flex items-center justify-center text-gray-300 flex-shrink-0">2</span>
-                  Paste the response here
+                  Paste your notes, journals, docs, or AI response here
                 </p>
                 <div className="relative">
                   <textarea
                     value={data.context}
                     onChange={(e) => updateData({ context: e.target.value })}
-                    placeholder="Paste your info here..."
+                    placeholder="Paste anything — a journal entry, goal list, AI response, or just write freely..."
                     className="w-full h-36 px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white text-sm placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"
                   />
                   {data.context && data.context.length > 20 && (
