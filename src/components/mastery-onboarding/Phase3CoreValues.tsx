@@ -117,11 +117,11 @@ export default function Phase3CoreValues({ onComplete }: Phase3CoreValuesProps) 
         {/* 3. Purpose */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-400 uppercase tracking-wider">
-            3. Purpose (The Trajectory)
+            3. Purpose
           </label>
           <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
             <p className="text-gray-300 mb-4 text-sm">
-              If you fulfill your 'Why' every single day, who do you become at the end of the path?
+              What is the purpose of your life?
             </p>
             <input
               type="text"
