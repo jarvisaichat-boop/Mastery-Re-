@@ -98,11 +98,11 @@ export default function Phase3CoreValues({ onComplete }: Phase3CoreValuesProps) 
         {/* 2. Your Why */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-400 uppercase tracking-wider">
-            2. Your "Why" (Survival Engine)
+            2. Your "Why"
           </label>
           <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
             <p className="text-gray-300 mb-4 text-sm">
-              What is the internal need you must satisfy to avoid suffering or feeling empty?
+              What is the internal need you must satisfy to avoid suffering or feeling empty and unhappy?
             </p>
             <input
               type="text"
