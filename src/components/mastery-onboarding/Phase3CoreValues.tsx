@@ -136,11 +136,11 @@ export default function Phase3CoreValues({ onComplete }: Phase3CoreValuesProps) 
         {/* 4. Motto */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-400 uppercase tracking-wider">
-            4. Motto (The Attitude)
+            4. Motto
           </label>
           <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
             <p className="text-gray-300 mb-4 text-sm">
-              What quote or philosophy fits your mindset right now?
+              What quote or philosophy fits your mindset?
             </p>
             <input
               type="text"
