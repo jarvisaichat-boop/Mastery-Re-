@@ -12,7 +12,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
   const { path } = data;
 
-  const [step, setStep] = useState<'vision' | 'project' | 'goals' | 'habit' | 'confirm'>('vision');
+  const [step, setStep] = useState<'vision' | 'project' | 'goals' | 'habit' | 'microwin' | 'confirm'>('vision');
   
   // Vision Inputs
   const [visionInputs, setVisionInputs] = useState({
@@ -60,6 +60,9 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
         setStep('habit');
         break;
       case 'habit':
+        setStep('microwin');
+        break;
+      case 'microwin':
         setStep('confirm');
         break;
     }
@@ -70,7 +73,8 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
       case 'project':  setStep('vision'); break;
       case 'goals':    setStep('project'); break;
       case 'habit':    setStep('goals'); break;
-      case 'confirm':  setStep('habit'); break;
+      case 'microwin': setStep('habit'); break;
+      case 'confirm':  setStep('microwin'); break;
     }
   };
 
@@ -202,43 +206,30 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
       case 'habit':
         return (
           <div className="space-y-8 animate-fadeIn">
-            <h3 className="text-2xl font-bold text-yellow-500">The Standard Habit</h3>
-            
-            {/* Standard Habit */}
+            <h3 className="text-2xl font-bold text-yellow-500">Habit</h3>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
               <p className="text-gray-300 mb-4">
-                To hit that Goal, what is the one specific action you must do regularly?
+                To hit that Goal, what is the one specific action you must do regularly and make it into your habit?
               </p>
               <input
                 type="text"
                 value={habitData.name}
                 onChange={e => setHabitData({ ...habitData, name: e.target.value })}
                 placeholder="e.g. Write Code, Run, Meditate..."
-                className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white focus:border-yellow-500 outline-none mb-4"
+                className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white focus:border-yellow-500 outline-none"
               />
-              <div className="flex gap-2">
-                {(['daily', 'weekly'] as const).map(f => (
-                  <button
-                    key={f}
-                    onClick={() => setHabitData({ ...habitData, frequency: f })}
-                    className={`px-4 py-2 rounded-lg text-sm border ${
-                      habitData.frequency === f
-                        ? 'bg-yellow-500 text-black border-yellow-500'
-                        : 'border-gray-700 text-gray-400'
-                    }`}
-                  >
-                    {f.charAt(0).toUpperCase() + f.slice(1)}
-                  </button>
-                ))}
-              </div>
             </div>
+          </div>
+        );
 
-            {/* Micro Win - User Adjustment 2 */}
+      case 'microwin':
+        return (
+          <div className="space-y-8 animate-fadeIn">
+            <div className="flex items-center gap-3">
+              <Brain className="text-purple-400" size={24} />
+              <h3 className="text-2xl font-bold text-purple-400">The Micro Win</h3>
+            </div>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
-              <div className="flex items-center gap-2 mb-4">
-                <Brain className="text-purple-400" size={20} />
-                <h4 className="text-lg font-bold text-purple-400">The Micro Win</h4>
-              </div>
               <p className="text-gray-300 mb-4 text-sm">
                 Human beings are weak. On days when you are sick or tired, what is the <strong>ridiculously easy version</strong> of this habit?
               </p>
@@ -276,12 +267,12 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
     <div className="max-w-xl mx-auto px-6 py-12 pb-32">
       {/* Step Indicator */}
       <div className="flex justify-center gap-2 mb-8">
-        {['vision', 'project', 'goals', 'habit', 'confirm'].map((s, i) => (
+        {['vision', 'project', 'goals', 'habit', 'microwin', 'confirm'].map((s, i) => (
           <div
             key={s}
             className={`h-1 rounded-full transition-all duration-500 ${
               step === s ? 'w-8 bg-yellow-500' : 
-              ['vision', 'project', 'goals', 'habit', 'confirm'].indexOf(step) > i ? 'w-8 bg-yellow-500/50' : 'w-2 bg-gray-800'
+              ['vision', 'project', 'goals', 'habit', 'microwin', 'confirm'].indexOf(step) > i ? 'w-8 bg-yellow-500/50' : 'w-2 bg-gray-800'
             }`}
           />
         ))}
