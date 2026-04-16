@@ -168,7 +168,8 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
       case 'project':
         return (
           <div className="space-y-8 animate-fadeIn">
-            <h3 className="text-2xl font-bold text-yellow-500">Mid Term Vision — 4 months~3 years</h3>
+            <h3 className="text-2xl font-bold text-yellow-500">Mid Term Vision</h3>
+            <p className="text-base text-yellow-500/70 -mt-4">Project / Goals — 4 months~3 years</p>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
               <p className="text-gray-300 mb-4">
                 What is the <strong>'Project'</strong> or Season you are building for right now (4 months - 3 years)?
