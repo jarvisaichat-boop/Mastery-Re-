@@ -183,7 +183,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
       case 'goals':
         return (
           <div className="space-y-8 animate-fadeIn">
-            <h3 className="text-2xl font-bold text-yellow-500">Quarterly Goals</h3>
+            <h3 className="text-2xl font-bold text-yellow-500">Goals — 3 months or less</h3>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
               <p className="text-gray-300 mb-4">
                 What specific Goal is achievable in the next <strong>3 months</strong> to prove you are winning? (Must be Yes/No)
