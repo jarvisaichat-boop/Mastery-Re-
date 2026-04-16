@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen, FileCheck, Shield, Rocket } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen, FileCheck, Shield, Rocket, User, Star } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
@@ -979,9 +979,31 @@ function App() {
                                                     setShowDevMenu(false);
                                                 }}
                                                 className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-400 hover:text-white rounded-lg transition-colors"
-                                                title="Jump to Phase 0"
+                                                title="Jump to Phase 0 (Manifesto)"
                                             >
                                                 <Home className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setJumpToPhase(1);
+                                                    setPreviewOnboarding(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-blue-400 hover:text-blue-300 rounded-lg transition-colors"
+                                                title="Jump to Phase 1 (Profile)"
+                                            >
+                                                <User className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setJumpToPhase(2);
+                                                    setPreviewOnboarding(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-yellow-400 hover:text-yellow-300 rounded-lg transition-colors"
+                                                title="Jump to Phase 2 (Core Values)"
+                                            >
+                                                <Star className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => {
