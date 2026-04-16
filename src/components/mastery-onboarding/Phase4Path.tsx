@@ -123,7 +123,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-2">2. The Feeling (FEEL)</label>
-                <p className="text-xs text-gray-500 mb-2">When you do that, how does it make you FEEL inside?</p>
+                <p className="text-xs text-gray-500 mb-2">How do you want that action to make you feel? Imagine the feeling doing that action gives you.</p>
                 <input
                   type="text"
                   value={visionInputs.feel}
