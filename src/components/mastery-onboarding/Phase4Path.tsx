@@ -170,7 +170,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
           <div className="space-y-8 animate-fadeIn">
             <div className="space-y-1">
               <h3 className="text-lg font-bold text-yellow-500">Mid Term Vision</h3>
-              <p className="text-3xl font-bold text-yellow-500/70">Goals: Project (3+ months ~ 3 years)</p>
+              <p className="text-3xl font-bold text-yellow-500/70">Goals: Project (3+ months - 3 years)</p>
             </div>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
               <p className="text-gray-300 mb-4">
@@ -192,7 +192,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
           <div className="space-y-8 animate-fadeIn">
             <div className="space-y-1">
               <h3 className="text-lg font-bold text-yellow-500">Short Term Vision</h3>
-              <p className="text-3xl font-bold text-yellow-500/70">Goals: Target — 3 months or less</p>
+              <p className="text-3xl font-bold text-yellow-500/70">Goals: Target (less than 3 months)</p>
             </div>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
               <p className="text-gray-300 mb-4">
