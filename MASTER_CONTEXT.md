@@ -127,6 +127,26 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 -   Design reflection question templates that force specific, actionable daily plans
 -   Track curriculum streak separately from habit completion streak
 
+## Pinned Ideas — Future Development
+
+### Goal Input — Free-form + AI Categorization (Life Goals Screen)
+**Research insight (April 2026):** User research across 3 participants showed that people do not naturally think about goals in time-boxed buckets (long term / short term). Goals are contextual clusters in their heads — one big life change broken into sub-steps. Forcing time-frame labels creates friction.
+
+**Planned direction:** Replace or supplement the structured Long Term / Short Term inputs with a free-form input where the user dumps everything they want ("move to NY", "make money", "renew license"). The system (via AI) then categorizes each item into Vision / Long Term Goal / Short Term Goal / Task. This removes cognitive load and meets users where they are.
+
+**When to build:** When OpenAI integration is active (needed for smart categorization). Batch with other AI features.
+
+---
+
+### Goal Structuring — Educational Walkthrough / Primer
+**Research insight (April 2026):** Same user research showed that users would benefit from seeing the goal hierarchy explained with a relatable real-life example before filling in their goals. Concepts like "Long Term Goal" and "Short Term Goal" are abstract without context.
+
+**Planned direction:** An educational primer — either a short video lesson or an interactive single-screen walkthrough — that shows the Vision → Long Term → Short Term → Habit hierarchy using a real-life scenario (e.g., someone wanting to move cities: Vision = freedom, Long Term = move to NY, Short Term = land a job, Habit = apply to 2 jobs/day). Could live in the Momentum Generator curriculum or as an optional explainer on the Life Goals screen.
+
+**When to build:** Can be standalone — does not require AI. Good candidate for early curriculum content.
+
+---
+
 ## External Dependencies
 -   **Frontend Framework**: React 18
 -   **Build Tool**: Vite 5
