@@ -212,7 +212,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
       case 'habit':
         return (
           <div className="space-y-8 animate-fadeIn">
-            <h3 className="text-2xl font-bold text-yellow-500">Habit</h3>
+            <h3 className="text-2xl font-bold text-yellow-500">Life Goals Habit</h3>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
               <p className="text-gray-300 mb-4">
                 To hit that Goal, what is the one specific action you must do regularly and make it into your habit?
