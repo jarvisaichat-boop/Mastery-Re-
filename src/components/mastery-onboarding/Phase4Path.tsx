@@ -105,12 +105,16 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
       case 'vision':
         return (
           <div className="space-y-8 animate-fadeIn">
-            <h3 className="text-2xl font-bold text-yellow-500">Vision — Life Long Goal</h3>
-            <p className="text-gray-400 text-sm">Build and recognize your <span className="text-yellow-500">vision in life</span>.<br /><span className="text-gray-600 italic">Ex. I want to work on my business that makes me feel fulfilled and give me financial freedom</span></p>
+            <h3 className="text-2xl font-bold text-yellow-500">Vision — Your Ideal Life</h3>
+            <div className="space-y-2">
+              <p className="text-gray-300 text-sm font-medium italic">"This is your direction, not a destination. Most people set goals. You're designing a life."</p>
+              <p className="text-gray-500 text-xs">Define the lifestyle you are moving toward. This is intentionally open-ended — your goals will change, your vision shouldn't.</p>
+              <p className="text-gray-600 text-xs italic">Ex. I want to work on my business that makes me feel fulfilled and give me financial freedom</p>
+            </div>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">1. The Action (DO)</label>
-                <p className="text-xs text-gray-500 mb-2">What is the one core activity you want to DO everyday in your life? (Use a verb)</p>
+                <label className="block text-sm text-gray-400 mb-1">1. The Action (DO)</label>
+                <p className="text-xs text-gray-500 mb-2">The core daily activity that defines how you spend your time — use a verb.</p>
                 <input
                   type="text"
                   value={visionInputs.do}
@@ -120,8 +124,8 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">2. The Feeling (FEEL)</label>
-                <p className="text-xs text-gray-500 mb-2">How do you want that action to make you feel? Imagine the feeling doing that action gives you.</p>
+                <label className="block text-sm text-gray-400 mb-1">2. The Feeling (FEEL)</label>
+                <p className="text-xs text-gray-500 mb-2">The emotional state you're optimizing for — how you want to feel doing it every day.</p>
                 <input
                   type="text"
                   value={visionInputs.feel}
@@ -131,8 +135,8 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">3. The Result (GIVE)</label>
-                <p className="text-xs text-gray-500 mb-2">What tangible result does this lifestyle GIVE you? (ex. money, fame, relationship, family)</p>
+                <label className="block text-sm text-gray-400 mb-1">3. The Result (GIVE)</label>
+                <p className="text-xs text-gray-500 mb-2">The outcome that makes it all worth it — what this lifestyle gives you.</p>
                 <input
                   type="text"
                   value={visionInputs.give}
@@ -168,14 +172,14 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
           <div className="space-y-8 animate-fadeIn">
             <h3 className="text-2xl font-bold text-yellow-500">Life Goals</h3>
 
-            {/* Mid Term */}
+            {/* Long Term Goal */}
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800 space-y-3">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest">Mid Term Vision</p>
-                <p className="text-lg font-bold text-yellow-500/70">Goals: Project (3+ months - 3 years)</p>
+                <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest">Long Term Goal</p>
+                <p className="text-lg font-bold text-yellow-500/70">The Project / Season (1 year+)</p>
               </div>
               <p className="text-gray-400 text-sm">
-                What is the <strong className="text-white">'Project'</strong> or Season you are building for right now?
+                What is the big <strong className="text-white">project or season</strong> you are currently building toward? The concrete thing your Vision is pushing you to create.
               </p>
               <input
                 type="text"
@@ -186,14 +190,14 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               />
             </div>
 
-            {/* Short Term */}
+            {/* Short Term Goal */}
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800 space-y-3">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest">Short Term Vision</p>
-                <p className="text-lg font-bold text-yellow-500/70">Goals: Target (less than 3 months)</p>
+                <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest">Short Term Goal</p>
+                <p className="text-lg font-bold text-yellow-500/70">The Target (under 3 months)</p>
               </div>
               <p className="text-gray-400 text-sm">
-                What specific Goal is achievable in the next <strong className="text-white">3 months</strong> to prove you are winning?
+                What is one <strong className="text-white">specific, measurable target</strong> achievable in the next 3 months that proves you are making progress?
               </p>
               <input
                 type="text"
