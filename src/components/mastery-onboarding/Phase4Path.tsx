@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, ArrowRight, ArrowLeft, Eye, Brain, ChevronDown, ChevronUp } from 'lucide-react';
+import { Target, ArrowRight, ArrowLeft, Eye, Brain } from 'lucide-react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { MasteryProfile } from '../../types/onboarding';
 
@@ -14,7 +14,6 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   const { path } = data;
 
   const [step, setStep] = useState<'vision' | 'lifegoals' | 'habit' | 'microwin' | 'confirm'>('vision');
-  const [showGoalNote, setShowGoalNote] = useState(false);
   
   // Vision Inputs
   const [visionInputs, setVisionInputs] = useState({
@@ -107,48 +106,39 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
         return (
           <div className="space-y-8 animate-fadeIn">
             <h3 className="text-2xl font-bold text-yellow-500">Vision — Your Ideal Life</h3>
+
+            {/* How To Note — always visible */}
+            <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-4 py-4 space-y-4 text-xs text-gray-400">
+              <p className="text-xs font-semibold text-yellow-500/80 uppercase tracking-widest">How to think about this</p>
+              <div className="space-y-2">
+                <p>Most people have never structured their goals by time frame — and that's normal. Goals tend to live as a mix of vague wants, urgent to-dos, and big life ambitions all jumbled together.</p>
+                <p>This app helps you sort them. Here's how the layers work:</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex gap-3 items-start">
+                  <span className="text-yellow-500 font-bold shrink-0">Vision</span>
+                  <span>The lifestyle you want — not a finish line, just a direction. <span className="text-gray-500 italic">"Build things that give me freedom."</span></span>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="text-yellow-500/70 font-bold shrink-0 whitespace-nowrap">Long Term</span>
+                  <span>The big project or season you are in right now. <span className="text-gray-500 italic">"Move to a new city and build a career there."</span></span>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="text-yellow-500/50 font-bold shrink-0 whitespace-nowrap">Short Term</span>
+                  <span>One specific win you can hit in the next 3 months. <span className="text-gray-500 italic">"Land my first job in the new city."</span></span>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="text-yellow-500/30 font-bold shrink-0">Habit</span>
+                  <span>The daily action that moves all of the above forward. <span className="text-gray-500 italic">"Apply to 2 jobs every morning."</span></span>
+                </div>
+              </div>
+              <p className="text-gray-600">Don't overthink it — just answer what feels true right now. You can update any of this later.</p>
+            </div>
+
             <div className="space-y-2">
               <p className="text-gray-300 text-sm font-medium italic">"This is your direction, not a destination. Most people set goals. You're designing a life."</p>
               <p className="text-gray-500 text-xs">Define the lifestyle you are moving toward. This is intentionally open-ended — your goals will change, your vision shouldn't.</p>
               <p className="text-gray-600 text-xs italic">Ex. I want to work on my business that makes me feel fulfilled and give me financial freedom</p>
-            </div>
-
-            {/* Collapsible How-To Note */}
-            <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 overflow-hidden">
-              <button
-                onClick={() => setShowGoalNote(v => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 text-left"
-              >
-                <span className="text-xs font-semibold text-yellow-500/80 uppercase tracking-widest">How to think about this</span>
-                {showGoalNote ? <ChevronUp size={14} className="text-yellow-500/60" /> : <ChevronDown size={14} className="text-yellow-500/60" />}
-              </button>
-              {showGoalNote && (
-                <div className="px-4 pb-4 space-y-4 text-xs text-gray-400 border-t border-yellow-500/10">
-                  <div className="pt-3 space-y-2">
-                    <p>Most people have never structured their goals by time frame — and that's normal. Goals tend to live as a mix of vague wants, urgent to-dos, and big life ambitions all jumbled together.</p>
-                    <p>This app helps you sort them. Here's how the layers work:</p>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex gap-3 items-start">
-                      <span className="text-yellow-500 font-bold shrink-0">Vision</span>
-                      <span>The lifestyle you want — not a finish line, just a direction. <span className="text-gray-500 italic">"Build things that give me freedom."</span></span>
-                    </div>
-                    <div className="flex gap-3 items-start">
-                      <span className="text-yellow-500/70 font-bold shrink-0 whitespace-nowrap">Long Term</span>
-                      <span>The big project or season you are in right now. <span className="text-gray-500 italic">"Move to a new city and build a career there."</span></span>
-                    </div>
-                    <div className="flex gap-3 items-start">
-                      <span className="text-yellow-500/50 font-bold shrink-0 whitespace-nowrap">Short Term</span>
-                      <span>One specific win you can hit in the next 3 months. <span className="text-gray-500 italic">"Land my first job in the new city."</span></span>
-                    </div>
-                    <div className="flex gap-3 items-start">
-                      <span className="text-yellow-500/30 font-bold shrink-0">Habit</span>
-                      <span>The daily action that moves all of the above forward. <span className="text-gray-500 italic">"Apply to 2 jobs every morning."</span></span>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 pt-1">Don't overthink it — just answer what feels true right now. You can update any of this later.</p>
-                </div>
-              )}
             </div>
             <div className="space-y-6">
               <div>
