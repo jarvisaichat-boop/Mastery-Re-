@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { VisualTimelineEditor } from '../VisionBoard/VisualTimelineEditor';
 import { MasteryProfile } from '../../types/onboarding';
-import { ArrowRight, Clock, Plus, Trash2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Clock, Plus, Trash2 } from 'lucide-react';
 import { RoutineItem } from '../../types/visionBoard';
 
 interface Phase5ScheduleProps {
   onComplete: (data: Partial<MasteryProfile>) => void;
+  onBack?: () => void;
 }
 
-export default function Phase5Schedule({ onComplete }: Phase5ScheduleProps) {
+export default function Phase5Schedule({ onComplete, onBack }: Phase5ScheduleProps) {
   const { data, updateSchedule } = useVisionBoard();
   const { schedule } = data;
 
@@ -53,7 +54,17 @@ export default function Phase5Schedule({ onComplete }: Phase5ScheduleProps) {
       case 'gm': setStep('gd'); break;
       case 'gd': setStep('gn'); break;
       case 'gn': setStep('busy'); break;
-      case 'busy': onComplete({}); break; // Done
+      case 'busy': onComplete({}); break;
+    }
+  };
+
+  const prevStep = () => {
+    switch (step) {
+      case 'timeline': onBack?.(); break;
+      case 'gm': setStep('timeline'); break;
+      case 'gd': setStep('gm'); break;
+      case 'gn': setStep('gd'); break;
+      case 'busy': setStep('gn'); break;
     }
   };
 
@@ -168,11 +179,17 @@ export default function Phase5Schedule({ onComplete }: Phase5ScheduleProps) {
 
       {renderContent()}
 
-       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent z-40">
-        <div className="max-w-xl mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent z-40">
+        <div className="max-w-xl mx-auto flex gap-3">
+          <button
+            onClick={prevStep}
+            className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold text-lg rounded-2xl transition-all flex items-center justify-center gap-2"
+          >
+            <ArrowLeft size={20} /> Back
+          </button>
           <button
             onClick={nextStep}
-            className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
+            className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
           >
             {step === 'busy' ? 'FINISH SCHEDULE' : 'CONTINUE'} <ArrowRight size={20} />
           </button>

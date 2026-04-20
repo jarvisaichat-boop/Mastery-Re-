@@ -81,6 +81,10 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
     setCurrentPhase(prev => Math.min(prev + 1, 7) as OnboardingPhase);
   };
 
+  const prevPhase = () => {
+    setCurrentPhase(prev => Math.max(prev - 1, 0) as OnboardingPhase);
+  };
+
   const handlePhase0Complete = () => {
     nextPhase();
   };
@@ -214,7 +218,7 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
       case 3:
         return <Phase4Path profile={profile} onComplete={handlePhase3Complete} />;
       case 4:
-        return <Phase5Schedule onComplete={handlePhase4Complete} />;
+        return <Phase5Schedule onComplete={handlePhase4Complete} onBack={prevPhase} />;
       case 5:
         return <Phase6Enforcer profile={profile} onComplete={handlePhase5Complete} />;
       case 6:
