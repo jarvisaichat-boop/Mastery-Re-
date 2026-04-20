@@ -13,7 +13,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   const { data, updatePath } = useVisionBoard();
   const { path } = data;
 
-  const [step, setStep] = useState<'vision' | 'project' | 'goals' | 'habit' | 'microwin' | 'confirm'>('vision');
+  const [step, setStep] = useState<'vision' | 'lifegoals' | 'habit' | 'microwin' | 'confirm'>('vision');
   
   // Vision Inputs
   const [visionInputs, setVisionInputs] = useState({
@@ -50,13 +50,10 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     switch (step) {
       case 'vision':
         if (synthesizedVision) updatePath({ vision: synthesizedVision });
-        setStep('project');
+        setStep('lifegoals');
         break;
-      case 'project':
+      case 'lifegoals':
         if (currentProject) updatePath({ projects: [{ text: currentProject, hidden: false }] });
-        setStep('goals');
-        break;
-      case 'goals':
         if (quarterlyGoal) updatePath({ quarterlyGoals: [{ text: quarterlyGoal, hidden: false }] });
         setStep('habit');
         break;
@@ -71,12 +68,11 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
 
   const toPrevStep = () => {
     switch (step) {
-      case 'vision':   onBack?.(); break;
-      case 'project':  setStep('vision'); break;
-      case 'goals':    setStep('project'); break;
-      case 'habit':    setStep('goals'); break;
-      case 'microwin': setStep('habit'); break;
-      case 'confirm':  setStep('microwin'); break;
+      case 'vision':    onBack?.(); break;
+      case 'lifegoals': setStep('vision'); break;
+      case 'habit':     setStep('lifegoals'); break;
+      case 'microwin':  setStep('habit'); break;
+      case 'confirm':   setStep('microwin'); break;
     }
   };
 
@@ -167,16 +163,19 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
           </div>
         );
 
-      case 'project':
+      case 'lifegoals':
         return (
           <div className="space-y-8 animate-fadeIn">
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold text-yellow-500">Mid Term Vision</h3>
-              <p className="text-3xl font-bold text-yellow-500/70">Goals: Project (3+ months - 3 years)</p>
-            </div>
-            <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
-              <p className="text-gray-300 mb-4">
-                What is the <strong>'Project'</strong> or Season you are building for right now (4 months - 3 years)?
+            <h3 className="text-2xl font-bold text-yellow-500">Life Goals</h3>
+
+            {/* Mid Term */}
+            <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800 space-y-3">
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest">Mid Term Vision</p>
+                <p className="text-lg font-bold text-yellow-500/70">Goals: Project (3+ months - 3 years)</p>
+              </div>
+              <p className="text-gray-400 text-sm">
+                What is the <strong className="text-white">'Project'</strong> or Season you are building for right now?
               </p>
               <input
                 type="text"
@@ -186,19 +185,15 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
                 className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white focus:border-yellow-500 outline-none"
               />
             </div>
-          </div>
-        );
 
-      case 'goals':
-        return (
-          <div className="space-y-8 animate-fadeIn">
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold text-yellow-500">Short Term Vision</h3>
-              <p className="text-3xl font-bold text-yellow-500/70">Goals: Target (less than 3 months)</p>
-            </div>
-            <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
-              <p className="text-gray-300 mb-4">
-                What specific Goal is achievable in the next <strong>3 months</strong> to prove you are winning? (Must be Yes/No)
+            {/* Short Term */}
+            <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800 space-y-3">
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest">Short Term Vision</p>
+                <p className="text-lg font-bold text-yellow-500/70">Goals: Target (less than 3 months)</p>
+              </div>
+              <p className="text-gray-400 text-sm">
+                What specific Goal is achievable in the next <strong className="text-white">3 months</strong> to prove you are winning?
               </p>
               <input
                 type="text"
@@ -275,12 +270,12 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     <div className="max-w-xl mx-auto px-6 py-12 pb-32">
       {/* Step Indicator */}
       <div className="flex justify-center gap-2 mb-8">
-        {['vision', 'project', 'goals', 'habit', 'microwin', 'confirm'].map((s, i) => (
+        {['vision', 'lifegoals', 'habit', 'microwin', 'confirm'].map((s, i) => (
           <div
             key={s}
             className={`h-1 rounded-full transition-all duration-500 ${
               step === s ? 'w-8 bg-yellow-500' : 
-              ['vision', 'project', 'goals', 'habit', 'microwin', 'confirm'].indexOf(step) > i ? 'w-8 bg-yellow-500/50' : 'w-2 bg-gray-800'
+              ['vision', 'lifegoals', 'habit', 'microwin', 'confirm'].indexOf(step) > i ? 'w-8 bg-yellow-500/50' : 'w-2 bg-gray-800'
             }`}
           />
         ))}
