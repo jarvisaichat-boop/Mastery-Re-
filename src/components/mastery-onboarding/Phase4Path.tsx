@@ -6,9 +6,10 @@ import { MasteryProfile } from '../../types/onboarding';
 interface Phase4PathProps {
   onComplete: (data: Partial<MasteryProfile>) => void;
   profile?: Partial<MasteryProfile>;
+  onBack?: () => void;
 }
 
-export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
+export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
   const { path } = data;
 
@@ -70,6 +71,7 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
 
   const toPrevStep = () => {
     switch (step) {
+      case 'vision':   onBack?.(); break;
       case 'project':  setStep('vision'); break;
       case 'goals':    setStep('project'); break;
       case 'habit':    setStep('goals'); break;
@@ -289,14 +291,12 @@ export default function Phase4Path({ onComplete, profile }: Phase4PathProps) {
       {/* Navigation */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent z-40">
         <div className="max-w-xl mx-auto flex gap-3">
-          {step !== 'vision' && (
-            <button
-              onClick={toPrevStep}
-              className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-all flex items-center gap-2"
-            >
-              <ArrowLeft size={18} /> Back
-            </button>
-          )}
+          <button
+            onClick={toPrevStep}
+            className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold rounded-2xl transition-all flex items-center gap-2"
+          >
+            <ArrowLeft size={18} /> Back
+          </button>
           {step !== 'confirm' ? (
             <button
               onClick={toNextStep}

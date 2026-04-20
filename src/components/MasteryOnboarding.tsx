@@ -216,7 +216,7 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
       case 2:
         return <Phase3CoreValues onComplete={handlePhase2Complete} />;
       case 3:
-        return <Phase4Path profile={profile} onComplete={handlePhase3Complete} />;
+        return <Phase4Path profile={profile} onComplete={handlePhase3Complete} onBack={prevPhase} />;
       case 4:
         return <Phase5Schedule onComplete={handlePhase4Complete} onBack={prevPhase} />;
       case 5:
