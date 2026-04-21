@@ -25,8 +25,8 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
 
       <div className="space-y-8 animate-fadeIn">
         <div className="space-y-4">
-          <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Vision</p>
-          <h3 className="text-3xl font-bold text-white leading-tight">What is your ideal life?</h3>
+          <p className="text-sm font-bold text-yellow-500 uppercase tracking-[0.2em]">Vision</p>
+          <h3 className="text-4xl font-bold text-white leading-tight">What is your ideal life?</h3>
           <p className="text-gray-300 text-sm leading-relaxed">
             Imagine everything is set. Things are going well. You wake up and feel great, and everything is exactly as it should be.
           </p>
@@ -34,15 +34,6 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
             What would you be doing? And what would that give you?
           </p>
         </div>
-
-        <textarea
-          value={vision}
-          onChange={e => setVision(e.target.value)}
-          placeholder="e.g. I want to live freely and be happy..."
-          rows={6}
-          className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white text-base focus:border-yellow-500 outline-none resize-none leading-relaxed"
-          autoFocus
-        />
 
         <div className="bg-gray-900/40 border border-gray-800 rounded-xl px-4 py-4 space-y-2">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Guidance</p>
@@ -56,6 +47,15 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
             Write naturally — you don't need to use those words. This is a direction, not a destination. It doesn't need to be specific.
           </p>
         </div>
+
+        <textarea
+          value={vision}
+          onChange={e => setVision(e.target.value)}
+          placeholder="e.g. I want to live freely and be happy..."
+          rows={6}
+          className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white text-base focus:border-yellow-500 outline-none resize-none leading-relaxed"
+          autoFocus
+        />
 
         {vision.trim() && (
           <p className="text-gray-600 text-xs text-center">
