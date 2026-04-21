@@ -13,7 +13,7 @@ type Step = 'rawgoal' | 'steps' | 'habit' | 'microwin' | 'confirm';
 const STEPS: Step[] = ['rawgoal', 'steps', 'habit', 'microwin', 'confirm'];
 
 export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathProps) {
-  const { updatePath } = useVisionBoard();
+  const { data, updatePath } = useVisionBoard();
 
   const [step, setStep] = useState<Step>('rawgoal');
 
@@ -163,6 +163,17 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
             </div>
             <div className="space-y-6">
               <p className="text-gray-400 text-sm">The one thing that, if you achieved it, would have the greatest meaning for your life.</p>
+              {(data.coreValues?.priority || data.coreValues?.why) && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
+                  <p className="text-xs text-yellow-500/70 mb-2">Values</p>
+                  {data.coreValues.priority && (
+                    <p className="text-white text-sm font-medium">{data.coreValues.priority}</p>
+                  )}
+                  {data.coreValues.why && (
+                    <p className="text-gray-400 text-xs italic mt-1">"{data.coreValues.why}"</p>
+                  )}
+                </div>
+              )}
               <textarea
                 value={rawGoal}
                 onChange={e => setRawGoal(e.target.value)}
