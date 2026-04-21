@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ArrowRight, ArrowLeft, Eye, Brain, Plus, X, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Eye, Brain, Plus, X, GripVertical, ChevronUp, ChevronDown, Route } from 'lucide-react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { MasteryProfile } from '../../types/onboarding';
 
@@ -151,21 +151,28 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
 
       case 'rawgoal':
         return (
-          <div className="space-y-8 animate-fadeIn">
-            <div className="space-y-3">
-              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 1 of {STEPS.length} — Life Goal</p>
-              <h3 className="text-3xl font-bold text-white leading-tight">What do you want most right now?</h3>
-              <p className="text-gray-400 text-sm">The one thing that, if you achieved it, would have the greatest meaning for your life.</p>
+          <div className="animate-fadeIn">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500/10 mb-6">
+                <Route className="w-8 h-8 text-yellow-500" />
+              </div>
+              <h2 className="text-4xl font-bold text-white mb-4">Life Goal</h2>
+              <p className="text-xl text-gray-400">
+                What do you want most right now?
+              </p>
             </div>
-            <textarea
-              value={rawGoal}
-              onChange={e => setRawGoal(e.target.value)}
-              placeholder="e.g. Be rich, Level up my physique, Move abroad..."
-              rows={4}
-              className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white text-lg focus:border-yellow-500 outline-none resize-none leading-relaxed"
-              autoFocus
-            />
-            <p className="text-gray-600 text-xs">Don't over-think it. You'll break it down in the next step.</p>
+            <div className="space-y-6">
+              <p className="text-gray-400 text-sm">The one thing that, if you achieved it, would have the greatest meaning for your life.</p>
+              <textarea
+                value={rawGoal}
+                onChange={e => setRawGoal(e.target.value)}
+                placeholder="e.g. Be rich, Level up my physique, Move abroad..."
+                rows={4}
+                className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white text-lg focus:border-yellow-500 outline-none resize-none leading-relaxed"
+                autoFocus
+              />
+              <p className="text-gray-600 text-xs">Don't over-think it. You'll break it down in the next step.</p>
+            </div>
           </div>
         );
 
