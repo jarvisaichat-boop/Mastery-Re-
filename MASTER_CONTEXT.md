@@ -147,6 +147,28 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 
 ---
 
+### AI Goal Hierarchy Tree — Visual Goal Mapping
+**Concept (April 2026):** When a user dumps what they want from life, an AI should automatically sort their desires by altitude and show a visual tree. The top level is always the 5 fixed life domains. Under each domain sit the user's specific goals, sorted from highest altitude (vision-level) down to the concrete steps.
+
+**The 5 fixed top-level life domains:**
+- Self (Mental & Physical Health)
+- Family (Blood / Parents)
+- Love (Partner / Romance)
+- Work (Career / Mission / School)
+- Friends (Social Circle / Community)
+
+**Example flow:**
+1. User dumps a list: "get ripped, make money, find a partner, call my parents more"
+2. AI maps each item under the correct domain and altitude
+3. A visual tree is shown — user can tap a domain to focus on it
+4. The selected domain's top goal becomes their Life Goal, carrying forward into Phase 4
+
+**Graceful fallback:** If OpenAI is unavailable, show the plain list and let user pick manually.
+
+**When to build:** Requires OpenAI API key. Best batched with other AI features. The `openai` npm package is already installed on the backend — endpoint just needs to be wired up.
+
+---
+
 ## External Dependencies
 -   **Frontend Framework**: React 18
 -   **Build Tool**: Vite 5
