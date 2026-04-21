@@ -155,7 +155,7 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 - Family (Blood / Parents)
 - Love (Partner / Romance)
 - Work (Career / Project / School)
-- Friends (Social Circle / Community)
+- Social (Friends / Community)
 
 **Example flow:**
 1. User dumps a list: "get ripped, make money, find a partner, call my parents more"

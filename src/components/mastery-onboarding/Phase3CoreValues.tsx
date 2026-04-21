@@ -18,7 +18,7 @@ export default function Phase3CoreValues({ onComplete }: Phase3CoreValuesProps) 
     { value: 'Family', label: 'Family (Blood / Parents)' },
     { value: 'Love', label: 'Love (Partner / Romance)' },
     { value: 'Work', label: 'Work (Career / Project / School)' },
-    { value: 'Friends', label: 'Friends (Social Circle / Community)' }
+    { value: 'Social', label: 'Social (Friends / Community)' }
   ];
 
   const updateField = (field: keyof typeof coreValues, value: any) => {
