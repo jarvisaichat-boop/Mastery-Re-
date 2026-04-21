@@ -18,8 +18,8 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
 
   const [step, setStep] = useState<Step>('rawgoal');
 
-  // Step 1 — Raw desire
-  const [rawGoal, setRawGoal] = useState('');
+  // Step 1 — Raw desire (persisted via onComplete → MasteryProfile.rawGoal)
+  const [rawGoal, setRawGoal] = useState(profile?.rawGoal || '');
 
   // Step 2 — Life Goals
   const [currentProject, setCurrentProject] = useState(path.projects?.[0]?.text || '');
@@ -86,6 +86,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     });
 
     onComplete({
+      rawGoal,
       proposedHabit: {
         name: habitData.name,
         description: `Micro Win: ${habitData.microMethod}`,

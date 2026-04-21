@@ -28,6 +28,7 @@ export interface MasteryProfile {
   goldenHour: 'Morning' | 'Lunch' | 'After Work' | 'Late Night' | '';
   
   // Phase 4: The Architect (Logic Tree)
+  rawGoal: string; // Unfiltered "what do you want?" answer from first screen
   specificMetric: string;
   logicTreeRoot: string;
   logicTreeBranch: string;
