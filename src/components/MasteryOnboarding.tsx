@@ -10,6 +10,7 @@ import Phase1ContextBaseline from './mastery-onboarding/Phase1ContextBaseline';
 import Phase7Contract from './mastery-onboarding/Phase7Contract';
 
 import Phase3CoreValues from './mastery-onboarding/Phase3CoreValues';
+import Phase3bVision from './mastery-onboarding/Phase3bVision';
 import Phase4Path from './mastery-onboarding/Phase4Path';
 import Phase5Schedule from './mastery-onboarding/Phase5Schedule';
 import Phase6Enforcer from './mastery-onboarding/Phase6Enforcer';
@@ -184,8 +185,10 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
 
   // ... (existing code top) ...
 
-  // Handlers for new phases
-  const handlePhase3Complete = (data: Partial<MasteryProfile>) => {
+  // Handlers for phases
+  // Phase 3 = Core Values (handlePhase2Complete already handles this)
+  // Phase 3b = Vision (new standalone phase)
+  const handlePhase3bComplete = (data: Partial<MasteryProfile>) => {
     updateProfile(data);
     nextPhase();
   };
@@ -205,8 +208,6 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
     nextPhase();
   };
 
-  // ... (existing code mid) ...
-
   const renderPhase = () => {
     switch (currentPhase) {
       case 0:
@@ -214,29 +215,22 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
       case 1:
         return <Phase1ContextBaseline profile={profile} onComplete={handlePhase1Complete} />;
       case 2:
+        // Core Values
         return <Phase3CoreValues onComplete={handlePhase2Complete} />;
       case 3:
-        return <Phase4Path profile={profile} onComplete={handlePhase3Complete} onBack={prevPhase} />;
+        // Vision — standalone phase (new, inserted after Core Values)
+        return <Phase3bVision onComplete={handlePhase3bComplete} onBack={prevPhase} />;
       case 4:
-        return <Phase5Schedule onComplete={handlePhase4Complete} onBack={prevPhase} />;
+        // Life Goals (was phase 3)
+        return <Phase4Path profile={profile} onComplete={handlePhase4Complete} onBack={prevPhase} />;
       case 5:
-        return <Phase6Enforcer profile={profile} onComplete={handlePhase5Complete} />;
+        // Schedule (was phase 4)
+        return <Phase5Schedule onComplete={handlePhase5Complete} onBack={prevPhase} />;
       case 6:
-        // Skip phase 6 if needed or just use Enforcer again/placeholder -> Actually we should just jump to 7?
-        // If we want Enforcer to be Phase 5, then handlePhase5Complete calls nextPhase -> 6.
-        // If 6 is empty/skipped, we should auto-forward or just render Contract at 6?
-        // Let's just map Enforcer to 5, and if we are at 6, go to 7 immediately?
-        // Or better: Let's make Enforcer Phase 5, and then next phase is 7 (Contract).
-        // But nextPhase() increments by 1. 5->6.
-        // So at 6 we need something.
-        // Let's Put Contract at 6 and 7? Or just auto-skip 6?
-        // Simplest: Enforcer is Phase 5. Contract is Phase 6.
-        // But existing code uses 7 phases (0-7).
-        // Let's make Phase 6 a "Pre-Launch" or just Contract part 1?
-        // Valid Fix: Change Phase 7 Contract to be Phase 6?
-        // Or just render Contract at 6 too?
-        return <Phase7Contract onComplete={handlePhase7Complete} />; 
+        // Enforcer (was phase 5)
+        return <Phase6Enforcer profile={profile} onComplete={handlePhase6Complete} />;
       case 7:
+        // Contract
         return <Phase7Contract onComplete={handlePhase7Complete} />;
       default:
         return null;
