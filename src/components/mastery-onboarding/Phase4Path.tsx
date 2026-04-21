@@ -503,7 +503,8 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
           <div className="space-y-8 animate-fadeIn">
             <div className="space-y-3">
               <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 3 of {STEPS.length} — Daily Habit</p>
-              <h3 className="text-2xl font-bold text-yellow-500">The Daily Habit</h3>
+              <h3 className="text-2xl font-bold text-yellow-500">Habit — Life Goal Habit</h3>
+              <p className="text-gray-400 text-sm">What is the one daily habit / action you must make everyday to achieve your life goal?</p>
             </div>
             {stepsList.length > 0 && (
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
