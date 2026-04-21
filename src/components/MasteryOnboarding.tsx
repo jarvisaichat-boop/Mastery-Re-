@@ -6,7 +6,6 @@ import { Home, Target } from 'lucide-react';
 import Phase0Manifesto from './mastery-onboarding/Phase0Manifesto';
 import Phase1ContextBaseline from './mastery-onboarding/Phase1ContextBaseline';
 
-// Phase 3, 4, 5, 6 old components replaced by new imports below
 import Phase7Contract from './mastery-onboarding/Phase7Contract';
 
 import Phase3CoreValues from './mastery-onboarding/Phase3CoreValues';
@@ -183,11 +182,6 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
 
 
 
-  // ... (existing code top) ...
-
-  // Handlers for phases
-  // Phase 3 = Core Values (handlePhase2Complete already handles this)
-  // Phase 3b = Vision (new standalone phase)
   const handlePhase3bComplete = (data: Partial<MasteryProfile>) => {
     updateProfile(data);
     nextPhase();
@@ -215,22 +209,16 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
       case 1:
         return <Phase1ContextBaseline profile={profile} onComplete={handlePhase1Complete} />;
       case 2:
-        // Core Values
         return <Phase3CoreValues onComplete={handlePhase2Complete} />;
       case 3:
-        // Vision — standalone phase (new, inserted after Core Values)
         return <Phase3bVision onComplete={handlePhase3bComplete} onBack={prevPhase} />;
       case 4:
-        // Life Goals (was phase 3)
         return <Phase4Path profile={profile} onComplete={handlePhase4Complete} onBack={prevPhase} />;
       case 5:
-        // Schedule (was phase 4)
         return <Phase5Schedule onComplete={handlePhase5Complete} onBack={prevPhase} />;
       case 6:
-        // Enforcer (was phase 5)
         return <Phase6Enforcer profile={profile} onComplete={handlePhase6Complete} />;
       case 7:
-        // Contract
         return <Phase7Contract onComplete={handlePhase7Complete} />;
       default:
         return null;
@@ -262,7 +250,7 @@ export default function MasteryOnboarding({ onComplete, isPreview = false, onExi
           <button
             onClick={() => setCurrentPhase(4)}
             className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-lg border border-gray-700 transition-colors"
-            title="Jump to Phase 4 (Logic Tree)"
+            title="Jump to Phase 4 (Life Goals)"
           >
             <Target className="w-4 h-4" />
           </button>

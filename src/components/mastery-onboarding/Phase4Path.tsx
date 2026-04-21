@@ -91,11 +91,12 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
         setStep('steps');
         break;
       case 'steps': {
-        if (draftStep.trim()) {
-          setStepsList(prev => [...prev, draftStep.trim()]);
-          setDraftStep('');
-        }
-        const ordered = stepsList.map((text, idx) => ({
+        const finalSteps = draftStep.trim()
+          ? [...stepsList, draftStep.trim()]
+          : [...stepsList];
+        setStepsList(finalSteps);
+        setDraftStep('');
+        const ordered = finalSteps.map((text, idx) => ({
           text,
           hidden: false,
           order: idx,
