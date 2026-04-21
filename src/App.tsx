@@ -18,6 +18,7 @@ import { MomentumGeneratorModal } from './components/MomentumGeneratorModal';
 import { ContentLibraryManager } from './components/ContentLibraryManager';
 import { Toast } from './components/Toast';
 import { Habit, HabitTemplate, ContentLibraryItem } from './types';
+import { MasteryProfile } from './types/onboarding';
 import { getStartOfWeek, addDays, calculateDashboardData, formatDate, isHabitScheduledOnDay, isHabitLoggable, getHabitStrictness } from './utils';
 import { logger } from './utils/logger';
 import { NotificationService } from './services/NotificationService';
@@ -34,6 +35,7 @@ const LOCAL_STORAGE_MICRO_WIN_KEY = 'mastery-dashboard-micro-win-complete';
 const LOCAL_STORAGE_CELEBRATED_STREAKS_KEY = 'mastery-dashboard-celebrated-streaks';
 const LOCAL_STORAGE_GOAL_KEY = 'mastery-dashboard-goal';
 const LOCAL_STORAGE_ASPIRATIONS_KEY = 'mastery-dashboard-aspirations';
+const LOCAL_STORAGE_RAW_GOAL_KEY = 'mastery-dashboard-raw-goal';
 
 const LOCAL_STORAGE_EMERGENCY_MODE_KEY = 'mastery-dashboard-emergency-mode';
 const LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY = 'mastery-dashboard-last-streak-repair-check';
@@ -291,6 +293,7 @@ function App() {
     const [habits, setHabits] = useState<Habit[]>(loadHabitsFromStorage);
     const [goal, setGoal] = useState(() => localStorage.getItem(LOCAL_STORAGE_GOAL_KEY) || 'Set your #1 priority');
     const [aspirations, setAspirations] = useState(() => localStorage.getItem(LOCAL_STORAGE_ASPIRATIONS_KEY) || '');
+    const [rawGoal, setRawGoal] = useState(() => localStorage.getItem(LOCAL_STORAGE_RAW_GOAL_KEY) || '');
     const [showAddHabitModal, setShowAddHabitModal] = useState(false);
     const [showProgramLibrary, setShowProgramLibrary] = useState(false);
     const [selectedHabitToEdit, setSelectedHabitToEdit] = useState<Habit | null>(null);
@@ -365,7 +368,7 @@ function App() {
     const [igniteHabit, setIgniteHabit] = useState<Habit | null>(null);
     const [activeMiniApp, setActiveMiniApp] = useState<{ habit: Habit; date: string; type: 'breath' | 'journal' | 'vision' } | null>(null);
 
-    const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string) => {
+    const handleOnboardingComplete = (newHabits: Omit<Habit, 'id' | 'createdAt'>[], userGoal: string, userAspirations: string, profile?: Partial<MasteryProfile>) => {
         logger.log('🎊 App.tsx handleOnboardingComplete called');
         logger.log('📦 Received habits:', newHabits);
         logger.log('🎯 Received goal:', userGoal);
@@ -395,6 +398,16 @@ function App() {
 
             setAspirations(userAspirations);
             logger.log('✅ setAspirations called');
+
+            const incomingRawGoal = profile?.rawGoal || '';
+            setRawGoal(incomingRawGoal);
+            if (incomingRawGoal) {
+                localStorage.setItem(LOCAL_STORAGE_RAW_GOAL_KEY, incomingRawGoal);
+                logger.log('✅ rawGoal saved:', incomingRawGoal);
+            } else {
+                localStorage.removeItem(LOCAL_STORAGE_RAW_GOAL_KEY);
+                logger.log('🧹 rawGoal cleared (none provided)');
+            }
 
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
             localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, userGoal);
@@ -437,9 +450,14 @@ function App() {
             localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, aspirations);
             localStorage.setItem(LOCAL_STORAGE_EMERGENCY_MODE_KEY, String(emergencyMode));
             localStorage.setItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY, momentumLastCompleted || '');
+            if (rawGoal) {
+                localStorage.setItem(LOCAL_STORAGE_RAW_GOAL_KEY, rawGoal);
+            } else {
+                localStorage.removeItem(LOCAL_STORAGE_RAW_GOAL_KEY);
+            }
         }
         catch (e) { logger.error("Failed to save habits", e); }
-    }, [habits, weeklyRateMode, streakMode, goal, aspirations, emergencyMode, momentumLastCompleted]);
+    }, [habits, weeklyRateMode, streakMode, goal, aspirations, emergencyMode, momentumLastCompleted, rawGoal]);
 
     useEffect(() => {
         try {
@@ -936,7 +954,7 @@ function App() {
                     >
                         <Shield size={24} />
                     </button>
-                    <VisionBoardDashboard habits={habits} />
+                    <VisionBoardDashboard habits={habits} rawGoal={rawGoal} />
                 </div>
                 ) : (
                     // Main Dashboard Layout

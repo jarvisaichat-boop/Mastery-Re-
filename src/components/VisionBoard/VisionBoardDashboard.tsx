@@ -6,9 +6,10 @@ import { useVisionBoard } from '../../contexts/VisionBoardContext';
 
 interface VisionBoardDashboardProps {
    habits: Habit[];
+   rawGoal?: string;
 }
 
-export const VisionBoardDashboard: React.FC<VisionBoardDashboardProps> = ({ habits }) => {
+export const VisionBoardDashboard: React.FC<VisionBoardDashboardProps> = ({ habits, rawGoal }) => {
    const { data, updateSchedule } = useVisionBoard();
    const { schedule } = data;
    return (
@@ -24,6 +25,16 @@ export const VisionBoardDashboard: React.FC<VisionBoardDashboardProps> = ({ habi
          </div>
 
          <div className="max-w-3xl mx-auto divide-y divide-gray-800">
+            {/* What I'm chasing — raw goal from onboarding */}
+            {rawGoal && (
+               <section className="px-6 py-6">
+                  <p className="text-xs font-semibold text-yellow-500/60 uppercase tracking-widest mb-2">What I'm chasing</p>
+                  <blockquote className="border-l-2 border-yellow-500/40 pl-4 text-gray-300 text-base italic leading-relaxed">
+                     "{rawGoal}"
+                  </blockquote>
+               </section>
+            )}
+
             {/* Stacked Vertical Sections */}
             <section>
                <CoreValuesSection mode="edit" />
