@@ -96,9 +96,9 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
               {cv.values?.filter(v => v.title && !v.hidden).length > 0 && (
                 <div className="pt-1 space-y-1">
                   {cv.values.filter(v => v.title && !v.hidden).map((v, i) => (
-                    <div key={i} className="flex gap-2 text-sm text-gray-300">
+                    <div key={i} className="flex gap-2 text-sm text-white">
                       <span className="text-yellow-500 font-medium shrink-0">{v.title}</span>
-                      {v.description && <span>— {v.description}</span>}
+                      {v.description && <span>{v.description}</span>}
                     </div>
                   ))}
                 </div>
