@@ -128,10 +128,10 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
 
   // ── Time ranges helpers ─────────────────────────────────────────────────────
 
-  const openTimeRanges = () => {
-    const n = stepsList.length;
-    setLongMidBoundary(Math.max(1, Math.floor(n / 3)));
-    setMidShortBoundary(Math.max(2, Math.floor((2 * n) / 3)));
+  const openTimeRanges = (list = stepsList) => {
+    const n = list.length;
+    setLongMidBoundary(Math.floor(n / 3));
+    setMidShortBoundary(Math.floor((2 * n) / 3));
     setShowTimeRanges(true);
   };
 
@@ -158,9 +158,9 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
       }
 
       if (dividerDragging.current === 'longMid') {
-        setLongMidBoundary(Math.max(1, Math.min(bestGap, midShortRef.current - 1)));
+        setLongMidBoundary(Math.max(0, Math.min(bestGap, midShortRef.current)));
       } else {
-        setMidShortBoundary(Math.max(longMidRef.current + 1, Math.min(bestGap, n - 1)));
+        setMidShortBoundary(Math.max(longMidRef.current, Math.min(bestGap, n)));
       }
     };
 
@@ -182,15 +182,21 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
         setStep('steps');
         break;
       case 'steps': {
-        const finalSteps = draftStep.trim()
-          ? [...stepsList, draftStep.trim()]
-          : [...stepsList];
-        setStepsList(finalSteps);
-        setDraftStep('');
-        const ordered = finalSteps.map((text, idx) => ({ text, hidden: false, order: idx }));
-        updatePath({ projects: ordered });
-        setShowTimeRanges(false);
-        setStep('habit');
+        if (!showTimeRanges) {
+          // Commit any pending draft, then open time ranges (mandatory)
+          const finalSteps = draftStep.trim()
+            ? [...stepsList, draftStep.trim()]
+            : [...stepsList];
+          setStepsList(finalSteps);
+          setDraftStep('');
+          openTimeRanges(finalSteps);
+        } else {
+          // Save steps + proceed to habit
+          const ordered = stepsList.map((text, idx) => ({ text, hidden: false, order: idx }));
+          updatePath({ projects: ordered });
+          setShowTimeRanges(false);
+          setStep('habit');
+        }
         break;
       }
       case 'habit':    setStep('microwin'); break;
@@ -478,16 +484,9 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
                     <p className="text-gray-700 text-xs text-center pt-1">
                       ↑ Far away &nbsp;·&nbsp; ↓ Where you are now
                     </p>
-
-                    {/* Set Time Ranges button — only shows when enough steps */}
-                    {stepsList.length >= 2 && (
-                      <button
-                        onClick={openTimeRanges}
-                        className="w-full mt-2 py-3 rounded-xl border border-dashed border-gray-700 text-gray-400 hover:border-yellow-500/50 hover:text-yellow-400 text-sm font-semibold transition-all"
-                      >
-                        Set Time Ranges →
-                      </button>
-                    )}
+                    <p className="text-gray-600 text-xs text-center">
+                      Your bottom step should be achievable in 1 week – 3 months.
+                    </p>
                   </div>
                 ) : (
                   <p className="text-gray-700 text-xs text-center py-4">Your steps will appear here as you add them.</p>
@@ -599,7 +598,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               disabled={!canContinue}
               className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
             >
-              CONTINUE <ArrowRight size={20} />
+              {step === 'steps' && !showTimeRanges ? 'Set Time Ranges' : 'CONTINUE'} <ArrowRight size={20} />
             </button>
           ) : (
             <button
