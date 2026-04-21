@@ -106,7 +106,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
           <div className="space-y-8 animate-fadeIn">
             <div className="space-y-3">
               <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 1 of {STEPS.length}</p>
-              <h3 className="text-3xl font-bold text-white leading-tight">What do you want most in life right now?</h3>
+              <h3 className="text-3xl font-bold text-white leading-tight">What do you want most right now?</h3>
               <p className="text-gray-500 text-sm">Don't filter it. Don't structure it. Just say what's pulling at you.</p>
             </div>
             <textarea
