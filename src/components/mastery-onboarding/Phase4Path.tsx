@@ -187,7 +187,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
           <div className="space-y-6 animate-fadeIn">
             <div className="space-y-3">
               <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 2 of {STEPS.length} — The Steps</p>
-              <h3 className="text-2xl font-bold text-white leading-tight">What needs to happen to get there?</h3>
+              <h3 className="text-2xl font-bold text-yellow-500">The Steps</h3>
               {rawGoal && (
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
                   <p className="text-xs text-yellow-500/70 mb-1">Life Goal</p>
