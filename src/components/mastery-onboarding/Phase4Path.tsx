@@ -138,6 +138,12 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     });
   };
 
+  const canContinue = (() => {
+    if (step === 'rawgoal') return rawGoal.trim().length > 0;
+    if (step === 'steps') return stepsList.length > 0 || draftStep.trim().length > 0;
+    return true;
+  })();
+
   const currentIndex = STEPS.indexOf(step);
 
   const renderStepContent = () => {
@@ -361,7 +367,8 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
           {step !== 'confirm' ? (
             <button
               onClick={toNextStep}
-              className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
+              disabled={!canContinue}
+              className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
             >
               CONTINUE <ArrowRight size={20} />
             </button>

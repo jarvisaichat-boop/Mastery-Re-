@@ -13,9 +13,7 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
   const [vision, setVision] = useState(data.path.vision || '');
 
   const handleContinue = () => {
-    if (vision.trim()) {
-      updatePath({ vision: vision.trim() });
-    }
+    updatePath({ vision: vision.trim() });
     onComplete({});
   };
 
