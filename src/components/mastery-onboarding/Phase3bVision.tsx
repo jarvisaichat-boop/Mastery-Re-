@@ -56,12 +56,6 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
           className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white text-base focus:border-yellow-500 outline-none resize-none leading-relaxed"
           autoFocus
         />
-
-        {vision.trim() && (
-          <p className="text-gray-600 text-xs text-center">
-            Your goals will change. This shouldn't.
-          </p>
-        )}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent z-40">
