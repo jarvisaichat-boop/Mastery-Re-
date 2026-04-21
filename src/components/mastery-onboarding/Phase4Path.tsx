@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { ArrowRight, ArrowLeft, Eye, Brain, Plus, X, GripVertical, ChevronUp, ChevronDown, Route } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ArrowRight, ArrowLeft, Eye, Brain, Plus, X, GripVertical, ChevronUp, ChevronDown, Route, Pencil, Check } from 'lucide-react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { MasteryProfile } from '../../types/onboarding';
 
@@ -20,12 +20,32 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   // Step 1 — Life Goal
   const [rawGoal, setRawGoal] = useState(profile?.rawGoal || '');
 
-  // Step 2 — Steps (ordered path to the goal)
+  // Step 2 — Steps
   const [stepsList, setStepsList] = useState<string[]>([]);
   const [draftStep, setDraftStep] = useState('');
   const draftInputRef = useRef<HTMLInputElement>(null);
 
-  // Drag state
+  // Inline editing
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  // Time ranges sub-phase
+  const [showTimeRanges, setShowTimeRanges] = useState(false);
+  const [longMidBoundary, setLongMidBoundary] = useState(0); // 0..n, steps 0..lM-1 = Long
+  const [midShortBoundary, setMidShortBoundary] = useState(0); // lM..mS-1 = Mid, mS..n-1 = Short
+
+  // Refs for divider drag (avoid stale closures)
+  const dividerDragging = useRef<'longMid' | 'midShort' | null>(null);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const longMidRef = useRef(longMidBoundary);
+  const midShortRef = useRef(midShortBoundary);
+  const stepsLenRef = useRef(stepsList.length);
+  longMidRef.current = longMidBoundary;
+  midShortRef.current = midShortBoundary;
+  stepsLenRef.current = stepsList.length;
+
+  // Drag-to-reorder state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
@@ -35,7 +55,26 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   // Step 4 — Micro Win
   const [microMethod, setMicroMethod] = useState('');
 
-  // Steps list helpers
+  // ── Inline edit helpers ─────────────────────────────────────────────────────
+
+  const startEdit = (i: number) => {
+    setEditingIndex(i);
+    setEditingText(stepsList[i]);
+    setTimeout(() => editInputRef.current?.focus(), 0);
+  };
+
+  const commitEdit = () => {
+    if (editingIndex === null) return;
+    const trimmed = editingText.trim();
+    if (trimmed) {
+      setStepsList(prev => prev.map((s, i) => (i === editingIndex ? trimmed : s)));
+    }
+    setEditingIndex(null);
+    setEditingText('');
+  };
+
+  // ── Steps list helpers ──────────────────────────────────────────────────────
+
   const addStep = () => {
     const trimmed = draftStep.trim();
     if (!trimmed) return;
@@ -44,7 +83,10 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     draftInputRef.current?.focus();
   };
 
-  const removeStep = (i: number) => setStepsList(prev => prev.filter((_, idx) => idx !== i));
+  const removeStep = (i: number) => {
+    if (editingIndex === i) setEditingIndex(null);
+    setStepsList(prev => prev.filter((_, idx) => idx !== i));
+  };
 
   const moveStep = (i: number, dir: -1 | 1) => {
     const next = i + dir;
@@ -54,7 +96,6 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     setStepsList(arr);
   };
 
-  // Drag-to-reorder (desktop)
   const handleDragStart = (e: React.DragEvent, i: number) => {
     setDragIndex(i);
     e.dataTransfer.effectAllowed = 'move';
@@ -85,6 +126,56 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     setDragOverIndex(null);
   };
 
+  // ── Time ranges helpers ─────────────────────────────────────────────────────
+
+  const openTimeRanges = () => {
+    const n = stepsList.length;
+    setLongMidBoundary(Math.max(1, Math.floor(n / 3)));
+    setMidShortBoundary(Math.max(2, Math.floor((2 * n) / 3)));
+    setShowTimeRanges(true);
+  };
+
+  const handleDividerMouseDown = (which: 'longMid' | 'midShort') => {
+    dividerDragging.current = which;
+  };
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dividerDragging.current) return;
+      const n = stepsLenRef.current;
+      const rects = rowRefs.current.slice(0, n).map(r => r?.getBoundingClientRect() ?? null);
+
+      // Find which gap (0..n) is nearest to the cursor
+      let bestGap = 0;
+      let bestDist = Infinity;
+      for (let i = 0; i <= n; i++) {
+        let gapY: number;
+        if (i === 0) gapY = rects[0]?.top ?? 0;
+        else if (i === n) gapY = rects[n - 1]?.bottom ?? 0;
+        else gapY = ((rects[i - 1]?.bottom ?? 0) + (rects[i]?.top ?? 0)) / 2;
+        const dist = Math.abs(e.clientY - gapY);
+        if (dist < bestDist) { bestDist = dist; bestGap = i; }
+      }
+
+      if (dividerDragging.current === 'longMid') {
+        setLongMidBoundary(Math.max(1, Math.min(bestGap, midShortRef.current - 1)));
+      } else {
+        setMidShortBoundary(Math.max(longMidRef.current + 1, Math.min(bestGap, n - 1)));
+      }
+    };
+
+    const onMouseUp = () => { dividerDragging.current = null; };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, []);
+
+  // ── Navigation ──────────────────────────────────────────────────────────────
+
   const toNextStep = () => {
     switch (step) {
       case 'rawgoal':
@@ -96,31 +187,27 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
           : [...stepsList];
         setStepsList(finalSteps);
         setDraftStep('');
-        const ordered = finalSteps.map((text, idx) => ({
-          text,
-          hidden: false,
-          order: idx,
-        }));
+        const ordered = finalSteps.map((text, idx) => ({ text, hidden: false, order: idx }));
         updatePath({ projects: ordered });
+        setShowTimeRanges(false);
         setStep('habit');
         break;
       }
-      case 'habit':
-        setStep('microwin');
-        break;
-      case 'microwin':
-        setStep('confirm');
-        break;
+      case 'habit':    setStep('microwin'); break;
+      case 'microwin': setStep('confirm'); break;
     }
   };
 
   const toPrevStep = () => {
     switch (step) {
-      case 'rawgoal':   onBack?.(); break;
-      case 'steps':     setStep('rawgoal'); break;
-      case 'habit':     setStep('steps'); break;
-      case 'microwin':  setStep('habit'); break;
-      case 'confirm':   setStep('microwin'); break;
+      case 'rawgoal':  onBack?.(); break;
+      case 'steps':
+        if (showTimeRanges) { setShowTimeRanges(false); }
+        else { setStep('rawgoal'); }
+        break;
+      case 'habit':    setStep('steps'); break;
+      case 'microwin': setStep('habit'); break;
+      case 'confirm':  setStep('microwin'); break;
     }
   };
 
@@ -146,6 +233,165 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
 
   const currentIndex = STEPS.indexOf(step);
 
+  // ── Render helpers ──────────────────────────────────────────────────────────
+
+  const renderStepRow = (s: string, i: number, inZone = false) => (
+    <div
+      key={i}
+      ref={el => { rowRefs.current[i] = el; }}
+      draggable={!inZone && editingIndex !== i}
+      onDragStart={!inZone ? e => handleDragStart(e, i) : undefined}
+      onDragOver={!inZone ? e => handleDragOver(e, i) : undefined}
+      onDrop={!inZone ? e => handleDrop(e, i) : undefined}
+      onDragEnd={!inZone ? handleDragEnd : undefined}
+      className={`flex items-center gap-2 rounded-xl px-3 py-3 transition-all ${
+        inZone ? 'bg-black/30' : 'bg-gray-900/60 border'
+      } ${
+        !inZone && dragOverIndex === i && dragIndex !== i
+          ? 'border-yellow-500/60 bg-yellow-500/5'
+          : !inZone ? 'border-gray-800' : ''
+      } ${!inZone && dragIndex === i ? 'opacity-40' : 'opacity-100'}`}
+    >
+      {!inZone && (
+        <span className="text-gray-600 cursor-grab active:cursor-grabbing shrink-0">
+          <GripVertical size={16} />
+        </span>
+      )}
+
+      <span className="text-xs text-gray-600 font-mono w-4 shrink-0">{i + 1}</span>
+
+      {/* Editable text */}
+      {editingIndex === i ? (
+        <input
+          ref={editInputRef}
+          value={editingText}
+          onChange={e => setEditingText(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingIndex(null); }}
+          onBlur={commitEdit}
+          className="flex-1 bg-black/50 border border-yellow-500/50 rounded-lg px-2 py-1 text-white text-sm outline-none min-w-0"
+        />
+      ) : (
+        <span
+          className="text-white text-sm flex-1 min-w-0 break-words cursor-text"
+          onClick={() => startEdit(i)}
+        >
+          {s}
+        </span>
+      )}
+
+      {/* Actions */}
+      <div className="flex items-center gap-1 shrink-0">
+        {editingIndex === i ? (
+          <button onClick={commitEdit} className="p-1 text-yellow-500 hover:text-yellow-400 transition-colors">
+            <Check size={14} />
+          </button>
+        ) : (
+          <>
+            {!inZone && (
+              <>
+                <button onClick={() => startEdit(i)} className="p-1 text-gray-600 hover:text-yellow-400 transition-colors">
+                  <Pencil size={13} />
+                </button>
+                <button onClick={() => moveStep(i, -1)} disabled={i === 0} className="p-1 text-gray-600 hover:text-gray-300 disabled:opacity-20 transition-colors">
+                  <ChevronUp size={14} />
+                </button>
+                <button onClick={() => moveStep(i, 1)} disabled={i === stepsList.length - 1} className="p-1 text-gray-600 hover:text-gray-300 disabled:opacity-20 transition-colors">
+                  <ChevronDown size={14} />
+                </button>
+              </>
+            )}
+            {inZone && (
+              <button onClick={() => startEdit(i)} className="p-1 text-gray-600 hover:text-yellow-400 transition-colors">
+                <Pencil size={13} />
+              </button>
+            )}
+            <button onClick={() => removeStep(i)} className="p-1 text-gray-600 hover:text-red-400 transition-colors">
+              <X size={14} />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderTimeRangesView = () => {
+    const zones = [
+      {
+        key: 'long',
+        label: 'Long Term',
+        range: '3+ years',
+        start: 0,
+        end: longMidBoundary,
+        bg: 'bg-red-950/50',
+        border: 'border-red-700/40',
+        text: 'text-red-400',
+        dividerKey: 'longMid' as const,
+      },
+      {
+        key: 'mid',
+        label: 'Mid Term',
+        range: '4 months – 3 years',
+        start: longMidBoundary,
+        end: midShortBoundary,
+        bg: 'bg-green-950/50',
+        border: 'border-green-700/40',
+        text: 'text-green-400',
+        dividerKey: 'midShort' as const,
+      },
+      {
+        key: 'short',
+        label: 'Short Term',
+        range: '1 week – 3 months',
+        start: midShortBoundary,
+        end: stepsList.length,
+        bg: 'bg-blue-950/50',
+        border: 'border-blue-700/40',
+        text: 'text-blue-400',
+        dividerKey: null,
+      },
+    ];
+
+    return (
+      <div className="space-y-1">
+        {zones.map((zone, zi) => (
+          <React.Fragment key={zone.key}>
+            {/* Zone block */}
+            <div className={`rounded-xl border ${zone.border} ${zone.bg} overflow-hidden`}>
+              <div className={`px-3 py-2 flex items-center justify-between border-b ${zone.border}`}>
+                <span className={`text-xs font-bold uppercase tracking-widest ${zone.text}`}>{zone.label}</span>
+                <span className={`text-xs opacity-60 ${zone.text}`}>{zone.range}</span>
+              </div>
+              <div className="px-2 py-2 space-y-1">
+                {zone.start < zone.end
+                  ? stepsList.slice(zone.start, zone.end).map((s, li) =>
+                      renderStepRow(s, zone.start + li, true)
+                    )
+                  : <p className="text-gray-600 text-xs text-center py-2 italic">Drag the divider to include steps here</p>
+                }
+              </div>
+            </div>
+
+            {/* Draggable divider between zones */}
+            {zone.dividerKey && (
+              <div
+                className="flex items-center justify-center py-0.5 cursor-ns-resize select-none group"
+                onMouseDown={() => handleDividerMouseDown(zone.dividerKey!)}
+              >
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-800/80 border border-gray-600 group-hover:border-yellow-500/60 group-active:border-yellow-500 transition-colors">
+                  <GripVertical size={13} className="text-gray-500 rotate-90" />
+                  <span className="text-gray-500 text-[11px] group-hover:text-gray-300 transition-colors">drag to adjust</span>
+                  <GripVertical size={13} className="text-gray-500 rotate-90" />
+                </div>
+              </div>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
+
+  // ── Screen renders ──────────────────────────────────────────────────────────
+
   const renderStepContent = () => {
     switch (step) {
 
@@ -157,12 +403,10 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
                 <Route className="w-8 h-8 text-yellow-500" />
               </div>
               <h2 className="text-4xl font-bold text-white mb-4">Life Goal</h2>
-              <p className="text-xl text-gray-400">
-                What do you want most right now?
-              </p>
+              <p className="text-xl text-gray-400">What do you want most right now?</p>
             </div>
             {data.path?.vision && (
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3 mb-6">
                 <p className="text-xs text-yellow-500/70 mb-2">Vision</p>
                 <p className="text-white text-sm font-medium italic">"{data.path.vision}"</p>
               </div>
@@ -184,97 +428,73 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
 
       case 'steps':
         return (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-5 animate-fadeIn">
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 2 of {STEPS.length} — The Steps</p>
-              <h3 className="text-2xl font-bold text-yellow-500">The Steps</h3>
+              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">
+                Step 2 of {STEPS.length} — {showTimeRanges ? 'Time Ranges' : 'The Steps'}
+              </p>
+              <h3 className="text-2xl font-bold text-yellow-500">
+                {showTimeRanges ? 'Set Time Ranges' : 'The Steps'}
+              </h3>
               {rawGoal && (
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
                   <p className="text-xs text-yellow-500/70 mb-1">Life Goal</p>
                   <p className="text-white text-sm font-medium italic">"{rawGoal}"</p>
                 </div>
               )}
-              <p className="text-gray-500 text-xs">Add the steps that need to happen — then drag or use the arrows to order them. Furthest step at the top, nearest at the bottom.</p>
+              <p className="text-gray-500 text-xs">
+                {showTimeRanges
+                  ? 'Drag the dividers to group your steps by time horizon.'
+                  : 'Add the steps — then drag or use arrows to order them. Furthest at the top, nearest at the bottom.'}
+              </p>
             </div>
 
-            {/* Input + Add */}
-            <div className="flex gap-2">
-              <input
-                ref={draftInputRef}
-                type="text"
-                value={draftStep}
-                onChange={e => setDraftStep(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && addStep()}
-                placeholder="e.g. Build the app, Launch, Get customers..."
-                className="flex-1 bg-black/40 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 outline-none"
-              />
-              <button
-                onClick={addStep}
-                disabled={!draftStep.trim()}
-                className="flex items-center gap-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold rounded-xl transition-all"
-              >
-                <Plus size={18} /> Add
-              </button>
-            </div>
-
-            {/* Ordered Steps List */}
-            {stepsList.length > 0 ? (
-              <div className="space-y-2">
-                {stepsList.map((s, i) => (
-                  <div
-                    key={i}
-                    draggable
-                    onDragStart={e => handleDragStart(e, i)}
-                    onDragOver={e => handleDragOver(e, i)}
-                    onDrop={e => handleDrop(e, i)}
-                    onDragEnd={handleDragEnd}
-                    className={`flex items-center gap-2 bg-gray-900/60 border rounded-xl px-3 py-3 transition-all ${
-                      dragOverIndex === i && dragIndex !== i
-                        ? 'border-yellow-500/60 bg-yellow-500/5'
-                        : 'border-gray-800'
-                    } ${dragIndex === i ? 'opacity-40' : 'opacity-100'}`}
+            {!showTimeRanges ? (
+              <>
+                {/* Input + Add */}
+                <div className="flex gap-2">
+                  <input
+                    ref={draftInputRef}
+                    type="text"
+                    value={draftStep}
+                    onChange={e => setDraftStep(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && addStep()}
+                    placeholder="e.g. Build the app, Launch, Get customers..."
+                    className="flex-1 bg-black/40 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 outline-none"
+                  />
+                  <button
+                    onClick={addStep}
+                    disabled={!draftStep.trim()}
+                    className="flex items-center gap-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold rounded-xl transition-all"
                   >
-                    {/* Drag handle */}
-                    <span className="text-gray-600 cursor-grab active:cursor-grabbing shrink-0">
-                      <GripVertical size={16} />
-                    </span>
+                    <Plus size={18} /> Add
+                  </button>
+                </div>
 
-                    {/* Step number + text */}
-                    <span className="text-xs text-gray-600 font-mono w-4 shrink-0">{i + 1}</span>
-                    <span className="text-white text-sm flex-1 min-w-0 break-words">{s}</span>
+                {/* Order list */}
+                {stepsList.length > 0 ? (
+                  <div className="space-y-2">
+                    {stepsList.map((s, i) => renderStepRow(s, i, false))}
+                    <p className="text-gray-700 text-xs text-center pt-1">
+                      ↑ Far away &nbsp;·&nbsp; ↓ Where you are now
+                    </p>
 
-                    {/* Up/Down + Remove */}
-                    <div className="flex items-center gap-1 shrink-0">
+                    {/* Set Time Ranges button — only shows when enough steps */}
+                    {stepsList.length >= 2 && (
                       <button
-                        onClick={() => moveStep(i, -1)}
-                        disabled={i === 0}
-                        className="p-1 text-gray-600 hover:text-gray-300 disabled:opacity-20 transition-colors"
+                        onClick={openTimeRanges}
+                        className="w-full mt-2 py-3 rounded-xl border border-dashed border-gray-700 text-gray-400 hover:border-yellow-500/50 hover:text-yellow-400 text-sm font-semibold transition-all"
                       >
-                        <ChevronUp size={14} />
+                        Set Time Ranges →
                       </button>
-                      <button
-                        onClick={() => moveStep(i, 1)}
-                        disabled={i === stepsList.length - 1}
-                        className="p-1 text-gray-600 hover:text-gray-300 disabled:opacity-20 transition-colors"
-                      >
-                        <ChevronDown size={14} />
-                      </button>
-                      <button
-                        onClick={() => removeStep(i)}
-                        className="p-1 text-gray-600 hover:text-red-400 transition-colors"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
+                    )}
                   </div>
-                ))}
-
-                <p className="text-gray-700 text-xs text-center pt-1">
-                  ↑ Far away &nbsp;&nbsp;·&nbsp;&nbsp; ↓ Where you are now
-                </p>
-              </div>
+                ) : (
+                  <p className="text-gray-700 text-xs text-center py-4">Your steps will appear here as you add them.</p>
+                )}
+              </>
             ) : (
-              <p className="text-gray-700 text-xs text-center py-4">Your steps will appear here as you add them.</p>
+              renderTimeRangesView()
             )}
           </div>
         );
@@ -286,18 +506,14 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 3 of {STEPS.length} — Daily Habit</p>
               <h3 className="text-2xl font-bold text-yellow-500">The Daily Habit</h3>
             </div>
-
             {stepsList.length > 0 && (
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
                 <p className="text-xs text-yellow-500/70 mb-1">Your nearest step:</p>
                 <p className="text-white text-sm font-medium italic">"{stepsList[stepsList.length - 1]}"</p>
               </div>
             )}
-
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
-              <p className="text-gray-300 mb-4 text-sm">
-                What is the one daily action that moves that step forward?
-              </p>
+              <p className="text-gray-300 mb-4 text-sm">What is the one daily action that moves that step forward?</p>
               <input
                 type="text"
                 value={habitName}
