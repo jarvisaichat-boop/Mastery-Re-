@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Target, ArrowRight, ArrowLeft, Eye, Brain } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowRight, ArrowLeft, Eye, Brain, Plus, X, Check } from 'lucide-react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { MasteryProfile } from '../../types/onboarding';
 
@@ -9,34 +9,38 @@ interface Phase4PathProps {
   onBack?: () => void;
 }
 
-type Step = 'rawgoal' | 'lifegoals' | 'habit' | 'microwin' | 'vision' | 'confirm';
-const STEPS: Step[] = ['rawgoal', 'lifegoals', 'habit', 'microwin', 'vision', 'confirm'];
+type Step = 'goaldump' | 'goalpick' | 'lifegoals' | 'habit' | 'microwin' | 'vision' | 'confirm';
+const STEPS: Step[] = ['goaldump', 'goalpick', 'lifegoals', 'habit', 'microwin', 'vision', 'confirm'];
 
 export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
   const { path } = data;
 
-  const [step, setStep] = useState<Step>('rawgoal');
+  const [step, setStep] = useState<Step>('goaldump');
 
-  // Step 1 — Raw desire (persisted via onComplete → MasteryProfile.rawGoal)
+  // Step 1a — Goal dump list
+  const [goalList, setGoalList] = useState<string[]>([]);
+  const [draftGoal, setDraftGoal] = useState('');
+  const draftInputRef = useRef<HTMLInputElement>(null);
+
+  // Step 1b — Selected primary goal
   const [rawGoal, setRawGoal] = useState(profile?.rawGoal || '');
 
-  // Step 2 — Life Goals
+  // Step 3 — Life Goals
   const [currentProject, setCurrentProject] = useState(path.projects?.[0]?.text || '');
   const [quarterlyGoal, setQuarterlyGoal] = useState(path.quarterlyGoals?.[0]?.text || '');
 
-  // Step 3 — Habit
+  // Step 4 — Habit
   const [habitData, setHabitData] = useState({
     name: '',
     microMethod: '',
     frequency: 'daily' as 'daily' | 'weekly'
   });
 
-  // Step 5 — Vision (synthesis)
+  // Step 6 — Vision (synthesis)
   const [visionInputs, setVisionInputs] = useState({ do: '', feel: '', give: '' });
   const [synthesizedVision, setSynthesizedVision] = useState(path.vision);
 
-  // Auto-generate vision sentence whenever DO/FEEL/GIVE inputs change
   useEffect(() => {
     if (visionInputs.do || visionInputs.feel || visionInputs.give) {
       const sentence = `To ${visionInputs.do} feeling ${visionInputs.feel}, giving me ${visionInputs.give}.`;
@@ -44,9 +48,30 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     }
   }, [visionInputs.do, visionInputs.feel, visionInputs.give]);
 
+  const addGoal = () => {
+    const trimmed = draftGoal.trim();
+    if (!trimmed) return;
+    setGoalList(prev => [...prev, trimmed]);
+    setDraftGoal('');
+    draftInputRef.current?.focus();
+  };
+
+  const removeGoal = (index: number) => {
+    setGoalList(prev => prev.filter((_, i) => i !== index));
+    if (rawGoal === goalList[index]) setRawGoal('');
+  };
+
   const toNextStep = () => {
     switch (step) {
-      case 'rawgoal':
+      case 'goaldump':
+        // Add any unsaved draft before continuing
+        if (draftGoal.trim()) {
+          setGoalList(prev => [...prev, draftGoal.trim()]);
+          setDraftGoal('');
+        }
+        setStep('goalpick');
+        break;
+      case 'goalpick':
         setStep('lifegoals');
         break;
       case 'lifegoals':
@@ -69,8 +94,9 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
 
   const toPrevStep = () => {
     switch (step) {
-      case 'rawgoal':   onBack?.(); break;
-      case 'lifegoals': setStep('rawgoal'); break;
+      case 'goaldump':  onBack?.(); break;
+      case 'goalpick':  setStep('goaldump'); break;
+      case 'lifegoals': setStep('goalpick'); break;
       case 'habit':     setStep('lifegoals'); break;
       case 'microwin':  setStep('habit'); break;
       case 'vision':    setStep('microwin'); break;
@@ -98,26 +124,114 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     });
   };
 
+  // Continue button is disabled on goalpick until one is selected
+  const canContinue = step !== 'goalpick' || !!rawGoal;
+
+  const currentIndex = STEPS.indexOf(step);
+
   const renderStepContent = () => {
     switch (step) {
 
-      case 'rawgoal':
+      case 'goaldump':
         return (
-          <div className="space-y-8 animate-fadeIn">
+          <div className="space-y-6 animate-fadeIn">
             <div className="space-y-3">
               <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 1 of {STEPS.length}</p>
-              <h3 className="text-3xl font-bold text-white leading-tight">What do you want most right now?</h3>
-              <p className="text-gray-300 text-sm font-medium">Choose the one thing you want to achieve the most — the goal that would have the greatest meaning for your life.</p>
-              <p className="text-gray-500 text-sm">You can always add more goals once you're inside the app.</p>
+              <h3 className="text-3xl font-bold text-white leading-tight">What do you want?</h3>
+              <p className="text-gray-300 text-sm">Add everything on your mind — goals, dreams, things you've been thinking about. Don't sort it, don't filter it.</p>
+              <p className="text-gray-600 text-xs">We'll help you find the most important one next.</p>
             </div>
-            <textarea
-              value={rawGoal}
-              onChange={e => setRawGoal(e.target.value)}
-              placeholder="e.g. Make money, Move to a new country, Start my own business..."
-              rows={4}
-              className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white text-lg focus:border-yellow-500 outline-none resize-none leading-relaxed"
-            />
-            <p className="text-gray-600 text-xs">You'll break this down in the next step — for now, just name it.</p>
+
+            {/* Input + Add */}
+            <div className="flex gap-2">
+              <input
+                ref={draftInputRef}
+                type="text"
+                value={draftGoal}
+                onChange={e => setDraftGoal(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addGoal()}
+                placeholder="Type a goal and press Add..."
+                className="flex-1 bg-black/40 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-yellow-500 outline-none"
+              />
+              <button
+                onClick={addGoal}
+                disabled={!draftGoal.trim()}
+                className="flex items-center gap-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold rounded-xl transition-all"
+              >
+                <Plus size={18} /> Add
+              </button>
+            </div>
+
+            {/* Goal List */}
+            {goalList.length > 0 && (
+              <div className="space-y-2">
+                {goalList.map((goal, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between bg-gray-900/60 border border-gray-800 rounded-xl px-4 py-3"
+                  >
+                    <span className="text-white text-sm">{goal}</span>
+                    <button
+                      onClick={() => removeGoal(i)}
+                      className="text-gray-600 hover:text-red-400 transition-colors ml-3 shrink-0"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {goalList.length === 0 && (
+              <p className="text-gray-700 text-xs text-center pt-2">Your goals will appear here as you add them.</p>
+            )}
+          </div>
+        );
+
+      case 'goalpick':
+        return (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 2 of {STEPS.length}</p>
+              <h3 className="text-3xl font-bold text-white leading-tight">Now — which one matters most?</h3>
+              <p className="text-gray-300 text-sm font-medium">Choose the one thing you want to achieve the most — the goal that would have the greatest meaning for your life.</p>
+              <p className="text-gray-500 text-xs">Tap to select. Everything else builds from this.</p>
+            </div>
+
+            <div className="space-y-3">
+              {goalList.length > 0 ? goalList.map((goal, i) => {
+                const selected = rawGoal === goal;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setRawGoal(goal)}
+                    className={`w-full flex items-center justify-between text-left px-5 py-4 rounded-2xl border transition-all duration-200 ${
+                      selected
+                        ? 'bg-yellow-500/15 border-yellow-500 text-white'
+                        : 'bg-gray-900/50 border-gray-800 text-gray-300 hover:border-gray-600'
+                    }`}
+                  >
+                    <span className="text-sm font-medium">{goal}</span>
+                    {selected && (
+                      <span className="shrink-0 ml-3 w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center">
+                        <Check size={14} className="text-black" strokeWidth={3} />
+                      </span>
+                    )}
+                  </button>
+                );
+              }) : (
+                <div className="text-center py-8 space-y-2">
+                  <p className="text-gray-500 text-sm">No goals added yet.</p>
+                  <button onClick={() => setStep('goaldump')} className="text-yellow-500 text-xs underline">Go back and add some</button>
+                </div>
+              )}
+            </div>
+
+            {rawGoal && (
+              <p className="text-yellow-500/60 text-xs text-center pt-2">
+                Selected: "{rawGoal}"
+              </p>
+            )}
           </div>
         );
 
@@ -125,16 +239,16 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
         return (
           <div className="space-y-8 animate-fadeIn">
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 2 of {STEPS.length}</p>
+              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 3 of {STEPS.length}</p>
               <h3 className="text-2xl font-bold text-yellow-500">Life Goals</h3>
               {rawGoal ? (
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
-                  <p className="text-xs text-yellow-500/70 mb-1">You said you want to:</p>
+                  <p className="text-xs text-yellow-500/70 mb-1">Your most meaningful goal:</p>
                   <p className="text-white text-sm font-medium italic">"{rawGoal}"</p>
-                  <p className="text-gray-500 text-xs mt-2">Now let's break that down by time.</p>
+                  <p className="text-gray-500 text-xs mt-2">Now let's break that down by time. Don't worry if you're not sure — you can change these any time.</p>
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">Let's break your goal down by time frame.</p>
+                <p className="text-gray-500 text-sm">Let's break your goal down by time frame. You can change these any time.</p>
               )}
             </div>
 
@@ -154,6 +268,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
                 placeholder="e.g. Launch the App, Buy a House, Move abroad..."
                 className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white focus:border-yellow-500 outline-none"
               />
+              <p className="text-xs text-gray-700">Not sure yet? Add something for now — you can update it later.</p>
             </div>
 
             {/* Short Term Goal */}
@@ -172,6 +287,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
                 placeholder="e.g. Finish MVP Code, Run 10km, Land first job..."
                 className="w-full bg-black/40 border border-gray-700 rounded-xl p-4 text-white focus:border-yellow-500 outline-none"
               />
+              <p className="text-xs text-gray-700">Not sure yet? Add something for now — you can update it later.</p>
             </div>
           </div>
         );
@@ -180,7 +296,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
         return (
           <div className="space-y-8 animate-fadeIn">
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 3 of {STEPS.length}</p>
+              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 4 of {STEPS.length}</p>
               <h3 className="text-2xl font-bold text-yellow-500">The Daily Habit</h3>
             </div>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
@@ -202,7 +318,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
         return (
           <div className="space-y-8 animate-fadeIn">
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-purple-400/70 uppercase tracking-widest">Step 4 of {STEPS.length}</p>
+              <p className="text-xs font-semibold text-purple-400/70 uppercase tracking-widest">Step 5 of {STEPS.length}</p>
               <div className="flex items-center gap-3">
                 <Brain className="text-purple-400" size={24} />
                 <h3 className="text-2xl font-bold text-purple-400">The Micro Win</h3>
@@ -227,7 +343,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
         return (
           <div className="space-y-8 animate-fadeIn">
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 5 of {STEPS.length}</p>
+              <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">Step 6 of {STEPS.length}</p>
               <h3 className="text-2xl font-bold text-yellow-500">Vision — Your Ideal Life</h3>
               <p className="text-gray-400 text-sm">You've named what you want and how you'll get there. Now let's capture the direction behind all of it.</p>
               <p className="text-gray-500 text-xs">This is your lifestyle orientation — not a goal, not a finish line. A direction.</p>
@@ -306,8 +422,6 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     }
   };
 
-  const currentIndex = STEPS.indexOf(step);
-
   return (
     <div className="max-w-xl mx-auto px-6 py-12 pb-32">
       {/* Step Indicator */}
@@ -337,7 +451,8 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
           {step !== 'confirm' ? (
             <button
               onClick={toNextStep}
-              className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
+              disabled={!canContinue}
+              className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
             >
               CONTINUE <ArrowRight size={20} />
             </button>
