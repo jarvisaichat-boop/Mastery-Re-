@@ -506,12 +506,20 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               <h3 className="text-2xl font-bold text-yellow-500">Habit — Life Goal Habit</h3>
               <p className="text-gray-400 text-sm">What is the one daily habit / action you must make everyday to achieve your life goal?</p>
             </div>
-            {stepsList.length > 0 && (
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
-                <p className="text-xs text-yellow-500/70 mb-1">Your nearest step:</p>
-                <p className="text-white text-sm font-medium italic">"{stepsList[stepsList.length - 1]}"</p>
-              </div>
-            )}
+            <div className="space-y-2">
+              {rawGoal && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
+                  <p className="text-xs text-yellow-500/70 mb-1">Life Goal</p>
+                  <p className="text-white text-sm font-medium">{rawGoal}</p>
+                </div>
+              )}
+              {stepsList.length > 0 && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
+                  <p className="text-xs text-yellow-500/70 mb-1">Your nearest step:</p>
+                  <p className="text-white text-sm font-medium">{stepsList[stepsList.length - 1]}</p>
+                </div>
+              )}
+            </div>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
               <p className="text-gray-300 mb-4 text-sm">What is the one daily action that moves that step forward?</p>
               <input
