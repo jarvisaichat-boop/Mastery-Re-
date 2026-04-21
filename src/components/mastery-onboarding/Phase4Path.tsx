@@ -152,7 +152,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
       case 'rawgoal':
         return (
           <div className="animate-fadeIn">
-            <div className="text-center mb-12">
+            <div className="text-center mb-6">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500/10 mb-6">
                 <Route className="w-8 h-8 text-yellow-500" />
               </div>
@@ -162,7 +162,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               </p>
             </div>
             {data.path?.vision && (
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3 mb-6">
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
                 <p className="text-xs text-yellow-500/70 mb-2">Vision</p>
                 <p className="text-white text-sm font-medium italic">"{data.path.vision}"</p>
               </div>
