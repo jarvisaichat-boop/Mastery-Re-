@@ -12,43 +12,6 @@ interface Phase4PathProps {
 type Step = 'rawgoal' | 'steps' | 'habit' | 'microwin' | 'confirm';
 const STEPS: Step[] = ['rawgoal', 'steps', 'habit', 'microwin', 'confirm'];
 
-type TimeHorizon = 'short' | 'mid' | 'long';
-
-interface StepItem {
-  text: string;
-  horizon: TimeHorizon;
-}
-
-const HORIZONS: { key: TimeHorizon; label: string; range: string; color: string; border: string; tag: string; dot: string }[] = [
-  {
-    key: 'short',
-    label: 'Short Term',
-    range: '1 week – 3 months',
-    color: 'text-emerald-400',
-    border: 'border-emerald-500/30',
-    tag: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    dot: 'bg-emerald-400',
-  },
-  {
-    key: 'mid',
-    label: 'Mid Term',
-    range: '4 months – 3 years',
-    color: 'text-blue-400',
-    border: 'border-blue-500/30',
-    tag: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-    dot: 'bg-blue-400',
-  },
-  {
-    key: 'long',
-    label: 'Long Term',
-    range: '3+ years',
-    color: 'text-purple-400',
-    border: 'border-purple-500/30',
-    tag: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-    dot: 'bg-purple-400',
-  },
-];
-
 export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
 
@@ -57,10 +20,9 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   // Step 1 — Life Goal
   const [rawGoal, setRawGoal] = useState(profile?.rawGoal || '');
 
-  // Step 2 — Steps with time horizons
-  const [stepsList, setStepsList] = useState<StepItem[]>([]);
+  // Step 2 — Steps (ordered path to the goal)
+  const [stepsList, setStepsList] = useState<string[]>([]);
   const [draftStep, setDraftStep] = useState('');
-  const [draftHorizon, setDraftHorizon] = useState<TimeHorizon>('short');
   const draftInputRef = useRef<HTMLInputElement>(null);
 
   // Drag state
@@ -77,7 +39,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   const addStep = () => {
     const trimmed = draftStep.trim();
     if (!trimmed) return;
-    setStepsList(prev => [...prev, { text: trimmed, horizon: draftHorizon }]);
+    setStepsList(prev => [...prev, trimmed]);
     setDraftStep('');
     draftInputRef.current?.focus();
   };
@@ -129,13 +91,13 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
         setStep('steps');
         break;
       case 'steps': {
-        const finalSteps: StepItem[] = draftStep.trim()
-          ? [...stepsList, { text: draftStep.trim(), horizon: draftHorizon }]
+        const finalSteps = draftStep.trim()
+          ? [...stepsList, draftStep.trim()]
           : [...stepsList];
         setStepsList(finalSteps);
         setDraftStep('');
-        const ordered = finalSteps.map((s, idx) => ({
-          text: s.text,
+        const ordered = finalSteps.map((text, idx) => ({
+          text,
           hidden: false,
           order: idx,
         }));
@@ -232,25 +194,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
                   <p className="text-white text-sm font-medium italic">"{rawGoal}"</p>
                 </div>
               )}
-              <p className="text-gray-500 text-xs">Add every step on the path to your goal and tag it by time horizon.</p>
-            </div>
-
-            {/* Time horizon picker */}
-            <div className="grid grid-cols-3 gap-2">
-              {HORIZONS.map(h => (
-                <button
-                  key={h.key}
-                  onClick={() => setDraftHorizon(h.key)}
-                  className={`flex flex-col items-center gap-1 py-2 px-2 rounded-xl border text-xs font-semibold transition-all ${
-                    draftHorizon === h.key
-                      ? `${h.tag} border-opacity-100`
-                      : 'bg-gray-900/40 border-gray-800 text-gray-500 hover:border-gray-600'
-                  }`}
-                >
-                  <span className={draftHorizon === h.key ? h.color : 'text-gray-500'}>{h.label}</span>
-                  <span className="font-normal opacity-70 text-[10px]">{h.range}</span>
-                </button>
-              ))}
+              <p className="text-gray-500 text-xs">Add the steps that need to happen — then drag or use the arrows to order them. Furthest step at the top, nearest at the bottom.</p>
             </div>
 
             {/* Input + Add */}
@@ -273,69 +217,61 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               </button>
             </div>
 
-            {/* Steps grouped by horizon */}
+            {/* Ordered Steps List */}
             {stepsList.length > 0 ? (
-              <div className="space-y-4">
-                {HORIZONS.map(h => {
-                  const group = stepsList
-                    .map((s, i) => ({ ...s, globalIndex: i }))
-                    .filter(s => s.horizon === h.key);
-                  if (group.length === 0) return null;
-                  return (
-                    <div key={h.key}>
-                      {/* Section header */}
-                      <div className={`flex items-center gap-2 mb-2 pb-1 border-b ${h.border}`}>
-                        <span className={`w-2 h-2 rounded-full ${h.dot}`} />
-                        <span className={`text-xs font-bold uppercase tracking-widest ${h.color}`}>{h.label}</span>
-                        <span className="text-gray-600 text-xs">{h.range}</span>
-                      </div>
-                      <div className="space-y-2">
-                        {group.map(({ text, globalIndex }) => (
-                          <div
-                            key={globalIndex}
-                            draggable
-                            onDragStart={e => handleDragStart(e, globalIndex)}
-                            onDragOver={e => handleDragOver(e, globalIndex)}
-                            onDrop={e => handleDrop(e, globalIndex)}
-                            onDragEnd={handleDragEnd}
-                            className={`flex items-center gap-2 bg-gray-900/60 border rounded-xl px-3 py-3 transition-all ${
-                              dragOverIndex === globalIndex && dragIndex !== globalIndex
-                                ? `${h.border} bg-yellow-500/5`
-                                : 'border-gray-800'
-                            } ${dragIndex === globalIndex ? 'opacity-40' : 'opacity-100'}`}
-                          >
-                            <span className="text-gray-600 cursor-grab active:cursor-grabbing shrink-0">
-                              <GripVertical size={16} />
-                            </span>
-                            <span className="text-white text-sm flex-1 min-w-0 break-words">{text}</span>
-                            <div className="flex items-center gap-1 shrink-0">
-                              <button
-                                onClick={() => moveStep(globalIndex, -1)}
-                                disabled={globalIndex === 0}
-                                className="p-1 text-gray-600 hover:text-gray-300 disabled:opacity-20 transition-colors"
-                              >
-                                <ChevronUp size={14} />
-                              </button>
-                              <button
-                                onClick={() => moveStep(globalIndex, 1)}
-                                disabled={globalIndex === stepsList.length - 1}
-                                className="p-1 text-gray-600 hover:text-gray-300 disabled:opacity-20 transition-colors"
-                              >
-                                <ChevronDown size={14} />
-                              </button>
-                              <button
-                                onClick={() => removeStep(globalIndex)}
-                                className="p-1 text-gray-600 hover:text-red-400 transition-colors"
-                              >
-                                <X size={14} />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+              <div className="space-y-2">
+                {stepsList.map((s, i) => (
+                  <div
+                    key={i}
+                    draggable
+                    onDragStart={e => handleDragStart(e, i)}
+                    onDragOver={e => handleDragOver(e, i)}
+                    onDrop={e => handleDrop(e, i)}
+                    onDragEnd={handleDragEnd}
+                    className={`flex items-center gap-2 bg-gray-900/60 border rounded-xl px-3 py-3 transition-all ${
+                      dragOverIndex === i && dragIndex !== i
+                        ? 'border-yellow-500/60 bg-yellow-500/5'
+                        : 'border-gray-800'
+                    } ${dragIndex === i ? 'opacity-40' : 'opacity-100'}`}
+                  >
+                    {/* Drag handle */}
+                    <span className="text-gray-600 cursor-grab active:cursor-grabbing shrink-0">
+                      <GripVertical size={16} />
+                    </span>
+
+                    {/* Step number + text */}
+                    <span className="text-xs text-gray-600 font-mono w-4 shrink-0">{i + 1}</span>
+                    <span className="text-white text-sm flex-1 min-w-0 break-words">{s}</span>
+
+                    {/* Up/Down + Remove */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => moveStep(i, -1)}
+                        disabled={i === 0}
+                        className="p-1 text-gray-600 hover:text-gray-300 disabled:opacity-20 transition-colors"
+                      >
+                        <ChevronUp size={14} />
+                      </button>
+                      <button
+                        onClick={() => moveStep(i, 1)}
+                        disabled={i === stepsList.length - 1}
+                        className="p-1 text-gray-600 hover:text-gray-300 disabled:opacity-20 transition-colors"
+                      >
+                        <ChevronDown size={14} />
+                      </button>
+                      <button
+                        onClick={() => removeStep(i)}
+                        className="p-1 text-gray-600 hover:text-red-400 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
+
+                <p className="text-gray-700 text-xs text-center pt-1">
+                  ↑ Far away &nbsp;&nbsp;·&nbsp;&nbsp; ↓ Where you are now
+                </p>
               </div>
             ) : (
               <p className="text-gray-700 text-xs text-center py-4">Your steps will appear here as you add them.</p>
@@ -354,7 +290,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
             {stepsList.length > 0 && (
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
                 <p className="text-xs text-yellow-500/70 mb-1">Your nearest step:</p>
-                <p className="text-white text-sm font-medium italic">"{stepsList[stepsList.length - 1].text}"</p>
+                <p className="text-white text-sm font-medium italic">"{stepsList[stepsList.length - 1]}"</p>
               </div>
             )}
 
