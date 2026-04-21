@@ -154,7 +154,7 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 - Self (Mental & Physical Health)
 - Family (Blood / Parents)
 - Love (Partner / Romance)
-- Work (Career / Mission / School)
+- Work (Career / Project / School)
 - Friends (Social Circle / Community)
 
 **Example flow:**

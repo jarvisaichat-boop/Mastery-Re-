@@ -17,7 +17,7 @@ export default function Phase3CoreValues({ onComplete }: Phase3CoreValuesProps) 
     { value: 'Self', label: 'Self (Mental & Physical Health)' },
     { value: 'Family', label: 'Family (Blood / Parents)' },
     { value: 'Love', label: 'Love (Partner / Romance)' },
-    { value: 'Work', label: 'Work (Career / Mission / School)' },
+    { value: 'Work', label: 'Work (Career / Project / School)' },
     { value: 'Friends', label: 'Friends (Social Circle / Community)' }
   ];
 
