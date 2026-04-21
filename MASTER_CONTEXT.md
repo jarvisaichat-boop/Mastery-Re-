@@ -151,7 +151,7 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 **Concept (April 2026):** When a user dumps what they want from life, an AI should automatically sort their desires by altitude and show a visual tree. The top level is always the 5 fixed life domains. Under each domain sit the user's specific goals, sorted from highest altitude (vision-level) down to the concrete steps.
 
 **The 5 fixed top-level life domains** (reference screenshot: `attached_assets/image_1776751929556.png`):
-- Self (Mental & Physical Health)
+- Self (Mental & Physical)
 - Family (Blood / Parents)
 - Love (Partner / Romance)
 - Work (Career / Project / School)

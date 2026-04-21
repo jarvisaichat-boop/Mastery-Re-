@@ -14,7 +14,7 @@ export default function Phase3CoreValues({ onComplete }: Phase3CoreValuesProps) 
   const [localValues, setLocalValues] = useState(coreValues);
 
   const priorities = [
-    { value: 'Self', label: 'Self (Mental & Physical Health)' },
+    { value: 'Self', label: 'Self (Mental & Physical)' },
     { value: 'Family', label: 'Family (Blood / Parents)' },
     { value: 'Love', label: 'Love (Partner / Romance)' },
     { value: 'Work', label: 'Work (Career / Project / School)' },
