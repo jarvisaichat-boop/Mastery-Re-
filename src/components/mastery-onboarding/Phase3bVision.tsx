@@ -66,14 +66,47 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
         />
 
         {hasCoreValues && (
-          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
-            <p className="text-xs text-yellow-500/70 mb-2">Core Value</p>
-            {cv.priority && (
-              <p className="text-white text-sm font-medium">{cv.priority}</p>
-            )}
-            {cv.why && (
-              <p className="text-gray-400 text-xs italic mt-1">"{cv.why}"</p>
-            )}
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-4 space-y-3">
+            <p className="text-xs text-yellow-500/70 uppercase tracking-widest font-semibold">Core Values</p>
+            <div className="space-y-2">
+              {cv.priority && (
+                <div>
+                  <p className="text-xs text-gray-600 uppercase tracking-wider">Priority</p>
+                  <p className="text-white text-sm font-medium">{cv.priority}</p>
+                </div>
+              )}
+              {cv.why && (
+                <div>
+                  <p className="text-xs text-gray-600 uppercase tracking-wider">Why</p>
+                  <p className="text-gray-300 text-sm italic">"{cv.why}"</p>
+                </div>
+              )}
+              {cv.purpose && (
+                <div>
+                  <p className="text-xs text-gray-600 uppercase tracking-wider">Purpose</p>
+                  <p className="text-gray-300 text-sm">{cv.purpose}</p>
+                </div>
+              )}
+              {cv.motto && (
+                <div>
+                  <p className="text-xs text-gray-600 uppercase tracking-wider">Motto</p>
+                  <p className="text-gray-300 text-sm italic">"{cv.motto}"</p>
+                </div>
+              )}
+              {cv.values?.filter(v => v.title && !v.hidden).length > 0 && (
+                <div>
+                  <p className="text-xs text-gray-600 uppercase tracking-wider mb-1">Values</p>
+                  <div className="space-y-1">
+                    {cv.values.filter(v => v.title && !v.hidden).map((v, i) => (
+                      <div key={i} className="flex gap-2 text-xs text-gray-400">
+                        <span className="text-yellow-500/70 font-medium shrink-0">{v.title}</span>
+                        {v.description && <span>— {v.description}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
