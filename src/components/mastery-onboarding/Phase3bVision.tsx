@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Eye } from 'lucide-react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { MasteryProfile } from '../../types/onboarding';
 
@@ -18,15 +18,19 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
   };
 
   return (
-    <div className="max-w-xl mx-auto px-6 py-12 pb-32">
-      <div className="flex justify-center mb-8">
-        <div className="h-1 w-8 rounded-full bg-yellow-500" />
+    <div className="max-w-2xl mx-auto px-6 py-12 pb-32 animate-fadeIn">
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500/10 mb-6">
+          <Eye className="w-8 h-8 text-yellow-500" />
+        </div>
+        <h2 className="text-4xl font-bold text-white mb-4">Vision</h2>
+        <p className="text-xl text-gray-400">
+          What is your ideal life?
+        </p>
       </div>
 
-      <div className="space-y-8 animate-fadeIn">
-        <div className="space-y-4">
-          <p className="text-sm font-bold text-yellow-500 uppercase tracking-[0.2em]">Vision</p>
-          <h3 className="text-4xl font-bold text-white leading-tight">What is your ideal life?</h3>
+      <div className="space-y-6">
+        <div className="space-y-2">
           <p className="text-gray-300 text-sm leading-relaxed">
             Imagine everything is set. Things are going well. You wake up and feel great, and everything is exactly as it should be.
           </p>
