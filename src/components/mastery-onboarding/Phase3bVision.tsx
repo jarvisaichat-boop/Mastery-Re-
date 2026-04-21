@@ -72,31 +72,31 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
               {cv.priority && (
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs text-yellow-500 uppercase tracking-wider font-semibold shrink-0 w-16">Priority</span>
-                  <span className="text-white text-sm font-medium">{cv.priority}</span>
+                  <span className="text-white text-sm">{cv.priority}</span>
                 </div>
               )}
               {cv.why && (
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs text-yellow-500 uppercase tracking-wider font-semibold shrink-0 w-16">Why</span>
-                  <span className="text-gray-300 text-sm italic">"{cv.why}"</span>
+                  <span className="text-white text-sm">{cv.why}</span>
                 </div>
               )}
               {cv.purpose && (
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs text-yellow-500 uppercase tracking-wider font-semibold shrink-0 w-16">Purpose</span>
-                  <span className="text-gray-300 text-sm">{cv.purpose}</span>
+                  <span className="text-white text-sm">{cv.purpose}</span>
                 </div>
               )}
               {cv.motto && (
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs text-yellow-500 uppercase tracking-wider font-semibold shrink-0 w-16">Motto</span>
-                  <span className="text-gray-300 text-sm italic">"{cv.motto}"</span>
+                  <span className="text-white text-sm">{cv.motto}</span>
                 </div>
               )}
               {cv.values?.filter(v => v.title && !v.hidden).length > 0 && (
                 <div className="pt-1 space-y-1">
                   {cv.values.filter(v => v.title && !v.hidden).map((v, i) => (
-                    <div key={i} className="flex gap-2 text-xs text-gray-400">
+                    <div key={i} className="flex gap-2 text-sm text-gray-300">
                       <span className="text-yellow-500 font-medium shrink-0">{v.title}</span>
                       {v.description && <span>— {v.description}</span>}
                     </div>
