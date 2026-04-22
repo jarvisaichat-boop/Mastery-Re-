@@ -569,7 +569,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               Close your eyes. Picture your worst day — tired, raining, no motivation.
             </p>
             <p className="text-xl text-gray-300 max-w-md leading-relaxed">
-              Can you see yourself doing this <span className="text-purple-400 font-bold">Micro Win</span>
+              Can you see yourself achieving <span className="text-purple-400 font-bold">Micro Win</span>
               <br />
               <span className="text-yellow-500 font-semibold">{microMethod || 'your micro win'}</span>
               <br />?
