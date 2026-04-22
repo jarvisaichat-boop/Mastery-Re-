@@ -34,12 +34,11 @@ export default function Phase3bVision({ onComplete, onBack }: Phase3bVisionProps
 
       <div className="space-y-6">
         <div className="space-y-3">
-          <p className="text-gray-300 text-sm font-medium">Not a goal. Not a plan.</p>
           <p className="text-gray-400 text-sm leading-relaxed">
-            Vision is the feeling behind all your goals. Think about everything you're chasing — money, health, connection, freedom. Strip away the specifics and ask: what does all of that actually give me, at the deepest level?
+            Vision is the direction your life is pointing. Not a goal. Not a plan. Just the answer to: what kind of life do I want to live?
           </p>
           <p className="text-gray-500 text-sm leading-relaxed">
-            That feeling is your Vision. It sits above your goals and doesn't change when your goals do.
+            Think about your ideal life — not what you own or achieve, but how you feel moving through each day, how you spend your time, who you are in the process. Clear. Purposeful. Alive. That's the Vision.
           </p>
         </div>
 
