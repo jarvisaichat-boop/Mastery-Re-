@@ -167,6 +167,8 @@ The core system follows a 7-phase coaching cycle: Intake, Goal Contract, Weekly 
 
 **When to build:** Requires OpenAI API key. Best batched with other AI features. The `openai` npm package is already installed on the backend — endpoint just needs to be wired up.
 
+**Contemplation note (April 2026):** The Life Goal step currently asks the user to type their goal directly. The better version: use AI to collect everything bouncing around in the user's head — goals, desires, todos, random thoughts — and sort them by hierarchy, altitude, and category. Then present the organised tree and ask the user to pick one as their Life Goal. This removes the blank-page paralysis and ensures the picked goal is properly placed in context of everything else they want.
+
 ---
 
 ## External Dependencies
