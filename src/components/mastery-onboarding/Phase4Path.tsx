@@ -540,12 +540,12 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               <p className="text-xs font-semibold text-purple-400/70 uppercase tracking-widest">Step 4 of {STEPS.length} — Micro Win</p>
               <div className="flex items-center gap-3">
                 <Brain className="text-purple-400" size={24} />
-                <h3 className="text-2xl font-bold text-purple-400">The Micro Win</h3>
+                <h3 className="text-2xl font-bold text-purple-400">Micro Win</h3>
               </div>
             </div>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
               <p className="text-gray-300 mb-4 text-sm">
-                Human beings are weak. On days when you are sick or tired, what is the <strong>ridiculously easy version</strong> of this habit?
+                Human beings are weak. On days when you are sick or tired, what is the <strong>ridiculously easy version</strong> of this habit that you can do in 60 seconds??
               </p>
               <input
                 type="text"
