@@ -597,8 +597,9 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               </div>
             </div>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
-              <p className="text-gray-300 mb-4 text-sm">
-                Human beings are weak. On days when you are tired, lazy, procrastinating and out of motivation, what is one <strong>ridiculously easy version</strong> of this habit that you can accomplish in 60 seconds?? It should feel stupid to do it but also stupid not to do it.
+              <p className="text-white font-semibold text-base mb-2">Human beings are weak.</p>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                On days when you are tired, lazy, procrastinating and out of motivation, what is one <span className="text-white font-bold">ridiculously easy version</span> of this habit that you can accomplish in 60 seconds?? <span className="text-gray-400 italic">It should feel stupid to do it but also stupid not to do it.</span>
               </p>
               <input
                 type="text"
