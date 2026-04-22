@@ -489,19 +489,23 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
                   </button>
                 </div>
 
+                {/* Hints — always visible below input */}
+                <div className="space-y-1">
+                  <p className="text-white text-xs text-center">
+                    ↑ Far away &nbsp;·&nbsp; ↓ Closer to where you are now
+                  </p>
+                  <p className="text-white text-xs text-center">
+                    Your bottom step should be achievable in 1 week – 3 months.
+                  </p>
+                </div>
+
                 {/* Order list */}
                 {stepsList.length > 0 ? (
                   <div className="space-y-2">
                     {stepsList.map((s, i) => renderStepRow(s, i, false))}
-                    <p className="text-gray-700 text-xs text-center pt-1">
-                      ↑ Far away &nbsp;·&nbsp; ↓ Where you are now
-                    </p>
-                    <p className="text-gray-600 text-xs text-center">
-                      Your bottom step should be achievable in 1 week – 3 months.
-                    </p>
                   </div>
                 ) : (
-                  <p className="text-gray-700 text-xs text-center py-4">Your steps will appear here as you add them.</p>
+                  <p className="text-gray-500 text-xs text-center py-4">Your steps will appear here as you add them.</p>
                 )}
               </>
             ) : (
