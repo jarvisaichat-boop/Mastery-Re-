@@ -408,7 +408,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500/10 mb-6">
                 <Route className="w-8 h-8 text-yellow-500" />
               </div>
-              <h2 className="text-4xl font-bold text-white mb-4">Life Goal</h2>
+              <h2 className="text-4xl font-bold text-white mb-4">Goal</h2>
               <p className="text-xl text-gray-400">What do you want most right now?</p>
             </div>
             {data.path?.vision && (
@@ -418,7 +418,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               </div>
             )}
             <div className="space-y-6">
-              <p className="text-gray-400 text-sm">The one thing that, if you achieved it, would have the greatest meaning for your life.</p>
+              <p className="text-gray-400 text-sm">You came to this app for a reason. What is the goal or desire that brought you here? Throughout the app, this will be referred to as your <span className="text-yellow-500 font-medium">Life Goal</span>.</p>
               <textarea
                 value={rawGoal}
                 onChange={e => setRawGoal(e.target.value)}
