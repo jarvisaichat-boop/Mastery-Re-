@@ -5,6 +5,7 @@ import { MasteryProfile } from '../../types/onboarding';
 
 interface Phase4PathProps {
   onComplete: (data: Partial<MasteryProfile>) => void;
+  onPartialUpdate?: (data: Partial<MasteryProfile>) => void;
   profile?: Partial<MasteryProfile>;
   onBack?: () => void;
 }
@@ -16,7 +17,7 @@ const RANGES_DRAFT_KEY = 'mastery-onboarding-ranges-draft';
 const HABIT_DRAFT_KEY = 'mastery-onboarding-habit-draft';
 const MICRO_DRAFT_KEY = 'mastery-onboarding-micro-draft';
 
-export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathProps) {
+export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBack }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
 
   const [step, setStep] = useState<Step>('rawgoal');
@@ -24,8 +25,9 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   // Step 1 — Life Goal
   const [rawGoal, setRawGoal] = useState(profile?.rawGoal || '');
 
-  // Step 2 — Steps (draft persisted to localStorage so refreshes don't wipe them)
+  // Step 2 — Steps: prefer profile (survives full flow), fall back to draft key
   const [stepsList, setStepsList] = useState<string[]>(() => {
+    if (profile?.steps && profile.steps.length > 0) return profile.steps;
     try {
       const saved = localStorage.getItem(STEPS_DRAFT_KEY);
       return saved ? JSON.parse(saved) : [];
@@ -64,9 +66,10 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   midShortRef.current = midShortBoundary;
   stepsLenRef.current = stepsList.length;
 
-  // Auto-save steps draft so refreshes don't wipe them
+  // Auto-save steps draft + sync to profile so they survive the full flow
   useEffect(() => {
     try { localStorage.setItem(STEPS_DRAFT_KEY, JSON.stringify(stepsList)); } catch {}
+    onPartialUpdate?.({ steps: stepsList });
   }, [stepsList]);
 
   // Auto-save time range boundaries

@@ -29,6 +29,7 @@ export interface MasteryProfile {
   
   // Phase 4: The Architect (Logic Tree)
   rawGoal: string; // Unfiltered "what do you want?" answer from first screen
+  steps: string[]; // Ordered list of steps toward the Life Goal
   specificMetric: string;
   logicTreeRoot: string;
   logicTreeBranch: string;
