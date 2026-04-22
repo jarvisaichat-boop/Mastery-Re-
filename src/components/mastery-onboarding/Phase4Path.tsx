@@ -157,8 +157,12 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
 
   const openTimeRanges = (list = stepsList) => {
     const n = list.length;
-    setLongMidBoundary(Math.floor(n / 3));
-    setMidShortBoundary(Math.floor((2 * n) / 3));
+    // Only apply defaults if no saved boundaries exist yet
+    const hasSaved = !!localStorage.getItem(RANGES_DRAFT_KEY);
+    if (!hasSaved) {
+      setLongMidBoundary(Math.floor(n / 3));
+      setMidShortBoundary(Math.floor((2 * n) / 3));
+    }
     setShowTimeRanges(true);
   };
 
