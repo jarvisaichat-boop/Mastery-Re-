@@ -74,14 +74,6 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     try { localStorage.setItem(RANGES_DRAFT_KEY, JSON.stringify({ longMid: longMidBoundary, midShort: midShortBoundary })); } catch {}
   }, [longMidBoundary, midShortBoundary]);
 
-  // Auto-save habit and micro win drafts
-  useEffect(() => {
-    try { localStorage.setItem(HABIT_DRAFT_KEY, habitName); } catch {}
-  }, [habitName]);
-  useEffect(() => {
-    try { localStorage.setItem(MICRO_DRAFT_KEY, microMethod); } catch {}
-  }, [microMethod]);
-
   // Drag-to-reorder state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -95,6 +87,14 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   const [microMethod, setMicroMethod] = useState(() => {
     try { return localStorage.getItem(MICRO_DRAFT_KEY) || ''; } catch { return ''; }
   });
+
+  // Auto-save habit and micro win drafts
+  useEffect(() => {
+    try { localStorage.setItem(HABIT_DRAFT_KEY, habitName); } catch {}
+  }, [habitName]);
+  useEffect(() => {
+    try { localStorage.setItem(MICRO_DRAFT_KEY, microMethod); } catch {}
+  }, [microMethod]);
 
   // ── Inline edit helpers ─────────────────────────────────────────────────────
 
