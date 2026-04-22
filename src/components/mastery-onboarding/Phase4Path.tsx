@@ -11,6 +11,7 @@ interface Phase4PathProps {
 
 type Step = 'rawgoal' | 'steps' | 'habit' | 'microwin' | 'confirm';
 const STEPS: Step[] = ['rawgoal', 'steps', 'habit', 'microwin', 'confirm'];
+const STEPS_DRAFT_KEY = 'mastery-onboarding-steps-draft';
 
 export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
@@ -20,8 +21,13 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   // Step 1 — Life Goal
   const [rawGoal, setRawGoal] = useState(profile?.rawGoal || '');
 
-  // Step 2 — Steps
-  const [stepsList, setStepsList] = useState<string[]>([]);
+  // Step 2 — Steps (draft persisted to localStorage so refreshes don't wipe them)
+  const [stepsList, setStepsList] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(STEPS_DRAFT_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [draftStep, setDraftStep] = useState('');
   const draftInputRef = useRef<HTMLInputElement>(null);
 
@@ -44,6 +50,11 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   longMidRef.current = longMidBoundary;
   midShortRef.current = midShortBoundary;
   stepsLenRef.current = stepsList.length;
+
+  // Auto-save steps draft so refreshes don't wipe them
+  useEffect(() => {
+    try { localStorage.setItem(STEPS_DRAFT_KEY, JSON.stringify(stepsList)); } catch {}
+  }, [stepsList]);
 
   // Drag-to-reorder state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -218,6 +229,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   };
 
   const handleFinish = () => {
+    try { localStorage.removeItem(STEPS_DRAFT_KEY); } catch {}
     onComplete({
       rawGoal,
       proposedHabit: {
