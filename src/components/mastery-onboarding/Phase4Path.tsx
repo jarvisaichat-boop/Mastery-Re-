@@ -12,6 +12,7 @@ interface Phase4PathProps {
 type Step = 'rawgoal' | 'steps' | 'habit' | 'microwin' | 'confirm';
 const STEPS: Step[] = ['rawgoal', 'steps', 'habit', 'microwin', 'confirm'];
 const STEPS_DRAFT_KEY = 'mastery-onboarding-steps-draft';
+const RANGES_DRAFT_KEY = 'mastery-onboarding-ranges-draft';
 
 export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
@@ -36,10 +37,20 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   const [editingText, setEditingText] = useState('');
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  // Time ranges sub-phase
+  // Time ranges sub-phase (boundaries persisted to localStorage)
   const [showTimeRanges, setShowTimeRanges] = useState(false);
-  const [longMidBoundary, setLongMidBoundary] = useState(0); // 0..n, steps 0..lM-1 = Long
-  const [midShortBoundary, setMidShortBoundary] = useState(0); // lM..mS-1 = Mid, mS..n-1 = Short
+  const [longMidBoundary, setLongMidBoundary] = useState(() => {
+    try {
+      const saved = localStorage.getItem(RANGES_DRAFT_KEY);
+      return saved ? JSON.parse(saved).longMid ?? 0 : 0;
+    } catch { return 0; }
+  });
+  const [midShortBoundary, setMidShortBoundary] = useState(() => {
+    try {
+      const saved = localStorage.getItem(RANGES_DRAFT_KEY);
+      return saved ? JSON.parse(saved).midShort ?? 0 : 0;
+    } catch { return 0; }
+  });
 
   // Refs for divider drag (avoid stale closures)
   const dividerDragging = useRef<'longMid' | 'midShort' | null>(null);
@@ -55,6 +66,11 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   useEffect(() => {
     try { localStorage.setItem(STEPS_DRAFT_KEY, JSON.stringify(stepsList)); } catch {}
   }, [stepsList]);
+
+  // Auto-save time range boundaries
+  useEffect(() => {
+    try { localStorage.setItem(RANGES_DRAFT_KEY, JSON.stringify({ longMid: longMidBoundary, midShort: midShortBoundary })); } catch {}
+  }, [longMidBoundary, midShortBoundary]);
 
   // Drag-to-reorder state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -230,6 +246,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
 
   const handleFinish = () => {
     try { localStorage.removeItem(STEPS_DRAFT_KEY); } catch {}
+    try { localStorage.removeItem(RANGES_DRAFT_KEY); } catch {}
     onComplete({
       rawGoal,
       proposedHabit: {
