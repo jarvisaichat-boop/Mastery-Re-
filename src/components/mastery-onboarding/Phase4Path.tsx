@@ -13,6 +13,8 @@ type Step = 'rawgoal' | 'steps' | 'habit' | 'microwin' | 'confirm';
 const STEPS: Step[] = ['rawgoal', 'steps', 'habit', 'microwin', 'confirm'];
 const STEPS_DRAFT_KEY = 'mastery-onboarding-steps-draft';
 const RANGES_DRAFT_KEY = 'mastery-onboarding-ranges-draft';
+const HABIT_DRAFT_KEY = 'mastery-onboarding-habit-draft';
+const MICRO_DRAFT_KEY = 'mastery-onboarding-micro-draft';
 
 export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
@@ -72,15 +74,27 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
     try { localStorage.setItem(RANGES_DRAFT_KEY, JSON.stringify({ longMid: longMidBoundary, midShort: midShortBoundary })); } catch {}
   }, [longMidBoundary, midShortBoundary]);
 
+  // Auto-save habit and micro win drafts
+  useEffect(() => {
+    try { localStorage.setItem(HABIT_DRAFT_KEY, habitName); } catch {}
+  }, [habitName]);
+  useEffect(() => {
+    try { localStorage.setItem(MICRO_DRAFT_KEY, microMethod); } catch {}
+  }, [microMethod]);
+
   // Drag-to-reorder state
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   // Step 3 — Habit
-  const [habitName, setHabitName] = useState('');
+  const [habitName, setHabitName] = useState(() => {
+    try { return localStorage.getItem(HABIT_DRAFT_KEY) || ''; } catch { return ''; }
+  });
 
   // Step 4 — Micro Win
-  const [microMethod, setMicroMethod] = useState('');
+  const [microMethod, setMicroMethod] = useState(() => {
+    try { return localStorage.getItem(MICRO_DRAFT_KEY) || ''; } catch { return ''; }
+  });
 
   // ── Inline edit helpers ─────────────────────────────────────────────────────
 
@@ -251,6 +265,8 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
   const handleFinish = () => {
     try { localStorage.removeItem(STEPS_DRAFT_KEY); } catch {}
     try { localStorage.removeItem(RANGES_DRAFT_KEY); } catch {}
+    try { localStorage.removeItem(HABIT_DRAFT_KEY); } catch {}
+    try { localStorage.removeItem(MICRO_DRAFT_KEY); } catch {}
     onComplete({
       rawGoal,
       proposedHabit: {
