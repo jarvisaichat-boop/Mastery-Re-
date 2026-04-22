@@ -418,7 +418,7 @@ export default function Phase4Path({ onComplete, profile, onBack }: Phase4PathPr
               </div>
             )}
             <div className="space-y-6">
-              <p className="text-gray-400 text-sm">You came to this app for a reason. What is the goal or desire that brought you here? Throughout the app, this will be referred to as your <span className="text-yellow-500 font-medium">Life Goal</span>.</p>
+              <p className="text-gray-400 text-sm">What do you want the most right now? What is driving you? What do you want to achieve? What comes to your mind? We all want a million things in life — but what do you desire the most? You can add more goals later in the app, but you can only have one main goal active at a time. Throughout the app, this will be referred to as your <span className="text-yellow-500 font-medium">Life Goal</span>.</p>
               <textarea
                 value={rawGoal}
                 onChange={e => setRawGoal(e.target.value)}
