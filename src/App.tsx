@@ -413,15 +413,24 @@ function App() {
                 logger.log('⚠️ rawGoal not provided — keeping existing value in localStorage');
             }
 
-            // If VisionBoard context lost the projects, restore from backup key
-            const projectsBackup = (() => {
-                try {
-                    const raw = localStorage.getItem(ONBOARDING_PROJECTS_BACKUP_KEY);
-                    return raw ? JSON.parse(raw) : null;
-                } catch { return null; }
-            })();
-            if (projectsBackup) {
-                logger.log('📦 Projects backup found:', projectsBackup);
+            // Restore projects backup into VisionBoard storage if projects are missing
+            try {
+                const backupRaw = localStorage.getItem(ONBOARDING_PROJECTS_BACKUP_KEY);
+                if (backupRaw) {
+                    const backup = JSON.parse(backupRaw);
+                    if (Array.isArray(backup) && backup.length > 0) {
+                        const vbRaw = localStorage.getItem('mastery-vision-board-v2');
+                        const vb = vbRaw ? JSON.parse(vbRaw) : null;
+                        const hasProjects = vb?.path?.projects && Array.isArray(vb.path.projects) && vb.path.projects.length > 0;
+                        if (!hasProjects && vb) {
+                            vb.path = { ...(vb.path || {}), projects: backup };
+                            localStorage.setItem('mastery-vision-board-v2', JSON.stringify(vb));
+                            logger.log('📦 Restored projects from backup into VisionBoard storage:', backup.length, 'items');
+                        }
+                    }
+                }
+            } catch (e) {
+                logger.error('Failed to restore projects backup', e);
             }
 
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
@@ -433,6 +442,7 @@ function App() {
             localStorage.removeItem('mastery-onboarding-profile');
             localStorage.removeItem('mastery-onboarding-phase');
             localStorage.removeItem(ONBOARDING_RAWGOAL_DRAFT_KEY);
+            localStorage.removeItem(ONBOARDING_PROJECTS_BACKUP_KEY);
             logger.log('🧹 Cleared onboarding localStorage');
 
             // Reset App Tour and Micro-Win flags to ensure proper flow

@@ -284,7 +284,8 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
     try { localStorage.removeItem(RANGES_DRAFT_KEY); } catch {}
     try { localStorage.removeItem(HABIT_DRAFT_KEY); } catch {}
     try { localStorage.removeItem(MICRO_DRAFT_KEY); } catch {}
-    try { localStorage.removeItem(RAWGOAL_DRAFT_KEY); } catch {}
+    // RAWGOAL_DRAFT_KEY is intentionally NOT cleared here — it stays until
+    // App.handleOnboardingComplete successfully reads it and clears it there.
     onComplete({
       rawGoal,
       proposedHabit: {
