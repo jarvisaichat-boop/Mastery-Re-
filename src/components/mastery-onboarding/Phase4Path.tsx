@@ -24,10 +24,10 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
 
   const [step, setStep] = useState<Step>('rawgoal');
 
-  // Step 1 — Life Goal (prefer profile, fall back to draft key so it survives reload)
+  // Step 1 — Life Goal (draft key is source of truth — newer than profile on refresh)
   const [rawGoal, setRawGoal] = useState(() => {
-    if (profile?.rawGoal) return profile.rawGoal;
-    try { return localStorage.getItem(RAWGOAL_DRAFT_KEY) || ''; } catch { return ''; }
+    try { const draft = localStorage.getItem(RAWGOAL_DRAFT_KEY); if (draft) return draft; } catch {}
+    return profile?.rawGoal || '';
   });
 
   // Step 2 — Steps: prefer profile (survives full flow), fall back to draft key

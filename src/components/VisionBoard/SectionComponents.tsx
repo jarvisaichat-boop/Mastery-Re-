@@ -173,8 +173,12 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnl
     return path.projects;
   }, [path.projects]);
 
-  // Sync backup into VisionBoardContext so it persists going forward
+  // Sync backup into VisionBoardContext on first mount only if projects are missing.
+  // Ref guard prevents repeat calls if this section remounts while backup is still present.
+  const backupSyncedRef = React.useRef(false);
   React.useEffect(() => {
+    if (backupSyncedRef.current) return;
+    backupSyncedRef.current = true;
     if (path.projects && path.projects.length > 0) return;
     try {
       const raw = localStorage.getItem(PROJECTS_BACKUP_KEY);
