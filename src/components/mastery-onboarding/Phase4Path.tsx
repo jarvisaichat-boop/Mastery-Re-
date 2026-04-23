@@ -424,7 +424,7 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
                   ? stepsList.slice(zone.start, zone.end).map((s, li) =>
                       renderStepRow(s, zone.start + li, true)
                     )
-                  : <p className="text-gray-600 text-xs text-center py-2 italic">Drag the divider to include steps here</p>
+                  : <p className="text-gray-600 text-xs text-center py-2 italic">Drag the divider to include goals here</p>
                 }
               </div>
             </div>
@@ -489,10 +489,10 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
           <div className="space-y-5 animate-fadeIn">
             <div className="space-y-3">
               <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest">
-                Step 2 of {STEPS.length} — {showTimeRanges ? 'Time Ranges' : 'The Steps'}
+                Step 2 of {STEPS.length} — {showTimeRanges ? 'Time Ranges' : 'The Goals'}
               </p>
               <h3 className="text-2xl font-bold text-yellow-500">
-                {showTimeRanges ? 'Set Time Ranges' : 'The Steps'}
+                {showTimeRanges ? 'Set Time Ranges' : 'The Goals'}
               </h3>
               {rawGoal && (
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
@@ -502,8 +502,8 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
               )}
               <p className="text-gray-500 text-xs">
                 {showTimeRanges
-                  ? 'Drag the dividers to group your steps by time horizon.'
-                  : 'Add the steps — then drag or use arrows to order them. Furthest at the top, nearest at the bottom.'}
+                  ? 'Drag the dividers to group your goals by time horizon.'
+                  : 'Add the goals — then drag or use arrows to order them. Furthest at the top, nearest at the bottom.'}
               </p>
             </div>
 
@@ -535,7 +535,7 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
                     ↑ Far away &nbsp;·&nbsp; ↓ Closer to where you are now
                   </p>
                   <p className="text-white text-xs text-center">
-                    Your bottom step should be achievable in 1 week – 3 months.
+                    Your nearest goal should be achievable in 1 week – 3 months.
                   </p>
                 </div>
 
@@ -545,7 +545,7 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
                     {stepsList.map((s, i) => renderStepRow(s, i, false))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-xs text-center py-4">Your steps will appear here as you add them.</p>
+                  <p className="text-gray-500 text-xs text-center py-4">Your goals will appear here as you add them.</p>
                 )}
               </>
             ) : (
@@ -571,13 +571,13 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
               )}
               {stepsList.length > 0 && (
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
-                  <p className="text-xs text-yellow-500/70 mb-1">Your nearest step:</p>
+                  <p className="text-xs text-yellow-500/70 mb-1">Your nearest goal:</p>
                   <p className="text-white text-sm font-medium">{stepsList[stepsList.length - 1]}</p>
                 </div>
               )}
             </div>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
-              <p className="text-gray-300 mb-4 text-sm">What is the one daily action that moves that step forward?</p>
+              <p className="text-gray-300 mb-4 text-sm">What is the one daily action that moves that goal forward?</p>
               <input
                 type="text"
                 value={habitName}
