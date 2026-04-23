@@ -40,6 +40,8 @@ const LOCAL_STORAGE_RAW_GOAL_KEY = 'mastery-dashboard-raw-goal';
 const LOCAL_STORAGE_EMERGENCY_MODE_KEY = 'mastery-dashboard-emergency-mode';
 const LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY = 'mastery-dashboard-last-streak-repair-check';
 const LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY = 'mastery-momentum-last-completed';
+const ONBOARDING_RAWGOAL_DRAFT_KEY = 'mastery-onboarding-rawgoal-draft';
+const ONBOARDING_PROJECTS_BACKUP_KEY = 'mastery-onboarding-projects-backup';
 
 function loadRateMode(): 'basic' | 'hard' {
     try {
@@ -399,14 +401,27 @@ function App() {
             setAspirations(userAspirations);
             logger.log('✅ setAspirations called');
 
-            const incomingRawGoal = profile?.rawGoal || '';
+            // Read rawGoal: profile → onboarding draft → previously saved value → ''
+            const incomingRawGoal = profile?.rawGoal ||
+                (() => { try { return localStorage.getItem(ONBOARDING_RAWGOAL_DRAFT_KEY) || ''; } catch { return ''; } })() ||
+                (() => { try { return localStorage.getItem(LOCAL_STORAGE_RAW_GOAL_KEY) || ''; } catch { return ''; } })();
             setRawGoal(incomingRawGoal);
             if (incomingRawGoal) {
                 localStorage.setItem(LOCAL_STORAGE_RAW_GOAL_KEY, incomingRawGoal);
                 logger.log('✅ rawGoal saved:', incomingRawGoal);
             } else {
-                localStorage.removeItem(LOCAL_STORAGE_RAW_GOAL_KEY);
-                logger.log('🧹 rawGoal cleared (none provided)');
+                logger.log('⚠️ rawGoal not provided — keeping existing value in localStorage');
+            }
+
+            // If VisionBoard context lost the projects, restore from backup key
+            const projectsBackup = (() => {
+                try {
+                    const raw = localStorage.getItem(ONBOARDING_PROJECTS_BACKUP_KEY);
+                    return raw ? JSON.parse(raw) : null;
+                } catch { return null; }
+            })();
+            if (projectsBackup) {
+                logger.log('📦 Projects backup found:', projectsBackup);
             }
 
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
@@ -417,6 +432,7 @@ function App() {
             // Clear onboarding-specific storage
             localStorage.removeItem('mastery-onboarding-profile');
             localStorage.removeItem('mastery-onboarding-phase');
+            localStorage.removeItem(ONBOARDING_RAWGOAL_DRAFT_KEY);
             logger.log('🧹 Cleared onboarding localStorage');
 
             // Reset App Tour and Micro-Win flags to ensure proper flow

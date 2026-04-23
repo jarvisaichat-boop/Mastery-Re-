@@ -153,11 +153,38 @@ export const CoreValuesSection: React.FC<SectionProps> = ({ mode }) => {
 };
 
 // --- Section B: Path ---
+const PROJECTS_BACKUP_KEY = 'mastery-onboarding-projects-backup';
+
 export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnly = false }) => {
   const { data, updatePath, completePathItem } = useVisionBoard();
   const { path } = data;
   const [celebrationInfo, setCelebrationInfo] = useState<CompletedGoalInfo | null>(null);
   const rawGoal = localStorage.getItem('mastery-dashboard-raw-goal') || '';
+
+  // If VisionBoardContext projects is empty, check for the onboarding backup
+  const effectiveProjects = React.useMemo(() => {
+    if (path.projects && path.projects.length > 0) return path.projects;
+    try {
+      const raw = localStorage.getItem(PROJECTS_BACKUP_KEY);
+      if (!raw) return path.projects;
+      const backup = JSON.parse(raw);
+      if (Array.isArray(backup) && backup.length > 0) return backup;
+    } catch {}
+    return path.projects;
+  }, [path.projects]);
+
+  // Sync backup into VisionBoardContext so it persists going forward
+  React.useEffect(() => {
+    if (path.projects && path.projects.length > 0) return;
+    try {
+      const raw = localStorage.getItem(PROJECTS_BACKUP_KEY);
+      if (!raw) return;
+      const backup = JSON.parse(raw);
+      if (Array.isArray(backup) && backup.length > 0) {
+        updatePath({ projects: backup });
+      }
+    } catch {}
+  }, []);
 
   const lifeGoalHabits = habits.filter(h => h.type === 'Life Goal Habit');
 
@@ -239,13 +266,13 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnl
           </p>
           {mode === 'edit' ? (
             <div className="space-y-2">
-              {path.projects.map((project, idx) => (
+              {effectiveProjects.map((project, idx) => (
                 <div key={idx} className={`flex gap-2 items-center ${project.hidden ? 'opacity-50' : ''}`}>
                   {project.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
                   <input
                     value={project.text}
                     onChange={(e) => {
-                      const newProjects = [...path.projects];
+                      const newProjects = [...effectiveProjects];
                       newProjects[idx] = { ...newProjects[idx], text: e.target.value };
                       updatePath({ projects: newProjects });
                     }}
@@ -254,38 +281,38 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnl
                   />
                   <ActionMenu
                     index={idx}
-                    totalItems={path.projects.length}
+                    totalItems={effectiveProjects.length}
                     isHidden={project.hidden}
                     isCompleted={project.isCompleted}
                     onMoveUp={() => {
                       if (idx > 0) {
-                        const newProjects = [...path.projects];
+                        const newProjects = [...effectiveProjects];
                         [newProjects[idx - 1], newProjects[idx]] = [newProjects[idx], newProjects[idx - 1]];
                         updatePath({ projects: newProjects });
                       }
                     }}
                     onMoveDown={() => {
-                      if (idx < path.projects.length - 1) {
-                        const newProjects = [...path.projects];
+                      if (idx < effectiveProjects.length - 1) {
+                        const newProjects = [...effectiveProjects];
                         [newProjects[idx], newProjects[idx + 1]] = [newProjects[idx + 1], newProjects[idx]];
                         updatePath({ projects: newProjects });
                       }
                     }}
                     onToggleHide={() => {
-                      const newProjects = [...path.projects];
+                      const newProjects = [...effectiveProjects];
                       newProjects[idx] = { ...newProjects[idx], hidden: !newProjects[idx].hidden };
                       updatePath({ projects: newProjects });
                     }}
                     onComplete={() => handleCompleteProject(idx)}
                     onDelete={() => {
-                      const newProjects = path.projects.filter((_, i) => i !== idx);
+                      const newProjects = effectiveProjects.filter((_, i) => i !== idx);
                       updatePath({ projects: newProjects });
                     }}
                   />
                 </div>
               ))}
               <button
-                onClick={() => updatePath({ projects: [...path.projects, { text: "", hidden: false, createdAt: Date.now() }] })}
+                onClick={() => updatePath({ projects: [...effectiveProjects, { text: "", hidden: false, createdAt: Date.now() }] })}
                 className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1"
               >
                 <Plus size={14} /> ADD GOAL
@@ -293,9 +320,9 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnl
             </div>
           ) : (
             <ul className="space-y-2">
-              {path.projects.filter(p => p.text && !p.hidden && !p.isCompleted).length > 0 ? (
-                path.projects.filter(p => p.text && !p.hidden && !p.isCompleted).map((project) => {
-                  const originalIdx = path.projects.findIndex(p => p === project);
+              {effectiveProjects.filter(p => p.text && !p.hidden && !p.isCompleted).length > 0 ? (
+                effectiveProjects.filter(p => p.text && !p.hidden && !p.isCompleted).map((project) => {
+                  const originalIdx = effectiveProjects.findIndex(p => p === project);
                   return (
                     <li key={originalIdx} className="flex items-center gap-3">
                       <div

@@ -16,14 +16,19 @@ const STEPS_DRAFT_KEY = 'mastery-onboarding-steps-draft';
 const RANGES_DRAFT_KEY = 'mastery-onboarding-ranges-draft';
 const HABIT_DRAFT_KEY = 'mastery-onboarding-habit-draft';
 const MICRO_DRAFT_KEY = 'mastery-onboarding-micro-draft';
+export const RAWGOAL_DRAFT_KEY = 'mastery-onboarding-rawgoal-draft';
+export const PROJECTS_BACKUP_KEY = 'mastery-onboarding-projects-backup';
 
 export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBack }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
 
   const [step, setStep] = useState<Step>('rawgoal');
 
-  // Step 1 — Life Goal
-  const [rawGoal, setRawGoal] = useState(profile?.rawGoal || '');
+  // Step 1 — Life Goal (prefer profile, fall back to draft key so it survives reload)
+  const [rawGoal, setRawGoal] = useState(() => {
+    if (profile?.rawGoal) return profile.rawGoal;
+    try { return localStorage.getItem(RAWGOAL_DRAFT_KEY) || ''; } catch { return ''; }
+  });
 
   // Step 2 — Steps: prefer profile (survives full flow), fall back to draft key
   const [stepsList, setStepsList] = useState<string[]>(() => {
@@ -65,6 +70,14 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
   longMidRef.current = longMidBoundary;
   midShortRef.current = midShortBoundary;
   stepsLenRef.current = stepsList.length;
+
+  // Auto-save rawGoal draft so it survives page reload mid-onboarding
+  useEffect(() => {
+    try {
+      if (rawGoal) { localStorage.setItem(RAWGOAL_DRAFT_KEY, rawGoal); }
+      else { localStorage.removeItem(RAWGOAL_DRAFT_KEY); }
+    } catch {}
+  }, [rawGoal]);
 
   // Auto-save steps draft + sync to profile so they survive the full flow
   useEffect(() => {
@@ -242,6 +255,7 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
           // Save steps + proceed to habit
           const ordered = stepsList.map((text, idx) => ({ text, hidden: false, order: idx }));
           updatePath({ projects: ordered });
+          try { localStorage.setItem(PROJECTS_BACKUP_KEY, JSON.stringify(ordered)); } catch {}
           setShowTimeRanges(false);
           setStep('habit');
         }
@@ -270,6 +284,7 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
     try { localStorage.removeItem(RANGES_DRAFT_KEY); } catch {}
     try { localStorage.removeItem(HABIT_DRAFT_KEY); } catch {}
     try { localStorage.removeItem(MICRO_DRAFT_KEY); } catch {}
+    try { localStorage.removeItem(RAWGOAL_DRAFT_KEY); } catch {}
     onComplete({
       rawGoal,
       proposedHabit: {
