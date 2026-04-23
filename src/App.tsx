@@ -413,24 +413,46 @@ function App() {
                 logger.log('⚠️ rawGoal not provided — keeping existing value in localStorage');
             }
 
-            // Restore projects backup into VisionBoard storage if projects are missing
+            // Restore projects backup into VisionBoard storage if projects are missing.
+            // Only remove the backup key after a confirmed successful write — if anything
+            // fails, leave it so PathSection's fallback useEffect can still use it.
+            let projectsBackupSafe = false;
             try {
                 const backupRaw = localStorage.getItem(ONBOARDING_PROJECTS_BACKUP_KEY);
-                if (backupRaw) {
+                if (!backupRaw) {
+                    projectsBackupSafe = true; // Nothing to restore
+                } else {
                     const backup = JSON.parse(backupRaw);
-                    if (Array.isArray(backup) && backup.length > 0) {
+                    if (!Array.isArray(backup) || backup.length === 0) {
+                        projectsBackupSafe = true; // Backup is empty/invalid, safe to clear
+                    } else {
                         const vbRaw = localStorage.getItem('mastery-vision-board-v2');
-                        const vb = vbRaw ? JSON.parse(vbRaw) : null;
-                        const hasProjects = vb?.path?.projects && Array.isArray(vb.path.projects) && vb.path.projects.length > 0;
-                        if (!hasProjects && vb) {
-                            vb.path = { ...(vb.path || {}), projects: backup };
-                            localStorage.setItem('mastery-vision-board-v2', JSON.stringify(vb));
-                            logger.log('📦 Restored projects from backup into VisionBoard storage:', backup.length, 'items');
+                        let vb: Record<string, unknown> | null = null;
+                        try { vb = vbRaw ? JSON.parse(vbRaw) : null; } catch { /* ignore */ }
+                        const hasProjects = vb &&
+                            typeof vb === 'object' &&
+                            Array.isArray((vb as { path?: { projects?: unknown[] } }).path?.projects) &&
+                            ((vb as { path: { projects: unknown[] } }).path.projects.length > 0);
+                        if (hasProjects) {
+                            logger.log('📦 VisionBoard already has projects — backup not needed');
+                            projectsBackupSafe = true;
+                        } else {
+                            // Construct a minimal valid VisionBoard object if missing/corrupt
+                            const safeVb = (vb && typeof vb === 'object') ? { ...vb } : {};
+                            const safePath = ((safeVb as { path?: object }).path && typeof (safeVb as { path?: object }).path === 'object')
+                                ? { ...(safeVb as { path: object }).path }
+                                : {};
+                            (safePath as { projects?: unknown[] }).projects = backup;
+                            (safeVb as { path: object }).path = safePath;
+                            localStorage.setItem('mastery-vision-board-v2', JSON.stringify(safeVb));
+                            logger.log('📦 Restored', backup.length, 'projects from backup into VisionBoard storage');
+                            projectsBackupSafe = true;
                         }
                     }
                 }
             } catch (e) {
-                logger.error('Failed to restore projects backup', e);
+                logger.error('Failed to restore projects backup — leaving key for PathSection fallback', e);
+                projectsBackupSafe = false;
             }
 
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
@@ -442,7 +464,9 @@ function App() {
             localStorage.removeItem('mastery-onboarding-profile');
             localStorage.removeItem('mastery-onboarding-phase');
             localStorage.removeItem(ONBOARDING_RAWGOAL_DRAFT_KEY);
-            localStorage.removeItem(ONBOARDING_PROJECTS_BACKUP_KEY);
+            if (projectsBackupSafe) {
+                localStorage.removeItem(ONBOARDING_PROJECTS_BACKUP_KEY);
+            }
             logger.log('🧹 Cleared onboarding localStorage');
 
             // Reset App Tour and Micro-Win flags to ensure proper flow
