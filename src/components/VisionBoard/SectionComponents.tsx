@@ -157,6 +157,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnl
   const { data, updatePath, completePathItem } = useVisionBoard();
   const { path } = data;
   const [celebrationInfo, setCelebrationInfo] = useState<CompletedGoalInfo | null>(null);
+  const rawGoal = localStorage.getItem('mastery-dashboard-raw-goal') || '';
 
   const lifeGoalHabits = habits.filter(h => h.type === 'Life Goal Habit');
 
@@ -218,10 +219,23 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnl
           </div>
         </div>
 
-        {/* Short Term Vision (Projects) */}
+        {/* Life Goal */}
         <div>
           <p className="text-lg leading-relaxed mb-2">
-            <span className="text-yellow-500 font-medium uppercase tracking-wide">SHORT TERM VISION (PROJECTS)</span>
+            <span className="text-yellow-500 font-medium uppercase tracking-wide">LIFE GOAL</span>
+          </p>
+          <div className="bg-black/20 rounded-xl p-4 border border-white/5">
+            {rawGoal
+              ? <p className="text-lg text-white font-light leading-relaxed italic">"{rawGoal}"</p>
+              : <p className="text-gray-600 italic text-lg font-light">Not set</p>
+            }
+          </div>
+        </div>
+
+        {/* Goals (formerly Short Term Vision / Projects) */}
+        <div>
+          <p className="text-lg leading-relaxed mb-2">
+            <span className="text-yellow-500 font-medium uppercase tracking-wide">GOALS</span>
           </p>
           {mode === 'edit' ? (
             <div className="space-y-2">
@@ -236,7 +250,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnl
                       updatePath({ projects: newProjects });
                     }}
                     className={`flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm ${project.hidden ? 'line-through' : ''}`}
-                    placeholder="Project name..."
+                    placeholder="Goal name..."
                   />
                   <ActionMenu
                     index={idx}
@@ -274,7 +288,7 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnl
                 onClick={() => updatePath({ projects: [...path.projects, { text: "", hidden: false, createdAt: Date.now() }] })}
                 className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1"
               >
-                <Plus size={14} /> ADD PROJECT
+                <Plus size={14} /> ADD GOAL
               </button>
             </div>
           ) : (
@@ -302,90 +316,8 @@ export const PathSection: React.FC<SectionProps> = ({ mode, habits = [], readOnl
                   );
                 })
               ) : (
-                <li className="text-gray-600 italic text-lg font-light">No projects set</li>
+                <li className="text-gray-600 italic text-lg font-light">No goals set</li>
               )}
-            </ul>
-          )}
-        </div>
-
-        {/* Goals */}
-        <div>
-          <p className="text-lg leading-relaxed mb-2">
-            <span className="text-yellow-500 font-medium uppercase tracking-wide">GOALS</span>
-          </p>
-          {mode === 'edit' ? (
-            <div className="space-y-2">
-              {path.quarterlyGoals.map((goal, idx) => (
-                <div key={idx} className={`flex gap-2 items-center ${goal.hidden ? 'opacity-50' : ''}`}>
-                  {goal.hidden && <EyeOff size={14} className="text-gray-500 flex-shrink-0" />}
-                  <input
-                    value={goal.text}
-                    onChange={(e) => {
-                      const newGoals = [...path.quarterlyGoals];
-                      newGoals[idx] = { ...newGoals[idx], text: e.target.value };
-                      updatePath({ quarterlyGoals: newGoals });
-                    }}
-                    className={`flex-1 bg-black/30 border border-white/10 rounded-lg p-2 text-white text-sm ${goal.hidden ? 'line-through' : ''}`}
-                  />
-                  <ActionMenu
-                    index={idx}
-                    totalItems={path.quarterlyGoals.length}
-                    isHidden={goal.hidden}
-                    isCompleted={goal.isCompleted}
-                    onMoveUp={() => {
-                      if (idx > 0) {
-                        const newGoals = [...path.quarterlyGoals];
-                        [newGoals[idx - 1], newGoals[idx]] = [newGoals[idx], newGoals[idx - 1]];
-                        updatePath({ quarterlyGoals: newGoals });
-                      }
-                    }}
-                    onMoveDown={() => {
-                      if (idx < path.quarterlyGoals.length - 1) {
-                        const newGoals = [...path.quarterlyGoals];
-                        [newGoals[idx], newGoals[idx + 1]] = [newGoals[idx + 1], newGoals[idx]];
-                        updatePath({ quarterlyGoals: newGoals });
-                      }
-                    }}
-                    onToggleHide={() => {
-                      const newGoals = [...path.quarterlyGoals];
-                      newGoals[idx] = { ...newGoals[idx], hidden: !newGoals[idx].hidden };
-                      updatePath({ quarterlyGoals: newGoals });
-                    }}
-                    onComplete={() => handleCompleteGoal(idx)}
-                    onDelete={() => {
-                      const newGoals = path.quarterlyGoals.filter((_, i) => i !== idx);
-                      updatePath({ quarterlyGoals: newGoals });
-                    }}
-                  />
-                </div>
-              ))}
-              <button onClick={() => updatePath({ quarterlyGoals: [...path.quarterlyGoals, { text: "", hidden: false, createdAt: Date.now() }] })} className="text-xs text-yellow-500 hover:text-yellow-400 flex items-center gap-1">
-                <Plus size={14} /> ADD GOAL
-              </button>
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {path.quarterlyGoals.filter(g => g.text && !g.hidden && !g.isCompleted).map((goal) => {
-                const originalIdx = path.quarterlyGoals.findIndex(g => g === goal);
-                return (
-                  <li key={originalIdx} className="flex items-center gap-3">
-                    <div
-                      className="w-2 h-2 rounded-full bg-blue-400"
-                      style={{ boxShadow: '0 0 8px rgba(96, 165, 250, 0.6)' }}
-                    />
-                    <span className="text-lg text-white font-light flex-1">{goal.text}</span>
-                    {!readOnly && (
-                      <button
-                        onClick={() => handleCompleteGoal(originalIdx)}
-                        className="p-1 text-gray-500 hover:text-green-400 transition-colors"
-                        title="Mark as completed"
-                      >
-                        <Trophy size={16} />
-                      </button>
-                    )}
-                  </li>
-                );
-              })}
             </ul>
           )}
         </div>
