@@ -5,6 +5,7 @@ import { Plus, Trash2 } from 'lucide-react';
 interface VisualTimelineEditorProps {
   timeline: TimeBlock[];
   onUpdate: (timeline: TimeBlock[]) => void;
+  hideAddBlock?: boolean;
 }
 
 const HOUR_HEIGHT = 48;
@@ -51,7 +52,7 @@ const formatTimeDisplay = (time: string): string => {
   return minutes === 0 ? `${displayHour}${period}` : `${displayHour}:${minutes.toString().padStart(2, '0')}${period}`;
 };
 
-export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ timeline, onUpdate }) => {
+export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ timeline, onUpdate, hideAddBlock = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragState, setDragState] = useState<{
     blockIndex: number;
@@ -418,12 +419,14 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
         </div>
       </div>
 
-      <button
-        onClick={addNewBlock}
-        className="mt-3 flex items-center gap-2 text-sm text-yellow-500 hover:text-yellow-400"
-      >
-        <Plus size={16} /> Add Block
-      </button>
+      {!hideAddBlock && (
+        <button
+          onClick={addNewBlock}
+          className="mt-3 flex items-center gap-2 text-sm text-yellow-500 hover:text-yellow-400"
+        >
+          <Plus size={16} /> Add Block
+        </button>
+      )}
     </div>
   );
 };
