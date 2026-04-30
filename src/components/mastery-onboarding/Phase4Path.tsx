@@ -657,6 +657,12 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
                 <h3 className="text-2xl font-bold text-purple-400">Micro Win</h3>
               </div>
             </div>
+            {habitName && (
+              <div className="bg-gray-900/60 border border-yellow-500/20 rounded-2xl px-4 py-3">
+                <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest mb-1">Your habit:</p>
+                <p className="text-white font-bold text-sm">{habitName}</p>
+              </div>
+            )}
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
               <p className="text-white font-semibold text-base mb-2">Human beings are weak.</p>
               <p className="text-gray-300 text-sm leading-relaxed mb-4">
