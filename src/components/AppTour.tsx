@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { ChevronRight, X, Sparkles } from 'lucide-react';
 import DailyCheckInPreview from './DailyCheckInPreview';
 
@@ -7,9 +7,21 @@ interface AppTourProps {
   onToggleStatsView?: (show: boolean) => void;
 }
 
+const TOOLTIP_MARGIN = 12;
+const TOOLTIP_EST_WIDTH = 448;
+const TOOLTIP_EST_HEIGHT = 200;
+const PREVIEW_EST_WIDTH = 380;
+const PREVIEW_EST_HEIGHT = 400;
+const BOTTOM_NAV_HEIGHT = 80;
+const ARROW_SIZE = 12;
+const SPOTLIGHT_GAP = 24;
+const PREVIEW_GAP = 32;
+
 export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [elementReady, setElementReady] = useState(false);
+  const [tooltipHeight, setTooltipHeight] = useState(TOOLTIP_EST_HEIGHT);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   const tourStops = [
     {
@@ -27,17 +39,17 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
     },
     {
       title: 'Mastery Dashboard',
-      description: 'See your transformation unfold. Weekly stats, completion rates, streak breakdowns, and heatmaps show exactly how far you\'ve come.',
+      description: "See your transformation unfold. Weekly stats, completion rates, streak breakdowns, and heatmaps show exactly how far you've come.",
       spotlightSelector: '.stats-dashboard-area',
       position: 'bottom' as const,
       requireStatsView: true,
+      reserveBottom: true,
     },
   ];
 
   const currentStop = tourStops[currentStep];
 
   useEffect(() => {
-    // Auto-switch to stats view for step 3
     if (currentStop.requireStatsView && onToggleStatsView) {
       onToggleStatsView(true);
     } else if (!currentStop.requireStatsView && onToggleStatsView && currentStep > 0) {
@@ -45,20 +57,27 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
     }
   }, [currentStep, currentStop.requireStatsView, onToggleStatsView]);
 
-  // Wait for DOM element to be ready
   useEffect(() => {
     setElementReady(false);
+    setTooltipHeight(TOOLTIP_EST_HEIGHT);
     const checkElement = () => {
       const element = document.querySelector(currentStop.spotlightSelector);
       if (element) {
         setElementReady(true);
       } else {
-        // Retry after a short delay
         setTimeout(checkElement, 100);
       }
     };
     checkElement();
   }, [currentStop.spotlightSelector]);
+
+  useLayoutEffect(() => {
+    if (!tooltipRef.current) return;
+    const measured = tooltipRef.current.offsetHeight;
+    if (measured > 0 && measured !== tooltipHeight) {
+      setTooltipHeight(measured);
+    }
+  });
 
   const handleNext = () => {
     if (currentStep < tourStops.length - 1) {
@@ -73,7 +92,6 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
   };
 
   const handleComplete = () => {
-    // Reset to habit tracker view
     if (onToggleStatsView) {
       onToggleStatsView(false);
     }
@@ -81,7 +99,6 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
     onComplete();
   };
 
-  // Get spotlight element position
   const getSpotlightStyle = () => {
     const element = document.querySelector(currentStop.spotlightSelector);
     if (!element) return {};
@@ -95,69 +112,118 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
     };
   };
 
-  // Get tooltip position
-  const getTooltipStyle = () => {
+  const getTooltipPlacement = (): { style: React.CSSProperties; side: 'top' | 'bottom' } => {
     const element = document.querySelector(currentStop.spotlightSelector);
-    if (!element) return {};
+    if (!element) return { style: {}, side: currentStop.position };
 
     const rect = element.getBoundingClientRect();
-    
-    if (currentStop.position === 'bottom') {
-      return {
-        top: `${rect.bottom + 24}px`,
-        left: `${rect.left + rect.width / 2}px`,
-        transform: 'translateX(-50%)',
-      };
-    } else {
-      return {
-        bottom: `${window.innerHeight - rect.top + 24}px`,
-        left: `${rect.left + rect.width / 2}px`,
-        transform: 'translateX(-50%)',
-      };
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const reservedBottom = currentStop.reserveBottom ? BOTTOM_NAV_HEIGHT : 0;
+
+    const tooltipW = Math.min(TOOLTIP_EST_WIDTH, vw - TOOLTIP_MARGIN * 2);
+    const tooltipH = tooltipHeight;
+
+    const spaceAbove = rect.top - SPOTLIGHT_GAP - TOOLTIP_MARGIN;
+    const spaceBelow = vh - reservedBottom - rect.bottom - SPOTLIGHT_GAP - TOOLTIP_MARGIN;
+
+    let side: 'top' | 'bottom' = currentStop.position;
+
+    if (side === 'top' && spaceAbove < tooltipH && spaceBelow >= tooltipH) {
+      side = 'bottom';
+    } else if (side === 'bottom' && spaceBelow < tooltipH && spaceAbove >= tooltipH) {
+      side = 'top';
+    } else if (spaceAbove < tooltipH && spaceBelow < tooltipH) {
+      side = spaceBelow >= spaceAbove ? 'bottom' : 'top';
     }
+
+    const centerX = rect.left + rect.width / 2;
+    let left = centerX - tooltipW / 2;
+    left = Math.max(TOOLTIP_MARGIN, Math.min(left, vw - tooltipW - TOOLTIP_MARGIN));
+
+    const style: React.CSSProperties = {
+      left: `${left}px`,
+      width: `${tooltipW}px`,
+      maxWidth: `calc(100vw - ${TOOLTIP_MARGIN * 2}px)`,
+    };
+
+    const maxBottom = vh - reservedBottom - TOOLTIP_MARGIN;
+
+    if (side === 'bottom') {
+      let top = rect.bottom + SPOTLIGHT_GAP;
+      top = Math.min(top, maxBottom - tooltipH);
+      top = Math.max(TOOLTIP_MARGIN, top);
+      style.top = `${top}px`;
+    } else {
+      let top = rect.top - SPOTLIGHT_GAP - tooltipH;
+      top = Math.max(TOOLTIP_MARGIN, top);
+      top = Math.min(top, maxBottom - tooltipH);
+      style.top = `${top}px`;
+    }
+
+    return { style, side };
   };
 
-  // Get preview position (for Daily Check-in) with viewport awareness
-  const getPreviewStyle = () => {
+  const getPreviewStyle = (): React.CSSProperties => {
     const element = document.querySelector(currentStop.spotlightSelector);
     if (!element) return {};
 
     const rect = element.getBoundingClientRect();
-    const previewWidth = 380;
-    const gap = 32;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const previewW = Math.min(PREVIEW_EST_WIDTH, vw - TOOLTIP_MARGIN * 2);
+    const previewH = PREVIEW_EST_HEIGHT;
 
-    // Check vertical position (top or bottom half)
-    const isBottomHalf = rect.top > viewportHeight / 2;
-    const verticalStyle = isBottomHalf
-      ? { bottom: `${viewportHeight - rect.bottom}px` }
-      : { top: `${rect.top}px` };
+    const clampTop = (rawTop: number) =>
+      Math.max(TOOLTIP_MARGIN, Math.min(rawTop, vh - previewH - TOOLTIP_MARGIN));
+    const clampBottom = (rawBottom: number) =>
+      Math.max(TOOLTIP_MARGIN, Math.min(rawBottom, vh - previewH - TOOLTIP_MARGIN));
 
-    // Try to position to the right first
-    const rightPosition = rect.right + gap;
-    const wouldOverflow = rightPosition + previewWidth > viewportWidth;
-    
-    if (wouldOverflow) {
-      // Position to the left instead
+    const spaceRight = vw - rect.right - PREVIEW_GAP;
+    const spaceLeft = rect.left - PREVIEW_GAP;
+
+    if (spaceRight >= previewW) {
+      const isBottomHalf = rect.top > vh / 2;
+      const rawTop = isBottomHalf ? vh - rect.bottom : rect.top;
+      return isBottomHalf
+        ? { bottom: `${clampBottom(rawTop)}px`, left: `${rect.right + PREVIEW_GAP}px`, width: `${previewW}px` }
+        : { top: `${clampTop(rawTop)}px`, left: `${rect.right + PREVIEW_GAP}px`, width: `${previewW}px` };
+    }
+
+    if (spaceLeft >= previewW) {
+      const isBottomHalf = rect.top > vh / 2;
+      const rawLeft = vw - rect.left + PREVIEW_GAP;
+      const rawTop = isBottomHalf ? vh - rect.bottom : rect.top;
+      return isBottomHalf
+        ? { bottom: `${clampBottom(rawTop)}px`, right: `${rawLeft}px`, width: `${previewW}px` }
+        : { top: `${clampTop(rawTop)}px`, right: `${rawLeft}px`, width: `${previewW}px` };
+    }
+
+    const centeredLeft = Math.max(TOOLTIP_MARGIN, (vw - previewW) / 2);
+    const spaceBelow = vh - rect.bottom - PREVIEW_GAP;
+    const spaceAbove = rect.top - PREVIEW_GAP;
+
+    if (spaceBelow >= spaceAbove) {
+      const rawTop = rect.bottom + PREVIEW_GAP;
       return {
-        ...verticalStyle,
-        right: `${viewportWidth - rect.left + gap}px`,
+        top: `${clampTop(rawTop)}px`,
+        left: `${centeredLeft}px`,
+        width: `${previewW}px`,
       };
     }
-    
-    // Default: position to the right
+
+    const rawTop = rect.top - PREVIEW_GAP - previewH;
     return {
-      ...verticalStyle,
-      left: `${rightPosition}px`,
+      top: `${clampTop(rawTop)}px`,
+      left: `${centeredLeft}px`,
+      width: `${previewW}px`,
     };
   };
 
   const spotlightStyle = getSpotlightStyle();
-  const tooltipStyle = getTooltipStyle();
+  const { style: tooltipStyle, side: tooltipSide } = getTooltipPlacement();
   const previewStyle = getPreviewStyle();
 
-  // Don't render until element is ready
   if (!elementReady) {
     return (
       <div className="fixed inset-0 z-[100] bg-black/15 flex items-center justify-center">
@@ -170,10 +236,7 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
     <>
       {/* Dimmed backdrop with spotlight cutout */}
       <div className="fixed inset-0 z-[100] pointer-events-none">
-        {/* Full dark overlay */}
         <div className="absolute inset-0 bg-black/15"></div>
-        
-        {/* Spotlight cutout - lighter area */}
         <div
           className="absolute rounded-xl border-4 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.15)] transition-all duration-500 pointer-events-auto"
           style={spotlightStyle}
@@ -193,16 +256,23 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
 
       {/* Floating tooltip */}
       <div
-        className="fixed z-[104] max-w-md animate-fadeIn pointer-events-auto"
+        ref={tooltipRef}
+        className="fixed z-[104] animate-fadeIn pointer-events-auto"
         style={tooltipStyle}
       >
-        <div className="bg-gray-900 border-2 border-blue-500 rounded-2xl p-6 shadow-2xl">
-          {/* Arrow pointer */}
-          {currentStop.position === 'bottom' && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 border-t-2 border-l-2 border-blue-500 rotate-45"></div>
+        <div className="relative bg-gray-900 border-2 border-blue-500 rounded-2xl p-6 shadow-2xl">
+          {/* Arrow pointer — direction tracks actual placement side */}
+          {tooltipSide === 'bottom' && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 border-t-2 border-l-2 border-blue-500 rotate-45"
+              style={{ top: `-${ARROW_SIZE}px` }}
+            ></div>
           )}
-          {currentStop.position === 'top' && (
-            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 border-b-2 border-r-2 border-blue-500 rotate-45"></div>
+          {tooltipSide === 'top' && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 border-b-2 border-r-2 border-blue-500 rotate-45"
+              style={{ bottom: `-${ARROW_SIZE}px` }}
+            ></div>
           )}
 
           {/* Content */}
@@ -240,7 +310,7 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
                   ></div>
                 ))}
               </div>
-              
+
               <button
                 onClick={handleNext}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-all"

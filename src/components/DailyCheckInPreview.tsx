@@ -3,7 +3,7 @@ import { Sparkles } from 'lucide-react';
 export default function DailyCheckInPreview() {
   return (
     <div 
-      className="w-[380px] bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden"
+      className="w-full max-w-[380px] bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden"
       role="img"
       aria-label="Daily Check-in interface preview"
     >
@@ -20,7 +20,7 @@ export default function DailyCheckInPreview() {
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 max-w-[280px]">
+          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 max-w-[75%]">
             <p className="text-sm text-gray-200">
               Hell yeah! 🔥 That's the kind of energy that builds empires. Keep this momentum going.
             </p>
@@ -29,7 +29,7 @@ export default function DailyCheckInPreview() {
 
         {/* User Message */}
         <div className="flex gap-2 items-start justify-end">
-          <div className="bg-blue-600 rounded-lg p-3 max-w-[280px]">
+          <div className="bg-blue-600 rounded-lg p-3 max-w-[75%]">
             <p className="text-sm text-white">
               Crushed my workout and deep work session today!
             </p>
@@ -46,10 +46,10 @@ export default function DailyCheckInPreview() {
           <input
             type="text"
             placeholder="Type your reflection..."
-            className="flex-1 px-3 py-2 bg-zinc-700/50 border border-zinc-600 rounded-lg text-sm text-zinc-300 placeholder-zinc-500"
+            className="flex-1 px-3 py-2 bg-zinc-700/50 border border-zinc-600 rounded-lg text-sm text-zinc-300 placeholder-zinc-500 min-w-0"
             disabled
           />
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium opacity-50 cursor-not-allowed">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium opacity-50 cursor-not-allowed flex-shrink-0">
             Send
           </button>
         </div>
