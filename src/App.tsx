@@ -1075,6 +1075,17 @@ function App() {
                                             </button>
                                             <button
                                                 onClick={() => {
+                                                    setJumpToPhase(5);
+                                                    setPreviewOnboarding(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-purple-400 hover:text-purple-300 rounded-lg transition-colors"
+                                                title="Jump to Phase 5 (Timeline Canvas)"
+                                            >
+                                                <Calendar className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
                                                     setJumpToPhase(7);
                                                     setPreviewOnboarding(true);
                                                     setShowDevMenu(false);
