@@ -658,9 +658,9 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
               </div>
             </div>
             {habitName && (
-              <div className="bg-gray-900/60 border border-yellow-500/20 rounded-2xl px-4 py-3">
-                <p className="text-xs font-semibold text-yellow-500/70 uppercase tracking-widest mb-1">Your habit:</p>
-                <p className="text-white font-bold text-sm">{habitName}</p>
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
+                <p className="text-xs text-yellow-500/70 mb-1">Your Habit:</p>
+                <p className="text-white text-sm font-medium">{habitName}</p>
               </div>
             )}
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
