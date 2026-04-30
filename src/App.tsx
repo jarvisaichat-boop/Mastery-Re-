@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, Zap, BookOpen, FileCheck, Shield, Rocket, User, Star } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, BookOpen, FileCheck, Shield, Rocket, User, Star } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
-import MicroWinProtocol from './components/MicroWinProtocol';
 import EmergencyHabitAction from './components/EmergencyHabitAction';
 import StreakRepair from './components/StreakRepair';
 import AICoachWidget from './components/AICoachWidget';
@@ -31,7 +30,6 @@ const LOCAL_STORAGE_RATE_MODE_KEY = 'mastery-dashboard-rate-mode-v1';
 const LOCAL_STORAGE_STREAK_MODE_KEY = 'mastery-dashboard-streak-mode-v1';
 const LOCAL_STORAGE_ONBOARDING_KEY = 'mastery-dashboard-onboarding-complete';
 const LOCAL_STORAGE_APP_TOUR_KEY = 'mastery-dashboard-app-tour-complete';
-const LOCAL_STORAGE_MICRO_WIN_KEY = 'mastery-dashboard-micro-win-complete';
 const LOCAL_STORAGE_CELEBRATED_STREAKS_KEY = 'mastery-dashboard-celebrated-streaks';
 const LOCAL_STORAGE_GOAL_KEY = 'mastery-dashboard-goal';
 const LOCAL_STORAGE_ASPIRATIONS_KEY = 'mastery-dashboard-aspirations';
@@ -240,14 +238,6 @@ function isAppTourComplete(): boolean {
     }
 }
 
-function isMicroWinComplete(): boolean {
-    try {
-        return localStorage.getItem(LOCAL_STORAGE_MICRO_WIN_KEY) === 'true';
-    } catch (e) {
-        return false;
-    }
-}
-
 function isEmergencyModeActive(): boolean {
     try {
         return localStorage.getItem(LOCAL_STORAGE_EMERGENCY_MODE_KEY) === 'true';
@@ -271,17 +261,14 @@ function App() {
         if (shouldSkipOnboarding) {
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
             localStorage.setItem(LOCAL_STORAGE_APP_TOUR_KEY, 'true');
-            localStorage.setItem(LOCAL_STORAGE_MICRO_WIN_KEY, 'true');
             return true;
         }
         return isOnboardingComplete();
     });
     const [appTourComplete, setAppTourComplete] = useState(() => shouldSkipOnboarding || isAppTourComplete());
-    const [microWinComplete, setMicroWinComplete] = useState(() => shouldSkipOnboarding || isMicroWinComplete());
     const [emergencyMode, setEmergencyMode] = useState(isEmergencyModeActive);
     const [previewOnboarding, setPreviewOnboarding] = useState(false);
     const [previewAppTour, setPreviewAppTour] = useState(false);
-    const [previewMicroWin, setPreviewMicroWin] = useState(false);
     const [jumpToPhase, setJumpToPhase] = useState<number | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
@@ -330,6 +317,9 @@ function App() {
             return 0;
         } catch { return 0; }
     });
+
+    // Clear legacy Micro-Win localStorage key so returning users aren't gated by the old flag
+    useEffect(() => { try { localStorage.removeItem('mastery-dashboard-micro-win-complete'); } catch {} }, []);
 
     // CRITICAL: Immediately purge any videos > 8 minutes on mount
     useEffect(() => {
@@ -491,12 +481,10 @@ function App() {
             }
             logger.log('🧹 Cleared onboarding localStorage');
 
-            // Reset App Tour and Micro-Win flags to ensure proper flow
+            // Reset App Tour flag to ensure proper flow
             localStorage.removeItem(LOCAL_STORAGE_APP_TOUR_KEY);
-            localStorage.removeItem(LOCAL_STORAGE_MICRO_WIN_KEY);
             setAppTourComplete(false);
-            setMicroWinComplete(false);
-            logger.log('🔄 Reset App Tour and Micro-Win flags for fresh flow');
+            logger.log('🔄 Reset App Tour flag for fresh flow');
 
             setOnboardingComplete(true);
             logger.log('✅ setOnboardingComplete(true) called - should trigger dashboard render');
@@ -952,28 +940,7 @@ function App() {
     }, []);
 
 
-    const handleMicroWinComplete = () => {
-        logger.log('🎯 Micro-Win Protocol completed');
-        setMicroWinComplete(true);
-        setPreviewMicroWin(false);
-        localStorage.setItem(LOCAL_STORAGE_MICRO_WIN_KEY, 'true');
-    };
-
-    // Auto-skip micro-win if no Life Goal habit exists (MUST be before returns!)
-    useEffect(() => {
-        if (onboardingComplete && appTourComplete && !microWinComplete && !previewMicroWin && habits.length > 0) {
-            const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
-            if (!coreHabit) {
-                logger.log('⚠️ No Life Goal habit found, skipping Micro-Win Protocol');
-                handleMicroWinComplete();
-            }
-        }
-    }, [onboardingComplete, appTourComplete, microWinComplete, previewMicroWin, habits]);
-
-    // Determine if we should show Micro-Win (either first time or preview)
     const shouldShowAppTour = (onboardingComplete && !appTourComplete) || previewAppTour;
-    const shouldShowMicroWin = (onboardingComplete && appTourComplete && !microWinComplete) || previewMicroWin;
-    const coreHabit = habits.find(h => h.type === 'Life Goal Habit');
 
     return (
         <VisionBoardProvider>
@@ -1126,16 +1093,6 @@ function App() {
                                                 title="Preview App Tour"
                                             >
                                                 <BookOpen className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setPreviewMicroWin(true);
-                                                    setShowDevMenu(false);
-                                                }}
-                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-yellow-400 hover:text-yellow-300 rounded-lg transition-colors"
-                                                title="Preview Micro-Win"
-                                            >
-                                                <Zap className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -1410,18 +1367,6 @@ function App() {
                                         setShowAiCoach(true);
                                     }}
                                     onCancel={() => setActiveMiniApp(null)}
-                                />
-                            )}
-
-                            {shouldShowMicroWin && coreHabit && (
-                                <MicroWinProtocol
-                                    habit={{
-                                        name: coreHabit.name,
-                                        description: coreHabit.description || ''
-                                    }}
-                                    onComplete={handleMicroWinComplete}
-                                    isPreview={previewMicroWin}
-                                    onDismiss={() => setPreviewMicroWin(false)}
                                 />
                             )}
 
