@@ -148,12 +148,13 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
         break;
       case 'commitment':
         saveAllBlocksToSchedule(sleepBlock, workBlock, habitBlock, momentumBlock);
-        setStep('gm');
+        setStep('summary'); // MVP: skip gm/gd/gn/busy — go straight to summary
         break;
-      case 'gm': setStep('gd'); break;
-      case 'gd': setStep('gn'); break;
-      case 'gn': setStep('busy'); break;
-      case 'busy': setStep('summary'); break;
+      // MVP DEFERRED — gm/gd/gn/busy navigation preserved for re-enabling later:
+      // case 'gm': setStep('gd'); break;
+      // case 'gd': setStep('gn'); break;
+      // case 'gn': setStep('busy'); break;
+      // case 'busy': setStep('summary'); break;
       case 'summary': onComplete({}); break;
     }
   };
@@ -163,11 +164,12 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
       case 'wow': onBack?.(); break;
       case 'coreSchedule': setStep('wow'); break;
       case 'commitment': setStep('coreSchedule'); break;
-      case 'gm': setStep('commitment'); break;
-      case 'gd': setStep('gm'); break;
-      case 'gn': setStep('gd'); break;
-      case 'busy': setStep('gn'); break;
-      case 'summary': setStep('busy'); break;
+      case 'summary': setStep('commitment'); break; // MVP: back from summary goes to commitment
+      // MVP DEFERRED — gm/gd/gn/busy back-navigation preserved for re-enabling later:
+      // case 'gm': setStep('commitment'); break;
+      // case 'gd': setStep('gm'); break;
+      // case 'gn': setStep('gd'); break;
+      // case 'busy': setStep('gn'); break;
     }
   };
 
@@ -321,6 +323,19 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
           </div>
         );
 
+      /*
+       * ============================================================
+       * MVP DEFERRED — GM/GD/GN Routines + Busy Day Plan
+       * ============================================================
+       * These steps are intentionally SKIPPED in the current onboarding
+       * flow. They are a CRITICAL feature planned for a future release.
+       *
+       * DO NOT DELETE this code.
+       * To re-enable: restore the nextStep/prevStep cases above and add
+       * 'gm', 'gd', 'gn', 'busy' back to FLOW_STEPS.
+       * ============================================================
+       */
+      // eslint-disable-next-line no-fallthrough
       case 'gm':
       case 'gd':
       case 'gn': {
@@ -486,7 +501,9 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
     }
   };
 
-  const FLOW_STEPS: SubStep[] = ['wow', 'coreSchedule', 'commitment', 'gm', 'gd', 'gn', 'busy'];
+  // MVP: only 3 active steps shown in progress dots. gm/gd/gn/busy are deferred.
+  // To re-enable, restore: ['wow', 'coreSchedule', 'commitment', 'gm', 'gd', 'gn', 'busy']
+  const FLOW_STEPS: SubStep[] = ['wow', 'coreSchedule', 'commitment'];
   const isSummary = step === 'summary';
 
   return (

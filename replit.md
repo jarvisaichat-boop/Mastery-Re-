@@ -159,6 +159,14 @@ Role-playing-heavy, 7-phase initiation sequence that replaces the old wizard.
 - **Interactive Tour**: Highlights Tracker, Check-In, and Dashboard layers.
 - **Micro-Win Protocol**: Mandatory 60-second timer to prove immediate action ability before full access.
 
+### Phase 5 Schedule — MVP Deferred Steps
+
+The GM (Good Morning), GD (Good Day), GN (Good Night) routine steps and the Busy Day Plan step have been **intentionally removed from the active onboarding flow** for the MVP launch. The flow is now:
+
+`wow → coreSchedule → commitment → summary (Blueprint Complete)`
+
+**These are CRITICAL features planned for a future release.** All render code for gm/gd/gn/busy is preserved in `Phase5Schedule.tsx` (clearly marked with `MVP DEFERRED` comments). To re-enable: restore the commented-out `nextStep`/`prevStep` switch cases and add `'gm', 'gd', 'gn', 'busy'` back to the `FLOW_STEPS` array. The underlying data model (`gmRoutine`, `gdRoutine`, `gnRoutine`, `busyDayPlan` in VisionBoard) is untouched.
+
 ### Backend API Server
 - Express.js server running on port 3001
 - Vite proxy configuration routes `/api/*` requests to backend during development
