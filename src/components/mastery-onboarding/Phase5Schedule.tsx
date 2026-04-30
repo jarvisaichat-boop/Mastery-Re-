@@ -335,7 +335,6 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
        * 'gm', 'gd', 'gn', 'busy' back to FLOW_STEPS.
        * ============================================================
        */
-      // eslint-disable-next-line no-fallthrough
       case 'gm':
       case 'gd':
       case 'gn': {
@@ -527,14 +526,12 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
 
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent z-40">
         <div className="max-w-xl mx-auto flex gap-3">
-          {!isSummary && (
-            <button
-              onClick={prevStep}
-              className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold text-lg rounded-2xl transition-all flex items-center justify-center gap-2"
-            >
-              <ArrowLeft size={20} /> Back
-            </button>
-          )}
+          <button
+            onClick={prevStep}
+            className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold text-lg rounded-2xl transition-all flex items-center justify-center gap-2"
+          >
+            <ArrowLeft size={20} /> Back
+          </button>
           <button
             onClick={nextStep}
             className={`flex-1 py-4 font-bold text-lg rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 ${
