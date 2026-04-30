@@ -12,7 +12,14 @@ const INTEREST_KEY = 'mastery-dashboard-enforcer-interest';
 function recordInterest(level: 'tax' | 'camera' | 'social') {
   try {
     const raw = localStorage.getItem(INTEREST_KEY);
-    const counts = raw ? JSON.parse(raw) : { tax: 0, camera: 0, social: 0 };
+    let counts: Record<string, number> = { tax: 0, camera: 0, social: 0 };
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') counts = { ...counts, ...parsed };
+      } catch {
+      }
+    }
     counts[level] = (counts[level] ?? 0) + 1;
     localStorage.setItem(INTEREST_KEY, JSON.stringify(counts));
   } catch {
@@ -81,12 +88,19 @@ export default function Phase6Enforcer({ onComplete, profile }: Phase6EnforcerPr
           toast ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-3 pointer-events-none'
         }`}
       >
-        <div className="bg-gray-800 border border-yellow-500/40 rounded-2xl px-6 py-4 shadow-2xl shadow-black/60 flex items-center gap-3 max-w-xs">
+        <div className="bg-gray-800 border border-yellow-500/40 rounded-2xl px-5 py-4 shadow-2xl shadow-black/60 flex items-center gap-3 max-w-xs">
           <span className="text-yellow-400 text-xl">🚧</span>
-          <div>
+          <div className="flex-1">
             <p className="text-white font-semibold text-sm">{toast} — Coming Soon</p>
             <p className="text-gray-400 text-xs mt-0.5">This mode isn't available yet. Stay tuned!</p>
           </div>
+          <button
+            onClick={() => { if (toastTimer.current) clearTimeout(toastTimer.current); setToast(null); }}
+            className="text-gray-500 hover:text-gray-300 text-lg leading-none ml-1 flex-shrink-0"
+            aria-label="Dismiss"
+          >
+            ×
+          </button>
         </div>
       </div>
 
