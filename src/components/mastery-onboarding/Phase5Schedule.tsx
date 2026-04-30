@@ -393,27 +393,29 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
 
       case 'summary':
         return (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-6">
             <div className="text-center mb-2">
-              <div className="relative inline-flex items-center justify-center mb-5">
+              <div className="relative inline-flex items-center justify-center mb-5 animate-checkBounce">
                 <div className="w-20 h-20 rounded-full bg-yellow-500/10 flex items-center justify-center">
                   <CheckCircle className="w-10 h-10 text-yellow-400" strokeWidth={1.5} />
                 </div>
-                <Star className="absolute -top-1 -right-1 w-5 h-5 text-yellow-300 fill-yellow-300/60" />
-                <Star className="absolute -bottom-1 -left-2 w-4 h-4 text-yellow-400 fill-yellow-400/50" />
+                <Star className="absolute -top-1 -right-1 w-5 h-5 text-yellow-300 fill-yellow-300/60 animate-sparklePulse" style={{ animationDelay: '0.5s' }} />
+                <Star className="absolute -bottom-1 -left-2 w-4 h-4 text-yellow-400 fill-yellow-400/50 animate-sparklePulse" style={{ animationDelay: '0.65s' }} />
               </div>
-              <h3 className="text-3xl font-bold text-white leading-tight">Blueprint Complete</h3>
-              <p className="text-gray-400 text-sm mt-3 max-w-xs mx-auto leading-relaxed">
-                Your daily blueprint is set. You're ready.
-              </p>
+              <div className="animate-blueprintHeaderIn">
+                <h3 className="text-3xl font-bold text-white leading-tight">Blueprint Complete</h3>
+                <p className="text-gray-400 text-sm mt-3 max-w-xs mx-auto leading-relaxed">
+                  Your daily blueprint is set. You're ready.
+                </p>
+              </div>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+            <div className="animate-blueprintCardIn bg-white/5 border border-white/10 rounded-2xl overflow-hidden" style={{ animationDelay: '0.75s' }}>
               <div className="px-5 py-3 border-b border-white/10">
                 <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Your Daily Structure</p>
               </div>
               <div className="divide-y divide-white/5">
-                <div className="flex items-center gap-4 px-5 py-4">
+                <div className="flex items-center gap-4 px-5 py-4 animate-rowSlideIn" style={{ animationDelay: '0.9s' }}>
                   <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
                     <Moon className="w-4 h-4 text-purple-400" />
                   </div>
@@ -425,7 +427,7 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 px-5 py-4">
+                <div className="flex items-center gap-4 px-5 py-4 animate-rowSlideIn" style={{ animationDelay: '1.05s' }}>
                   <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
                     <Briefcase className="w-4 h-4 text-blue-400" />
                   </div>
@@ -437,7 +439,7 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 px-5 py-4">
+                <div className="flex items-center gap-4 px-5 py-4 animate-rowSlideIn" style={{ animationDelay: '1.2s' }}>
                   <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
                     <Rocket className="w-4 h-4 text-orange-400" />
                   </div>
@@ -449,7 +451,7 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 px-5 py-4">
+                <div className="flex items-center gap-4 px-5 py-4 animate-rowSlideIn" style={{ animationDelay: '1.35s' }}>
                   <div className="w-9 h-9 rounded-xl bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
                     <Zap className="w-4 h-4 text-yellow-400" />
                   </div>
@@ -463,7 +465,7 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-2xl p-5 text-center">
+            <div className="animate-blueprintCardIn bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-2xl p-5 text-center" style={{ animationDelay: '1.55s' }}>
               <p className="text-yellow-200 text-sm font-medium leading-relaxed">
                 Consistency beats intensity. Show up to this blueprint daily and watch everything change.
               </p>
