@@ -229,7 +229,7 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
             let endMins = timeToMinutes(block.endTime!);
             if (endMins < startMins) endMins += 24 * 60;
 
-            // ── Point marker rendering (e.g. Momentum Generator / App Open) ─────
+            // Point marker: render as a horizontal line instead of a block
             if (block.isPointMarker) {
               const topPx = minutesToPixels(startMins);
               const hex = getHexColor(block.color);
