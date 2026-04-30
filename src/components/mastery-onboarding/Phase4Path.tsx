@@ -78,6 +78,13 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
     return seed.midShortBoundary ?? 0;
   });
 
+  // Flip to true once boundaries have been initialized (auto-split or seed/draft load).
+  // Prevents openTimeRanges from auto-splitting again if the user goes back and re-enters
+  // the sub-step within the same mounted session.
+  const rangesEverInitializedRef = useRef(
+    hasSavedRangesFromMount || seed.longMidBoundary !== undefined || seed.midShortBoundary !== undefined
+  );
+
   // Refs for divider drag (avoid stale closures)
   const dividerDragging = useRef<'longMid' | 'midShort' | null>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -217,14 +224,15 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
   const openTimeRanges = (list = stepsList) => {
     const n = list.length;
     // Auto-split only when there were genuinely no saved boundaries at mount time
-    // (no RANGES_DRAFT_KEY before our own auto-save effect ran, and no seed from a
-    //  previous completed run). Using the mount-time flag avoids false positives
-    // caused by the auto-save effect writing 0/0 on first render.
-    const hasPriorBoundaries = hasSavedRangesFromMount || seed.longMidBoundary !== undefined;
+    // (no RANGES_DRAFT_KEY before our own auto-save effect ran, no seed from a
+    //  previous completed run, and boundaries haven't been initialized yet this session).
+    const hasSeedBoundaries = seed.longMidBoundary !== undefined || seed.midShortBoundary !== undefined;
+    const hasPriorBoundaries = hasSavedRangesFromMount || hasSeedBoundaries || rangesEverInitializedRef.current;
     if (!hasPriorBoundaries) {
       setLongMidBoundary(Math.floor(n / 3));
       setMidShortBoundary(Math.floor((2 * n) / 3));
     }
+    rangesEverInitializedRef.current = true;
     setShowTimeRanges(true);
   };
 
