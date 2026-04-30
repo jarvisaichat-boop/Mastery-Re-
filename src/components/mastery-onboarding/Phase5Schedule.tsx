@@ -25,7 +25,7 @@ const WOW_SAMPLE_BLOCKS: TimeBlock[] = [
 const DEFAULT_SLEEP: TimeBlock = { time: '23:00', endTime: '07:00', label: 'Sleep', color: 'bg-purple-400', hidden: false, isProtected: true };
 const DEFAULT_WORK: TimeBlock = { time: '09:00', endTime: '17:00', label: 'Work / School', color: 'bg-blue-400', hidden: false, isProtected: true };
 const DEFAULT_HABIT: TimeBlock = { time: '07:00', endTime: '08:00', label: 'Habit Time', color: 'bg-orange-400', hidden: false };
-const DEFAULT_MOMENTUM: TimeBlock = { time: '06:00', endTime: '06:30', label: 'Momentum Generator', color: 'bg-yellow-400', hidden: false };
+const DEFAULT_MOMENTUM: TimeBlock = { time: '06:00', endTime: '06:30', label: 'Momentum Generator', color: 'bg-yellow-400', hidden: false, isPointMarker: true };
 
 const LABEL_IS_SLEEP = (l: string) => /sleep/i.test(l);
 const LABEL_IS_WORK = (l: string) => /work|school/i.test(l);
@@ -65,9 +65,10 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
   const [habitBlock, setHabitBlock] = useState<TimeBlock>(() =>
     extractCoreBlock(schedule.timeline, LABEL_IS_HABIT, DEFAULT_HABIT)
   );
-  const [momentumBlock, setMomentumBlock] = useState<TimeBlock>(() =>
-    extractCoreBlock(schedule.timeline, LABEL_IS_MOMENTUM, DEFAULT_MOMENTUM)
-  );
+  const [momentumBlock, setMomentumBlock] = useState<TimeBlock>(() => ({
+    ...extractCoreBlock(schedule.timeline, LABEL_IS_MOMENTUM, DEFAULT_MOMENTUM),
+    isPointMarker: true,
+  }));
 
   const [currentRoutineItems, setCurrentRoutineItems] = useState<RoutineItem[]>([]);
 
@@ -81,18 +82,23 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
 
   const commitmentTimeline = useMemo(() => [sleepBlock, workBlock, habitBlock, momentumBlock], [sleepBlock, workBlock, habitBlock, momentumBlock]);
 
+  const stripMarkerFlag = (b: TimeBlock): TimeBlock => {
+    const { isPointMarker: _, ...rest } = b;
+    return rest;
+  };
+
   const saveCoreBlocksToSchedule = (sleep: TimeBlock, work: TimeBlock, habit: TimeBlock) => {
     const otherBlocks = schedule.timeline.filter(b =>
       !LABEL_IS_SLEEP(b.label) && !LABEL_IS_WORK(b.label) && !LABEL_IS_HABIT(b.label) && !LABEL_IS_MOMENTUM(b.label)
     );
-    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, momentumBlock] });
+    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, stripMarkerFlag(momentumBlock)] });
   };
 
   const saveAllBlocksToSchedule = (sleep: TimeBlock, work: TimeBlock, habit: TimeBlock, momentum: TimeBlock) => {
     const otherBlocks = schedule.timeline.filter(b =>
       !LABEL_IS_SLEEP(b.label) && !LABEL_IS_WORK(b.label) && !LABEL_IS_HABIT(b.label) && !LABEL_IS_MOMENTUM(b.label)
     );
-    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, momentum] });
+    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, stripMarkerFlag(momentum)] });
   };
 
   const handleCoreScheduleUpdate = (newTimeline: TimeBlock[]) => {
@@ -109,7 +115,7 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
     const newSleep = newTimeline.find(b => LABEL_IS_SLEEP(b.label)) || sleepBlock;
     const newWork = newTimeline.find(b => LABEL_IS_WORK(b.label)) || workBlock;
     const newHabit = newTimeline.find(b => LABEL_IS_HABIT(b.label)) || habitBlock;
-    const newMomentum = newTimeline.find(b => LABEL_IS_MOMENTUM(b.label)) || momentumBlock;
+    const newMomentum = { ...(newTimeline.find(b => LABEL_IS_MOMENTUM(b.label)) || momentumBlock), isPointMarker: true as const };
     setSleepBlock(newSleep);
     setWorkBlock(newWork);
     setHabitBlock(newHabit);
@@ -256,7 +262,7 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-yellow-500/10 mb-3">
                 <Zap className="w-6 h-6 text-yellow-400" />
               </div>
-              <h3 className="text-2xl font-bold text-white leading-tight">The Most Important Part</h3>
+              <h3 className="text-2xl font-bold text-white leading-tight">App Open</h3>
               <p className="text-gray-400 text-sm mt-2 max-w-xs mx-auto leading-relaxed">
                 Opening this app daily is your single most powerful habit. Here's why:
               </p>
@@ -278,8 +284,8 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
                   <BookOpen className="w-4 h-4 text-green-400" />
                 </div>
                 <div>
-                  <p className="text-white text-sm font-semibold">Learn and grow your habits</p>
-                  <p className="text-gray-500 text-xs mt-0.5">Understanding the "why" behind your habits transforms willpower into automatic behavior.</p>
+                  <p className="text-white text-sm font-semibold">Learn and grow your habit muscle</p>
+                  <p className="text-gray-500 text-xs mt-0.5">Every time you open the app you are doing a rep. Showing up daily is how you build the habit muscle that makes everything else stick.</p>
                 </div>
               </div>
 

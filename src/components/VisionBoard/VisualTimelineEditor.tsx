@@ -223,6 +223,32 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
             let endMins = timeToMinutes(block.endTime!);
             if (endMins < startMins) endMins += 24 * 60;
 
+            // ── Point marker rendering (e.g. Momentum Generator / App Open) ─────
+            if (block.isPointMarker) {
+              const topPx = minutesToPixels(startMins);
+              const hex = getHexColor(block.color);
+              const isDragging = dragState?.blockIndex === idx;
+              return [
+                <div
+                  key={`${idx}-point-marker`}
+                  className="absolute left-0 right-0 flex items-center cursor-ns-resize select-none"
+                  style={{ top: `${topPx - 10}px`, zIndex: isDragging ? 1000 : 30, height: '20px' }}
+                  onMouseDown={(e) => handleMouseDown(e, idx, 'move')}
+                  onTouchStart={(e) => handleMouseDown(e, idx, 'move')}
+                >
+                  <div className="flex-1 h-0.5 rounded-full" style={{ backgroundColor: hex, opacity: isDragging ? 1 : 0.85 }} />
+                  <div
+                    className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap mx-2 select-none"
+                    style={{ backgroundColor: hex, color: '#000' }}
+                  >
+                    App Open
+                    <span className="font-normal opacity-70">{formatTimeDisplay(block.time)}</span>
+                  </div>
+                  <div className="flex-1 h-0.5 rounded-full" style={{ backgroundColor: hex, opacity: isDragging ? 1 : 0.85 }} />
+                </div>
+              ];
+            }
+
             const isEditing = editingBlock === idx;
             const isProtected = block.isProtected || block.isRoutine;
             const actualIndex = timeline.findIndex(b => b === block);
