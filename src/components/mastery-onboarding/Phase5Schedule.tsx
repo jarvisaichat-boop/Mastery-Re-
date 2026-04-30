@@ -307,7 +307,7 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
             </div>
 
             <p className="text-gray-400 text-sm text-center">
-              Drag the <span className="text-yellow-400 font-semibold">Momentum Generator</span> block to your preferred daily app-open time.
+              Drag the <span className="text-yellow-400 font-semibold">App Open</span> marker to your preferred daily time.
             </p>
 
             <div className="bg-black/20 rounded-xl p-4 border border-white/5 overflow-y-auto custom-scrollbar" style={{ height: '400px' }}>

@@ -102,6 +102,8 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
     const actualIndex = timeline.findIndex(b => b === blocks[dragState.blockIndex]);
     if (actualIndex === -1) return;
     
+    const isDraggingPointMarker = blocks[dragState.blockIndex]?.isPointMarker === true;
+    
     let newStart = dragState.startMinutes;
     let newEnd = dragState.endMinutes;
     const originalDuration = dragState.endMinutes - dragState.startMinutes;
@@ -121,7 +123,11 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
       }
     } else if (dragState.edge === 'move') {
       const duration = newEnd - newStart;
-      if (isOvernightBlock) {
+      if (isDraggingPointMarker) {
+        // Point markers clamp only the start time; endTime follows at fixed offset
+        newStart = Math.max(0, Math.min(dragState.startMinutes + deltaMinutes, 24 * 60 - 15));
+        newEnd = newStart + duration;
+      } else if (isOvernightBlock) {
         newStart = Math.max(0, dragState.startMinutes + deltaMinutes);
         if (newStart >= 24 * 60) newStart = 24 * 60 - 15;
         newEnd = newStart + duration;
