@@ -94,22 +94,32 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
-  // Step 3 — Habit
+  // Step 3 — Habit (draft key is source of truth; fall back to profile when draft is absent)
   const [habitName, setHabitName] = useState(() => {
-    try { return localStorage.getItem(HABIT_DRAFT_KEY) || ''; } catch { return ''; }
+    try { const draft = localStorage.getItem(HABIT_DRAFT_KEY); if (draft) return draft; } catch {}
+    return profile?.proposedHabit?.name || '';
   });
 
-  // Step 4 — Micro Win
+  // Step 4 — Micro Win (same pattern; strip the "Micro Win: " storage prefix when restoring from profile)
   const [microMethod, setMicroMethod] = useState(() => {
-    try { return localStorage.getItem(MICRO_DRAFT_KEY) || ''; } catch { return ''; }
+    try { const draft = localStorage.getItem(MICRO_DRAFT_KEY); if (draft) return draft; } catch {}
+    const desc = profile?.proposedHabit?.description || '';
+    return desc.startsWith('Micro Win: ') ? desc.slice('Micro Win: '.length) : desc;
   });
 
-  // Auto-save habit and micro win drafts
+  // Auto-save habit and micro win drafts (remove key when empty so an absent key
+  // never masks a valid profile value on the next mount — mirrors rawGoal pattern)
   useEffect(() => {
-    try { localStorage.setItem(HABIT_DRAFT_KEY, habitName); } catch {}
+    try {
+      if (habitName) { localStorage.setItem(HABIT_DRAFT_KEY, habitName); }
+      else { localStorage.removeItem(HABIT_DRAFT_KEY); }
+    } catch {}
   }, [habitName]);
   useEffect(() => {
-    try { localStorage.setItem(MICRO_DRAFT_KEY, microMethod); } catch {}
+    try {
+      if (microMethod) { localStorage.setItem(MICRO_DRAFT_KEY, microMethod); }
+      else { localStorage.removeItem(MICRO_DRAFT_KEY); }
+    } catch {}
   }, [microMethod]);
 
   // ── Inline edit helpers ─────────────────────────────────────────────────────
