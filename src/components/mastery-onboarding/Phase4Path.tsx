@@ -58,6 +58,11 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
 
   // Time ranges sub-phase (boundaries persisted to localStorage)
   const [showTimeRanges, setShowTimeRanges] = useState(false);
+
+  // Capture whether a real draft existed BEFORE mount — the auto-save effect will write
+  // 0/0 on the first render, making a later localStorage check unreliable for first-time users.
+  const [hasSavedRangesFromMount] = useState(() => !!localStorage.getItem(RANGES_DRAFT_KEY));
+
   const [longMidBoundary, setLongMidBoundary] = useState(() => {
     try {
       const saved = localStorage.getItem(RANGES_DRAFT_KEY);
@@ -211,9 +216,12 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
 
   const openTimeRanges = (list = stepsList) => {
     const n = list.length;
-    // Only apply defaults if no saved boundaries exist yet
-    const hasSaved = !!localStorage.getItem(RANGES_DRAFT_KEY);
-    if (!hasSaved) {
+    // Auto-split only when there were genuinely no saved boundaries at mount time
+    // (no RANGES_DRAFT_KEY before our own auto-save effect ran, and no seed from a
+    //  previous completed run). Using the mount-time flag avoids false positives
+    // caused by the auto-save effect writing 0/0 on first render.
+    const hasPriorBoundaries = hasSavedRangesFromMount || seed.longMidBoundary !== undefined;
+    if (!hasPriorBoundaries) {
       setLongMidBoundary(Math.floor(n / 3));
       setMidShortBoundary(Math.floor((2 * n) / 3));
     }
