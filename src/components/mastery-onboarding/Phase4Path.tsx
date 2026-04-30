@@ -30,16 +30,13 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
 
   const [step, setStep] = useState<Step>('rawgoal');
 
-  // Parse seed once per mount — shared across all lazy initializers below via closure.
-  // Declared here (before the useState calls) so each initializer closes over the same object.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const _seed = readSeed();
+  const seed = readSeed();
 
   // Step 1 — Life Goal: draft > profile > seed (last run)
   const [rawGoal, setRawGoal] = useState(() => {
     try { const draft = localStorage.getItem(RAWGOAL_DRAFT_KEY); if (draft) return draft; } catch {}
     if (profile?.rawGoal) return profile.rawGoal;
-    return _seed.rawGoal || '';
+    return seed.rawGoal || '';
   });
 
   // Step 2 — Steps: draft > profile > seed (last run)
@@ -49,7 +46,7 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
       if (saved) { const parsed = JSON.parse(saved); if (Array.isArray(parsed) && parsed.length > 0) return parsed; }
     } catch {}
     if (profile?.steps && profile.steps.length > 0) return profile.steps;
-    return (Array.isArray(_seed.steps) && _seed.steps.length > 0) ? _seed.steps : [];
+    return (Array.isArray(seed.steps) && seed.steps.length > 0) ? seed.steps : [];
   });
   const [draftStep, setDraftStep] = useState('');
   const draftInputRef = useRef<HTMLInputElement>(null);
@@ -111,7 +108,7 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
   const [habitName, setHabitName] = useState(() => {
     try { const draft = localStorage.getItem(HABIT_DRAFT_KEY); if (draft) return draft; } catch {}
     if (profile?.proposedHabit?.name) return profile.proposedHabit.name;
-    return _seed.habitName || '';
+    return seed.habitName || '';
   });
 
   // Step 4 — Micro Win: draft > profile > seed (last run)
@@ -119,7 +116,7 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
     try { const draft = localStorage.getItem(MICRO_DRAFT_KEY); if (draft) return draft; } catch {}
     const desc = profile?.proposedHabit?.description || '';
     if (desc) return desc.startsWith('Micro Win: ') ? desc.slice('Micro Win: '.length) : desc;
-    return _seed.microMethod || '';
+    return seed.microMethod || '';
   });
 
   // Auto-save habit and micro win drafts (remove key when empty so an absent key
