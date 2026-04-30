@@ -20,7 +20,7 @@ export const RAWGOAL_DRAFT_KEY = 'mastery-onboarding-rawgoal-draft';
 export const PROJECTS_BACKUP_KEY = 'mastery-onboarding-projects-backup';
 const SEED_KEY = 'mastery-onboarding-seed';
 
-type OnboardingSeed = { rawGoal?: string; steps?: string[]; habitName?: string; microMethod?: string };
+type OnboardingSeed = { rawGoal?: string; steps?: string[]; habitName?: string; microMethod?: string; longMidBoundary?: number; midShortBoundary?: number };
 function readSeed(): OnboardingSeed {
   try { const raw = localStorage.getItem(SEED_KEY); return raw ? JSON.parse(raw) : {}; } catch { return {}; }
 }
@@ -61,14 +61,16 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
   const [longMidBoundary, setLongMidBoundary] = useState(() => {
     try {
       const saved = localStorage.getItem(RANGES_DRAFT_KEY);
-      return saved ? JSON.parse(saved).longMid ?? 0 : 0;
-    } catch { return 0; }
+      if (saved) { const v = JSON.parse(saved).longMid; if (typeof v === 'number') return v; }
+    } catch {}
+    return seed.longMidBoundary ?? 0;
   });
   const [midShortBoundary, setMidShortBoundary] = useState(() => {
     try {
       const saved = localStorage.getItem(RANGES_DRAFT_KEY);
-      return saved ? JSON.parse(saved).midShort ?? 0 : 0;
-    } catch { return 0; }
+      if (saved) { const v = JSON.parse(saved).midShort; if (typeof v === 'number') return v; }
+    } catch {}
+    return seed.midShortBoundary ?? 0;
   });
 
   // Refs for divider drag (avoid stale closures)
@@ -318,6 +320,8 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
       },
       acceptedHabit: true,
       finalHabitDuration: 15,
+      timeRangeLongMid: longMidBoundary,
+      timeRangeMidShort: midShortBoundary,
     });
   };
 

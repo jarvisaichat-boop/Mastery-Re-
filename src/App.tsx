@@ -468,6 +468,8 @@ function App() {
                     steps: profile?.steps || [],
                     habitName: profile?.proposedHabit?.name || '',
                     microMethod: seedMicroMethod,
+                    longMidBoundary: profile?.timeRangeLongMid ?? 0,
+                    midShortBoundary: profile?.timeRangeMidShort ?? 0,
                 };
                 localStorage.setItem('mastery-onboarding-seed', JSON.stringify(seed));
                 logger.log('🌱 Onboarding seed saved for next run');

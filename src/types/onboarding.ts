@@ -49,6 +49,8 @@ export interface MasteryProfile {
   } | null;
   acceptedHabit: boolean;
   finalHabitDuration: number;
+  timeRangeLongMid?: number;
+  timeRangeMidShort?: number;
   
   // Phase 7: Contract
   committed: boolean;
