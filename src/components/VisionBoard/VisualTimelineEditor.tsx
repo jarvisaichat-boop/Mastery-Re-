@@ -247,7 +247,7 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
                     className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap mx-2 select-none"
                     style={{ backgroundColor: hex, color: '#000' }}
                   >
-                    App Open
+                    {block.label}
                     <span className="font-normal opacity-70">{formatTimeDisplay(block.time)}</span>
                   </div>
                   <div className="flex-1 h-0.5 rounded-full" style={{ backgroundColor: hex, opacity: isDragging ? 1 : 0.85 }} />

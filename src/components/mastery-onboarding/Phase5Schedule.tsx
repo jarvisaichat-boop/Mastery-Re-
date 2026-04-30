@@ -25,12 +25,12 @@ const WOW_SAMPLE_BLOCKS: TimeBlock[] = [
 const DEFAULT_SLEEP: TimeBlock = { time: '23:00', endTime: '07:00', label: 'Sleep', color: 'bg-purple-400', hidden: false, isProtected: true };
 const DEFAULT_WORK: TimeBlock = { time: '09:00', endTime: '17:00', label: 'Work / School', color: 'bg-blue-400', hidden: false, isProtected: true };
 const DEFAULT_HABIT: TimeBlock = { time: '07:00', endTime: '08:00', label: 'Habit Time', color: 'bg-orange-400', hidden: false };
-const DEFAULT_MOMENTUM: TimeBlock = { time: '06:00', endTime: '06:30', label: 'Momentum Generator', color: 'bg-yellow-400', hidden: false, isPointMarker: true };
+const DEFAULT_MOMENTUM: TimeBlock = { time: '06:00', endTime: '06:30', label: 'App Open', color: 'bg-yellow-400', hidden: false, isPointMarker: true };
 
 const LABEL_IS_SLEEP = (l: string) => /sleep/i.test(l);
 const LABEL_IS_WORK = (l: string) => /work|school/i.test(l);
 const LABEL_IS_HABIT = (l: string) => /habit/i.test(l);
-const LABEL_IS_MOMENTUM = (l: string) => /momentum/i.test(l);
+const LABEL_IS_MOMENTUM = (l: string) => /momentum|app open/i.test(l);
 
 function extractCoreBlock(timeline: TimeBlock[], matcher: (l: string) => boolean, fallback: TimeBlock): TimeBlock {
   const found = timeline.find(b => b.endTime && matcher(b.label));
