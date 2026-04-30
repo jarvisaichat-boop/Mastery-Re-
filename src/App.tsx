@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, BookOpen, FileCheck, Shield, Rocket, User, Star } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, BookOpen, FileCheck, Shield, Rocket, User, Star, Clock, Handshake } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
@@ -1064,6 +1064,17 @@ function App() {
                                             </button>
                                             <button
                                                 onClick={() => {
+                                                    setJumpToPhase(3);
+                                                    setPreviewOnboarding(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-orange-400 hover:text-orange-300 rounded-lg transition-colors"
+                                                title="Jump to Phase 3 (Logistics)"
+                                            >
+                                                <Clock className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
                                                     setJumpToPhase(4);
                                                     setPreviewOnboarding(true);
                                                     setShowDevMenu(false);
@@ -1083,6 +1094,17 @@ function App() {
                                                 title="Jump to Phase 5 (Timeline Canvas)"
                                             >
                                                 <Calendar className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setJumpToPhase(6);
+                                                    setPreviewOnboarding(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-gray-700 hover:bg-gray-600 text-teal-400 hover:text-teal-300 rounded-lg transition-colors"
+                                                title="Jump to Phase 6 (Negotiation)"
+                                            >
+                                                <Handshake className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => {
