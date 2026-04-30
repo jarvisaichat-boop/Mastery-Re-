@@ -159,7 +159,7 @@ export default function Phase6Enforcer({ onComplete, profile }: Phase6EnforcerPr
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent z-40">
         <div className="max-w-xl mx-auto">
           <button
-            onClick={() => onComplete({})}
+            onClick={() => onComplete({ enforcerLevel: level })}
             className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg rounded-2xl shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
           >
             CONFIRM PROTOCOL <ArrowRight size={20} />
