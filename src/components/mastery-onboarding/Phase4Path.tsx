@@ -615,7 +615,7 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
               )}
             </div>
             <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-800">
-              <p className="text-gray-300 mb-4 text-sm">What is the one daily action that moves that goal forward?</p>
+              <p className="text-gray-300 mb-4 text-sm">What is the one daily habit / action that moves you towards that goal?</p>
               <input
                 type="text"
                 value={habitName}
