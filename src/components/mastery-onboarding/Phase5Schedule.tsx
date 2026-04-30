@@ -67,6 +67,7 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
   );
   const [momentumBlock, setMomentumBlock] = useState<TimeBlock>(() => ({
     ...extractCoreBlock(schedule.timeline, LABEL_IS_MOMENTUM, DEFAULT_MOMENTUM),
+    label: 'App Open',
     isPointMarker: true,
   }));
 
