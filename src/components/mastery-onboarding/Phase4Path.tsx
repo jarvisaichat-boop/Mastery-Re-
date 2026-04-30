@@ -18,25 +18,34 @@ const HABIT_DRAFT_KEY = 'mastery-onboarding-habit-draft';
 const MICRO_DRAFT_KEY = 'mastery-onboarding-micro-draft';
 export const RAWGOAL_DRAFT_KEY = 'mastery-onboarding-rawgoal-draft';
 export const PROJECTS_BACKUP_KEY = 'mastery-onboarding-projects-backup';
+const SEED_KEY = 'mastery-onboarding-seed';
+
+type OnboardingSeed = { rawGoal?: string; steps?: string[]; habitName?: string; microMethod?: string };
+function readSeed(): OnboardingSeed {
+  try { const raw = localStorage.getItem(SEED_KEY); return raw ? JSON.parse(raw) : {}; } catch { return {}; }
+}
 
 export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBack }: Phase4PathProps) {
   const { data, updatePath } = useVisionBoard();
 
   const [step, setStep] = useState<Step>('rawgoal');
 
-  // Step 1 — Life Goal (draft key is source of truth — newer than profile on refresh)
+  // Step 1 — Life Goal: draft > profile > seed (last run)
   const [rawGoal, setRawGoal] = useState(() => {
     try { const draft = localStorage.getItem(RAWGOAL_DRAFT_KEY); if (draft) return draft; } catch {}
-    return profile?.rawGoal || '';
+    if (profile?.rawGoal) return profile.rawGoal;
+    return readSeed().rawGoal || '';
   });
 
-  // Step 2 — Steps: prefer profile (survives full flow), fall back to draft key
+  // Step 2 — Steps: profile > draft > seed (last run)
   const [stepsList, setStepsList] = useState<string[]>(() => {
     if (profile?.steps && profile.steps.length > 0) return profile.steps;
     try {
       const saved = localStorage.getItem(STEPS_DRAFT_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
+      if (saved) { const parsed = JSON.parse(saved); if (Array.isArray(parsed) && parsed.length > 0) return parsed; }
+    } catch {}
+    const seedSteps = readSeed().steps;
+    return (Array.isArray(seedSteps) && seedSteps.length > 0) ? seedSteps : [];
   });
   const [draftStep, setDraftStep] = useState('');
   const draftInputRef = useRef<HTMLInputElement>(null);
@@ -94,17 +103,19 @@ export default function Phase4Path({ onComplete, onPartialUpdate, profile, onBac
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
-  // Step 3 — Habit (draft key is source of truth; fall back to profile when draft is absent)
+  // Step 3 — Habit: draft > profile > seed (last run)
   const [habitName, setHabitName] = useState(() => {
     try { const draft = localStorage.getItem(HABIT_DRAFT_KEY); if (draft) return draft; } catch {}
-    return profile?.proposedHabit?.name || '';
+    if (profile?.proposedHabit?.name) return profile.proposedHabit.name;
+    return readSeed().habitName || '';
   });
 
-  // Step 4 — Micro Win (same pattern; strip the "Micro Win: " storage prefix when restoring from profile)
+  // Step 4 — Micro Win: draft > profile > seed (last run)
   const [microMethod, setMicroMethod] = useState(() => {
     try { const draft = localStorage.getItem(MICRO_DRAFT_KEY); if (draft) return draft; } catch {}
     const desc = profile?.proposedHabit?.description || '';
-    return desc.startsWith('Micro Win: ') ? desc.slice('Micro Win: '.length) : desc;
+    if (desc) return desc.startsWith('Micro Win: ') ? desc.slice('Micro Win: '.length) : desc;
+    return readSeed().microMethod || '';
   });
 
   // Auto-save habit and micro win drafts (remove key when empty so an absent key

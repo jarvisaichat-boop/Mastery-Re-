@@ -455,6 +455,26 @@ function App() {
                 projectsBackupSafe = false;
             }
 
+            // Persist a seed so Phase 4 fields are pre-filled on the next onboarding run.
+            // Priority on next run: draft key > profile > seed (seed is last resort).
+            // This key is intentionally NEVER cleared by the cleanup below.
+            try {
+                const seedHabitDesc = profile?.proposedHabit?.description || '';
+                const seedMicroMethod = seedHabitDesc.startsWith('Micro Win: ')
+                    ? seedHabitDesc.slice('Micro Win: '.length)
+                    : seedHabitDesc;
+                const seed = {
+                    rawGoal: incomingRawGoal,
+                    steps: profile?.steps || [],
+                    habitName: profile?.proposedHabit?.name || '',
+                    microMethod: seedMicroMethod,
+                };
+                localStorage.setItem('mastery-onboarding-seed', JSON.stringify(seed));
+                logger.log('🌱 Onboarding seed saved for next run');
+            } catch (e) {
+                logger.error('Failed to save onboarding seed', e);
+            }
+
             localStorage.setItem(LOCAL_STORAGE_ONBOARDING_KEY, 'true');
             localStorage.setItem(LOCAL_STORAGE_GOAL_KEY, userGoal);
             localStorage.setItem(LOCAL_STORAGE_ASPIRATIONS_KEY, userAspirations);
