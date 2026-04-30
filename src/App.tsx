@@ -1113,7 +1113,7 @@ function App() {
                                                     setShowDevMenu(false);
                                                 }}
                                                 className="p-2 bg-gray-700 hover:bg-gray-600 text-green-400 hover:text-green-300 rounded-lg transition-colors"
-                                                title="Jump to Phase 7"
+                                                title="Jump to Phase 7 (Completion)"
                                             >
                                                 <FileCheck className="w-4 h-4" />
                                             </button>
