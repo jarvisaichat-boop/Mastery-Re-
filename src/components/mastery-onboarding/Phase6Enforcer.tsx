@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, ArrowRight, Zap, Bell, CheckCircle } from 'lucide-react';
+import { Shield, ArrowRight, Zap, Bell, CheckCircle, Users } from 'lucide-react';
 import { MasteryProfile } from '../../types/onboarding';
 
 interface Phase6EnforcerProps {
@@ -8,7 +8,7 @@ interface Phase6EnforcerProps {
 }
 
 export default function Phase6Enforcer({ onComplete, profile }: Phase6EnforcerProps) {
-  const [level, setLevel] = useState<'gentle' | 'tax' | 'camera'>('gentle');
+  const [level, setLevel] = useState<'gentle' | 'tax' | 'camera' | 'social'>('gentle');
 
   const options = [
     {
@@ -34,6 +34,14 @@ export default function Phase6Enforcer({ onComplete, profile }: Phase6EnforcerPr
       icon: Shield,
       color: 'text-red-500',
       border: 'border-red-500'
+    },
+    {
+      id: 'social',
+      title: 'Social Pressure',
+      description: 'Post your progress to social space or have someone you know track your progress and get a notification when you are not completing your habit.',
+      icon: Users,
+      color: 'text-purple-400',
+      border: 'border-purple-400'
     }
   ];
 

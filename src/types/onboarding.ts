@@ -40,6 +40,9 @@ export interface MasteryProfile {
   // Phase 5: Synthesis
   aiPersona: string; // "Hype Man" or "Drill Sergeant"
   
+  // Phase 6: Enforcer
+  enforcerLevel: 'gentle' | 'tax' | 'camera' | 'social' | '';
+
   // Phase 6: Negotiation
   proposedHabit: {
     name: string;
