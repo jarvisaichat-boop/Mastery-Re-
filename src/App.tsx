@@ -4,6 +4,7 @@ import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
 import PostTourCinematic from './components/PostTourCinematic';
+import MGBallDescent from './components/MGBallDescent';
 import EmergencyHabitAction from './components/EmergencyHabitAction';
 import StreakRepair from './components/StreakRepair';
 import AICoachWidget from './components/AICoachWidget';
@@ -293,6 +294,7 @@ function App() {
     const [showMomentumConfirmation, setShowMomentumConfirmation] = useState(false);
     const [showMomentumGenerator, setShowMomentumGenerator] = useState(false);
     const [showPostTourCinematic, setShowPostTourCinematic] = useState(false);
+    const [showMGBallDescent, setShowMGBallDescent] = useState(false);
     const [showMGSpotlight, setShowMGSpotlight] = useState(false);
     const [showMGInteractionLock, setShowMGInteractionLock] = useState(false);
     const [showContentLibraryManager, setShowContentLibraryManager] = useState(false);
@@ -1244,7 +1246,7 @@ function App() {
 
                                 {/* Launch Pad Button - Premium Half-circle at bottom-center */}
                                 {onboardingComplete && !showStatsView && (
-                                    <div className={`fixed bottom-0 left-1/2 transform -translate-x-1/2 group ${showMGInteractionLock ? 'z-[49]' : 'z-40'}`}>
+                                    <div className={`fixed bottom-0 left-1/2 transform -translate-x-1/2 group ${showMGInteractionLock ? 'z-[49]' : 'z-40'} ${showMGBallDescent ? 'opacity-0 pointer-events-none' : ''}`} style={{ transition: 'opacity 0.15s ease' }}>
                                         <button
                                             onClick={() => {
                                                 setShowMGSpotlight(false);
@@ -1440,6 +1442,21 @@ function App() {
                                 <PostTourCinematic
                                     onReveal={() => {
                                         setShowPostTourCinematic(false);
+                                        setShowMGSpotlight(true);
+                                        setShowMGInteractionLock(true);
+                                    }}
+                                    onCurtainUp={() => {
+                                        setShowPostTourCinematic(false);
+                                        setShowMGBallDescent(true);
+                                    }}
+                                />
+                            )}
+
+                            {/* MG ball descent — golden sun sinks into the MG button position */}
+                            {showMGBallDescent && (
+                                <MGBallDescent
+                                    onReveal={() => {
+                                        setShowMGBallDescent(false);
                                         setShowMGSpotlight(true);
                                         setShowMGInteractionLock(true);
                                     }}

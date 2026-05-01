@@ -24,11 +24,12 @@ const DIM_DURATION = 1800;
 
 interface Props {
   onReveal: () => void;
+  onCurtainUp: () => void;
 }
 
 type Phase = 'breathe' | 'dimming' | 'drumroll' | 'crash' | 'lines' | 'curtain';
 
-export default function PostTourCinematic({ onReveal }: Props) {
+export default function PostTourCinematic({ onReveal, onCurtainUp }: Props) {
   const [phase, setPhase] = useState<Phase>('breathe');
   const [barHeights, setBarHeights] = useState<number[]>(Array(NUM_BARS).fill(8));
   const [lineIndex, setLineIndex] = useState(-1);
@@ -147,13 +148,9 @@ export default function PostTourCinematic({ onReveal }: Props) {
             addTimeout(() => {
               setPhase('curtain');
               setCurtainActive(true);
+              // After curtain finishes rising, hand off to the ball descent animation
               addTimeout(() => {
-                try {
-                  if ('vibrate' in navigator && navigator.vibrate) {
-                    navigator.vibrate([100, 50, 200]);
-                  }
-                } catch {}
-                onReveal();
+                onCurtainUp();
               }, 650);
             }, LINES.length * 1300 + 800);
 
