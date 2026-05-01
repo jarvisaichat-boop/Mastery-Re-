@@ -26,7 +26,7 @@ export default function MGBallDescent({ onReveal }: Props) {
       clearTimeout(paintTimer);
       clearTimeout(revealTimer);
     };
-  }, []);
+  }, [onReveal]);
 
   const ballStyle: React.CSSProperties = settled
     ? {
@@ -65,7 +65,7 @@ export default function MGBallDescent({ onReveal }: Props) {
           ...ballStyle,
           background: 'linear-gradient(to right, #facc15, #eab308, #f97316)',
           boxShadow:
-            '0 -10px 40px rgba(251, 191, 36, 0.6), 0 -5px 20px rgba(251, 191, 36, 0.4)',
+            '0 -10px 40px rgba(251, 191, 36, 0.5), 0 -5px 20px rgba(251, 191, 36, 0.3)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
