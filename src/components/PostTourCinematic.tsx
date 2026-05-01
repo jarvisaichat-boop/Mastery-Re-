@@ -22,6 +22,7 @@ export default function PostTourCinematic({ onReveal }: Props) {
   const [lineIndex, setLineIndex] = useState(-1);
   const [showFlash, setShowFlash] = useState(false);
   const [curtainActive, setCurtainActive] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
 
   const barIntervalRef = useRef<number | null>(null);
   const timeoutsRef = useRef<number[]>([]);
@@ -35,11 +36,12 @@ export default function PostTourCinematic({ onReveal }: Props) {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (reducedMotion) {
+      // Show all lines instantly with no animation, then fade the overlay out
       setPhase('lines');
       setLineIndex(LINES.length - 1);
       addTimeout(() => {
-        setCurtainActive(true);
-        addTimeout(onReveal, 100);
+        setFadeOut(true);
+        addTimeout(onReveal, 400);
       }, 1500);
       return;
     }
@@ -65,7 +67,7 @@ export default function PostTourCinematic({ onReveal }: Props) {
       setPhase('crash');
       setBarHeights(Array(NUM_BARS).fill(100));
 
-      // 300ms freeze at peak, then crash
+      // 300ms freeze at peak, then crash to true zero
       addTimeout(() => {
         setBarHeights(Array(NUM_BARS).fill(0));
         setShowFlash(true);
@@ -109,15 +111,27 @@ export default function PostTourCinematic({ onReveal }: Props) {
     };
   }, []);
 
+  const overlayStyle: React.CSSProperties = curtainActive
+    ? {
+        transform: 'translateY(-100%)',
+        transition: 'transform 650ms cubic-bezier(0.4, 0, 0.2, 1)',
+      }
+    : fadeOut
+    ? {
+        opacity: 0,
+        transition: 'opacity 400ms ease-out',
+        pointerEvents: 'none',
+      }
+    : {
+        transform: 'translateY(0)',
+      };
+
   return (
     <div
       className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center overflow-hidden"
-      style={{
-        transform: curtainActive ? 'translateY(-100%)' : 'translateY(0)',
-        transition: curtainActive ? 'transform 650ms cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-      }}
+      style={overlayStyle}
     >
-      {/* White flash */}
+      {/* White flash on crash */}
       {showFlash && (
         <div className="absolute inset-0 bg-white z-10 pointer-events-none" />
       )}
@@ -139,10 +153,10 @@ export default function PostTourCinematic({ onReveal }: Props) {
                 key={i}
                 className="flex-1 rounded-t"
                 style={{
-                  height: `${Math.max(h, 2)}%`,
+                  height: `${h}%`,
                   background: `linear-gradient(to top, #ca8a04, #fde047)`,
                   transition: 'height 60ms linear',
-                  opacity: 0.7 + (h / 100) * 0.3,
+                  opacity: h > 0 ? 0.7 + (h / 100) * 0.3 : 0,
                 }}
               />
             ))}

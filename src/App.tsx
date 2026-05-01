@@ -294,6 +294,7 @@ function App() {
     const [showMomentumGenerator, setShowMomentumGenerator] = useState(false);
     const [showPostTourCinematic, setShowPostTourCinematic] = useState(false);
     const [showMGSpotlight, setShowMGSpotlight] = useState(false);
+    const [showMGInteractionLock, setShowMGInteractionLock] = useState(false);
     const [showContentLibraryManager, setShowContentLibraryManager] = useState(false);
     const [showDevMenu, setShowDevMenu] = useState(false);
     const [showVisionBoard, setShowVisionBoard] = useState(false);
@@ -1243,10 +1244,11 @@ function App() {
 
                                 {/* Launch Pad Button - Premium Half-circle at bottom-center */}
                                 {onboardingComplete && !showStatsView && (
-                                    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 group">
+                                    <div className={`fixed bottom-0 left-1/2 transform -translate-x-1/2 group ${showMGInteractionLock ? 'z-[49]' : 'z-40'}`}>
                                         <button
                                             onClick={() => {
                                                 setShowMGSpotlight(false);
+                                                setShowMGInteractionLock(false);
                                                 // Skip confirmation popup on subsequent activations
                                                 if (isMomentumCompletedToday) {
                                                     setShowMomentumGenerator(true);
@@ -1439,6 +1441,7 @@ function App() {
                                     onReveal={() => {
                                         setShowPostTourCinematic(false);
                                         setShowMGSpotlight(true);
+                                        setShowMGInteractionLock(true);
                                     }}
                                 />
                             )}
@@ -1453,6 +1456,11 @@ function App() {
                                         animation: 'mgSpotlightPulse 1.5s ease-in-out infinite',
                                     }}
                                 />
+                            )}
+
+                            {/* Interaction lock — blocks all taps except the MG button until user taps it */}
+                            {showMGInteractionLock && (
+                                <div className="fixed inset-0 z-[48] bg-transparent pointer-events-auto cursor-not-allowed" />
                             )}
 
                             <AddHabitModal
