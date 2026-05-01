@@ -3,6 +3,7 @@ import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, BookOpen, File
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
+import PostTourCinematic from './components/PostTourCinematic';
 import EmergencyHabitAction from './components/EmergencyHabitAction';
 import StreakRepair from './components/StreakRepair';
 import AICoachWidget from './components/AICoachWidget';
@@ -291,6 +292,8 @@ function App() {
     // Momentum Generator state
     const [showMomentumConfirmation, setShowMomentumConfirmation] = useState(false);
     const [showMomentumGenerator, setShowMomentumGenerator] = useState(false);
+    const [showPostTourCinematic, setShowPostTourCinematic] = useState(false);
+    const [showMGSpotlight, setShowMGSpotlight] = useState(false);
     const [showContentLibraryManager, setShowContentLibraryManager] = useState(false);
     const [showDevMenu, setShowDevMenu] = useState(false);
     const [showVisionBoard, setShowVisionBoard] = useState(false);
@@ -1243,6 +1246,7 @@ function App() {
                                     <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 group">
                                         <button
                                             onClick={() => {
+                                                setShowMGSpotlight(false);
                                                 // Skip confirmation popup on subsequent activations
                                                 if (isMomentumCompletedToday) {
                                                     setShowMomentumGenerator(true);
@@ -1408,6 +1412,7 @@ function App() {
                                     onComplete={() => {
                                         setAppTourComplete(true);
                                         setPreviewAppTour(false);
+                                        setShowPostTourCinematic(true);
                                     }}
                                     onToggleStatsView={setShowStatsView}
                                     onOpenHabitModal={() => {
@@ -1425,6 +1430,28 @@ function App() {
                                 <Toast
                                     message={toastMessage}
                                     onClose={() => setToastMessage(null)}
+                                />
+                            )}
+
+                            {/* Cinematic post-tour sequence */}
+                            {showPostTourCinematic && (
+                                <PostTourCinematic
+                                    onReveal={() => {
+                                        setShowPostTourCinematic(false);
+                                        setShowMGSpotlight(true);
+                                    }}
+                                />
+                            )}
+
+                            {/* MG spotlight ring — appears after cinematic, guides user to the button */}
+                            {showMGSpotlight && (
+                                <div
+                                    className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 pointer-events-none rounded-t-full"
+                                    style={{
+                                        width: '13rem',
+                                        height: '6.75rem',
+                                        animation: 'mgSpotlightPulse 1.5s ease-in-out infinite',
+                                    }}
                                 />
                             )}
 
