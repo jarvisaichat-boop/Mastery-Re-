@@ -50,7 +50,7 @@ const saveCategoriesToLocalStorage = (categoriesMap: Record<string, string[]>) =
 };
 
 
-const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () => void }> = ({
+const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () => void; isInTour?: boolean }> = ({
   isOpen,
   onClose,
   onSaveHabit,
@@ -58,7 +58,8 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
   habitToEdit,
   habitMuscleCount,
   lifeGoalsCount,
-  onOpenProgramLibrary
+  onOpenProgramLibrary,
+  isInTour = false,
 }) => {
   const [habitName, setHabitName] = useState('');
   const [habitDescription, setHabitDescription] = useState('');
@@ -289,21 +290,23 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) onClose();
+      if (e.key === 'Escape' && isOpen && !isInTour) onClose();
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, isInTour]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
+    <div className={`fixed inset-0 flex items-center justify-center p-4 ${isInTour ? 'z-[102]' : 'z-50'}`}>
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={isInTour ? undefined : onClose} />
       <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 bg-[#2C2C2E] rounded-2xl shadow-xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-white">{habitToEdit ? 'Edit Habit' : 'Create New Habit'}</h2>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700"><X className="w-5 h-5" /></button>
+          {!isInTour && (
+            <button onClick={onClose} className="p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700"><X className="w-5 h-5" /></button>
+          )}
         </div>
         
         {!habitToEdit && onOpenProgramLibrary && (
@@ -370,7 +373,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">Habit Type</label>
-            <div className="space-y-3">
+            <div className="space-y-3 habit-type-selector-tour-target">
               {[
                 { value: 'Habit', label: 'Habit', description: 'Regular habit for personal growth' },
                 { value: 'Anchor Habit', label: 'Habit Muscle 💪', description: 'Simple habit to build your habit muscle (only 1 allowed)' },
@@ -400,7 +403,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
                     <input type="radio" name="habitType" value={type.value} checked={habitType === type.value} onChange={(e) => setHabitType(e.target.value)} className="w-4 h-4 text-green-500 bg-[#1C1C1E] border-gray-600 focus:ring-green-500 flex-shrink-0" />
                     <div>
                       <div className="text-white font-medium">{type.label}</div>
-                      <div className={`text-sm text-gray-400 ${shouldShrink ? 'hidden' : ''}`}>{type.description}</div>
+                      <div className={`text-sm text-gray-400 ${shouldShrink ? 'hidden' : ''} ${isCurrentSelection ? 'habit-type-description-tour-target' : ''}`}>{type.description}</div>
                     </div>
                   </label>
                 );

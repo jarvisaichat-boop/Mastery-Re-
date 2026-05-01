@@ -5,6 +5,8 @@ import DailyCheckInPreview from './DailyCheckInPreview';
 interface AppTourProps {
   onComplete: () => void;
   onToggleStatsView?: (show: boolean) => void;
+  onOpenHabitModal?: () => void;
+  onCloseHabitModal?: () => void;
 }
 
 const TOOLTIP_MARGIN = 12;
@@ -20,7 +22,7 @@ const PREVIEW_GAP = 32;
 const MOBILE_PREVIEW_BREAKPOINT = 480;
 const MOBILE_HEIGHT_BREAKPOINT = 500;
 
-export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps) {
+export default function AppTour({ onComplete, onToggleStatsView, onOpenHabitModal, onCloseHabitModal }: AppTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [elementReady, setElementReady] = useState(false);
   const [tooltipHeight, setTooltipHeight] = useState(TOOLTIP_EST_HEIGHT);
@@ -59,6 +61,34 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
       requireStatsView: true,
       reserveBottom: true,
     },
+    {
+      title: 'Add a Habit',
+      description: 'Tap the + button to start creating your first habit. Every great routine begins with a single step.',
+      spotlightSelector: '.add-habit-tour-target',
+      position: 'top' as const,
+    },
+    {
+      title: 'Name Your Habit',
+      description: 'Give your habit a clear, specific name. The more concrete it is, the easier it is to stay consistent.',
+      spotlightSelector: '#habitName',
+      position: 'bottom' as const,
+      requireHabitModal: true,
+    },
+    {
+      title: 'Choose a Habit Type',
+      description: 'Select the type that best fits your habit. Each type unlocks different tracking and coaching features.',
+      spotlightSelector: '.habit-type-selector-tour-target',
+      position: 'bottom' as const,
+      requireHabitModal: true,
+    },
+    {
+      title: 'Habit Type Explained',
+      description: 'Read the description to understand what each type means for your journey. Pick the one that matches your goal.',
+      spotlightSelector: '.habit-type-description-tour-target',
+      position: 'bottom' as const,
+      requireHabitModal: true,
+      isLastStep: true,
+    },
   ];
 
   const currentStop = tourStops[currentStep];
@@ -70,6 +100,14 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
       onToggleStatsView(false);
     }
   }, [currentStep, currentStop.requireStatsView, onToggleStatsView]);
+
+  useEffect(() => {
+    if (currentStop.requireHabitModal && onOpenHabitModal) {
+      onOpenHabitModal();
+    } else if (!currentStop.requireHabitModal && onCloseHabitModal && currentStep > 0) {
+      onCloseHabitModal();
+    }
+  }, [currentStep, currentStop.requireHabitModal, onOpenHabitModal, onCloseHabitModal]);
 
   useEffect(() => {
     setElementReady(false);
@@ -108,6 +146,9 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
   const handleComplete = () => {
     if (onToggleStatsView) {
       onToggleStatsView(false);
+    }
+    if (onCloseHabitModal) {
+      onCloseHabitModal();
     }
     localStorage.setItem('mastery-dashboard-app-tour-complete', 'true');
     onComplete();
@@ -286,14 +327,16 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
 
   return (
     <>
-      {/* Dimmed backdrop with spotlight cutout */}
+      {/* Dimmed backdrop */}
       <div className="fixed inset-0 z-[100] pointer-events-none">
         <div className="absolute inset-0 bg-black/15"></div>
-        <div
-          className="absolute rounded-xl border-4 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.15)] transition-all duration-500 pointer-events-auto"
-          style={spotlightStyle}
-        ></div>
       </div>
+
+      {/* Spotlight border — sits above any modal (z-[102]) opened during tour steps */}
+      <div
+        className="fixed z-[103] rounded-xl border-4 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.15)] transition-all duration-500 pointer-events-none"
+        style={spotlightStyle}
+      ></div>
 
       {/* Daily Check-in Preview (Step 2 only, hidden when space is insufficient to prevent tooltip overlap) */}
       {currentStop.showPreview && !shouldHidePreview && (
@@ -367,7 +410,7 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
                 onClick={handleNext}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-all"
               >
-                {currentStep < tourStops.length - 1 ? 'Next' : 'Got it!'}
+                {currentStep < tourStops.length - 1 ? 'Next' : 'Finish Tour'}
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
