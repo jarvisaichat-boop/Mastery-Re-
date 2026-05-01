@@ -10,19 +10,26 @@ interface Props {
 const BALL_SIZE = 260;
 const LANDING_WIDTH = 192;
 const LANDING_HEIGHT = 96;
+const HALO_INSET = 20;
 const POP_DURATION = 580;
 const FLOAT_DURATION = 1800;
 const DESCENT_DURATION = 1200;
+const HALO_FADE_BEFORE_END = 350;
 
 export default function MGBallDescent({ onReveal }: Props) {
   const [phase, setPhase] = useState<Phase>('pop');
+  const [haloFading, setHaloFading] = useState(false);
   const onRevealRef = useRef(onReveal);
   onRevealRef.current = onReveal;
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase('float'), POP_DURATION);
     const t2 = setTimeout(() => setPhase('descend'), POP_DURATION + FLOAT_DURATION);
-    const t3 = setTimeout(() => {
+    const t3 = setTimeout(
+      () => setHaloFading(true),
+      POP_DURATION + FLOAT_DURATION + DESCENT_DURATION - HALO_FADE_BEFORE_END
+    );
+    const t4 = setTimeout(() => {
       try {
         if ('vibrate' in navigator && navigator.vibrate) {
           navigator.vibrate([50, 30, 100]);
@@ -35,9 +42,11 @@ export default function MGBallDescent({ onReveal }: Props) {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
+      clearTimeout(t4);
     };
   }, []);
 
+  // Outer div: handles position + shape transitions
   const outerStyle: React.CSSProperties =
     phase === 'descend'
       ? {
@@ -65,6 +74,34 @@ export default function MGBallDescent({ onReveal }: Props) {
           borderRadius: '50%',
         };
 
+  // Halo: visible during float and most of descent, morphs shape with the ball
+  const haloOpacity = phase === 'pop' || haloFading ? 0 : 1;
+
+  const haloStyle: React.CSSProperties =
+    phase === 'descend'
+      ? {
+          position: 'absolute',
+          inset: `-${HALO_INSET}px`,
+          borderRadius: `${LANDING_HEIGHT + HALO_INSET}px ${LANDING_HEIGHT + HALO_INSET}px 0 0`,
+          border: '3px solid rgba(251, 191, 36, 0.95)',
+          opacity: haloOpacity,
+          transition: [
+            `border-radius ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+            `opacity ${HALO_FADE_BEFORE_END}ms ease`,
+          ].join(', '),
+          pointerEvents: 'none',
+        }
+      : {
+          position: 'absolute',
+          inset: `-${HALO_INSET}px`,
+          borderRadius: '50%',
+          border: '3px solid rgba(251, 191, 36, 0.95)',
+          opacity: haloOpacity,
+          transition: 'opacity 0.4s ease',
+          animation: phase === 'float' ? 'mgBallHalo 1.8s ease-in-out infinite' : 'none',
+          pointerEvents: 'none',
+        };
+
   const innerAnimation =
     phase === 'pop'
       ? 'mgBallPop 0.58s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
@@ -72,25 +109,12 @@ export default function MGBallDescent({ onReveal }: Props) {
       ? 'mgBallFloat 2.4s ease-in-out infinite'
       : 'none';
 
-  const haloOpacity = phase === 'float' ? 1 : 0;
-
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
       <div style={outerStyle}>
-        {/* Halo ring — pulsing golden circle around the ball during float */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: '-20px',
-            borderRadius: '50%',
-            border: '3px solid rgba(251, 191, 36, 0.95)',
-            opacity: haloOpacity,
-            transition: 'opacity 0.4s ease',
-            animation: phase === 'float' ? 'mgBallHalo 1.8s ease-in-out infinite' : 'none',
-            pointerEvents: 'none',
-          }}
-        />
-        {/* Ball visual + float/pop animation */}
+        {/* Halo ring — morphs and descends with the ball */}
+        <div style={haloStyle} />
+        {/* Ball visual */}
         <div
           style={{
             width: '100%',
