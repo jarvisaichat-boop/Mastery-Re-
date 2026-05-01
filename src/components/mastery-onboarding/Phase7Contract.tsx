@@ -2,11 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { logger } from '../../utils/logger';
 
-interface Phase6ContractProps {
+interface Phase7ContractProps {
   onComplete: () => void;
 }
 
-export default function Phase6Contract({ onComplete }: Phase6ContractProps) {
+export default function Phase7Contract({ onComplete }: Phase7ContractProps) {
   const [holdProgress, setHoldProgress] = useState(0);
   const [locked, setLocked] = useState(false);
   const holdIntervalRef = useRef<number | null>(null);
@@ -14,6 +14,7 @@ export default function Phase6Contract({ onComplete }: Phase6ContractProps) {
   // Same mechanism as MomentumGenerator pledge hold
   const handleHoldStart = () => {
     if (locked) return;
+    if (holdIntervalRef.current) return; // already running — ignore duplicate start
     setHoldProgress(0);
     const startTime = Date.now();
 
@@ -150,12 +151,8 @@ export default function Phase6Contract({ onComplete }: Phase6ContractProps) {
               </svg>
             </div>
 
-            <p className="text-white text-xl font-light">
-              {locked ? 'Signed. Entering Dojo...' : 'Hold'}
-            </p>
-            <p className="text-blue-400 text-base italic">
-              {locked ? '' : 'Sign & Enter Dojo'}
-            </p>
+            <p className="text-white text-xl font-light">Hold</p>
+            <p className="text-blue-400 text-base italic">Sign & Enter Dojo</p>
 
             <div className="h-8 flex items-center justify-center">
               {locked ? (
