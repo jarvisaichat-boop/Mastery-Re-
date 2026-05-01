@@ -152,7 +152,6 @@ export default function Phase7Contract({ onComplete }: Phase7ContractProps) {
             </div>
 
             <p className="text-white text-xl font-light">Hold</p>
-            <p className="text-blue-400 text-base italic">Sign & Enter Dojo</p>
 
             <div className="h-8 flex items-center justify-center">
               {locked ? (
