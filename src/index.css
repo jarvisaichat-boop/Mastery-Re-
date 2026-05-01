@@ -219,6 +219,18 @@
   }
 }
 
+@keyframes mgBallPop {
+  0%   { opacity: 0; transform: translateY(60px) scale(0.55); }
+  60%  { opacity: 1; transform: translateY(-18px) scale(1.08); }
+  80%  { transform: translateY(6px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes mgBallFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-16px); }
+}
+
 @keyframes floatHover {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-10px); }
