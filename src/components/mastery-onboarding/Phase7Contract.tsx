@@ -100,10 +100,11 @@ export default function Phase7Contract({ onComplete }: Phase7ContractProps) {
           {/* Hold-to-Sign button — same mechanism as MomentumGenerator pledge */}
           <div className="flex flex-col items-center gap-3 select-none">
             <div
-              className="w-44 h-44 mx-auto rounded-full bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center relative shadow-2xl cursor-pointer"
+              className="w-44 h-44 mx-auto rounded-full bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center relative shadow-2xl cursor-pointer animate-floatHover"
               style={{
                 boxShadow: `0 0 ${Math.max(40, holdProgress)}px rgba(99, 102, 241, ${0.35 + holdProgress / 250})`,
                 touchAction: 'none',
+                animationPlayState: holdProgress > 0 || locked ? 'paused' : 'running',
               }}
               onMouseDown={handleHoldStart}
               onMouseUp={handleHoldEnd}
@@ -113,9 +114,9 @@ export default function Phase7Contract({ onComplete }: Phase7ContractProps) {
               onTouchCancel={handleHoldEnd}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="text-7xl" style={{ userSelect: 'none' }}>
-                {locked ? '✅' : '👆'}
-              </div>
+              <span className="text-white text-2xl font-bold tracking-widest z-10" style={{ userSelect: 'none' }}>
+                {locked ? 'LOCKED ✓' : 'Hold'}
+              </span>
 
               {/* Circular progress ring */}
               <svg
@@ -151,21 +152,12 @@ export default function Phase7Contract({ onComplete }: Phase7ContractProps) {
               </svg>
             </div>
 
-            <p className="text-white text-xl font-light">Hold</p>
-
             <div className="h-8 flex items-center justify-center">
-              {locked ? (
-                <span
-                  className="text-2xl font-bold text-blue-400 animate-pulse"
-                  style={{ textShadow: '0 0 20px rgba(96, 165, 250, 0.8)' }}
-                >
-                  LOCKED ✓
-                </span>
-              ) : holdProgress > 0 ? (
+              {!locked && holdProgress > 0 && (
                 <span className="text-2xl font-bold text-blue-400">
                   {Math.round(holdProgress)}%
                 </span>
-              ) : null}
+              )}
             </div>
           </div>
         </div>

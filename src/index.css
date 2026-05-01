@@ -195,6 +195,15 @@
   animation: blueprintCardIn 0.4s ease-out forwards;
 }
 
+@keyframes floatHover {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+.animate-floatHover {
+  animation: floatHover 2.4s ease-in-out infinite;
+}
+
 /* Respect reduced-motion preference for Blueprint Complete animations */
 @media (prefers-reduced-motion: reduce) {
   .animate-checkBounce,
