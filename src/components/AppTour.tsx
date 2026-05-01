@@ -17,11 +17,25 @@ const ARROW_SIZE = 12;
 const SPOTLIGHT_GAP = 24;
 const PREVIEW_GAP = 32;
 
+const MOBILE_PREVIEW_BREAKPOINT = 480;
+const MOBILE_HEIGHT_BREAKPOINT = 500;
+
 export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [elementReady, setElementReady] = useState(false);
   const [tooltipHeight, setTooltipHeight] = useState(TOOLTIP_EST_HEIGHT);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const tourStops = [
     {
@@ -224,6 +238,44 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
   const { style: tooltipStyle, side: tooltipSide } = getTooltipPlacement();
   const previewStyle = getPreviewStyle();
 
+  const previewWouldOverlapTooltip = (): boolean => {
+    const element = document.querySelector(currentStop.spotlightSelector);
+    if (!element) return false;
+    const rect = element.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const previewW = Math.min(PREVIEW_EST_WIDTH, vw - TOOLTIP_MARGIN * 2);
+    const spaceRight = vw - rect.right - PREVIEW_GAP;
+    const spaceLeft = rect.left - PREVIEW_GAP;
+    if (spaceRight >= previewW || spaceLeft >= previewW) {
+      return false;
+    }
+    const parseTop = (style: React.CSSProperties, estHeight: number, vh: number): number | null => {
+      if (typeof style.top === 'string') return parseFloat(style.top);
+      if (typeof style.bottom === 'string') return vh - parseFloat(style.bottom) - estHeight;
+      return null;
+    };
+    const parseLeft = (style: React.CSSProperties, estWidth: number, outerVw: number): number | null => {
+      if (typeof style.left === 'string') return parseFloat(style.left);
+      if (typeof style.right === 'string') return outerVw - parseFloat(style.right) - estWidth;
+      return null;
+    };
+    const vh = window.innerHeight;
+    const tooltipW = typeof tooltipStyle.width === 'string' ? parseFloat(tooltipStyle.width) : TOOLTIP_EST_WIDTH;
+    const tTop = parseTop(tooltipStyle, tooltipHeight, vh);
+    const tLeft = parseLeft(tooltipStyle, tooltipW, vw);
+    const pTop = parseTop(previewStyle, PREVIEW_EST_HEIGHT, vh);
+    const pLeft = parseLeft(previewStyle, previewW, vw);
+    if (tTop === null || tLeft === null || pTop === null || pLeft === null) return false;
+    const hOverlap = tLeft < pLeft + previewW && tLeft + tooltipW > pLeft;
+    const vOverlap = tTop < pTop + PREVIEW_EST_HEIGHT && tTop + tooltipHeight > pTop;
+    return hOverlap && vOverlap;
+  };
+
+  const shouldHidePreview =
+    windowWidth < MOBILE_PREVIEW_BREAKPOINT ||
+    windowHeight < MOBILE_HEIGHT_BREAKPOINT ||
+    previewWouldOverlapTooltip();
+
   if (!elementReady) {
     return (
       <div className="fixed inset-0 z-[100] bg-black/15 flex items-center justify-center">
@@ -243,8 +295,8 @@ export default function AppTour({ onComplete, onToggleStatsView }: AppTourProps)
         ></div>
       </div>
 
-      {/* Daily Check-in Preview (Step 2 only) */}
-      {currentStop.showPreview && (
+      {/* Daily Check-in Preview (Step 2 only, hidden when space is insufficient to prevent tooltip overlap) */}
+      {currentStop.showPreview && !shouldHidePreview && (
         <div
           className="fixed z-[101] animate-fadeIn pointer-events-none"
           style={previewStyle}
