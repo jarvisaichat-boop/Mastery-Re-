@@ -23,6 +23,9 @@ export default function PostTourCinematic({ onReveal }: Props) {
   const [showFlash, setShowFlash] = useState(false);
   const [curtainActive, setCurtainActive] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const [isReducedMotion] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 
   const barIntervalRef = useRef<number | null>(null);
   const timeoutsRef = useRef<number[]>([]);
@@ -33,9 +36,7 @@ export default function PostTourCinematic({ onReveal }: Props) {
   }
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (reducedMotion) {
+    if (isReducedMotion) {
       // Show all lines instantly with no animation, then fade the overlay out
       setPhase('lines');
       setLineIndex(LINES.length - 1);
@@ -109,7 +110,7 @@ export default function PostTourCinematic({ onReveal }: Props) {
       if (barIntervalRef.current) clearInterval(barIntervalRef.current);
       timeoutsRef.current.forEach(clearTimeout);
     };
-  }, []);
+  }, [isReducedMotion]);
 
   const overlayStyle: React.CSSProperties = curtainActive
     ? {
@@ -171,7 +172,9 @@ export default function PostTourCinematic({ onReveal }: Props) {
             <p
               key={i}
               className={`font-bold ${
-                i <= lineIndex ? 'animate-cinematicLine' : 'opacity-0'
+                i <= lineIndex
+                  ? isReducedMotion ? 'opacity-100' : 'animate-cinematicLine'
+                  : 'opacity-0'
               } ${
                 i === LINES.length - 1
                   ? 'text-yellow-400 text-2xl mt-3'
