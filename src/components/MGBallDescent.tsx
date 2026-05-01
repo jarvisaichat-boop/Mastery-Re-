@@ -72,9 +72,25 @@ export default function MGBallDescent({ onReveal }: Props) {
       ? 'mgBallFloat 2.4s ease-in-out infinite'
       : 'none';
 
+  const haloOpacity = phase === 'float' ? 1 : 0;
+
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
       <div style={outerStyle}>
+        {/* Halo ring — pulsing golden circle around the ball during float */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: '-20px',
+            borderRadius: '50%',
+            border: '3px solid rgba(251, 191, 36, 0.95)',
+            opacity: haloOpacity,
+            transition: 'opacity 0.4s ease',
+            animation: phase === 'float' ? 'mgBallHalo 1.8s ease-in-out infinite' : 'none',
+            pointerEvents: 'none',
+          }}
+        />
+        {/* Ball visual + float/pop animation */}
         <div
           style={{
             width: '100%',
