@@ -72,6 +72,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
   const [repeatDays, setRepeatDays] = useState(1);
   const [scheduledTime, setScheduledTime] = useState<string | undefined>(undefined);
   const [miniAppType, setMiniAppType] = useState<'breath' | 'journal' | 'vision' | null>(null);
+  const [routine, setRoutine] = useState<'morning' | 'day' | 'evening' | null>(null);
   const [showCategorySelection, setShowCategorySelection] = useState(false);
   const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
   const [customMainCategoryInput, setCustomMainCategoryInput] = useState('');
@@ -230,6 +231,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
         setRepeatDays(habitToEdit.repeatDays);
         setScheduledTime(habitToEdit.scheduledTime);
         setMiniAppType(habitToEdit.miniAppType || null);
+        setRoutine(habitToEdit.routine || null);
       } else {
         setHabitName('');
         setHabitDescription('');
@@ -243,6 +245,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
         setRepeatDays(1);
         setScheduledTime(undefined);
         setMiniAppType(null);
+        setRoutine(null);
       }
     }
   }, [isOpen, habitToEdit]);
@@ -270,6 +273,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
         repeatDays,
         scheduledTime,
         miniAppType,
+        routine,
       };
       onSaveHabit(habitData);
       onClose();
@@ -399,6 +403,32 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
                       <div className={`text-sm text-gray-400 ${shouldShrink ? 'hidden' : ''}`}>{type.description}</div>
                     </div>
                   </label>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Routine (Optional)</label>
+            <div className="flex gap-2">
+              {[
+                { value: 'morning' as const, label: '🌅 Morning Routine' },
+                { value: 'day' as const, label: '☀️ Day Routine' },
+                { value: 'evening' as const, label: '🌙 Evening Routine' },
+              ].map((option) => {
+                const isSelected = routine === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setRoutine(isSelected ? null : option.value)}
+                    className={`flex-1 py-2 px-3 text-sm rounded-lg border transition-colors ${
+                      isSelected
+                        ? 'bg-purple-600 border-purple-500 text-white'
+                        : 'bg-[#1C1C1E] border-gray-600 text-gray-300 hover:border-gray-500'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
                 );
               })}
             </div>

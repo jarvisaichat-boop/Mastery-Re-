@@ -31,6 +31,7 @@ export interface Habit {
   miniAppType?: 'breath' | 'journal' | 'vision' | null; // Mini-app experience type
   sourceProgramId?: string; // Optional tracking of which program this habit came from
   microWins?: MicroWin[]; // Optional difficulty levels for the habit
+  routine?: 'morning' | 'day' | 'evening' | null; // Optional routine slot for the habit
 }
 
 export interface AddHabitModalProps {
@@ -50,6 +51,7 @@ export interface AddHabitModalProps {
     repeatDays: number;
     scheduledTime?: string;
     miniAppType?: 'breath' | 'journal' | 'vision' | null;
+    routine?: 'morning' | 'day' | 'evening' | null;
   }) => void;
   onDeleteHabit?: (habitId: number) => void;
   habitToEdit?: Habit | null;
