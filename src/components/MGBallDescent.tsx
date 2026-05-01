@@ -1,28 +1,48 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Rocket } from 'lucide-react';
 
 type Phase = 'pop' | 'float' | 'descend';
 
 interface Props {
+  mgButtonRef?: React.RefObject<HTMLButtonElement>;
   onReveal: () => void;
 }
 
 const BALL_SIZE = 260;
-const LANDING_WIDTH = 192;
-const LANDING_HEIGHT = 96;
+const FALLBACK_WIDTH = 192;
+const FALLBACK_HEIGHT = 96;
 const HALO_INSET = 20;
 const POP_DURATION = 580;
 const FLOAT_DURATION = 1800;
 const DESCENT_DURATION = 1200;
 const HALO_FADE_BEFORE_END = 350;
 
-export default function MGBallDescent({ onReveal }: Props) {
+export default function MGBallDescent({ mgButtonRef, onReveal }: Props) {
   const [phase, setPhase] = useState<Phase>('pop');
   const [haloFading, setHaloFading] = useState(false);
+  const [targetSize, setTargetSize] = useState({ width: FALLBACK_WIDTH, height: FALLBACK_HEIGHT });
   const onRevealRef = useRef(onReveal);
   onRevealRef.current = onReveal;
 
   useEffect(() => {
+    if (mgButtonRef?.current) {
+      const rect = mgButtonRef.current.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setTargetSize({ width: rect.width, height: rect.height });
+      }
+    }
+
+    const handleResize = () => {
+      if (mgButtonRef?.current) {
+        const rect = mgButtonRef.current.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          setTargetSize({ width: rect.width, height: rect.height });
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     const t1 = setTimeout(() => setPhase('float'), POP_DURATION);
     const t2 = setTimeout(() => setPhase('descend'), POP_DURATION + FLOAT_DURATION);
     const t3 = setTimeout(
@@ -43,20 +63,20 @@ export default function MGBallDescent({ onReveal }: Props) {
       clearTimeout(t2);
       clearTimeout(t3);
       clearTimeout(t4);
+      window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [mgButtonRef]);
 
-  // Outer div: handles position + shape transitions
   const outerStyle: React.CSSProperties =
     phase === 'descend'
       ? {
           position: 'absolute',
           left: '50%',
           transform: 'translateX(-50%)',
-          top: `calc(100% - ${LANDING_HEIGHT}px)`,
-          width: `${LANDING_WIDTH}px`,
-          height: `${LANDING_HEIGHT}px`,
-          borderRadius: `${LANDING_HEIGHT}px ${LANDING_HEIGHT}px 0 0`,
+          top: `calc(100% - ${targetSize.height}px)`,
+          width: `${targetSize.width}px`,
+          height: `${targetSize.height}px`,
+          borderRadius: `${targetSize.height}px ${targetSize.height}px 0 0`,
           transition: [
             `top ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
             `width ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
@@ -74,7 +94,6 @@ export default function MGBallDescent({ onReveal }: Props) {
           borderRadius: '50%',
         };
 
-  // Halo: visible during float and most of descent, morphs shape with the ball
   const haloOpacity = phase === 'pop' || haloFading ? 0 : 1;
 
   const haloStyle: React.CSSProperties =
@@ -82,7 +101,7 @@ export default function MGBallDescent({ onReveal }: Props) {
       ? {
           position: 'absolute',
           inset: `-${HALO_INSET}px`,
-          borderRadius: `${LANDING_HEIGHT + HALO_INSET}px ${LANDING_HEIGHT + HALO_INSET}px 0 0`,
+          borderRadius: `${targetSize.height + HALO_INSET}px ${targetSize.height + HALO_INSET}px 0 0`,
           border: '3px solid rgba(251, 191, 36, 0.95)',
           opacity: haloOpacity,
           transition: [
@@ -112,9 +131,7 @@ export default function MGBallDescent({ onReveal }: Props) {
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
       <div style={outerStyle}>
-        {/* Halo ring — morphs and descends with the ball */}
         <div style={haloStyle} />
-        {/* Ball visual */}
         <div
           style={{
             width: '100%',
