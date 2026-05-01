@@ -10,19 +10,26 @@ const LINES = [
 
 const NUM_BARS = 14;
 
+// How long the dashboard stays visible before dimming starts (ms)
+const BREATHE_DELAY = 600;
+// How long the dim-to-black transition takes (ms)
+const DIM_DURATION = 1800;
+
 interface Props {
   onReveal: () => void;
 }
 
-type Phase = 'drumroll' | 'crash' | 'lines' | 'curtain';
+type Phase = 'breathe' | 'dimming' | 'drumroll' | 'crash' | 'lines' | 'curtain';
 
 export default function PostTourCinematic({ onReveal }: Props) {
-  const [phase, setPhase] = useState<Phase>('drumroll');
+  const [phase, setPhase] = useState<Phase>('breathe');
   const [barHeights, setBarHeights] = useState<number[]>(Array(NUM_BARS).fill(8));
   const [lineIndex, setLineIndex] = useState(-1);
   const [showFlash, setShowFlash] = useState(false);
   const [curtainActive, setCurtainActive] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  // Controls the overlay opacity: 0 = transparent (dashboard shows), 1 = fully black
+  const [overlayOpacity, setOverlayOpacity] = useState(0);
   const [isReducedMotion] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
@@ -37,7 +44,8 @@ export default function PostTourCinematic({ onReveal }: Props) {
 
   useEffect(() => {
     if (isReducedMotion) {
-      // Show all lines instantly with no animation, then fade the overlay out
+      // Skip breathe + drum roll — show all lines instantly then fade out
+      setOverlayOpacity(1);
       setPhase('lines');
       setLineIndex(LINES.length - 1);
       addTimeout(() => {
@@ -47,64 +55,76 @@ export default function PostTourCinematic({ onReveal }: Props) {
       return;
     }
 
-    // PHASE 1: Drum roll — bars animate with rising intensity
-    let tick = 0;
-    barIntervalRef.current = window.setInterval(() => {
-      tick++;
-      const intensity = Math.min(tick * 4, 100);
-      setBarHeights(
-        Array(NUM_BARS).fill(0).map(() =>
-          Math.random() * intensity + (100 - intensity) * 0.05
-        )
-      );
-    }, 80);
-
-    // At 2000ms — peak all bars, then crash
+    // BREATHE: give the user a moment to see the dashboard, then dim
     addTimeout(() => {
-      if (barIntervalRef.current) {
-        clearInterval(barIntervalRef.current);
-        barIntervalRef.current = null;
-      }
-      setPhase('crash');
-      setBarHeights(Array(NUM_BARS).fill(100));
+      setPhase('dimming');
+      setOverlayOpacity(1); // CSS transition handles the 1.8s ease
+    }, BREATHE_DELAY);
 
-      // 300ms freeze at peak, then crash to true zero
+    // Drum roll begins after breathe + dim completes
+    const drumrollStart = BREATHE_DELAY + DIM_DURATION + 100;
+
+    addTimeout(() => {
+      setPhase('drumroll');
+
+      let tick = 0;
+      barIntervalRef.current = window.setInterval(() => {
+        tick++;
+        const intensity = Math.min(tick * 4, 100);
+        setBarHeights(
+          Array(NUM_BARS).fill(0).map(() =>
+            Math.random() * intensity + (100 - intensity) * 0.05
+          )
+        );
+      }, 80);
+
+      // Peak all bars, then crash 2s into drum roll
       addTimeout(() => {
-        setBarHeights(Array(NUM_BARS).fill(0));
-        setShowFlash(true);
-        try {
-          if ('vibrate' in navigator && navigator.vibrate) {
-            navigator.vibrate([30, 20, 30, 20, 200]);
-          }
-        } catch {}
+        if (barIntervalRef.current) {
+          clearInterval(barIntervalRef.current);
+          barIntervalRef.current = null;
+        }
+        setPhase('crash');
+        setBarHeights(Array(NUM_BARS).fill(100));
 
-        // Flash lasts 130ms, then lines begin
+        // 300ms freeze at peak, then crash to true zero
         addTimeout(() => {
-          setShowFlash(false);
-          setPhase('lines');
+          setBarHeights(Array(NUM_BARS).fill(0));
+          setShowFlash(true);
+          try {
+            if ('vibrate' in navigator && navigator.vibrate) {
+              navigator.vibrate([30, 20, 30, 20, 200]);
+            }
+          } catch {}
 
-          // Reveal each line one at a time
-          LINES.forEach((_, i) => {
-            addTimeout(() => setLineIndex(i), i * 1300);
-          });
-
-          // After last line + 800ms beat, raise the curtain
+          // Flash for 130ms, then begin impact lines
           addTimeout(() => {
-            setPhase('curtain');
-            setCurtainActive(true);
-            addTimeout(() => {
-              try {
-                if ('vibrate' in navigator && navigator.vibrate) {
-                  navigator.vibrate([100, 50, 200]);
-                }
-              } catch {}
-              onReveal();
-            }, 650);
-          }, LINES.length * 1300 + 800);
+            setShowFlash(false);
+            setPhase('lines');
 
-        }, 130);
-      }, 300);
-    }, 2000);
+            LINES.forEach((_, i) => {
+              addTimeout(() => setLineIndex(i), i * 1300);
+            });
+
+            // After last line + 800ms beat, raise the curtain
+            addTimeout(() => {
+              setPhase('curtain');
+              setCurtainActive(true);
+              addTimeout(() => {
+                try {
+                  if ('vibrate' in navigator && navigator.vibrate) {
+                    navigator.vibrate([100, 50, 200]);
+                  }
+                } catch {}
+                onReveal();
+              }, 650);
+            }, LINES.length * 1300 + 800);
+
+          }, 130);
+        }, 300);
+      }, 2000);
+
+    }, drumrollStart);
 
     return () => {
       if (barIntervalRef.current) clearInterval(barIntervalRef.current);
@@ -112,8 +132,10 @@ export default function PostTourCinematic({ onReveal }: Props) {
     };
   }, [isReducedMotion]);
 
+  // Overlay visual style — handles dim fade-in, curtain rise, and reduced-motion fade-out
   const overlayStyle: React.CSSProperties = curtainActive
     ? {
+        opacity: overlayOpacity,
         transform: 'translateY(-100%)',
         transition: 'transform 650ms cubic-bezier(0.4, 0, 0.2, 1)',
       }
@@ -124,7 +146,10 @@ export default function PostTourCinematic({ onReveal }: Props) {
         pointerEvents: 'none',
       }
     : {
-        transform: 'translateY(0)',
+        opacity: overlayOpacity,
+        transition: phase === 'dimming'
+          ? `opacity ${DIM_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
+          : 'none',
       };
 
   return (
