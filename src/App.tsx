@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, BookOpen, FileCheck, Shield, Rocket, User, Star, Clock, Handshake } from 'lucide-react';
+import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, BookOpen, FileCheck, Shield, Rocket, User, Star, Clock, Handshake, Clapperboard } from 'lucide-react';
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
@@ -1144,6 +1144,19 @@ function App() {
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                 </svg>
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setShowMGBallDescent(false);
+                                                    setShowMGSpotlight(false);
+                                                    setShowMGInteractionLock(false);
+                                                    setShowPostTourCinematic(true);
+                                                    setShowDevMenu(false);
+                                                }}
+                                                className="p-2 bg-yellow-900/40 hover:bg-yellow-800/60 text-yellow-400 hover:text-yellow-300 rounded-lg transition-colors"
+                                                title="Preview Cinematic Sequence"
+                                            >
+                                                <Clapperboard className="w-4 h-4" />
                                             </button>
                                         </div>
                                     )}
