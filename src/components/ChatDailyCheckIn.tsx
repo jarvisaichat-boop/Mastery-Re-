@@ -1,83 +1,19 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { X, MessageCircle } from 'lucide-react';
-import { formatDate } from '../utils';
 // ReflectionCard and ReflectionSummaryCard are preserved for future use — not rendered here
 // import ReflectionCard from './ReflectionCard';
 // import ReflectionSummaryCard from './ReflectionSummaryCard';
-
-interface Message {
-    role: 'ai' | 'user';
-    content: string;
-    timestamp: number;
-}
 
 interface ChatDailyCheckInProps {
     onDismiss: () => void;
 }
 
-function getGreeting(): string {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-}
-
-function getFirstHabitName(): string | null {
-    try {
-        const stored = localStorage.getItem('mastery-dashboard-habits-v1');
-        if (!stored) return null;
-        const habits = JSON.parse(stored);
-        const nonStarter = habits.find((h: { id: number; name: string }) => h.id < 9999990);
-        if (nonStarter) return nonStarter.name;
-        const first = habits.find((h: { id: number; name: string }) => h.id !== 9999994);
-        return first?.name || null;
-    } catch {
-        return null;
-    }
-}
-
-function buildStaticMessages(): Message[] {
-    const greeting = getGreeting();
-    const habitName = getFirstHabitName();
-    const now = Date.now();
-
-    const messages: Message[] = [
-        {
-            role: 'ai',
-            content: `${greeting}! 👋 I'm here to keep you on track and support your progress today.`,
-            timestamp: now,
-        },
-        {
-            role: 'ai',
-            content: `Remember: consistency beats perfection every time. Showing up — even on hard days — is what builds real momentum. You've got this. 💪`,
-            timestamp: now + 1,
-        },
-    ];
-
-    if (habitName) {
-        messages.push({
-            role: 'ai',
-            content: `Don't forget to complete "${habitName}" today. Small actions compound into big results. One step at a time. 🎯`,
-            timestamp: now + 2,
-        });
-    } else {
-        messages.push({
-            role: 'ai',
-            content: `Every habit you complete today is a vote for the person you're becoming. Keep building. 🔥`,
-            timestamp: now + 3,
-        });
-    }
-
-    return messages;
-}
-
 export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
-    const [messages] = useState<Message[]>(buildStaticMessages);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+    }, []);
 
     return (
         <div className="daily-checkin-modal fixed inset-0 bg-black z-50 flex items-center justify-center px-4 sm:px-6">
@@ -85,10 +21,7 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
                 <div className="flex items-center justify-between p-6 border-b border-gray-700">
                     <div className="flex items-center gap-3">
                         <MessageCircle className="w-6 h-6 text-blue-400" />
-                        <div>
-                            <h2 className="text-2xl font-bold">Chat</h2>
-                            <p className="text-sm text-gray-400">{formatDate(new Date(), 'EEEE, MMMM d, yyyy')}</p>
-                        </div>
+                        <h2 className="text-2xl font-bold">Chat</h2>
                     </div>
                     <button
                         onClick={onDismiss}
@@ -102,14 +35,14 @@ export default function ChatDailyCheckIn({ onDismiss }: ChatDailyCheckInProps) {
                     {/* Daily Reflection card is hidden for MVP — preserved in ReflectionCard.tsx for future use */}
                     {/* Daily Reflection summary card is hidden for MVP — preserved in ReflectionSummaryCard.tsx for future use */}
 
-                    {messages.map((message, index) => (
-                        <div key={index} className="flex justify-start">
-                            <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-gray-800 text-gray-100 border border-gray-700">
-                                <div className="text-xs text-gray-400 mb-1 font-semibold">Stoic Coach</div>
-                                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                            </div>
+                    <div className="flex justify-start">
+                        <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-gray-800 text-gray-100 border border-gray-700">
+                            <div className="text-xs text-gray-400 mb-1 font-semibold">Path</div>
+                            <p className="text-sm leading-relaxed">
+                                Chat will provide you with useful information and insights to support your journey and keep you moving forward.
+                            </p>
                         </div>
-                    ))}
+                    </div>
 
                     {/* User input is hidden for MVP */}
 
