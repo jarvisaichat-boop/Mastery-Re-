@@ -1260,7 +1260,7 @@ function App() {
 
                                 {/* Launch Pad Button - Premium Half-circle at bottom-center */}
                                 {onboardingComplete && !showStatsView && (
-                                    <div className={`fixed bottom-0 left-1/2 transform -translate-x-1/2 group ${showMGInteractionLock ? 'z-[49]' : 'z-40'} ${showMGBallDescent ? 'opacity-0 pointer-events-none' : ''}`} style={{ transition: 'opacity 0.15s ease' }}>
+                                    <div className={`fixed bottom-0 left-1/2 transform -translate-x-1/2 group ${showMGInteractionLock ? 'z-[49]' : 'z-40'} ${(showMGBallDescent || showPostTourCinematic) ? 'opacity-0 pointer-events-none' : ''}`} style={{ transition: 'opacity 0.15s ease' }}>
                                         <button
                                             onClick={() => {
                                                 setShowMGSpotlight(false);
