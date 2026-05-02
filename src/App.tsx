@@ -1636,7 +1636,7 @@ function App() {
                                         <button
                                             onClick={() => setShowChatCheckIn(true)}
                                             className="p-2 rounded-lg text-purple-400 hover:text-purple-300 transition-colors"
-                                            title="Daily Check-In"
+                                            title="Chat"
                                         >
                                             <Sparkles className="w-6 h-6" />
                                         </button>
