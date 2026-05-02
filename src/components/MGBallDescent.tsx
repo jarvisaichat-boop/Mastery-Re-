@@ -55,19 +55,19 @@ export default function MGBallDescent({ mgButtonRef, onReveal }: Props) {
       descentStart + DESCENT_DURATION - HALO_FADE_BEFORE_END
     );
 
-    const t4 = setTimeout(
-      () => setPhase('landing'),
-      descentStart + DESCENT_DURATION - BALL_FADE_OVERLAP
-    );
-
-    const t5 = setTimeout(() => {
+    const t4 = setTimeout(() => {
+      setPhase('landing');
       try {
         if ('vibrate' in navigator && navigator.vibrate) {
           navigator.vibrate([50, 30, 100]);
         }
       } catch {}
-      onRevealRef.current();
-    }, descentStart + DESCENT_DURATION - BALL_FADE_OVERLAP + BALL_FADE_DURATION);
+    }, descentStart + DESCENT_DURATION - BALL_FADE_OVERLAP);
+
+    const t5 = setTimeout(
+      () => onRevealRef.current(),
+      descentStart + DESCENT_DURATION - BALL_FADE_OVERLAP + BALL_FADE_DURATION
+    );
 
     return () => {
       clearTimeout(t1);
