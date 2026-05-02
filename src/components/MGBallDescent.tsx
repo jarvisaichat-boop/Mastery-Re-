@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Rocket } from 'lucide-react';
 
-type Phase = 'pop' | 'float' | 'descend';
+type Phase = 'pop' | 'float' | 'descend' | 'landing';
 
 interface Props {
   mgButtonRef?: React.RefObject<HTMLButtonElement>;
@@ -16,6 +16,8 @@ const POP_DURATION = 580;
 const FLOAT_DURATION = 1800;
 const DESCENT_DURATION = 1200;
 const HALO_FADE_BEFORE_END = 350;
+const BALL_FADE_OVERLAP = 350;
+const BALL_FADE_DURATION = 450;
 
 export default function MGBallDescent({ mgButtonRef, onReveal }: Props) {
   const [phase, setPhase] = useState<Phase>('pop');
@@ -43,84 +45,94 @@ export default function MGBallDescent({ mgButtonRef, onReveal }: Props) {
 
     window.addEventListener('resize', handleResize);
 
+    const descentStart = POP_DURATION + FLOAT_DURATION;
+
     const t1 = setTimeout(() => setPhase('float'), POP_DURATION);
-    const t2 = setTimeout(() => setPhase('descend'), POP_DURATION + FLOAT_DURATION);
+    const t2 = setTimeout(() => setPhase('descend'), descentStart);
+
     const t3 = setTimeout(
       () => setHaloFading(true),
-      POP_DURATION + FLOAT_DURATION + DESCENT_DURATION - HALO_FADE_BEFORE_END
+      descentStart + DESCENT_DURATION - HALO_FADE_BEFORE_END
     );
-    const t4 = setTimeout(() => {
+
+    const t4 = setTimeout(
+      () => setPhase('landing'),
+      descentStart + DESCENT_DURATION - BALL_FADE_OVERLAP
+    );
+
+    const t5 = setTimeout(() => {
       try {
         if ('vibrate' in navigator && navigator.vibrate) {
           navigator.vibrate([50, 30, 100]);
         }
       } catch {}
       onRevealRef.current();
-    }, POP_DURATION + FLOAT_DURATION + DESCENT_DURATION + 100);
+    }, descentStart + DESCENT_DURATION - BALL_FADE_OVERLAP + BALL_FADE_DURATION);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
       clearTimeout(t4);
+      clearTimeout(t5);
       window.removeEventListener('resize', handleResize);
     };
   }, [mgButtonRef]);
 
-  const outerStyle: React.CSSProperties =
-    phase === 'descend'
-      ? {
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          top: `calc(100% - ${targetSize.height}px)`,
-          width: `${targetSize.width}px`,
-          height: `${targetSize.height}px`,
-          borderRadius: `${targetSize.height}px ${targetSize.height}px 0 0`,
-          transition: [
-            `top ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-            `width ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-            `height ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-            `border-radius ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-          ].join(', '),
-        }
-      : {
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          top: `calc(50% - ${BALL_SIZE / 2}px)`,
-          width: `${BALL_SIZE}px`,
-          height: `${BALL_SIZE}px`,
-          borderRadius: '50%',
-        };
+  const isDescending = phase === 'descend' || phase === 'landing';
+
+  const outerStyle: React.CSSProperties = isDescending
+    ? {
+        position: 'absolute',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        top: `calc(100% - ${targetSize.height}px)`,
+        width: `${targetSize.width}px`,
+        height: `${targetSize.height}px`,
+        borderRadius: `${targetSize.height}px ${targetSize.height}px 0 0`,
+        transition: [
+          `top ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+          `width ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+          `height ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+          `border-radius ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+        ].join(', '),
+      }
+    : {
+        position: 'absolute',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        top: `calc(50% - ${BALL_SIZE / 2}px)`,
+        width: `${BALL_SIZE}px`,
+        height: `${BALL_SIZE}px`,
+        borderRadius: '50%',
+      };
 
   const haloOpacity = phase === 'pop' || haloFading ? 0 : 1;
 
-  const haloStyle: React.CSSProperties =
-    phase === 'descend'
-      ? {
-          position: 'absolute',
-          inset: `-${HALO_INSET}px`,
-          borderRadius: `${targetSize.height + HALO_INSET}px ${targetSize.height + HALO_INSET}px 0 0`,
-          border: '3px solid rgba(251, 191, 36, 0.95)',
-          opacity: haloOpacity,
-          animation: 'mgBallHalo 1.8s ease-in-out infinite',
-          transition: [
-            `border-radius ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-            `opacity ${HALO_FADE_BEFORE_END}ms ease`,
-          ].join(', '),
-          pointerEvents: 'none',
-        }
-      : {
-          position: 'absolute',
-          inset: `-${HALO_INSET}px`,
-          borderRadius: '50%',
-          border: '3px solid rgba(251, 191, 36, 0.95)',
-          opacity: haloOpacity,
-          transition: 'opacity 0.4s ease',
-          animation: phase === 'float' ? 'mgBallHalo 1.8s ease-in-out infinite' : 'none',
-          pointerEvents: 'none',
-        };
+  const haloStyle: React.CSSProperties = isDescending
+    ? {
+        position: 'absolute',
+        inset: `-${HALO_INSET}px`,
+        borderRadius: `${targetSize.height + HALO_INSET}px ${targetSize.height + HALO_INSET}px 0 0`,
+        border: '3px solid rgba(251, 191, 36, 0.95)',
+        opacity: haloOpacity,
+        animation: 'mgBallHalo 1.8s ease-in-out infinite',
+        transition: [
+          `border-radius ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+          `opacity ${HALO_FADE_BEFORE_END}ms ease`,
+        ].join(', '),
+        pointerEvents: 'none',
+      }
+    : {
+        position: 'absolute',
+        inset: `-${HALO_INSET}px`,
+        borderRadius: '50%',
+        border: '3px solid rgba(251, 191, 36, 0.95)',
+        opacity: haloOpacity,
+        transition: 'opacity 0.4s ease',
+        animation: phase === 'float' ? 'mgBallHalo 1.8s ease-in-out infinite' : 'none',
+        pointerEvents: 'none',
+      };
 
   const innerAnimation =
     phase === 'pop'
@@ -130,7 +142,13 @@ export default function MGBallDescent({ mgButtonRef, onReveal }: Props) {
       : 'mgBallFloat 2.4s ease-in-out infinite paused';
 
   return (
-    <div className="fixed inset-0 z-[200] pointer-events-none">
+    <div
+      className="fixed inset-0 z-[200] pointer-events-none"
+      style={{
+        opacity: phase === 'landing' ? 0 : 1,
+        transition: phase === 'landing' ? `opacity ${BALL_FADE_DURATION}ms ease-out` : 'none',
+      }}
+    >
       <div style={outerStyle}>
         <div style={haloStyle} />
         <div
