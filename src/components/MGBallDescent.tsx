@@ -127,7 +127,7 @@ export default function MGBallDescent({ mgButtonRef, onReveal }: Props) {
       ? 'mgBallPop 0.58s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
       : phase === 'float'
       ? 'mgBallFloat 2.4s ease-in-out infinite'
-      : 'none';
+      : 'mgBallFloat 2.4s ease-in-out infinite paused';
 
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
