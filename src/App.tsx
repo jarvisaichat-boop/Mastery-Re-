@@ -1238,21 +1238,29 @@ function App() {
                                     {/* MG Stat Boxes — only in Tracker view */}
                                     {!showStatsView && (
                                         <div className="flex gap-3">
-                                            <div className="flex-1 rounded-2xl p-4 bg-gradient-to-br from-orange-500/20 to-amber-500/10 border border-orange-500/30">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-lg">🔥</span>
-                                                    <span className="text-xs font-semibold text-orange-300 uppercase tracking-wide">Streak</span>
+                                            {/* Streak box */}
+                                            <div className="flex-1 rounded-2xl p-3.5" style={{ background: 'rgba(17,24,39,0.9)', border: '1.5px solid rgba(251,146,60,0.35)', boxShadow: '0 0 0 1px rgba(251,146,60,0.08), 0 8px 20px rgba(0,0,0,0.4)' }}>
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-base" style={{ background: 'rgba(251,146,60,0.15)', border: '1.5px solid rgba(251,146,60,0.4)' }}>🔥</div>
+                                                    <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full" style={{ color: 'rgba(251,146,60,0.6)', background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.2)' }}>Active</span>
                                                 </div>
-                                                <div className="text-3xl font-bold text-orange-400">{mgStreak}</div>
-                                                <div className="text-xs text-gray-400 mt-0.5">consecutive days</div>
+                                                <div className="text-4xl font-black leading-none mb-1" style={{ color: '#fed7aa', textShadow: '0 0 12px rgba(251,146,60,0.7), 0 0 30px rgba(251,146,60,0.3)' }}>{mgStreak}</div>
+                                                <div className="text-xs font-semibold mb-2" style={{ color: '#fb923c', textShadow: '0 0 8px rgba(251,146,60,0.5)' }}>Day Streak</div>
+                                                <div className="h-0.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                                                    <div className="h-full rounded-full" style={{ width: `${Math.min(100, (mgStreak / 30) * 100)}%`, background: 'linear-gradient(90deg,#f97316,#fb923c)', minWidth: mgStreak > 0 ? 6 : 0 }} />
+                                                </div>
                                             </div>
-                                            <div className="flex-1 rounded-2xl p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/10 border border-blue-500/30">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-lg">⚡</span>
-                                                    <span className="text-xs font-semibold text-blue-300 uppercase tracking-wide">Days Completed</span>
+                                            {/* Days Completed box */}
+                                            <div className="flex-1 rounded-2xl p-3.5" style={{ background: 'rgba(17,24,39,0.9)', border: '1.5px solid rgba(96,165,250,0.35)', boxShadow: '0 0 0 1px rgba(96,165,250,0.08), 0 8px 20px rgba(0,0,0,0.4)' }}>
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-base" style={{ background: 'rgba(96,165,250,0.15)', border: '1.5px solid rgba(96,165,250,0.4)' }}>⚡</div>
+                                                    <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full" style={{ color: 'rgba(96,165,250,0.6)', background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)' }}>Total</span>
                                                 </div>
-                                                <div className="text-3xl font-bold text-blue-400">{mgDaysCount}</div>
-                                                <div className="text-xs text-gray-400 mt-0.5">momentum sessions</div>
+                                                <div className="text-4xl font-black leading-none mb-1" style={{ color: '#bfdbfe', textShadow: '0 0 12px rgba(96,165,250,0.7), 0 0 30px rgba(96,165,250,0.3)' }}>{mgDaysCount}</div>
+                                                <div className="text-xs font-semibold mb-2" style={{ color: '#60a5fa', textShadow: '0 0 8px rgba(96,165,250,0.5)' }}>Sessions Done</div>
+                                                <div className="h-0.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                                                    <div className="h-full rounded-full" style={{ width: `${Math.min(100, (mgDaysCount / 50) * 100)}%`, background: 'linear-gradient(90deg,#3b82f6,#60a5fa)', minWidth: mgDaysCount > 0 ? 6 : 0 }} />
+                                                </div>
                                             </div>
                                         </div>
                                     )}
