@@ -1237,7 +1237,7 @@ function App() {
                                     </div>
                                     {/* MG Stat Boxes — only in Tracker view */}
                                     {!showStatsView && (
-                                        <div className="flex gap-3">
+                                        <div className="flex gap-3 px-3">
                                             {/* Streak box */}
                                             <div className="flex-1 rounded-2xl p-3.5" style={{ background: 'rgba(17,24,39,0.9)', border: '1.5px solid rgba(251,146,60,0.35)', boxShadow: '0 0 0 1px rgba(251,146,60,0.08), 0 8px 20px rgba(0,0,0,0.4)' }}>
                                                 <div className="flex items-center justify-between mb-3">
