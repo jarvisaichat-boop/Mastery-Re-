@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Rocket } from 'lucide-react';
 
 type Phase = 'pop' | 'float' | 'descend';
@@ -125,7 +125,9 @@ export default function MGBallDescent({ mgButtonRef, onReveal }: Props) {
   const innerAnimation =
     phase === 'pop'
       ? 'mgBallPop 0.58s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
-      : 'mgBallFloat 2.4s ease-in-out infinite';
+      : phase === 'float'
+      ? 'mgBallFloat 2.4s ease-in-out infinite'
+      : 'none';
 
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
@@ -139,13 +141,22 @@ export default function MGBallDescent({ mgButtonRef, onReveal }: Props) {
             background: 'linear-gradient(to right, #facc15, #eab308, #f97316)',
             boxShadow:
               '0 -10px 40px rgba(251, 191, 36, 0.5), 0 -5px 20px rgba(251, 191, 36, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            position: 'relative',
             animation: innerAnimation,
           }}
         >
-          <Rocket style={{ width: '52px', height: '52px', color: '#000' }} />
+          <Rocket
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '52px',
+              height: '52px',
+              color: '#000',
+              flexShrink: 0,
+            }}
+          />
         </div>
       </div>
     </div>
