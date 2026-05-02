@@ -40,6 +40,8 @@ const LOCAL_STORAGE_RAW_GOAL_KEY = 'mastery-dashboard-raw-goal';
 const LOCAL_STORAGE_EMERGENCY_MODE_KEY = 'mastery-dashboard-emergency-mode';
 const LOCAL_STORAGE_STREAK_REPAIR_CHECK_KEY = 'mastery-dashboard-last-streak-repair-check';
 const LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY = 'mastery-momentum-last-completed';
+const LOCAL_STORAGE_MG_STREAK_KEY = 'mastery-momentum-streak';
+const LOCAL_STORAGE_MG_DAYS_COUNT_KEY = 'mastery-momentum-days-count';
 const ONBOARDING_RAWGOAL_DRAFT_KEY = 'mastery-onboarding-rawgoal-draft';
 const ONBOARDING_PROJECTS_BACKUP_KEY = 'mastery-onboarding-projects-backup';
 
@@ -309,7 +311,15 @@ function App() {
             return localStorage.getItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY);
         } catch { return null; }
     });
-    
+    const [mgStreak, setMgStreak] = useState<number>(() => {
+        try { return parseInt(localStorage.getItem(LOCAL_STORAGE_MG_STREAK_KEY) || '0', 10) || 0; }
+        catch { return 0; }
+    });
+    const [mgDaysCount, setMgDaysCount] = useState<number>(() => {
+        try { return parseInt(localStorage.getItem(LOCAL_STORAGE_MG_DAYS_COUNT_KEY) || '0', 10) || 0; }
+        catch { return 0; }
+    });
+
     // Track number of activations today (for skipping streak/video on 2nd+ activations)
     const [momentumActivationCountToday, setMomentumActivationCountToday] = useState<number>(() => {
         try {
@@ -642,7 +652,18 @@ function App() {
         const today = formatDate(new Date(), 'yyyy-MM-dd');
         setMomentumLastCompleted(today);
         localStorage.setItem(LOCAL_STORAGE_MOMENTUM_LAST_COMPLETED_KEY, today);
-        
+
+        // Update streak + days count only on the first activation of a new day
+        if (momentumActivationCountToday === 0) {
+            const yesterday = formatDate(new Date(Date.now() - 86400000), 'yyyy-MM-dd');
+            const newStreak = momentumLastCompleted === yesterday ? mgStreak + 1 : 1;
+            const newDaysCount = mgDaysCount + 1;
+            setMgStreak(newStreak);
+            setMgDaysCount(newDaysCount);
+            localStorage.setItem(LOCAL_STORAGE_MG_STREAK_KEY, String(newStreak));
+            localStorage.setItem(LOCAL_STORAGE_MG_DAYS_COUNT_KEY, String(newDaysCount));
+        }
+
         // Increment activation count for today
         const newCount = momentumActivationCountToday + 1;
         setMomentumActivationCountToday(newCount);
@@ -1208,12 +1229,33 @@ function App() {
                                     </div>
                                 )}
 
-                                <div className="mb-8">
+                                <div className="mb-4">
                                     {/* Title and Caption - Centered */}
-                                    <div className="text-center">
+                                    <div className="text-center mb-4">
                                         <h1 className="text-4xl font-bold mb-2">{showStatsView ? 'Mastery Dashboard' : 'Mastery Tracker'}</h1>
                                         <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
                                     </div>
+                                    {/* MG Stat Boxes — only in Tracker view */}
+                                    {!showStatsView && (
+                                        <div className="flex gap-3">
+                                            <div className="flex-1 rounded-2xl p-4 bg-gradient-to-br from-orange-500/20 to-amber-500/10 border border-orange-500/30">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-lg">🔥</span>
+                                                    <span className="text-xs font-semibold text-orange-300 uppercase tracking-wide">Streak</span>
+                                                </div>
+                                                <div className="text-3xl font-bold text-orange-400">{mgStreak}</div>
+                                                <div className="text-xs text-gray-400 mt-0.5">consecutive days</div>
+                                            </div>
+                                            <div className="flex-1 rounded-2xl p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/10 border border-blue-500/30">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-lg">⚡</span>
+                                                    <span className="text-xs font-semibold text-blue-300 uppercase tracking-wide">Days Completed</span>
+                                                </div>
+                                                <div className="text-3xl font-bold text-blue-400">{mgDaysCount}</div>
+                                                <div className="text-xs text-gray-400 mt-0.5">momentum sessions</div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* STATS OVERVIEW */}
