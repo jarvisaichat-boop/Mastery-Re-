@@ -309,6 +309,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
           )}
         </div>
         
+        {/* MVP HIDDEN: Browse Program Library button and "or create custom habit" divider
         {!habitToEdit && onOpenProgramLibrary && (
           <div className="mb-6">
             <button
@@ -338,6 +339,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
             </div>
           </div>
         )}
+        END MVP HIDDEN */}
         
         {habitToEdit && (
           <div className="mb-6">
@@ -624,7 +626,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
             </div>
           </div>
 
-          {/* Mini-App Experience */}
+          {/* MVP HIDDEN: Mini-App Experience section (Breath Pacer and Journal cards)
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">Mini-App Experience (optional)</label>
             <p className="text-xs text-gray-500 mb-3">Turn this habit into an immersive experience instead of a simple checkbox</p>
@@ -663,6 +665,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
               </p>
             )}
           </div>
+          END MVP HIDDEN */}
 
           {/* Notification Scheduling */}
           <div>
