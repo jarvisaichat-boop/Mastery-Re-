@@ -104,6 +104,7 @@ export default function MGBallDescent({ mgButtonRef, onReveal }: Props) {
           borderRadius: `${targetSize.height + HALO_INSET}px ${targetSize.height + HALO_INSET}px 0 0`,
           border: '3px solid rgba(251, 191, 36, 0.95)',
           opacity: haloOpacity,
+          animation: 'mgBallHalo 1.8s ease-in-out infinite',
           transition: [
             `border-radius ${DESCENT_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
             `opacity ${HALO_FADE_BEFORE_END}ms ease`,
