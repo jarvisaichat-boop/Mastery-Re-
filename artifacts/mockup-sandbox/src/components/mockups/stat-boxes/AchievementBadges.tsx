@@ -46,10 +46,29 @@ export function AchievementBadges() {
                 Active
               </div>
             </div>
-            <div style={{ fontSize: 36, fontWeight: 900, color: "#fdba74", lineHeight: 1, fontFamily: "system-ui", marginBottom: 3 }}>
+            <div
+              style={{
+                fontSize: 36,
+                fontWeight: 900,
+                color: "#fed7aa",
+                lineHeight: 1,
+                fontFamily: "system-ui",
+                marginBottom: 3,
+                textShadow: "0 0 12px rgba(251,146,60,0.7), 0 0 30px rgba(251,146,60,0.3)",
+              }}
+            >
               7
             </div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.5)", fontFamily: "system-ui", marginBottom: 8 }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: "system-ui",
+                marginBottom: 8,
+                color: "#fb923c",
+                textShadow: "0 0 8px rgba(251,146,60,0.5)",
+              }}
+            >
               Day Streak
             </div>
             <div
@@ -114,10 +133,29 @@ export function AchievementBadges() {
                 Total
               </div>
             </div>
-            <div style={{ fontSize: 36, fontWeight: 900, color: "#93c5fd", lineHeight: 1, fontFamily: "system-ui", marginBottom: 3 }}>
+            <div
+              style={{
+                fontSize: 36,
+                fontWeight: 900,
+                color: "#bfdbfe",
+                lineHeight: 1,
+                fontFamily: "system-ui",
+                marginBottom: 3,
+                textShadow: "0 0 12px rgba(96,165,250,0.7), 0 0 30px rgba(96,165,250,0.3)",
+              }}
+            >
               24
             </div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.5)", fontFamily: "system-ui", marginBottom: 8 }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: "system-ui",
+                marginBottom: 8,
+                color: "#60a5fa",
+                textShadow: "0 0 8px rgba(96,165,250,0.5)",
+              }}
+            >
               Sessions Done
             </div>
             <div
