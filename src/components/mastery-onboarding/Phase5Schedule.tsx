@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useVisionBoard } from '../../contexts/VisionBoardContext';
 import { VisualTimelineEditor } from '../VisionBoard/VisualTimelineEditor';
 import { MasteryProfile } from '../../types/onboarding';
@@ -34,7 +34,22 @@ const LABEL_IS_MOMENTUM = (l: string) => /momentum|app open/i.test(l);
 
 function extractCoreBlock(timeline: TimeBlock[], matcher: (l: string) => boolean, fallback: TimeBlock): TimeBlock {
   const found = timeline.find(b => b.endTime && matcher(b.label));
-  return found ? { ...found } : { ...fallback };
+  // Return the underlying reference when found so memoization stays stable
+  // across renders (no spread, no new object identity each call).
+  return found ?? fallback;
+}
+
+function blocksEqual(a: TimeBlock, b: TimeBlock): boolean {
+  return (
+    a.time === b.time &&
+    a.endTime === b.endTime &&
+    a.label === b.label &&
+    a.color === b.color &&
+    a.hidden === b.hidden &&
+    a.isProtected === b.isProtected &&
+    a.isRoutine === b.isRoutine &&
+    a.isPointMarker === b.isPointMarker
+  );
 }
 
 function formatTime(time: string): string {
@@ -56,75 +71,124 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
 
   const [step, setStep] = useState<SubStep>('wow');
 
-  const [sleepBlock, setSleepBlock] = useState<TimeBlock>(() =>
-    extractCoreBlock(schedule.timeline, LABEL_IS_SLEEP, DEFAULT_SLEEP)
+  // Derive core blocks directly from context. We deliberately avoid local
+  // useState mirrors here: previously the editor would call onUpdate during
+  // drag snap/normalization with values equal to context, the parent would
+  // setState + write to context anyway, the new context reference would
+  // re-render the editor, and so on — producing a render loop that exhausted
+  // browser network slots refetching dev chunks.
+  const sleepBlock = useMemo(
+    () => extractCoreBlock(schedule.timeline, LABEL_IS_SLEEP, DEFAULT_SLEEP),
+    [schedule.timeline]
   );
-  const [workBlock, setWorkBlock] = useState<TimeBlock>(() =>
-    extractCoreBlock(schedule.timeline, LABEL_IS_WORK, DEFAULT_WORK)
+  const workBlock = useMemo(
+    () => extractCoreBlock(schedule.timeline, LABEL_IS_WORK, DEFAULT_WORK),
+    [schedule.timeline]
   );
-  const [habitBlock, setHabitBlock] = useState<TimeBlock>(() =>
-    extractCoreBlock(schedule.timeline, LABEL_IS_HABIT, DEFAULT_HABIT)
+  const habitBlock = useMemo(
+    () => extractCoreBlock(schedule.timeline, LABEL_IS_HABIT, DEFAULT_HABIT),
+    [schedule.timeline]
   );
-  const [momentumBlock, setMomentumBlock] = useState<TimeBlock>(() => ({
-    ...extractCoreBlock(schedule.timeline, LABEL_IS_MOMENTUM, DEFAULT_MOMENTUM),
-    label: 'App Open',
-    isPointMarker: true,
-  }));
+  const momentumRaw = useMemo(
+    () => extractCoreBlock(schedule.timeline, LABEL_IS_MOMENTUM, DEFAULT_MOMENTUM),
+    [schedule.timeline]
+  );
+  const momentumBlock = useMemo<TimeBlock>(
+    () => ({ ...momentumRaw, label: 'App Open', isPointMarker: true }),
+    [momentumRaw]
+  );
 
-  const [currentRoutineItems, setCurrentRoutineItems] = useState<RoutineItem[]>([]);
-
-  React.useEffect(() => {
-    if (step === 'gm') setCurrentRoutineItems(schedule.gmRoutine || []);
-    if (step === 'gd') setCurrentRoutineItems(schedule.gdRoutine || []);
-    if (step === 'gn') setCurrentRoutineItems(schedule.gnRoutine || []);
+  const currentRoutineItems = useMemo<RoutineItem[]>(() => {
+    if (step === 'gm') return schedule.gmRoutine || [];
+    if (step === 'gd') return schedule.gdRoutine || [];
+    if (step === 'gn') return schedule.gnRoutine || [];
+    return [];
   }, [step, schedule.gmRoutine, schedule.gdRoutine, schedule.gnRoutine]);
 
-  const coreScheduleTimeline = useMemo(() => [sleepBlock, workBlock, habitBlock], [sleepBlock, workBlock, habitBlock]);
+  const coreScheduleTimeline = useMemo(
+    () => [sleepBlock, workBlock, habitBlock],
+    [sleepBlock, workBlock, habitBlock]
+  );
 
-  const commitmentTimeline = useMemo(() => [sleepBlock, workBlock, habitBlock, momentumBlock], [sleepBlock, workBlock, habitBlock, momentumBlock]);
+  const commitmentTimeline = useMemo(
+    () => [sleepBlock, workBlock, habitBlock, momentumBlock],
+    [sleepBlock, workBlock, habitBlock, momentumBlock]
+  );
 
-  const saveCoreBlocksToSchedule = (sleep: TimeBlock, work: TimeBlock, habit: TimeBlock) => {
-    const otherBlocks = schedule.timeline.filter(b =>
-      !LABEL_IS_SLEEP(b.label) && !LABEL_IS_WORK(b.label) && !LABEL_IS_HABIT(b.label) && !LABEL_IS_MOMENTUM(b.label)
-    );
-    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, { ...momentumBlock, isPointMarker: true }] });
-  };
+  const writeCoreBlocks = useCallback(
+    (sleep: TimeBlock, work: TimeBlock, habit: TimeBlock, momentum: TimeBlock) => {
+      const otherBlocks = schedule.timeline.filter(b =>
+        !LABEL_IS_SLEEP(b.label) && !LABEL_IS_WORK(b.label) && !LABEL_IS_HABIT(b.label) && !LABEL_IS_MOMENTUM(b.label)
+      );
+      updateSchedule({
+        timeline: [...otherBlocks, sleep, work, habit, { ...momentum, isPointMarker: true }],
+      });
+    },
+    [schedule.timeline, updateSchedule]
+  );
 
-  const saveAllBlocksToSchedule = (sleep: TimeBlock, work: TimeBlock, habit: TimeBlock, momentum: TimeBlock) => {
-    const otherBlocks = schedule.timeline.filter(b =>
-      !LABEL_IS_SLEEP(b.label) && !LABEL_IS_WORK(b.label) && !LABEL_IS_HABIT(b.label) && !LABEL_IS_MOMENTUM(b.label)
-    );
-    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, { ...momentum, isPointMarker: true }] });
-  };
+  const saveCoreBlocksToSchedule = useCallback(
+    (sleep: TimeBlock, work: TimeBlock, habit: TimeBlock) => {
+      writeCoreBlocks(sleep, work, habit, momentumBlock);
+    },
+    [writeCoreBlocks, momentumBlock]
+  );
 
-  const handleCoreScheduleUpdate = (newTimeline: TimeBlock[]) => {
-    const newSleep = newTimeline.find(b => LABEL_IS_SLEEP(b.label)) || sleepBlock;
-    const newWork = newTimeline.find(b => LABEL_IS_WORK(b.label)) || workBlock;
-    const newHabit = newTimeline.find(b => LABEL_IS_HABIT(b.label)) || habitBlock;
-    setSleepBlock(newSleep);
-    setWorkBlock(newWork);
-    setHabitBlock(newHabit);
-    saveCoreBlocksToSchedule(newSleep, newWork, newHabit);
-  };
+  const saveAllBlocksToSchedule = useCallback(
+    (sleep: TimeBlock, work: TimeBlock, habit: TimeBlock, momentum: TimeBlock) => {
+      writeCoreBlocks(sleep, work, habit, momentum);
+    },
+    [writeCoreBlocks]
+  );
 
-  const handleCommitmentUpdate = (newTimeline: TimeBlock[]) => {
-    const newSleep = newTimeline.find(b => LABEL_IS_SLEEP(b.label)) || sleepBlock;
-    const newWork = newTimeline.find(b => LABEL_IS_WORK(b.label)) || workBlock;
-    const newHabit = newTimeline.find(b => LABEL_IS_HABIT(b.label)) || habitBlock;
-    const newMomentum = { ...(newTimeline.find(b => LABEL_IS_MOMENTUM(b.label)) || momentumBlock), isPointMarker: true as const };
-    setSleepBlock(newSleep);
-    setWorkBlock(newWork);
-    setHabitBlock(newHabit);
-    setMomentumBlock(newMomentum);
-    saveAllBlocksToSchedule(newSleep, newWork, newHabit, newMomentum);
-  };
+  const handleCoreScheduleUpdate = useCallback(
+    (newTimeline: TimeBlock[]) => {
+      const newSleep = newTimeline.find(b => LABEL_IS_SLEEP(b.label)) || sleepBlock;
+      const newWork = newTimeline.find(b => LABEL_IS_WORK(b.label)) || workBlock;
+      const newHabit = newTimeline.find(b => LABEL_IS_HABIT(b.label)) || habitBlock;
+      // Bail out if nothing actually changed — guards against snap/normalize
+      // re-emitting onUpdate with identical values, which previously closed
+      // the render loop via the context write.
+      if (
+        blocksEqual(newSleep, sleepBlock) &&
+        blocksEqual(newWork, workBlock) &&
+        blocksEqual(newHabit, habitBlock)
+      ) {
+        return;
+      }
+      saveCoreBlocksToSchedule(newSleep, newWork, newHabit);
+    },
+    [sleepBlock, workBlock, habitBlock, saveCoreBlocksToSchedule]
+  );
 
-  const handleUpdateRoutine = (newItems: RoutineItem[]) => {
-    setCurrentRoutineItems(newItems);
-    if (step === 'gm') updateSchedule({ gmRoutine: newItems });
-    if (step === 'gd') updateSchedule({ gdRoutine: newItems });
-    if (step === 'gn') updateSchedule({ gnRoutine: newItems });
-  };
+  const handleCommitmentUpdate = useCallback(
+    (newTimeline: TimeBlock[]) => {
+      const newSleep = newTimeline.find(b => LABEL_IS_SLEEP(b.label)) || sleepBlock;
+      const newWork = newTimeline.find(b => LABEL_IS_WORK(b.label)) || workBlock;
+      const newHabit = newTimeline.find(b => LABEL_IS_HABIT(b.label)) || habitBlock;
+      const foundMomentum = newTimeline.find(b => LABEL_IS_MOMENTUM(b.label)) || momentumBlock;
+      const newMomentum: TimeBlock = { ...foundMomentum, isPointMarker: true };
+      if (
+        blocksEqual(newSleep, sleepBlock) &&
+        blocksEqual(newWork, workBlock) &&
+        blocksEqual(newHabit, habitBlock) &&
+        blocksEqual(newMomentum, momentumBlock)
+      ) {
+        return;
+      }
+      saveAllBlocksToSchedule(newSleep, newWork, newHabit, newMomentum);
+    },
+    [sleepBlock, workBlock, habitBlock, momentumBlock, saveAllBlocksToSchedule]
+  );
+
+  const handleUpdateRoutine = useCallback(
+    (newItems: RoutineItem[]) => {
+      if (step === 'gm') updateSchedule({ gmRoutine: newItems });
+      if (step === 'gd') updateSchedule({ gdRoutine: newItems });
+      if (step === 'gn') updateSchedule({ gnRoutine: newItems });
+    },
+    [step, updateSchedule]
+  );
 
   const addRoutineItem = () => handleUpdateRoutine([...currentRoutineItems, { text: '', hidden: false }]);
   const updateRoutineItem = (idx: number, text: string) => {

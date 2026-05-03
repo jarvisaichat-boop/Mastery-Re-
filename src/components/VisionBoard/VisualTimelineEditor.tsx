@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { TimeBlock } from '../../types/visionBoard';
 import { Plus, Trash2 } from 'lucide-react';
 
@@ -69,6 +69,17 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
   
   const points = [...userPoints];
 
+  // Mirror latest props into refs so the drag handlers can read them without
+  // recreating the useCallback (and tearing down/reattaching window event
+  // listeners) on every parent re-render. This prevents a render churn loop
+  // when the parent passes a new `timeline`/`onUpdate` reference per render.
+  const timelineRef = useRef(timeline);
+  const blocksRef = useRef(blocks);
+  const onUpdateRef = useRef(onUpdate);
+  useEffect(() => { timelineRef.current = timeline; }, [timeline]);
+  useEffect(() => { blocksRef.current = blocks; }, [blocks]);
+  useEffect(() => { onUpdateRef.current = onUpdate; }, [onUpdate]);
+
   const minutesToPixels = (minutes: number) => (minutes / 60) * HOUR_HEIGHT;
   const pixelsToMinutes = (pixels: number) => (pixels / HOUR_HEIGHT) * 60;
 
@@ -93,16 +104,19 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
 
   const handleMouseMove = useCallback((e: MouseEvent | TouchEvent) => {
     if (!dragState || !containerRef.current) return;
-    
+
+    const currentTimeline = timelineRef.current;
+    const currentBlocks = blocksRef.current;
+
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     const deltaY = clientY - dragState.startY;
     const deltaMinutes = snapToGrid(pixelsToMinutes(deltaY));
-    
-    const newTimeline = [...timeline];
-    const actualIndex = timeline.findIndex(b => b === blocks[dragState.blockIndex]);
+
+    const newTimeline = [...currentTimeline];
+    const actualIndex = currentTimeline.findIndex(b => b === currentBlocks[dragState.blockIndex]);
     if (actualIndex === -1) return;
-    
-    const isDraggingPointMarker = blocks[dragState.blockIndex]?.isPointMarker === true;
+
+    const isDraggingPointMarker = currentBlocks[dragState.blockIndex]?.isPointMarker === true;
     
     let newStart = dragState.startMinutes;
     let newEnd = dragState.endMinutes;
@@ -143,8 +157,8 @@ export const VisualTimelineEditor: React.FC<VisualTimelineEditorProps> = ({ time
       endTime: minutesToTime(newEnd % (24 * 60))
     };
     
-    onUpdate(newTimeline);
-  }, [dragState, timeline, blocks, onUpdate]);
+    onUpdateRef.current(newTimeline);
+  }, [dragState]);
 
   const handleMouseUp = useCallback(() => {
     setDragState(null);
