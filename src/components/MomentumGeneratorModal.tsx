@@ -1087,19 +1087,19 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       const getExample = (tierId: string) => {
         if (habitName.includes('Movement') || habitName.includes('Exercise')) {
           if (tierId === 'trap') return 'Put running shoes by the front door';
-          if (tierId === 'direct') return 'Fill your bottle & put on your shoes';
+          if (tierId === 'direct') return 'Wash your face, finish another habit, go to the gym';
           if (tierId === 'start') return 'Start jogging in place';
           if (tierId === 'micro') return 'Do 10 jumping jacks';
         }
         if (habitName.includes('Work') || habitName.includes('Focus')) {
           if (tierId === 'trap') return 'Leave notebook open on desk';
-          if (tierId === 'direct') return 'Clear your desk & open the document';
+          if (tierId === 'direct') return 'Wash your face, finish another habit, go to the gym';
           if (tierId === 'start') return 'Write the first sentence';
           if (tierId === 'micro') return 'Write the title only';
         }
         // Generic fallbacks
         if (tierId === 'trap') return 'Set a phone alarm for 5 mins';
-        if (tierId === 'direct') return 'Get ready and go to the spot';
+        if (tierId === 'direct') return 'Wash your face, finish another habit, go to the gym';
         if (tierId === 'start') return 'Begin the activity';
         if (tierId === 'micro') return 'Do it for 1 minute';
         return '';
