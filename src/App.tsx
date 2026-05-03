@@ -1,5 +1,14 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, BookOpen, FileCheck, Shield, Rocket, User, Star, Clock, Handshake, Clapperboard } from 'lucide-react';
+import { SortCycleToggle, type SortCycleMode } from './components/SortCycleToggle';
+
+const SORT_CYCLE_MODES: SortCycleMode[] = [
+    { id: 'list', label: 'Simple List', enabled: true },
+    { id: 'calendar', label: 'Calendar Week', enabled: true },
+    { id: 'routine', label: 'By Routine', enabled: false },
+    { id: 'importance', label: 'By Importance', enabled: false },
+    { id: 'chronological', label: 'Chronological', enabled: false },
+];
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
@@ -278,6 +287,7 @@ function App() {
     const [viewMode, setViewMode] = useState<'week' | 'month' | 'year'>('week');
 
     const [showDailyTrackingView, setShowDailyTrackingView] = useState(true);
+    const [sortCycleModeId, setSortCycleModeId] = useState<string>('calendar');
     const [showStatsView, setShowStatsView] = useState(false);
 
     const [weeklyRateMode, setWeeklyRateMode] = useState(loadRateMode);
@@ -1356,25 +1366,18 @@ function App() {
                                     </div>
                                 )}
 
-                                {/* View Mode Toggle - moved down from top toolbar, always visible in tracker view */}
+                                {/* Sort/View cycle toggle - replaces the old 2-button segmented control */}
                                 {!showStatsView && (
-                                    <div className="flex justify-center mb-2">
-                                        <div className="inline-flex items-center rounded-lg bg-gray-900/60 border border-gray-700/40 p-0.5 gap-0.5 backdrop-blur-sm shadow-sm">
-                                            <button
-                                                onClick={() => setShowDailyTrackingView(false)}
-                                                className={`p-1.5 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
-                                                title="Simple View"
-                                            >
-                                                <List className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button
-                                                onClick={() => setShowDailyTrackingView(true)}
-                                                className={`p-1.5 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
-                                                title="Weekly View"
-                                            >
-                                                <Calendar className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
+                                    <div className="mb-2">
+                                        <SortCycleToggle
+                                            modes={SORT_CYCLE_MODES}
+                                            activeId={sortCycleModeId}
+                                            onAdvance={(nextId) => {
+                                                setSortCycleModeId(nextId);
+                                                setShowDailyTrackingView(nextId === 'calendar');
+                                                if (nextId === 'calendar') setViewMode('week');
+                                            }}
+                                        />
                                     </div>
                                 )}
 
