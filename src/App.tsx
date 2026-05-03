@@ -5,22 +5,13 @@ import { SortCycleToggle, type SortCycleMode } from './components/SortCycleToggl
 const SORT_CYCLE_MODES: SortCycleMode[] = [
     { id: 'calendar', label: 'Calendar', enabled: true },
     { id: 'list', label: 'List', enabled: true },
-    // Future modes — not yet in the cycle. They are surfaced only when the
-    // user has the data to justify them (see buildVisibleSortModes below).
     { id: 'routine', label: 'By Routine', enabled: false },
     { id: 'importance', label: 'By Importance', enabled: false },
     { id: 'chronological', label: 'Chronological', enabled: false },
 ];
 
-// Build the visible cycle for the toggle. Calendar and List are always
-// available. Other modes appear only when the user has data that makes
-// them meaningful (e.g. By Routine appears once any habit is assigned to
-// a routine).
 const buildVisibleSortModes = (allModes: SortCycleMode[], habits: Habit[]): SortCycleMode[] => {
-    const hasRoutineHabit = habits.some(h => {
-        const r = (h as unknown as { routine?: unknown }).routine;
-        return typeof r === 'string' && r.length > 0;
-    });
+    const hasRoutineHabit = habits.some(h => !!h.routine);
     return allModes.filter(m => {
         if (m.id === 'calendar' || m.id === 'list') return true;
         if (m.id === 'routine') return hasRoutineHabit;

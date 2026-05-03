@@ -28,7 +28,7 @@ export const SortCycleToggle: React.FC<SortCycleToggleProps> = ({ modes, activeI
             <button
                 onClick={handleClick}
                 className="relative w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:border-white/20 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-                aria-label={`Current view: ${activeMode?.label ?? ''}. Tap to change.`}
+                aria-label={`Current view: ${activeMode?.label ?? ''}. Tap to cycle views.`}
                 title={activeMode?.label}
             >
                 <SlidersHorizontal className="w-[16px] h-[16px]" />
