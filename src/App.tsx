@@ -1358,21 +1358,21 @@ function App() {
 
                                 {/* View Mode Toggle - moved down from top toolbar, always visible in tracker view */}
                                 {!showStatsView && (
-                                    <div className="flex justify-center mb-3">
-                                        <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
+                                    <div className="flex justify-center mb-2">
+                                        <div className="inline-flex items-center rounded-lg bg-gray-900/60 border border-gray-700/40 p-0.5 gap-0.5 backdrop-blur-sm shadow-sm">
                                             <button
                                                 onClick={() => setShowDailyTrackingView(false)}
-                                                className={`p-2 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
+                                                className={`p-1.5 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
                                                 title="Simple View"
                                             >
-                                                <List className="w-4 h-4" />
+                                                <List className="w-3.5 h-3.5" />
                                             </button>
                                             <button
                                                 onClick={() => setShowDailyTrackingView(true)}
-                                                className={`p-2 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
+                                                className={`p-1.5 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
                                                 title="Weekly View"
                                             >
-                                                <Calendar className="w-4 h-4" />
+                                                <Calendar className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
                                     </div>
