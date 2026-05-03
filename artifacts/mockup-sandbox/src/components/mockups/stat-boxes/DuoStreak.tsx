@@ -51,9 +51,9 @@ export function DuoStreak() {
             {/* 🔥 Flame — absolute right, vertically centered with the number */}
             <div style={{
               position: "absolute",
-              top: 30,
-              right: 24,
-              fontSize: 96,
+              top: 28,
+              right: 40,
+              fontSize: 88,
               lineHeight: 1,
               filter: "drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))",
               userSelect: "none",
@@ -69,7 +69,7 @@ export function DuoStreak() {
               letterSpacing: "-3px",
               color: "#fff8f0",
               textShadow: "0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)",
-              marginBottom: 10,
+              marginBottom: 4,
             }}>
               {streak}
             </div>
@@ -80,7 +80,7 @@ export function DuoStreak() {
               fontWeight: 700,
               color: "#fb923c",
               textShadow: "0 0 14px rgba(251,146,60,0.75)",
-              marginBottom: 22,
+              marginBottom: 18,
             }}>
               day streak!
             </div>
