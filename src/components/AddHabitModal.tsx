@@ -122,13 +122,13 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
   };
 
   const colorOptions = [
-    { name: 'red', class: 'bg-red-500', hex: '#ef4444' },
-    { name: 'orange', class: 'bg-orange-500', hex: '#f97316' },
-    { name: 'yellow', class: 'bg-yellow-500', hex: '#eab308' },
-    { name: 'green', class: 'bg-green-500', hex: '#22c55e' },
-    { name: 'blue', class: 'bg-blue-500', hex: '#3b82f6' },
-    { name: 'indigo', class: 'bg-indigo-500', hex: '#6366f1' },
-    { name: 'purple', class: 'bg-purple-500', hex: '#a855f7' },
+    { name: 'red',    class: 'bg-red-400',    glow: '0 0 8px #f87171, 0 0 18px #ef444480' },
+    { name: 'orange', class: 'bg-orange-400', glow: '0 0 8px #fb923c, 0 0 18px #f9731680' },
+    { name: 'yellow', class: 'bg-yellow-300', glow: '0 0 8px #fde047, 0 0 18px #facc1580' },
+    { name: 'green',  class: 'bg-green-400',  glow: '0 0 8px #4ade80, 0 0 18px #22c55e80' },
+    { name: 'blue',   class: 'bg-blue-400',   glow: '0 0 8px #60a5fa, 0 0 18px #3b82f680' },
+    { name: 'indigo', class: 'bg-indigo-400', glow: '0 0 8px #818cf8, 0 0 18px #6366f180' },
+    { name: 'purple', class: 'bg-purple-400', glow: '0 0 8px #c084fc, 0 0 18px #a855f780' },
   ];
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -371,7 +371,7 @@ const AddHabitModal: React.FC<AddHabitModalProps & { onOpenProgramLibrary?: () =
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">Habit Color</label>
-            <div className="flex space-x-3">{colorOptions.map((color) => (<button key={color.name} type="button" onClick={() => setSelectedColor(color.name)} className={`w-8 h-8 rounded-full ${color.class} border-2 ${selectedColor === color.name ? 'border-white' : 'border-gray-600'} flex items-center justify-center`}>{selectedColor === color.name && (<Check className="w-4 h-4 text-white" />)}</button>))}</div>
+            <div className="flex space-x-3">{colorOptions.map((color) => (<button key={color.name} type="button" onClick={() => setSelectedColor(color.name)} className={`w-8 h-8 rounded-full ${color.class} border-2 ${selectedColor === color.name ? 'border-white' : 'border-gray-600'} flex items-center justify-center`} style={{ boxShadow: color.glow }}>{selectedColor === color.name && (<Check className="w-4 h-4 text-white" />)}</button>))}</div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">Habit Type</label>

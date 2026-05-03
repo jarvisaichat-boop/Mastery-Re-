@@ -163,10 +163,12 @@ const DayCircle: React.FC<{
         }
     };
 
+    let completedGlow: string | undefined;
     if (!isScheduled) {
         circleClasses += 'bg-gray-800 border-gray-700 text-gray-500 opacity-50 cursor-not-allowed';
     } else if (completionStatus === true) {
         circleClasses += `${colors.bg} ${colors.border} text-white cursor-pointer`;
+        completedGlow = colors.glow;
     } else if (completionStatus === false) {
         circleClasses += 'bg-red-900/30 border-red-800/50 text-red-400 cursor-pointer';
         circleContent = <X className="w-4 h-4" />;
@@ -180,7 +182,7 @@ const DayCircle: React.FC<{
         circleClasses += 'bg-gray-700 border-gray-600 text-gray-300 cursor-pointer hover:bg-gray-600';
     }
     
-    return <button onClick={handleClick} className={circleClasses}>{circleContent}</button>;
+    return <button onClick={handleClick} className={circleClasses} style={completedGlow ? { boxShadow: completedGlow } : undefined}>{circleContent}</button>;
 };
 
 // A row for a single habit

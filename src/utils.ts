@@ -159,16 +159,16 @@ export const getMonthCalendarDays = (date: Date): Date[] => {
 
 // Map color names to Tailwind classes
 export const getColorClasses = (color: string) => {
-    const colorMap: Record<string, { bg: string; border: string }> = {
-        red: { bg: 'bg-red-500', border: 'border-red-400' },
-        orange: { bg: 'bg-orange-500', border: 'border-orange-400' },
-        yellow: { bg: 'bg-yellow-500', border: 'border-yellow-400' },
-        green: { bg: 'bg-green-500', border: 'border-green-400' },
-        blue: { bg: 'bg-blue-500', border: 'border-blue-400' },
-        indigo: { bg: 'bg-indigo-500', border: 'border-indigo-400' },
-        purple: { bg: 'bg-purple-500', border: 'border-purple-400' },
+    const colorMap: Record<string, { bg: string; border: string; glow: string }> = {
+        red:    { bg: 'bg-red-400',    border: 'border-red-300',    glow: '0 0 8px #f87171, 0 0 18px #ef444480' },
+        orange: { bg: 'bg-orange-400', border: 'border-orange-300', glow: '0 0 8px #fb923c, 0 0 18px #f9731680' },
+        yellow: { bg: 'bg-yellow-300', border: 'border-yellow-200', glow: '0 0 8px #fde047, 0 0 18px #facc1580' },
+        green:  { bg: 'bg-green-400',  border: 'border-green-300',  glow: '0 0 8px #4ade80, 0 0 18px #22c55e80' },
+        blue:   { bg: 'bg-blue-400',   border: 'border-blue-300',   glow: '0 0 8px #60a5fa, 0 0 18px #3b82f680' },
+        indigo: { bg: 'bg-indigo-400', border: 'border-indigo-300', glow: '0 0 8px #818cf8, 0 0 18px #6366f180' },
+        purple: { bg: 'bg-purple-400', border: 'border-purple-300', glow: '0 0 8px #c084fc, 0 0 18px #a855f780' },
     };
-    return colorMap[color] || { bg: 'bg-green-500', border: 'border-green-400' };
+    return colorMap[color] || { bg: 'bg-green-400', border: 'border-green-300', glow: '0 0 8px #4ade80, 0 0 18px #22c55e80' };
 };
 
 export const getTextColorClass = (color: string) => {
