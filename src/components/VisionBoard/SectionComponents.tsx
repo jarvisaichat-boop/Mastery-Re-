@@ -474,9 +474,50 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
       }
     });
 
-    const sortedBlocks = processedTimeline.sort((a, b) =>
-      timeToMinutes(a.time) - timeToMinutes(b.time)
-    );
+    // Split blocks around any point-marker times so markers render at the correct
+    // vertical position even when they fall inside a containing block (e.g. App
+    // Open at 7:45 inside Habit 7:00-8:00).
+    const minutesToTimeStr = (minutes: number): string => {
+      const h = Math.floor(minutes / 60) % 24;
+      const m = minutes % 60;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    };
+    const markerMinutes = processedTimeline
+      .filter(b => b.isPointMarker)
+      .map(b => timeToMinutes(b.time));
+    const splitTimeline: TimeBlock[] = [];
+    for (const b of processedTimeline) {
+      if (b.isPointMarker || !b.endTime) {
+        splitTimeline.push(b);
+        continue;
+      }
+      const start = timeToMinutes(b.time);
+      const end = timeToMinutes(b.endTime);
+      if (end <= start) {
+        splitTimeline.push(b);
+        continue;
+      }
+      const inside = markerMinutes.filter(m => m > start && m < end).sort((x, y) => x - y);
+      if (inside.length === 0) {
+        splitTimeline.push(b);
+        continue;
+      }
+      let cursor = start;
+      for (const m of inside) {
+        splitTimeline.push({ ...b, time: minutesToTimeStr(cursor), endTime: minutesToTimeStr(m) });
+        cursor = m;
+      }
+      splitTimeline.push({ ...b, time: minutesToTimeStr(cursor), endTime: minutesToTimeStr(end) });
+    }
+
+    const sortedBlocks = splitTimeline.sort((a, b) => {
+      const diff = timeToMinutes(a.time) - timeToMinutes(b.time);
+      if (diff !== 0) return diff;
+      // At the same start minute, render markers AFTER blocks so they sit on the boundary
+      if (a.isPointMarker && !b.isPointMarker) return 1;
+      if (!a.isPointMarker && b.isPointMarker) return -1;
+      return 0;
+    });
 
     const segments: Segment[] = [];
     let currentMinute = 0;
@@ -577,16 +618,21 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
               'bg-pink-400': '#f472b6', 'bg-rose-400': '#fb7185', 'bg-gray-400': '#9ca3af',
             };
             const hex = markerColors[block.color] || '#facc15';
+            const [hh, mm] = block.time.split(':').map(Number);
+            const period = hh >= 12 ? 'pm' : 'am';
+            const displayHour = hh % 12 || 12;
+            const timeLabel = mm === 0 ? `${displayHour}${period}` : `${displayHour}:${mm.toString().padStart(2, '0')}${period}`;
             return (
               <div key={i} className="flex items-center gap-2" style={{ minHeight: `${MARKER_HEIGHT}px` }}>
                 <div className="text-[9px] text-gray-500 font-mono w-10">{timeDisplay}</div>
                 <div className="flex-1 flex items-center">
                   <div className="flex-1 h-0.5 rounded-full" style={{ backgroundColor: hex, opacity: 0.85 }} />
                   <div
-                    className="px-2 py-0.5 mx-2 rounded-full text-[11px] font-bold whitespace-nowrap"
+                    className="flex items-center gap-1.5 px-2.5 py-0.5 mx-2 rounded-full text-[11px] font-bold whitespace-nowrap"
                     style={{ backgroundColor: hex, color: '#000' }}
                   >
                     {block.label}
+                    <span className="font-normal opacity-70">{timeLabel}</span>
                   </div>
                   <div className="flex-1 h-0.5 rounded-full" style={{ backgroundColor: hex, opacity: 0.85 }} />
                 </div>
