@@ -48,40 +48,43 @@ export function DuoStreak() {
 
           {/* Streak + flame row */}
           <div style={{ position: "relative", padding: "44px 20px 0" }}>
-            {/* 🔥 Flame */}
+            {/* Number + flame on same row, centered */}
             <div style={{
-              position: "absolute",
-              top: 36, right: 20,
-              fontSize: 108,
-              lineHeight: 1,
-              filter: "drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))",
-              userSelect: "none",
-            }}>
-              🔥
-            </div>
-
-            {/* Number */}
-            <div style={{
-              fontSize: 100,
-              fontWeight: 900,
-              lineHeight: 1,
-              letterSpacing: "-3px",
-              color: "#fff8f0",
-              textShadow: "0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
               marginBottom: 10,
-              marginLeft: 72,
             }}>
-              {streak}
+              <div style={{
+                fontSize: 100,
+                fontWeight: 900,
+                lineHeight: 1,
+                letterSpacing: "-3px",
+                color: "#fff8f0",
+                textShadow: "0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)",
+              }}>
+                {streak}
+              </div>
+              <div style={{
+                fontSize: 90,
+                lineHeight: 1,
+                filter: "drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))",
+                userSelect: "none",
+                marginTop: 6,
+              }}>
+                🔥
+              </div>
             </div>
 
-            {/* Label */}
+            {/* Label — centered under the pair */}
             <div style={{
+              textAlign: "center",
               fontSize: 24,
               fontWeight: 700,
               color: "#fb923c",
               textShadow: "0 0 14px rgba(251,146,60,0.75)",
               marginBottom: 22,
-              marginLeft: 40,
             }}>
               day streak!
             </div>
