@@ -81,7 +81,7 @@ export function DuoStreak() {
               color: "#fb923c",
               textShadow: "0 0 14px rgba(251,146,60,0.75)",
               marginBottom: 22,
-              marginLeft: 72,
+              marginLeft: 40,
             }}>
               day streak!
             </div>
