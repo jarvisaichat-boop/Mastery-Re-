@@ -244,19 +244,26 @@ export const HabitRow: React.FC<{
                 </button>
                 <div className="flex items-center space-x-3">
                     {currentStreak > 0 && <span className="text-sm text-gray-400 font-medium">{currentStreak} day{currentStreak !== 1 ? 's' : ''}</span>}
-                    {!showCircles && (
-                        <button 
-                            onClick={() => isHabitScheduledOnDay(habit, new Date()) && onToggle(habit.id, formatDate(new Date(), 'yyyy-MM-dd'))}
-                            disabled={!isHabitScheduledOnDay(habit, new Date())}
-                            className={`w-6 h-6 rounded-full border transition-colors flex items-center justify-center text-xs ${
-                                !isHabitScheduledOnDay(habit, new Date()) ? 'bg-gray-800 border-gray-700 opacity-50' : 
-                                habit.completed[formatDate(new Date(), 'yyyy-MM-dd')] === true ? `${getColorClasses(habit.color).bg} ${getColorClasses(habit.color).border}` : 
-                                habit.completed[formatDate(new Date(), 'yyyy-MM-dd')] === false ? 'bg-red-900/30 border-red-800/50' : 'bg-gray-700 border-gray-600'
-                            }`}
-                        >
-                            {habit.completed[formatDate(new Date(), 'yyyy-MM-dd')] === false && <X className="w-3 h-3" />}
-                        </button>
-                    )}
+                    {!showCircles && (() => {
+                        const todayStr = formatDate(new Date(), 'yyyy-MM-dd');
+                        const isScheduledToday = isHabitScheduledOnDay(habit, new Date());
+                        const todayStatus = habit.completed[todayStr];
+                        const compactColors = getColorClasses(habit.color);
+                        return (
+                            <button
+                                onClick={() => isScheduledToday && onToggle(habit.id, todayStr)}
+                                disabled={!isScheduledToday}
+                                className={`w-6 h-6 rounded-full border transition-colors flex items-center justify-center text-xs ${
+                                    !isScheduledToday ? 'bg-gray-800 border-gray-700 opacity-50' :
+                                    todayStatus === true ? `${compactColors.bg} ${compactColors.border}` :
+                                    todayStatus === false ? 'bg-red-900/30 border-red-800/50' : 'bg-gray-700 border-gray-600'
+                                }`}
+                                style={todayStatus === true ? { boxShadow: compactColors.glow } : undefined}
+                            >
+                                {todayStatus === false && <X className="w-3 h-3" />}
+                            </button>
+                        );
+                    })()}
                 </div>
             </div>
             {showCircles && (
