@@ -1184,25 +1184,6 @@ function App() {
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {/* View Mode Toggle - Next to Add Habit button */}
-                                    {!showStatsView && (
-                                        <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
-                                            <button
-                                                onClick={() => setShowDailyTrackingView(false)}
-                                                className={`p-2 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
-                                                title="Simple View"
-                                            >
-                                                <List className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => setShowDailyTrackingView(true)}
-                                                className={`p-2 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
-                                                title="Weekly View"
-                                            >
-                                                <Calendar className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    )}
                                     {/* Add New Habit Button */}
                                     <button onClick={handleAddNewHabit} className="p-2 rounded-full hover:bg-gray-700 add-habit-tour-target" style={{ boxShadow: '0 0 0 2px rgba(251, 191, 36, 0.2)' }}><Plus className="w-6 h-6" /></button>
                                 </div>
@@ -1372,6 +1353,28 @@ function App() {
                                             habits={habits}
                                             onOpenVisionBoard={() => setShowVisionBoard(true)}
                                         />
+                                    </div>
+                                )}
+
+                                {/* View Mode Toggle - moved down from top toolbar, always visible in tracker view */}
+                                {!showStatsView && (
+                                    <div className="flex justify-end mb-3">
+                                        <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
+                                            <button
+                                                onClick={() => setShowDailyTrackingView(false)}
+                                                className={`p-2 rounded transition-colors ${!showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
+                                                title="Simple View"
+                                            >
+                                                <List className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => setShowDailyTrackingView(true)}
+                                                className={`p-2 rounded transition-colors ${showDailyTrackingView ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-gray-300'}`}
+                                                title="Weekly View"
+                                            >
+                                                <Calendar className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
 
