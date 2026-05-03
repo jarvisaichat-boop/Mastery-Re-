@@ -51,9 +51,9 @@ export function DuoStreak() {
             {/* 🔥 Flame — absolute right, vertically centered with the number */}
             <div style={{
               position: "absolute",
-              top: 38,
+              top: 84,
               right: 40,
-              fontSize: 102,
+              fontSize: 108,
               lineHeight: 1,
               filter: "drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))",
               userSelect: "none",
@@ -70,7 +70,7 @@ export function DuoStreak() {
               color: "#fff8f0",
               textShadow: "0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)",
               marginBottom: 4,
-              marginLeft: 14,
+              marginLeft: 24,
             }}>
               {streak}
             </div>
