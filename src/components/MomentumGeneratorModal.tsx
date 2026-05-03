@@ -1078,7 +1078,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
       const tiers = [
         { id: 'trap', label: 'Trap for later', icon: '🕸️', title: 'Set a Trap', desc: 'Make it impossible to ignore later.' },
-        { id: 'direct', label: 'Close the Gap', icon: '🚶', title: 'Close the Gap', desc: 'Get through anything between you and starting — waking up, finishing other habits, prep.' },
+        { id: 'direct', label: 'Close the Gap', icon: '🚶', title: 'Close the Gap', desc: 'Get through anything between you and starting your habit.' },
         { id: 'micro', label: 'Micro Win', icon: '⚡', title: 'Micro Win', desc: 'A 60-second version of the habit.' },
         { id: 'start', label: 'Start the Habit', icon: '🔥', title: 'Start Now', desc: 'Just do the thing right now.' },
       ];
