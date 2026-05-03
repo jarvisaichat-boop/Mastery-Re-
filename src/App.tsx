@@ -1358,7 +1358,7 @@ function App() {
 
                                 {/* View Mode Toggle - moved down from top toolbar, always visible in tracker view */}
                                 {!showStatsView && (
-                                    <div className="flex justify-end mb-3">
+                                    <div className="flex justify-center mb-3">
                                         <div className="inline-flex items-center rounded-lg bg-gray-800 p-1 gap-1">
                                             <button
                                                 onClick={() => setShowDailyTrackingView(false)}
