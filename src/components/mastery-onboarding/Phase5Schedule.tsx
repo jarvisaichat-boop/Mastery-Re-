@@ -83,23 +83,18 @@ export default function Phase5Schedule({ onComplete, onBack }: Phase5SchedulePro
 
   const commitmentTimeline = useMemo(() => [sleepBlock, workBlock, habitBlock, momentumBlock], [sleepBlock, workBlock, habitBlock, momentumBlock]);
 
-  const stripMarkerFlag = (b: TimeBlock): TimeBlock => {
-    const { isPointMarker: _, ...rest } = b;
-    return rest;
-  };
-
   const saveCoreBlocksToSchedule = (sleep: TimeBlock, work: TimeBlock, habit: TimeBlock) => {
     const otherBlocks = schedule.timeline.filter(b =>
       !LABEL_IS_SLEEP(b.label) && !LABEL_IS_WORK(b.label) && !LABEL_IS_HABIT(b.label) && !LABEL_IS_MOMENTUM(b.label)
     );
-    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, stripMarkerFlag(momentumBlock)] });
+    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, { ...momentumBlock, isPointMarker: true }] });
   };
 
   const saveAllBlocksToSchedule = (sleep: TimeBlock, work: TimeBlock, habit: TimeBlock, momentum: TimeBlock) => {
     const otherBlocks = schedule.timeline.filter(b =>
       !LABEL_IS_SLEEP(b.label) && !LABEL_IS_WORK(b.label) && !LABEL_IS_HABIT(b.label) && !LABEL_IS_MOMENTUM(b.label)
     );
-    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, stripMarkerFlag(momentum)] });
+    updateSchedule({ timeline: [...otherBlocks, sleep, work, habit, { ...momentum, isPointMarker: true }] });
   };
 
   const handleCoreScheduleUpdate = (newTimeline: TimeBlock[]) => {

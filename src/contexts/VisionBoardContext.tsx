@@ -234,6 +234,8 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
             const label = (block.label as string || '').toLowerCase();
             const isProtected = block.isProtected || label === 'sleep' || label === 'work/school';
             const routineType = wasRoutine ? inferRoutineType(block) : undefined;
+            // Migration: any "App Open" / "Momentum" block is a point marker (Task #86)
+            const isPointMarker = block.isPointMarker || /momentum|app open/i.test(label);
             const { type: _type, routineKey: _routineKey, ...rest } = block as Record<string, unknown>;
             return {
               time: rest.time as string || '',
@@ -243,7 +245,8 @@ export const VisionBoardProvider: React.FC<{ children: ReactNode }> = ({ childre
               endTime: rest.endTime as string | undefined,
               isRoutine: wasRoutine,
               isProtected: isProtected || undefined,
-              routineType
+              routineType,
+              isPointMarker: isPointMarker || undefined
             };
           });
           
