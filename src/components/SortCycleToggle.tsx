@@ -24,7 +24,7 @@ export const SortCycleToggle: React.FC<SortCycleToggleProps> = ({ modes, activeI
     };
 
     return (
-        <div className="relative flex items-center px-2 mb-2 h-9">
+        <div className="relative flex items-center px-2 mb-2 h-10">
             <button
                 onClick={handleClick}
                 className="relative w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:border-white/20 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
@@ -36,7 +36,7 @@ export const SortCycleToggle: React.FC<SortCycleToggleProps> = ({ modes, activeI
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
                     key={activeMode?.id}
-                    className="text-[11px] font-medium tracking-wide text-zinc-500"
+                    className="text-[22px] font-bold tracking-wide text-white"
                 >
                     {activeMode?.label}
                 </span>
