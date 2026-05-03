@@ -1028,7 +1028,7 @@ function App() {
                     <div className="min-h-screen bg-gray-950 text-white font-sans selection:bg-yellow-500/30">
                         {/* ... existing JSX ... */}
 
-                            <div className="flex justify-between items-center max-w-2xl mx-auto mb-8">
+                            <div className="flex justify-between items-center max-w-2xl mx-auto mb-8" style={{ position: 'relative', zIndex: 2 }}>
                                 {/* Developer Menu - Single button that expands */}
                                 <div className="relative flex-1">
                                     <button
@@ -1245,8 +1245,10 @@ function App() {
                                             overflow: 'hidden',
                                             marginLeft: 'calc(50% - 50vw)',
                                             marginRight: 'calc(50% - 50vw)',
-                                            marginTop: -24,
+                                            marginTop: -140,
+                                            paddingTop: 140,
                                             width: '100vw',
+                                            zIndex: 1,
                                         }}>
                                             {/* Main orange ambient glow — fills the whole top of the screen */}
                                             <div style={{
