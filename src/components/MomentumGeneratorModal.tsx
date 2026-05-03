@@ -63,8 +63,11 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   const [preCountdown, setPreCountdown] = useState<number | null>(null);
   const [randomVisionContent, setRandomVisionContent] = useState<string>('');
   const [selectedStarterAction, setSelectedStarterAction] = useState<string | null>(() => {
-    // Load last selected starter action from localStorage
+    // Load last selected starter action from localStorage.
+    // Normalize legacy 'prep' (from the old 5-tier flow) to 'direct' so the
+    // merged "Close the Gap" card renders as selected on the Starter Action screen.
     const saved = localStorage.getItem('lastStarterAction');
+    if (saved === 'prep') return 'direct';
     return saved || null;
   });
   const [goalSelected, setGoalSelected] = useState(false);
@@ -1067,7 +1070,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
   );
 }
 
-    // Step 5.5: Starter Action (New - 5 Tiers)
+    // Step 5.5: Starter Action (4 Tiers — Set a Trap, Close the Gap, Micro Win, Start Now)
     if (currentStep === 'starter-action') {
       // Generate mock tiers based on selected habit name (if available)
       // In a real app, these would come from the habit object in DB
