@@ -1230,38 +1230,122 @@ function App() {
                                 )}
 
                                 <div className="mb-4">
-                                    {/* Title and Caption - Centered */}
-                                    <div className="text-center mb-4">
-                                        <h1 className="text-4xl font-bold mb-2">{showStatsView ? 'Mastery Dashboard' : 'Mastery Tracker'}</h1>
-                                        <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
-                                    </div>
-                                    {/* MG Stat Boxes — only in Tracker view */}
+                                    {/* Dashboard view keeps the title */}
+                                    {showStatsView && (
+                                        <div className="text-center mb-4">
+                                            <h1 className="text-4xl font-bold mb-2">Mastery Dashboard</h1>
+                                            <p className="text-gray-400">Track your habits and build a better you, one day at a time.</p>
+                                        </div>
+                                    )}
+
+                                    {/* Tracker view: Duolingo-style streak hero */}
                                     {!showStatsView && (
-                                        <div className="flex gap-3 px-3">
-                                            {/* Streak box */}
-                                            <div className="flex-1 rounded-2xl p-3.5" style={{ background: 'rgba(17,24,39,0.9)', border: '1.5px solid rgba(251,146,60,0.35)', boxShadow: '0 0 0 1px rgba(251,146,60,0.08), 0 8px 20px rgba(0,0,0,0.4)' }}>
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-base" style={{ background: 'rgba(251,146,60,0.15)', border: '1.5px solid rgba(251,146,60,0.4)' }}>🔥</div>
-                                                    <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full" style={{ color: 'rgba(251,146,60,0.6)', background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.2)' }}>Active</span>
+                                        <div style={{ position: 'relative', overflow: 'hidden' }}>
+                                            {/* Main orange ambient glow */}
+                                            <div style={{
+                                                position: 'absolute', inset: 0,
+                                                background: 'radial-gradient(ellipse 130% 110% at 70% 25%, rgba(251,146,60,0.30) 0%, rgba(251,146,60,0.10) 55%, rgba(251,146,60,0.04) 75%, transparent 90%)',
+                                                pointerEvents: 'none',
+                                            }} />
+                                            {/* Secondary glow behind number */}
+                                            <div style={{
+                                                position: 'absolute', top: 0, left: 0, width: 300, height: 300,
+                                                background: 'radial-gradient(circle, rgba(251,146,60,0.16) 0%, transparent 70%)',
+                                                pointerEvents: 'none',
+                                            }} />
+
+                                            {/* Streak + flame + sessions card */}
+                                            <div style={{ position: 'relative', padding: '36px 24px 0' }}>
+                                                {/* Flame */}
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: 34,
+                                                    right: 40,
+                                                    fontSize: 132,
+                                                    lineHeight: 1,
+                                                    filter: 'drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))',
+                                                    userSelect: 'none',
+                                                }}>
+                                                    🔥
                                                 </div>
-                                                <div className="text-4xl font-black leading-none mb-1" style={{ color: '#fed7aa', textShadow: '0 0 12px rgba(251,146,60,0.7), 0 0 30px rgba(251,146,60,0.3)' }}>{mgStreak}</div>
-                                                <div className="text-xs font-semibold mb-2" style={{ color: '#fb923c', textShadow: '0 0 8px rgba(251,146,60,0.5)' }}>Day Streak</div>
-                                                <div className="h-0.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                                                    <div className="h-full rounded-full" style={{ width: `${Math.min(100, (mgStreak / 30) * 100)}%`, background: 'linear-gradient(90deg,#f97316,#fb923c)', minWidth: mgStreak > 0 ? 6 : 0 }} />
+
+                                                {/* Number */}
+                                                <div style={{
+                                                    fontSize: 100,
+                                                    fontWeight: 900,
+                                                    lineHeight: 1,
+                                                    letterSpacing: '-3px',
+                                                    color: '#fff8f0',
+                                                    textShadow: '0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)',
+                                                    marginBottom: 4,
+                                                    marginLeft: 24,
+                                                }}>
+                                                    {mgStreak}
+                                                </div>
+
+                                                {/* Label */}
+                                                <div style={{
+                                                    fontSize: 24,
+                                                    fontWeight: 700,
+                                                    color: '#fb923c',
+                                                    textShadow: '0 0 14px rgba(251,146,60,0.75)',
+                                                    marginBottom: 18,
+                                                }}>
+                                                    day streak!
+                                                </div>
+
+                                                {/* Sessions Done card */}
+                                                <div style={{
+                                                    borderRadius: 18,
+                                                    padding: '18px 20px',
+                                                    background: 'rgba(8, 14, 28, 0.75)',
+                                                    border: '1.5px solid rgba(96,165,250,0.28)',
+                                                    boxShadow: '0 0 0 1px rgba(96,165,250,0.06), 0 8px 24px rgba(0,0,0,0.45)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 18,
+                                                    backdropFilter: 'blur(8px)',
+                                                }}>
+                                                    <div style={{
+                                                        width: 50, height: 50,
+                                                        borderRadius: '50%',
+                                                        background: 'rgba(96,165,250,0.13)',
+                                                        border: '1.5px solid rgba(96,165,250,0.38)',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        fontSize: 24, flexShrink: 0,
+                                                        boxShadow: '0 0 16px rgba(96,165,250,0.22)',
+                                                    }}>
+                                                        ⚡
+                                                    </div>
+                                                    <div>
+                                                        <div style={{
+                                                            fontSize: 17, fontWeight: 800,
+                                                            color: '#bfdbfe',
+                                                            textShadow: '0 0 12px rgba(96,165,250,0.55)',
+                                                            marginBottom: 4,
+                                                        }}>
+                                                            {mgDaysCount} Sessions Done
+                                                        </div>
+                                                        <div style={{ fontSize: 12, color: 'rgba(180,200,230,0.55)', fontWeight: 500 }}>
+                                                            total momentum sessions completed
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            {/* Days Completed box */}
-                                            <div className="flex-1 rounded-2xl p-3.5" style={{ background: 'rgba(17,24,39,0.9)', border: '1.5px solid rgba(96,165,250,0.35)', boxShadow: '0 0 0 1px rgba(96,165,250,0.08), 0 8px 20px rgba(0,0,0,0.4)' }}>
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-base" style={{ background: 'rgba(96,165,250,0.15)', border: '1.5px solid rgba(96,165,250,0.4)' }}>⚡</div>
-                                                    <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full" style={{ color: 'rgba(96,165,250,0.6)', background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)' }}>Total</span>
-                                                </div>
-                                                <div className="text-4xl font-black leading-none mb-1" style={{ color: '#bfdbfe', textShadow: '0 0 12px rgba(96,165,250,0.7), 0 0 30px rgba(96,165,250,0.3)' }}>{mgDaysCount}</div>
-                                                <div className="text-xs font-semibold mb-2" style={{ color: '#60a5fa', textShadow: '0 0 8px rgba(96,165,250,0.5)' }}>Sessions Done</div>
-                                                <div className="h-0.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                                                    <div className="h-full rounded-full" style={{ width: `${Math.min(100, (mgDaysCount / 50) * 100)}%`, background: 'linear-gradient(90deg,#3b82f6,#60a5fa)', minWidth: mgDaysCount > 0 ? 6 : 0 }} />
-                                                </div>
-                                            </div>
+
+                                            {/* Neon orange tail */}
+                                            <div style={{
+                                                position: 'relative',
+                                                height: 36,
+                                                background: 'radial-gradient(ellipse 80% 100% at 50% 0%, rgba(251,146,60,0.18) 0%, rgba(251,146,60,0.06) 60%, transparent 100%)',
+                                            }} />
+
+                                            {/* Divider glow line */}
+                                            <div style={{
+                                                height: 1,
+                                                marginBottom: 16,
+                                                background: 'linear-gradient(90deg, transparent, rgba(251,146,60,0.5) 20%, rgba(251,146,60,0.5) 80%, transparent)',
+                                            }} />
                                         </div>
                                     )}
                                 </div>
