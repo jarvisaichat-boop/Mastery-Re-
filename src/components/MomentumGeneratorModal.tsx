@@ -1075,8 +1075,7 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
 
       const tiers = [
         { id: 'trap', label: 'Trap for later', icon: '🕸️', title: 'Set a Trap', desc: 'Make it impossible to ignore later.' },
-        { id: 'prep', label: 'Prep for the Habit', icon: '🚶', title: 'Prepare Environment', desc: 'Reduce friction for when you start.' },
-        { id: 'direct', label: 'Direct steps', icon: '🏃', title: 'Direct Action', desc: 'Take the very first physical step.' },
+        { id: 'direct', label: 'Close the Gap', icon: '🚶', title: 'Close the Gap', desc: 'Anything that moves you closer to starting.' },
         { id: 'micro', label: 'Micro Win', icon: '⚡', title: 'Micro Win', desc: 'A 60-second version of the habit.' },
         { id: 'start', label: 'Start the Habit', icon: '🔥', title: 'Start Now', desc: 'Just do the thing right now.' },
       ];
@@ -1085,22 +1084,19 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       const getExample = (tierId: string) => {
         if (habitName.includes('Movement') || habitName.includes('Exercise')) {
           if (tierId === 'trap') return 'Put running shoes by the front door';
-          if (tierId === 'prep') return 'Fill water bottle & set out clothes';
-          if (tierId === 'direct') return 'Put on your running shoes';
+          if (tierId === 'direct') return 'Fill your bottle & put on your shoes';
           if (tierId === 'start') return 'Start jogging in place';
           if (tierId === 'micro') return 'Do 10 jumping jacks';
         }
         if (habitName.includes('Work') || habitName.includes('Focus')) {
           if (tierId === 'trap') return 'Leave notebook open on desk';
-          if (tierId === 'prep') return 'Clear desk & close tabs';
-          if (tierId === 'direct') return 'Open the specific document';
+          if (tierId === 'direct') return 'Clear your desk & open the document';
           if (tierId === 'start') return 'Write the first sentence';
           if (tierId === 'micro') return 'Write the title only';
         }
         // Generic fallbacks
         if (tierId === 'trap') return 'Set a phone alarm for 5 mins';
-        if (tierId === 'prep') return 'Get materials ready';
-        if (tierId === 'direct') return 'Go to the location';
+        if (tierId === 'direct') return 'Get ready and go to the spot';
         if (tierId === 'start') return 'Begin the activity';
         if (tierId === 'micro') return 'Do it for 1 minute';
         return '';
@@ -1177,15 +1173,15 @@ export const MomentumGeneratorModal: React.FC<MomentumGeneratorModalProps> = ({
       const selectedHabit = habits.find(h => selectedHabits.has(h.id));
       const starterActionLabels: Record<string, string> = {
         'trap': 'Set a Trap',
-        'prep': 'Prepare Environment',
-        'direct': 'Direct Action',
+        'direct': 'Close the Gap',
+        'prep': 'Close the Gap', // legacy id from previous 5-tier flow
         'micro': 'Micro Win',
         'start': 'Start Now'
       };
       const starterActionIcons: Record<string, string> = {
         'trap': '🕸️',
-        'prep': '🚶',
-        'direct': '🏃',
+        'direct': '🚶',
+        'prep': '🚶', // legacy id from previous 5-tier flow
         'micro': '⚡',
         'start': '🔥'
       };
