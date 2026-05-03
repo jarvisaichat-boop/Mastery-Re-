@@ -1376,9 +1376,6 @@ function App() {
                                 )}
 
                                 {/* Calendar Header shown for all calendar views (week/month/year) when showDailyTrackingView is true */}
-                                {!showStatsView && showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick} />}
-                                {!showStatsView && viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
-
                                 {!showStatsView && (
                                     <SortCycleToggle
                                         modes={buildVisibleSortModes(SORT_CYCLE_MODES, habits)}
@@ -1390,6 +1387,9 @@ function App() {
                                         }}
                                     />
                                 )}
+
+                                {!showStatsView && showDailyTrackingView && <CalendarHeader currentDate={currentDate} viewMode={viewMode} onPrevWeek={() => handleNavigation('prev')} onNextWeek={() => handleNavigation('next')} onTitleClick={handleTitleClick} />}
+                                {!showStatsView && viewMode === 'week' && showDailyTrackingView && <WeekHeader weekDates={weekDates} />}
 
                                 {/* Month and Year Views are shown when showDailyTrackingView is true (calendar mode) */}
                                 {!showStatsView && viewMode === 'month' && showDailyTrackingView && <MonthView currentDate={currentDate} habits={habits} onDateClick={handleDateClick} />}
