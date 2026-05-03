@@ -3,12 +3,30 @@ import { Plus, List, Calendar, BarChart3, Sparkles, Home, Target, BookOpen, File
 import { SortCycleToggle, type SortCycleMode } from './components/SortCycleToggle';
 
 const SORT_CYCLE_MODES: SortCycleMode[] = [
-    { id: 'list', label: 'Simple List', enabled: true },
-    { id: 'calendar', label: 'Calendar Week', enabled: true },
+    { id: 'calendar', label: 'Calendar', enabled: true },
+    { id: 'list', label: 'List', enabled: true },
+    // Future modes — not yet in the cycle. They are surfaced only when the
+    // user has the data to justify them (see buildVisibleSortModes below).
     { id: 'routine', label: 'By Routine', enabled: false },
     { id: 'importance', label: 'By Importance', enabled: false },
     { id: 'chronological', label: 'Chronological', enabled: false },
 ];
+
+// Build the visible cycle for the toggle. Calendar and List are always
+// available. Other modes appear only when the user has data that makes
+// them meaningful (e.g. By Routine appears once any habit is assigned to
+// a routine).
+const buildVisibleSortModes = (allModes: SortCycleMode[], habits: Habit[]): SortCycleMode[] => {
+    const hasRoutineHabit = habits.some(h => {
+        const r = (h as unknown as { routine?: unknown }).routine;
+        return typeof r === 'string' && r.length > 0;
+    });
+    return allModes.filter(m => {
+        if (m.id === 'calendar' || m.id === 'list') return true;
+        if (m.id === 'routine') return hasRoutineHabit;
+        return false;
+    });
+};
 import AddHabitModal from './components/AddHabitModal';
 import MasteryOnboarding from './components/MasteryOnboarding';
 import AppTour from './components/AppTour';
@@ -1366,19 +1384,17 @@ function App() {
                                     </div>
                                 )}
 
-                                {/* Sort/View cycle toggle - replaces the old 2-button segmented control */}
+                                {/* Sort/View cycle toggle - sits on its own row directly above the month/year header */}
                                 {!showStatsView && (
-                                    <div className="mb-2">
-                                        <SortCycleToggle
-                                            modes={SORT_CYCLE_MODES}
-                                            activeId={sortCycleModeId}
-                                            onAdvance={(nextId) => {
-                                                setSortCycleModeId(nextId);
-                                                setShowDailyTrackingView(nextId === 'calendar');
-                                                if (nextId === 'calendar') setViewMode('week');
-                                            }}
-                                        />
-                                    </div>
+                                    <SortCycleToggle
+                                        modes={buildVisibleSortModes(SORT_CYCLE_MODES, habits)}
+                                        activeId={sortCycleModeId}
+                                        onAdvance={(nextId) => {
+                                            setSortCycleModeId(nextId);
+                                            setShowDailyTrackingView(nextId === 'calendar');
+                                            if (nextId === 'calendar') setViewMode('week');
+                                        }}
+                                    />
                                 )}
 
                                 {/* Calendar Header shown for all calendar views (week/month/year) when showDailyTrackingView is true */}
