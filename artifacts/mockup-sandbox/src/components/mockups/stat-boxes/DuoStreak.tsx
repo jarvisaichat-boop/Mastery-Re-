@@ -47,14 +47,13 @@ export function DuoStreak() {
           }} />
 
           {/* Streak + flame row */}
-          <div style={{ position: "relative", padding: "44px 20px 0" }}>
-            {/* Number + flame on same row, centered */}
+          <div style={{ position: "relative", padding: "44px 24px 0" }}>
+            {/* Number + flame: left-aligned pair, flame tight to the right of number */}
             <div style={{
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              marginBottom: 10,
+              gap: 8,
+              marginBottom: 8,
             }}>
               <div style={{
                 fontSize: 100,
@@ -67,19 +66,18 @@ export function DuoStreak() {
                 {streak}
               </div>
               <div style={{
-                fontSize: 90,
+                fontSize: 86,
                 lineHeight: 1,
                 filter: "drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))",
                 userSelect: "none",
-                marginTop: 6,
+                marginTop: 8,
               }}>
                 🔥
               </div>
             </div>
 
-            {/* Label — centered under the pair */}
+            {/* Label — left-aligned under the pair */}
             <div style={{
-              textAlign: "center",
               fontSize: 24,
               fontWeight: 700,
               color: "#fb923c",
