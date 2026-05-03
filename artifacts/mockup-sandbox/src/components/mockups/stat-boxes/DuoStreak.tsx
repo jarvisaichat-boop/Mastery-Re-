@@ -51,9 +51,9 @@ export function DuoStreak() {
             {/* 🔥 Flame — absolute right, vertically centered with the number */}
             <div style={{
               position: "absolute",
-              top: 84,
+              top: 54,
               right: 40,
-              fontSize: 108,
+              fontSize: 124,
               lineHeight: 1,
               filter: "drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))",
               userSelect: "none",
