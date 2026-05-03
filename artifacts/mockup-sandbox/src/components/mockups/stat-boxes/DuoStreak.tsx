@@ -6,34 +6,34 @@ export function DuoStreak() {
     <div className="min-h-screen flex items-start justify-center" style={{ background: "#07090f" }}>
       <div style={{ width: 390, fontFamily: "system-ui, -apple-system, sans-serif" }}>
 
-        {/* ── Hero ── */}
+        {/* ── Orange hero — contains BOTH streak and sessions card ── */}
         <div style={{
           position: "relative",
-          padding: "52px 28px 52px",
+          padding: "44px 20px 28px",
           overflow: "hidden",
         }}>
-          {/* Warm orange glow fills entire hero area */}
+          {/* Orange ambient glow fills the whole hero block */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "radial-gradient(ellipse 110% 100% at 70% 40%, rgba(251,146,60,0.26) 0%, rgba(251,146,60,0.08) 50%, transparent 75%)",
+            background: "radial-gradient(ellipse 120% 90% at 70% 30%, rgba(251,146,60,0.28) 0%, rgba(251,146,60,0.10) 55%, transparent 80%)",
             pointerEvents: "none",
           }} />
           <div style={{
-            position: "absolute", top: 0, left: 0, width: 260, height: 260,
-            background: "radial-gradient(circle, rgba(251,146,60,0.14) 0%, transparent 70%)",
+            position: "absolute", top: 0, left: 0, width: 280, height: 280,
+            background: "radial-gradient(circle, rgba(251,146,60,0.15) 0%, transparent 70%)",
             pointerEvents: "none",
           }} />
-          {/* Bottom divider glow */}
+          {/* Bottom border glow — BELOW the sessions card */}
           <div style={{
             position: "absolute", bottom: 0, left: 0, right: 0, height: 1,
-            background: "linear-gradient(90deg, transparent, rgba(251,146,60,0.45) 25%, rgba(251,146,60,0.45) 75%, transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(251,146,60,0.5) 25%, rgba(251,146,60,0.5) 75%, transparent)",
           }} />
 
-          {/* 🔥 Flame — big, right side */}
+          {/* 🔥 Flame — absolute right, aligns with the number */}
           <div style={{
             position: "absolute",
-            top: "50%", right: 24,
-            transform: "translateY(-50%)",
+            top: 36,
+            right: 20,
             fontSize: 108,
             lineHeight: 1,
             filter: "drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))",
@@ -50,7 +50,7 @@ export function DuoStreak() {
             letterSpacing: "-3px",
             color: "#fff8f0",
             textShadow: "0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)",
-            marginBottom: 14,
+            marginBottom: 10,
           }}>
             {streak}
           </div>
@@ -61,31 +61,31 @@ export function DuoStreak() {
             fontWeight: 700,
             color: "#fb923c",
             textShadow: "0 0 14px rgba(251,146,60,0.75)",
+            marginBottom: 24,
           }}>
             day streak!
           </div>
-        </div>
 
-        {/* ── Sessions Done info card ── */}
-        <div style={{ padding: "16px 16px 0" }}>
+          {/* ── Sessions Done card — still inside the orange hero ── */}
           <div style={{
             borderRadius: 18,
-            padding: "20px 22px",
-            background: "rgba(13, 20, 36, 0.98)",
-            border: "1.5px solid rgba(96,165,250,0.3)",
-            boxShadow: "0 0 0 1px rgba(96,165,250,0.07), 0 8px 28px rgba(0,0,0,0.55)",
+            padding: "18px 20px",
+            background: "rgba(8, 14, 28, 0.75)",
+            border: "1.5px solid rgba(96,165,250,0.28)",
+            boxShadow: "0 0 0 1px rgba(96,165,250,0.06), 0 8px 24px rgba(0,0,0,0.45)",
             display: "flex",
             alignItems: "center",
             gap: 18,
+            backdropFilter: "blur(8px)",
           }}>
             <div style={{
-              width: 52, height: 52,
+              width: 50, height: 50,
               borderRadius: "50%",
-              background: "rgba(96,165,250,0.12)",
+              background: "rgba(96,165,250,0.13)",
               border: "1.5px solid rgba(96,165,250,0.38)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 26, flexShrink: 0,
-              boxShadow: "0 0 18px rgba(96,165,250,0.22)",
+              fontSize: 24, flexShrink: 0,
+              boxShadow: "0 0 16px rgba(96,165,250,0.22)",
             }}>
               ⚡
             </div>
@@ -101,7 +101,7 @@ export function DuoStreak() {
               </div>
               <div style={{
                 fontSize: 12,
-                color: "rgba(148,163,184,0.6)",
+                color: "rgba(180,200,230,0.55)",
                 fontWeight: 500,
               }}>
                 total momentum sessions completed
