@@ -47,36 +47,34 @@ export function DuoStreak() {
           }} />
 
           {/* Streak + flame row */}
-          <div style={{ position: "relative", padding: "44px 24px 0" }}>
-            {/* Number + flame: left-aligned pair, flame tight to the right of number */}
+          <div style={{ position: "relative", padding: "36px 24px 0" }}>
+            {/* 🔥 Flame — absolute right, vertically centered with the number */}
             <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              marginBottom: 8,
+              position: "absolute",
+              top: 30,
+              right: 24,
+              fontSize: 96,
+              lineHeight: 1,
+              filter: "drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))",
+              userSelect: "none",
             }}>
-              <div style={{
-                fontSize: 100,
-                fontWeight: 900,
-                lineHeight: 1,
-                letterSpacing: "-3px",
-                color: "#fff8f0",
-                textShadow: "0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)",
-              }}>
-                {streak}
-              </div>
-              <div style={{
-                fontSize: 86,
-                lineHeight: 1,
-                filter: "drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))",
-                userSelect: "none",
-                marginTop: 8,
-              }}>
-                🔥
-              </div>
+              🔥
             </div>
 
-            {/* Label — left-aligned under the pair */}
+            {/* Number — left side */}
+            <div style={{
+              fontSize: 100,
+              fontWeight: 900,
+              lineHeight: 1,
+              letterSpacing: "-3px",
+              color: "#fff8f0",
+              textShadow: "0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)",
+              marginBottom: 10,
+            }}>
+              {streak}
+            </div>
+
+            {/* Label — left-aligned, directly under number */}
             <div style={{
               fontSize: 24,
               fontWeight: 700,
