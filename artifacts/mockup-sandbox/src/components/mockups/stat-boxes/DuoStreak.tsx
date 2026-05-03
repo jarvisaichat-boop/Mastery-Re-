@@ -51,7 +51,7 @@ export function DuoStreak() {
             {/* 🔥 Flame — absolute right, vertically centered with the number */}
             <div style={{
               position: "absolute",
-              top: 46,
+              top: 40,
               right: 40,
               fontSize: 132,
               lineHeight: 1,
