@@ -70,6 +70,7 @@ export function DuoStreak() {
               color: "#fff8f0",
               textShadow: "0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)",
               marginBottom: 4,
+              marginLeft: -8,
             }}>
               {streak}
             </div>
