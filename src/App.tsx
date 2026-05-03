@@ -1240,19 +1240,28 @@ function App() {
 
                                     {/* Tracker view: Duolingo-style streak hero */}
                                     {!showStatsView && (
-                                        <div style={{ position: 'relative', overflow: 'hidden' }}>
-                                            {/* Main orange ambient glow */}
+                                        <div style={{
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            marginLeft: 'calc(50% - 50vw)',
+                                            marginRight: 'calc(50% - 50vw)',
+                                            marginTop: -24,
+                                            width: '100vw',
+                                        }}>
+                                            {/* Main orange ambient glow — fills the whole top of the screen */}
                                             <div style={{
                                                 position: 'absolute', inset: 0,
-                                                background: 'radial-gradient(ellipse 130% 110% at 70% 25%, rgba(251,146,60,0.30) 0%, rgba(251,146,60,0.10) 55%, rgba(251,146,60,0.04) 75%, transparent 90%)',
+                                                background: 'radial-gradient(ellipse 110% 130% at 50% 0%, rgba(251,146,60,0.45) 0%, rgba(251,146,60,0.20) 35%, rgba(251,146,60,0.08) 65%, transparent 95%)',
                                                 pointerEvents: 'none',
                                             }} />
                                             {/* Secondary glow behind number */}
                                             <div style={{
-                                                position: 'absolute', top: 0, left: 0, width: 300, height: 300,
-                                                background: 'radial-gradient(circle, rgba(251,146,60,0.16) 0%, transparent 70%)',
+                                                position: 'absolute', top: 0, left: '10%', width: 360, height: 360,
+                                                background: 'radial-gradient(circle, rgba(251,146,60,0.22) 0%, transparent 70%)',
                                                 pointerEvents: 'none',
                                             }} />
+                                            {/* Inner content container — re-centered + max-width for desktop */}
+                                            <div style={{ maxWidth: 672, margin: '0 auto', position: 'relative' }}>
 
                                             {/* Streak + flame + sessions card */}
                                             <div style={{ position: 'relative', padding: '36px 24px 0' }}>
@@ -1332,19 +1341,20 @@ function App() {
                                                     </div>
                                                 </div>
                                             </div>
+                                            </div>
 
-                                            {/* Neon orange tail */}
+                                            {/* Neon orange tail — spans full viewport width */}
                                             <div style={{
                                                 position: 'relative',
                                                 height: 36,
-                                                background: 'radial-gradient(ellipse 80% 100% at 50% 0%, rgba(251,146,60,0.18) 0%, rgba(251,146,60,0.06) 60%, transparent 100%)',
+                                                background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(251,146,60,0.22) 0%, rgba(251,146,60,0.08) 60%, transparent 100%)',
                                             }} />
 
-                                            {/* Divider glow line */}
+                                            {/* Divider glow line — spans full viewport width */}
                                             <div style={{
                                                 height: 1,
                                                 marginBottom: 16,
-                                                background: 'linear-gradient(90deg, transparent, rgba(251,146,60,0.5) 20%, rgba(251,146,60,0.5) 80%, transparent)',
+                                                background: 'linear-gradient(90deg, transparent, rgba(251,146,60,0.5) 30%, rgba(251,146,60,0.5) 70%, transparent)',
                                             }} />
                                         </div>
                                     )}
