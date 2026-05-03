@@ -513,9 +513,11 @@ export const ScheduleSection = ({ schedule, updateSchedule, mode, habits = [] }:
     const sortedBlocks = splitTimeline.sort((a, b) => {
       const diff = timeToMinutes(a.time) - timeToMinutes(b.time);
       if (diff !== 0) return diff;
-      // At the same start minute, render markers AFTER blocks so they sit on the boundary
-      if (a.isPointMarker && !b.isPointMarker) return 1;
-      if (!a.isPointMarker && b.isPointMarker) return -1;
+      // At the same start minute, render markers BEFORE blocks so they sit at
+      // the boundary at the correct vertical position (otherwise the block
+      // advances currentMinute past the marker time).
+      if (a.isPointMarker && !b.isPointMarker) return -1;
+      if (!a.isPointMarker && b.isPointMarker) return 1;
       return 0;
     });
 
