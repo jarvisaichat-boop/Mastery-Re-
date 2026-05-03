@@ -36,7 +36,7 @@ export const SortCycleToggle: React.FC<SortCycleToggleProps> = ({ modes, activeI
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
                     key={activeMode?.id}
-                    className="text-[22px] font-bold tracking-wide text-white"
+                    className="text-[11px] font-medium tracking-wide text-zinc-500"
                 >
                     {activeMode?.label}
                 </span>
