@@ -30,16 +30,16 @@ export function MGButtonBase() {
           ══════════════════════════════════════ */}
       <div style={{ position: 'relative', paddingTop: 36 }}>
 
-        {/* Main golden ambient glow — MATCHED to MG button colour */}
+        {/* Main golden ambient glow — slightly warmer/oranger */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 110% 130% at 50% 0%, rgba(234,179,8,0.50) 0%, rgba(234,179,8,0.22) 35%, rgba(234,179,8,0.08) 65%, transparent 95%)',
+          background: 'radial-gradient(ellipse 110% 130% at 50% 0%, rgba(245,158,11,0.50) 0%, rgba(245,158,11,0.22) 35%, rgba(245,158,11,0.08) 65%, transparent 95%)',
           pointerEvents: 'none',
         }} />
         {/* Secondary glow behind number */}
         <div style={{
           position: 'absolute', top: 0, left: '10%', width: 320, height: 320,
-          background: 'radial-gradient(circle, rgba(234,179,8,0.25) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(245,158,11,0.25) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -50,7 +50,7 @@ export function MGButtonBase() {
           <div style={{
             position: 'absolute', top: 30, right: 32,
             fontSize: 110, lineHeight: 1,
-            filter: 'drop-shadow(0 0 20px rgba(234,179,8,0.9)) drop-shadow(0 0 50px rgba(234,179,8,0.5))',
+            filter: 'drop-shadow(0 0 20px rgba(245,158,11,0.9)) drop-shadow(0 0 50px rgba(245,158,11,0.5))',
             userSelect: 'none',
           }}>🔥</div>
 
@@ -59,15 +59,15 @@ export function MGButtonBase() {
             fontSize: 100, fontWeight: 900, lineHeight: 1,
             letterSpacing: '-3px',
             color: '#fffbe6',
-            textShadow: '0 0 30px rgba(234,179,8,0.95), 0 0 80px rgba(234,179,8,0.45)',
+            textShadow: '0 0 30px rgba(245,158,11,0.95), 0 0 80px rgba(245,158,11,0.45)',
             marginBottom: 4, marginLeft: 24,
           }}>{streakCount}</div>
 
           {/* Label — gold tone */}
           <div style={{
             fontSize: 24, fontWeight: 700,
-            color: '#eab308',
-            textShadow: '0 0 14px rgba(234,179,8,0.75)',
+            color: '#f59e0b',
+            textShadow: '0 0 14px rgba(245,158,11,0.75)',
             marginBottom: 20, marginLeft: 4,
           }}>day streak!</div>
 
@@ -75,15 +75,15 @@ export function MGButtonBase() {
           <div style={{
             borderRadius: 18, padding: '18px 20px',
             background: 'rgba(8,14,28,0.75)',
-            border: '1.5px solid rgba(234,179,8,0.28)',
-            boxShadow: '0 0 0 1px rgba(234,179,8,0.06), 0 8px 24px rgba(0,0,0,0.45)',
+            border: '1.5px solid rgba(245,158,11,0.28)',
+            boxShadow: '0 0 0 1px rgba(245,158,11,0.06), 0 8px 24px rgba(0,0,0,0.45)',
             display: 'flex', alignItems: 'center', gap: 16,
             backdropFilter: 'blur(8px)',
           }}>
             <div style={{
               width: 48, height: 48, borderRadius: '50%',
-              background: 'rgba(234,179,8,0.13)',
-              border: '1.5px solid rgba(234,179,8,0.38)',
+              background: 'rgba(245,158,11,0.13)',
+              border: '1.5px solid rgba(245,158,11,0.38)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 22,
             }}>⚡</div>
@@ -141,7 +141,7 @@ export function MGButtonBase() {
           position: 'absolute', bottom: 0, left: '50%',
           transform: 'translateX(-50%)',
           width: 280, height: 60,
-          background: 'radial-gradient(ellipse, rgba(234,179,8,0.40) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse, rgba(245,158,11,0.40) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -149,11 +149,11 @@ export function MGButtonBase() {
         <div style={{
           width: 160, height: 80,
           borderRadius: '80px 80px 0 0',
-          background: 'linear-gradient(to right, #facc15, #eab308, #f97316)',
+          background: 'linear-gradient(to right, #f59e0b, #eab308, #f97316)',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
           gap: 2,
-          boxShadow: '0 -6px 32px rgba(234,179,8,0.55), 0 -2px 8px rgba(234,179,8,0.3)',
+          boxShadow: '0 -6px 32px rgba(245,158,11,0.55), 0 -2px 8px rgba(245,158,11,0.3)',
           cursor: 'pointer',
           position: 'relative', zIndex: 2,
         }}>
@@ -168,12 +168,12 @@ export function MGButtonBase() {
         padding: '10px 0 14px', background: 'rgba(0,0,0,0.4)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 14, height: 14, borderRadius: 3, background: 'linear-gradient(to right, #facc15, #eab308)' }} />
+          <div style={{ width: 14, height: 14, borderRadius: 3, background: 'linear-gradient(to right, #f59e0b, #eab308)' }} />
           <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontWeight: 600, letterSpacing: 1 }}>SHARED BASE</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(234,179,8,0.4)', border: '1px solid rgba(234,179,8,0.6)' }} />
-          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontWeight: 600, letterSpacing: 1 }}>GLOW #eab308</span>
+          <div style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(245,158,11,0.4)', border: '1px solid rgba(245,158,11,0.6)' }} />
+          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontWeight: 600, letterSpacing: 1 }}>GLOW #f59e0b</span>
         </div>
       </div>
     </div>

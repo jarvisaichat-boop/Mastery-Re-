@@ -1250,16 +1250,16 @@ function App() {
                                             width: '100vw',
                                             zIndex: 1,
                                         }}>
-                                            {/* Main gold ambient glow — fills the whole top of the screen */}
+                                            {/* Main orange ambient glow — fills the whole top of the screen */}
                                             <div style={{
                                                 position: 'absolute', inset: 0,
-                                                background: 'radial-gradient(ellipse 110% 130% at 50% 0%, rgba(234,179,8,0.45) 0%, rgba(234,179,8,0.20) 35%, rgba(234,179,8,0.08) 65%, transparent 95%)',
+                                                background: 'radial-gradient(ellipse 110% 130% at 50% 0%, rgba(251,146,60,0.45) 0%, rgba(251,146,60,0.20) 35%, rgba(251,146,60,0.08) 65%, transparent 95%)',
                                                 pointerEvents: 'none',
                                             }} />
                                             {/* Secondary glow behind number */}
                                             <div style={{
                                                 position: 'absolute', top: 0, left: '10%', width: 360, height: 360,
-                                                background: 'radial-gradient(circle, rgba(234,179,8,0.22) 0%, transparent 70%)',
+                                                background: 'radial-gradient(circle, rgba(251,146,60,0.22) 0%, transparent 70%)',
                                                 pointerEvents: 'none',
                                             }} />
                                             {/* Inner content container — re-centered + max-width for desktop */}
@@ -1274,7 +1274,7 @@ function App() {
                                                     right: 40,
                                                     fontSize: 132,
                                                     lineHeight: 1,
-                                                    filter: 'drop-shadow(0 0 20px rgba(234,179,8,0.85)) drop-shadow(0 0 50px rgba(234,179,8,0.4))',
+                                                    filter: 'drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))',
                                                     userSelect: 'none',
                                                 }}>
                                                     🔥
@@ -1287,7 +1287,7 @@ function App() {
                                                     lineHeight: 1,
                                                     letterSpacing: '-3px',
                                                     color: '#fff8f0',
-                                                    textShadow: '0 0 30px rgba(234,179,8,0.95), 0 0 80px rgba(234,179,8,0.45)',
+                                                    textShadow: '0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)',
                                                     marginBottom: 4,
                                                     marginLeft: 24,
                                                 }}>
@@ -1298,8 +1298,8 @@ function App() {
                                                 <div style={{
                                                     fontSize: 24,
                                                     fontWeight: 700,
-                                                    color: '#eab308',
-                                                    textShadow: '0 0 14px rgba(234,179,8,0.75)',
+                                                    color: '#fb923c',
+                                                    textShadow: '0 0 14px rgba(251,146,60,0.75)',
                                                     marginBottom: 18,
                                                 }}>
                                                     day streak!
@@ -1345,18 +1345,18 @@ function App() {
                                             </div>
                                             </div>
 
-                                            {/* Gold tail — spans full viewport width */}
+                                            {/* Neon orange tail — spans full viewport width */}
                                             <div style={{
                                                 position: 'relative',
                                                 height: 36,
-                                                background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(234,179,8,0.22) 0%, rgba(234,179,8,0.08) 60%, transparent 100%)',
+                                                background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(251,146,60,0.22) 0%, rgba(251,146,60,0.08) 60%, transparent 100%)',
                                             }} />
 
                                             {/* Divider glow line — spans full viewport width */}
                                             <div style={{
                                                 height: 1,
                                                 marginBottom: 16,
-                                                background: 'linear-gradient(90deg, transparent, rgba(234,179,8,0.5) 30%, rgba(234,179,8,0.5) 70%, transparent)',
+                                                background: 'linear-gradient(90deg, transparent, rgba(251,146,60,0.5) 30%, rgba(251,146,60,0.5) 70%, transparent)',
                                             }} />
                                         </div>
                                     )}

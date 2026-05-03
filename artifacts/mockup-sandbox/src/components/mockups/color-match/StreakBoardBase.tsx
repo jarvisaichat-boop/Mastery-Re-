@@ -29,16 +29,16 @@ export function StreakBoardBase() {
           ══════════════════════════════════════ */}
       <div style={{ position: 'relative', paddingTop: 36 }}>
 
-        {/* Main orange ambient glow — original colour */}
+        {/* Main orange ambient glow — slightly warmer */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 110% 130% at 50% 0%, rgba(251,146,60,0.45) 0%, rgba(251,146,60,0.20) 35%, rgba(251,146,60,0.08) 65%, transparent 95%)',
+          background: 'radial-gradient(ellipse 110% 130% at 50% 0%, rgba(245,158,11,0.45) 0%, rgba(245,158,11,0.20) 35%, rgba(245,158,11,0.08) 65%, transparent 95%)',
           pointerEvents: 'none',
         }} />
         {/* Secondary glow behind number */}
         <div style={{
           position: 'absolute', top: 0, left: '10%', width: 320, height: 320,
-          background: 'radial-gradient(circle, rgba(251,146,60,0.22) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(245,158,11,0.22) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -49,7 +49,7 @@ export function StreakBoardBase() {
           <div style={{
             position: 'absolute', top: 30, right: 32,
             fontSize: 110, lineHeight: 1,
-            filter: 'drop-shadow(0 0 20px rgba(251,146,60,0.85)) drop-shadow(0 0 50px rgba(251,146,60,0.4))',
+            filter: 'drop-shadow(0 0 20px rgba(245,158,11,0.85)) drop-shadow(0 0 50px rgba(245,158,11,0.4))',
             userSelect: 'none',
           }}>🔥</div>
 
@@ -58,15 +58,15 @@ export function StreakBoardBase() {
             fontSize: 100, fontWeight: 900, lineHeight: 1,
             letterSpacing: '-3px',
             color: '#fff8f0',
-            textShadow: '0 0 30px rgba(251,146,60,0.95), 0 0 80px rgba(251,146,60,0.45)',
+            textShadow: '0 0 30px rgba(245,158,11,0.95), 0 0 80px rgba(245,158,11,0.45)',
             marginBottom: 4, marginLeft: 24,
           }}>{streakCount}</div>
 
           {/* Label */}
           <div style={{
             fontSize: 24, fontWeight: 700,
-            color: '#fb923c',
-            textShadow: '0 0 14px rgba(251,146,60,0.75)',
+            color: '#f59e0b',
+            textShadow: '0 0 14px rgba(245,158,11,0.75)',
             marginBottom: 20, marginLeft: 4,
           }}>day streak!</div>
 
@@ -116,9 +116,9 @@ export function StreakBoardBase() {
           }}>
             <div style={{
               width: 32, height: 32, borderRadius: '50%',
-              background: i === 0 ? 'rgba(251,146,60,0.3)' : 'rgba(255,255,255,0.06)',
-              border: `2px solid ${i === 0 ? 'rgba(251,146,60,0.8)' : 'rgba(255,255,255,0.12)'}`,
-              boxShadow: i === 0 ? '0 0 10px rgba(251,146,60,0.4)' : 'none',
+              background: i === 0 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.06)',
+              border: `2px solid ${i === 0 ? 'rgba(245,158,11,0.8)' : 'rgba(255,255,255,0.12)'}`,
+              boxShadow: i === 0 ? '0 0 10px rgba(245,158,11,0.4)' : 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 14,
             }}>{i === 0 ? '✓' : ''}</div>
@@ -141,7 +141,7 @@ export function StreakBoardBase() {
           position: 'absolute', bottom: 0, left: '50%',
           transform: 'translateX(-50%)',
           width: 280, height: 60,
-          background: 'radial-gradient(ellipse, rgba(251,146,60,0.45) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse, rgba(245,158,11,0.45) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -149,11 +149,11 @@ export function StreakBoardBase() {
         <div style={{
           width: 160, height: 80,
           borderRadius: '80px 80px 0 0',
-          background: 'linear-gradient(to right, #fb923c, #f97316, #ea580c)',
+          background: 'linear-gradient(to right, #f59e0b, #f97316, #ea580c)',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
           gap: 2,
-          boxShadow: '0 -6px 32px rgba(251,146,60,0.55), 0 -2px 8px rgba(251,146,60,0.35)',
+          boxShadow: '0 -6px 32px rgba(245,158,11,0.55), 0 -2px 8px rgba(245,158,11,0.35)',
           cursor: 'pointer',
           position: 'relative', zIndex: 2,
         }}>
@@ -168,12 +168,12 @@ export function StreakBoardBase() {
         padding: '10px 0 14px', background: 'rgba(0,0,0,0.4)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 14, height: 14, borderRadius: 3, background: 'linear-gradient(to right, #fb923c, #f97316)' }} />
+          <div style={{ width: 14, height: 14, borderRadius: 3, background: 'linear-gradient(to right, #f59e0b, #f97316)' }} />
           <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontWeight: 600, letterSpacing: 1 }}>SHARED BASE</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(251,146,60,0.4)', border: '1px solid rgba(251,146,60,0.6)' }} />
-          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontWeight: 600, letterSpacing: 1 }}>GLOW #fb923c</span>
+          <div style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(245,158,11,0.4)', border: '1px solid rgba(245,158,11,0.6)' }} />
+          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontWeight: 600, letterSpacing: 1 }}>GLOW #f59e0b</span>
         </div>
       </div>
     </div>
